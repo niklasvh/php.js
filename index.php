@@ -5,6 +5,7 @@
         <title></title>
         <script src="src/core.js"></script>
         <script src="src/modules/tokenizer/constants.js"></script>
+        <script src="src/modules/tokenizer/core.js"></script>
         <script src="src/modules/tokenizer/token_name.js"></script>
         <script src="src/parser/parser.js"></script>
 

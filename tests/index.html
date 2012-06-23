@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>php.js test suite</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="src/include.js"></script>
+        <script>
+           // PHP.Tokenizer("sup");
+            
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/?file=tokenizer/basic.phpt', true);
+            xhr.responseType = 'text';
+
+            xhr.onload = function(e) {
+                if (this.status == 200) {
+                    //console.log(Object.keys(this.response));
+                    console.log(PHP.Tokenizer(JSON.parse(this.response).FILE));
+                }
+            };
+
+            xhr.send();
+            
+        </script>
+    </head>
+    <body>
+        <div>TODO write content</div>
+    </body>
+</html>
