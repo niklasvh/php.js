@@ -1,8 +1,7 @@
 
-PHP.VM = function( src ) {
+PHP.VM = function( src, opts ) {
     
     var $ = PHP.VM.VariableHandler();
-    $('_POST').$ = "a";
     // console.log($('_POST'));
   
     var $$ = function( arg ) {
@@ -13,6 +12,7 @@ PHP.VM = function( src ) {
     ENV[ PHP.Compiler.prototype.ERROR ] = function( msg, level ) {
         ENV.trigger_error( $$( msg ), $$( level ) );
     };
+
 
  
     
@@ -48,6 +48,19 @@ PHP.VM = function( src ) {
             }
         }
     })();
+    
+    ENV.$Array = new PHP.VM.Array( ENV );
+    
+    var $_POST = [],
+    obj = {};
+    
+    obj[ PHP.Compiler.prototype.ARRAY_KEY ] = "a";
+    obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = $$("working!");
+    
+    $_POST.push( obj )
+    
+    $('_POST').$ = ENV.array( $_POST ).$;
+    $('_SERVER').$ = ENV.array().$;
     
     var exec = new Function( "$$", "$", "ENV", src  );
     exec.call(this, $$, $, ENV);

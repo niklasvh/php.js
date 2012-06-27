@@ -8,4 +8,6 @@
 PHP.Modules.prototype.var_dump = function() {
   // console.log(arguments);
     
+    console.log( arguments );
+    
 };

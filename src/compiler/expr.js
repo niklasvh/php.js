@@ -1,7 +1,9 @@
 
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
-    return this.source( action.variable ) + "." + this.ARRAY_GET + "( " + this.source( action.dim ) + " )"; 
+
+    
+    return this.source( action.variable ) + "." + this.METHOD_CALL + '( this, "' + this.ARRAY_GET + '", ' + this.source( action.dim ) + " )"; 
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
