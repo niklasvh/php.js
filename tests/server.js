@@ -31,7 +31,7 @@ http.createServer(function (req, res) {
     
     var urlParse = url.parse(req.url, true);
     
-    console.log(urlParse.path.substring(0,5));
+   
     if (urlParse.path.substring(0,5) === "/src/") {
         res.writeHead(200, {
             'Content-Type': 'application/javascript'

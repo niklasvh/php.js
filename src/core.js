@@ -7,12 +7,22 @@
 
 var PHP = function( tokens ) {
     
-    var parser = new Parser( this, tokens );
-    console.log(parser);
+    var AST = new Parser( this, tokens );
+  
+  
+    var compiler = new PHP.Compiler( AST );
+    console.log(compiler.src);
+    var vm = new PHP.VM( compiler.src );
+    
+
     
 };
 
 PHP.Constants = {};
+
+PHP.Modules = function() {
+    this.OUTPUT_BUFFER = "";
+};
 
 PHP.Utils = {};
 

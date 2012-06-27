@@ -1016,7 +1016,7 @@ function Parser( inst, tokens ) {
             } else if (yyn !== this.YYUNEXPECTED ) {
                 /* reduce */
                 try {
-                    console.log('yyn' + yyn);
+                //    console.log('yyn' + yyn);
                     this['yyn' + yyn](
                         PHP.Utils.Merge(attributeStack[this.stackPos - yylen[ yyn ] ], this.endAttributes)
                         //      + endAttributes
@@ -1435,6 +1435,15 @@ Parser.prototype.yyn35 = function ( attributes ) {
         cond: this.yyastk[ this.stackPos-(9-5) ],
         loop: this.yyastk[ this.stackPos-(9-7) ],
         stmts: this.yyastk[ this.stackPos-(9-9) ],
+        attributes: attributes
+    };
+};
+
+Parser.prototype.yyn42 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_Return",
+        expr: this.yyastk[ this.stackPos-(3-2) ],
         attributes: attributes
     };
 };
@@ -3030,13 +3039,69 @@ Parser.prototype.yyn290 = function ( attributes ) {
     };
 };
 
+Parser.prototype.parseString = function( str ) {
+    var bLength = 0;
+    if ('b' === str[0]) {
+        bLength = 1;
+    }
+
+    if ('\'' === str[ bLength ]) {
+        str = str.substr(bLength + 1, str.length - 2).replace(
+            ['\\\\', '\\\''],
+            [  '\\',   '\'']);
+    } else {
+     
+        str = this.parseEscapeSequences(str.substr( bLength + 1, str.length - 2), '"');
+
+    }
+
+    return str;
+  
+};
+
+Parser.prototype.parseEscapeSequences = function( str, quote ) {
+    
+  
+
+    if (undefined !== quote) {
+        str = str.replace(new RegExp('\\' + quote, "g"), quote);
+    }
+
+    var replacements = {
+        '\\': '\\',
+        '$':  '$',
+        'n': "\n",
+        'r': "\r",
+        't': "\t",
+        'f': "\f",
+        'v': "\v",
+        'e': "\x1B",
+    };
+
+    return str.replace(
+        /~\\\\([\\\\$nrtfve]|[xX][0-9a-fA-F]{1,2}|[0-7]{1,3})~/g,
+        function ( matches ){
+            var str = matches[1];
+
+            if ( replacements[ str ] !== undefined ) {
+                return replacements[ str ];
+            } else if ('x' === str[ 0 ] || 'X' === str[ 0 ]) {
+                return chr(hexdec(str));
+            } else {
+                return chr(octdec(str));
+            }
+        }
+        );
+    
+    return str;
+};
 
 // string
 Parser.prototype.yyn291 = function ( attributes ) {
     // todo add parse escape sequence
     this.yyval =  {
         type: "Node_Scalar_String",
-        value: this.yyastk[this.stackPos-(1-1)],
+        value: this.parseString( this.yyastk[this.stackPos-(1-1)] ),
         attributes: attributes
     };
 };
@@ -3327,7 +3392,7 @@ Parser.prototype.yyn327 = function ( attributes ) {
 
 Parser.prototype.yyn328 = function ( attributes ) {
     this.yyval =  {
-        varibale: this.yyastk[this.stackPos-(6-1)],
+        variable: this.yyastk[this.stackPos-(6-1)],
         name: this.yyastk[this.stackPos-(6-3)],
         args: this.yyastk[this.stackPos-(6-5)],
         type: "Node_Expr_MethodCall",
