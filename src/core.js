@@ -7,12 +7,12 @@
 
 var PHP = function( tokens ) {
     
-    var AST = new Parser( this, tokens );
+    this.AST = new Parser( this, tokens );
   
   
-    var compiler = new PHP.Compiler( AST );
-    console.log(compiler.src);
-    var vm = new PHP.VM( compiler.src );
+    this.compiler = new PHP.Compiler( this.AST );
+    console.log(this.compiler.src);
+    this.vm = new PHP.VM( this.compiler.src );
     
 
     

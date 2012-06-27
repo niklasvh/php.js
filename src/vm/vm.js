@@ -52,16 +52,6 @@ PHP.VM = function( src ) {
     var exec = new Function( "$$", "$", "ENV", src  );
     exec.call(this, $$, $, ENV);
     
-    console.log(this);
-    
-//(new Function( $$, $, src ).bind(this))($$, $);
-    
-/*
-    (function(){
-        eval( src ); 
-    })();    
-     */
-    
 };
 
 PHP.VM.prototype = new PHP.Modules();

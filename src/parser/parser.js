@@ -1011,7 +1011,7 @@ function Parser( inst, tokens ) {
 
             if ( yyn === 0 ) {
                 /* accept */
-                console.log(this.yyastk);
+              //  console.log(this.yyastk);
                 return this.yyval;
             } else if (yyn !== this.YYUNEXPECTED ) {
                 /* reduce */

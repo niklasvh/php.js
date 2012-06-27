@@ -7,31 +7,116 @@
         <script>
             // PHP.Tokenizer("sup");
             
+            function PHP_Tests( type, elem ) {
+                this.elem = elem;
+                this.type = type;
+                this.cache = {};
+                
+                // this.buildTest( 'php/classes/__call_004.phpt' );
+                this.loadTests( type );
+            }
             
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', '/?file=php/classes/__call_004.phpt', true);
-            xhr.responseType = 'text';
-
-            xhr.onload = function(e) {
-                if (this.status == 200) {
+            PHP_Tests.prototype.loadTests = function( type ) {
+                
+                var ul  = document.createElement('ul'),
+                $this = this;
+                
+                this.loadJSON('/?tests=' + type, function( tests ) {
+                    tests.forEach(function( testFile ){
+                        var li = document.createElement('li');
+                        li.appendChild( document.createTextNode( testFile ) )
+                        ul.appendChild(li  );
+                        
+                    }, this);
                     
                     
-                  
+                    this.elem.appendChild( ul );
                     
-                    var testcase = JSON.parse(this.response);
-                    console.log(testcase);
-                    //console.log(Object.keys(this.response));
-                    console.log(PHP.Lexer(testcase.FILE));
+                });
+                
+                ul.addEventListener( "click", function( event ){
+                    var li = event.target;
+                    if (!/li/i.test( li.nodeName )) {
+                        return;
+                    }
                     
-                    var engine = new PHP( PHP.Lexer(testcase.FILE) );
-                }
+                    $this.runTest( li );
+                    
+                }, false );
             };
+            
+            PHP_Tests.prototype.runTest = function( li ) {
+                var testFile = li.childNodes[ 0 ].nodeValue;
+                this.buildTest( 'php/' + this.type + '/' + testFile, function( test, engine ) {
+                  
+                    li.setAttribute( 'title', test.TEST );
+                    
+                    if (engine.error !== undefined) {
+                        li.style.color = "red";
+                          throw new Error( engine.error );
+                    }
+                    
+                    var expect = ((test.EXPECT === undefined) ? test.EXPECTF : test.EXPECT );
+                    
+                    if ( expect === engine.vm.OUTPUT_BUFFER ) {
+                        li.style.color = "green";
+                        console.log( "-----OUTPUTTED-----", engine.OUTPUT_BUFFER );
+                    } else {
+                        li.style.color = "red";
+                        console.log( "-----EXPECTING-----", expect );
+                        console.log( "-----OUTPUTTED-----", engine.vm.OUTPUT_BUFFER );
+                        console.log( engine );
+                        
+                    }
+                    
+                    
+                } );
+                console.log( testFile );
+            };
+            
+            PHP_Tests.prototype.buildTest = function( path, callback ) {
+              
+                this.loadJSON('/?file=' + path, function( json ){
+                    var engine = {};
+                    try {
+                        engine = new PHP( PHP.Lexer(json.FILE) );
+                    } catch( e ) {
+                        engine.error = e;
+                    }
+                    
+                    
+                    callback.call( this, json, engine );  
+                    
+                });
+                
+            };
+            
+            PHP_Tests.prototype.loadJSON = function( file, callback ) {
+                
+                var xhr = new XMLHttpRequest(),
+                $this = this;
+                xhr.open('GET', file, true);
+                xhr.responseType = 'text';
 
-            xhr.send();
+                xhr.onload = function() {
+                    if (this.status == 200) {   
+                        callback.call( $this, JSON.parse(this.response) );
+                    }
+                };
+
+                xhr.send();
+            };
+            
+           
+
             
         </script>
     </head>
     <body>
-        <div>TODO write content</div>
+        <div id="tests"></div>
+        <script>
+            new PHP_Tests( "basic", document.getElementById("tests") );
+            
+        </script>
     </body>
 </html>
