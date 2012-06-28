@@ -9,11 +9,9 @@ PHP.VM = function( src, opts ) {
     },
     ENV = this;
     
-    ENV[ PHP.Compiler.prototype.ERROR ] = function( msg, level ) {
-        ENV.trigger_error( $$( msg ), $$( level ) );
-    };
 
-
+    // bind global variablehandler to ENV
+    ENV[ PHP.Compiler.prototype.GLOBAL ] = $;
  
     
     ENV.$Class = (function() {
@@ -51,16 +49,11 @@ PHP.VM = function( src, opts ) {
     
     ENV.$Array = new PHP.VM.Array( ENV );
     
-    var $_POST = [],
-    obj = {};
-    
-    obj[ PHP.Compiler.prototype.ARRAY_KEY ] = "a";
-    obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = $$("working!");
-    
-    $_POST.push( obj )
-    
-    $('_POST').$ = ENV.array( $_POST ).$;
-    $('_SERVER').$ = ENV.array().$;
+    $('_POST').$ = PHP.VM.Array.fromObject.call( this, opts.POST ).$;
+    $('_GET').$ = PHP.VM.Array.fromObject.call( this, opts.GET ).$;
+
+    //$('_POST').$ = ENV.array( $_POST ).$;
+    $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, opts.SERVER ).$;
     
     var exec = new Function( "$$", "$", "ENV", src  );
     exec.call(this, $$, $, ENV);

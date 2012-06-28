@@ -11,31 +11,22 @@
 
     </head>
     <body>
-        <?php $code = '<?php
-class A {
-	function __call($strMethod, $arrArgs) {
-		echo "In " . __METHOD__ . "($strMethod, array(" . implode(\',\',$arrArgs) . "))\n";
-		var_dump($this);
-	}
+        <?php $code = "<?php
+
+$strings = array(
+	'<? echo 1; if (isset($a)) print $a+1; $a++; $a--; $a == 2; $a === 2; endif; ?>',
+	'<?php switch($a) { case 1: break; default: break; } while($a) { exit; } ?>',
+	'<? /* comment */ if (1 || 2) { } $a = 2 | 1; $b = 3^2; $c = 4&2; ?>',
+	/* feel free to add more yourself */
+	'wrong syntax here'
+);
+
+foreach ($strings as $s) {
+	var_dump(token_get_all($s));
 }
 
-class B extends A {
-	function __call($strMethod, $arrArgs) {
-		echo "In " . __METHOD__ . "($strMethod, array(" . implode(\',\',$arrArgs) . "))\n";
-		var_dump($this);
-	}
-	
-	function test() {
-		A::test1(1,\'a\');
-		B::test2(1,\'a\');
-		self::test3(1,\'a\');
-		parent::test4(1,\'a\');
-	}
-}
-
-$b = new B();
-$b->test();
-';
+echo 'Done\n';
+";
 
 echo "<pre>";
         var_dump(token_get_all($code));

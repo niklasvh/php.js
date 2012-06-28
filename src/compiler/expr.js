@@ -2,12 +2,11 @@
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
 
-    
-    return this.source( action.variable ) + "." + this.METHOD_CALL + '( this, "' + this.ARRAY_GET + '", ' + this.source( action.dim ) + " )"; 
+    return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.METHOD_CALL + '( this, "' + this.ARRAY_GET + '", ' + this.source( action.dim ) + " )"; 
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
-    var src = this.source( action.variable ) + " = " + this.source( action.expr );
+    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " = " + this.source( action.expr );
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
@@ -15,38 +14,22 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
+     var src = "";
+     
     console.log( action );
     return src; 
 };
 
+PHP.Compiler.prototype.Node_Expr_ErrorSuppress = function( action ) {
+    // TODO add;
+    console.log( action );
+    var src = "";
+    src += this.source( action.expr );
+    return src; 
+};
 
 PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
-    /*
-    console.log(action);
-    
-                if ($item->name instanceof PHPParser_Node_Expr_Variable) {
-                $source .= str_repeat("\t", $tabs) . "(self[ " . $this->source($item->name) . VARIABLE_VALUE . " ](";
-            } else {
-                $source .= str_repeat("\t", $tabs) . "(" . getName($item->name) . "(";
-            }
 
-            if (count($item->args) > 0) {
-                $source .= " ";
-                $first = true;
-                foreach ($item->args as $param) {
-
-                    if ($first === false) {
-                        $source .= ", ";
-                    }
-                    $first = false;
-                    $source .= $this->source($param->value);
-                }
-                $source .= " ";
-            }
-            $source .= "))";
-    
-    */
-   
     var src = "";
     if ( action.func.type === "Node_Expr_Variable") {
         src += "(" + this.CTX + "[ " + this.source( action.func ) + "." + this.VARIABLE_VALUE + " ](";
@@ -55,6 +38,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
     }
     var args = [];
     action.args.forEach(function( arg ){
+        
         args.push( this.source( arg.value ) );
     }, this);
     
@@ -64,35 +48,35 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_BitwiseOr = function( action ) {
-    return this.source( action.left ) + " | " + this.source( action.right );
+    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " | " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
 };
 
 PHP.Compiler.prototype.Node_Expr_BitwiseAnd = function( action ) {
-    return this.source( action.left ) + " & " + this.source( action.right );
+    return this.source( action.left )  + "." + this.VARIABLE_VALUE + " & " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
 };
 
 PHP.Compiler.prototype.Node_Expr_Div = function( action ) {
-    return this.source( action.left ) + " / " + this.source( action.right );
+    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " / " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
 };
 
 PHP.Compiler.prototype.Node_Expr_Minus = function( action ) {
-    return this.source( action.left ) + " - " + this.source( action.right );
+    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " - " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
 };
 
 PHP.Compiler.prototype.Node_Expr_Mul = function( action ) {
-    return this.source( action.left ) + " * " + this.source( action.right );
+    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " * " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
 };
 
 PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
-    return this.source( action.left ) + " + " + this.source( action.right );
+    return this.source( action.left ) + "." + this.ADD + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {
-    return this.source( action.left ) + " < " + this.source( action.right );
+    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " < " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
 };
 
 PHP.Compiler.prototype.Node_Expr_PostInc = function( action ) {
-    return this.source( action.variable ) + "++";
+    return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "++";
 };
 
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
@@ -104,7 +88,7 @@ PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
     if ( action.name === "this" ) {
         return action.name;
     } else {
-        return this.VARIABLE + '("' + this.source( action.name ) + '").' + this.VARIABLE_VALUE;       
+        return this.VARIABLE + '("' + this.source( action.name ) + '")';       
     }
     
 
@@ -115,6 +99,7 @@ PHP.Compiler.prototype.Node_Expr_New = function( action ) {
     var src = this.CREATE_VARIABLE + '(new (' + this.CTX + this.CLASS_GET + '("' + this.getName( action.Class ) + '"))( this';
     
     action.args.forEach(function( arg ) {
+        
         src += ", "  + this.source( arg.value );
     }, this);
     
@@ -127,7 +112,7 @@ PHP.Compiler.prototype.Node_Expr_New = function( action ) {
 PHP.Compiler.prototype.Node_Expr_ConstFetch = function( action ) {
 
     if (/true|false|null/i.test(action.name.parts)) {
-        return action.name.parts;
+        return this.CREATE_VARIABLE + '(' + action.name.parts.toLowerCase() + ')';
     } else {
         return this.CONSTANTS + '.get("' + this.source( action.name ) + '")';
     }
@@ -174,15 +159,16 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
 
 PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
-   
-    var src = this.CTX + "array(",
+   console.log(action.items);
+    var src = this.CTX + "array([",
     items = [];
 
-    ((Array.isArray(action.items)) ? action.items : [ action.items ]).forEach(function( item ){
+    ((Array.isArray(action.items)) ? action.items : []).forEach(function( item ){
+        
         items.push("{" + this.ARRAY_VALUE + ":" + this.source( item.value ) + ( ( item.key !== undefined) ? ", " + this.ARRAY_KEY + ":" + this.source( item.key ) : "") +  "}");
     }, this);
       
-    src += items.join(", ") + ")";
+    src += items.join(", ") + "])";
     return src;
 
 };

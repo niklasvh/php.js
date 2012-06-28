@@ -5,13 +5,25 @@
     // files to include
     var files = {
         core: "js",
+        compiler: {
+            compiler: "js",
+            expr: "js",
+            stmt: "js",
+            scalar: "js"
+        },
         modules: {
+            init: "js",
             array: {
-                array: "js"
+                array: "js",
+                count: "js"
             },
             error: {
-              error_reporting: "js",
-              trigger_error: "js"
+                constants: "js",
+                error_reporting: "js",
+                trigger_error: "js"
+            },
+            filesystem: {
+                fopen: "js"
             },
             string: {
                 echo: "js",
@@ -19,7 +31,7 @@
             },
             tokenizer: {
                 constants: "js",
-                lexer: "js",
+                token_get_all: "js",
                 token_name: "js"
             },
             variable: {
@@ -27,13 +39,8 @@
             }
             
         },
-        compiler: {
-          compiler: "js",
-          expr: "js",
-          stmt: "js",
-          scalar: "js"
-        },
         parser: {
+            lexer: "js",
             parser: "js"
         },
         vm: {

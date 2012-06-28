@@ -15,6 +15,10 @@ PHP.Lexer = function( src ) {
         re: /^&=/
     },
     {
+        value: PHP.Constants.T_AS,
+        re: /^as\s/i
+    },
+    {
         value: PHP.Constants.T_CLOSE_TAG,
         re: /^(\?\>|\%\>)/
     },
@@ -60,7 +64,11 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_INC,
-        re: /^\+\+/i
+        re: /^\+\+/
+    },  
+    {
+        value: PHP.Constants.T_CONCAT_EQUAL,
+        re: /^\.\=/
     },  
     {
         value: PHP.Constants.T_OBJECT_OPERATOR,
@@ -79,6 +87,10 @@ PHP.Lexer = function( src ) {
         re: /^array(?=[ \(])/i
     },
     {
+        value: PHP.Constants.T_UNSET,
+        re: /^unset(?=[ \(])/i
+    },
+    {
         value: PHP.Constants.T_RETURN,
         re: /^return(?=[ "'(;])/i
     },
@@ -95,17 +107,33 @@ PHP.Lexer = function( src ) {
         re: /^new(?=[ ])/i
     },
     {
+        value: PHP.Constants.T_COMMENT,
+        re: /^\/\*(.|\s)*?\*\//
+    }, 
+    {
+        value: PHP.Constants.T_COMMENT,
+        re: /^\/\/.*/
+    }, 
+    {
+        value: PHP.Constants.T_FOREACH,
+        re: /^foreach(?=[ (])/i
+    },
+    {
+        value: PHP.Constants.T_ISSET,
+        re: /^isset(?=[ (])/i
+    },
+    {
         value: PHP.Constants.T_FOR,
         re: /^for(?=[ (])/i
     },
     {
         value: PHP.Constants.T_DNUMBER,
-        re: /^[-]?[0-9]+\.[0-9]*/
+        re: /^[-]?[0-9]*\.[0-9]+([eE][-]?[0-9]*)?/
         
     },
     {
         value: PHP.Constants.T_LNUMBER,
-        re: /^\d+/
+        re: /^(0x[0-9A-F]+|[-]?[0-9]+)/i
     },
     {
         value: PHP.Constants.T_OPEN_TAG,
@@ -117,7 +145,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_WHITESPACE,
-        re: /^\s/
+        re: /^\s+/
     },
     {
         value: PHP.Constants.T_CONSTANT_ENCAPSED_STRING,
@@ -129,81 +157,67 @@ PHP.Lexer = function( src ) {
     },
     {
         value: -1,
-        re: /^[\[\]\;\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}]/
+        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@]/
     }];
-    
-    var keywords = [
-    "abstract",
-    "class",
-    "constant",
-    "die",
-    "echo",
-    "exit",
-    "final",
-    "function",
-    "interface",
-    "namespace",
-    "new",
-    "print",
-    "private",
-    "protected",
-    "public",
-    "static"
-    ];
-    
-    
-    var tags = [
-    "<\\?php\s",
-    "<\\?= ",
-    "<\\? ",        
-    "\\?>",
-    "\\s"
-    ];
-    
-    var strings = [
-        
-        
-    ];
-    
-    var characters = [
-    "(",
-    ")",
-    "&",
-    ",",
-    ";",
-    "="
-    ]; 
+
     
     var results = [],
     line = 1,
+    insidePHP = false,
     cancel = true;
     
-    while (src.length >= 0 && cancel === true) {
     
-        cancel =  tokens.some(function( token ){
+    
+    while (src.length >= 0 && cancel === true) {
         
-            var result = src.match( token.re );
+        if ( insidePHP === true ) {
         
-            if ( result !== null ) {
-                if ( token.value !== -1) {
-                    results.push([
-                        parseInt(token.value, 10), 
-                        result[ 0 ],
-                        line
-                        ]);
-                } else {
-                    results.push( result[ 0 ] );
-                }
+            cancel =  tokens.some(function( token ){
+        
+                var result = src.match( token.re );
+        
+                if ( result !== null ) {
+                    if ( token.value !== -1) {
+                        results.push([
+                            parseInt(token.value, 10), 
+                            result[ 0 ],
+                            line
+                            ]);
+                        
+                    } else {
+                        results.push( result[ 0 ] );
+                    }
                 
-                src = src.substring(result[ 0 ].length);
-                //  console.log(result);
-                return true;
+                    src = src.substring(result[ 0 ].length);
+                    //  console.log(result);
+                    return true;
+                }
+                return false;
+        
+        
+            });
+        
+        } else {
+   
+            var result = src.match(/(\s\S)*?(?=\<\?php\s|\<\?\s|\<%\s)/i);
+           
+            if ( result !== null ) {
+                if (result[0].length > 0 ) {
+                    console.log('add inline');
+                }
+                insidePHP = true;
+            } else {
+                results.push ([
+                    parseInt(PHP.Constants.T_INLINE_HTML, 10), 
+                    src,
+                    line
+                    ]);
+                return results;
             }
-            return false;
-        
-        
-        });
-        
+            
+            src = src.substring(result[ 0 ].length);
+        //throw Error('sup')
+        }
 
         
         
@@ -214,18 +228,6 @@ PHP.Lexer = function( src ) {
     return results;
         
     
-    var re = new RegExp("^(" + keywords.join("|") + "|" + tags.join("|") + ")"),
-    result = re.exec(src);
-    
-    while(result !== null) {
-        src = src.substring( result[ 0 ].length );
-        console.log(result.input);
-        console.log(result);
-        result = re.exec(src);
-    }
-    
-    
-    console.log(src);
-    
+
 };
 

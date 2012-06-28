@@ -20,12 +20,16 @@ PHP.Compiler.prototype.getName = function( item ) {
     } else {
         return parts;
     }
-     
-}
+
+};
 
 PHP.Compiler.prototype.source = function( action ) {
+    
     if (typeof action === "string") {
         return action;
+    } else if ( action === undefined ) {
+        
+        return undefined;
     } else if ( action.type === "Node_Name" ) {
         return this.getName( action );
     }
@@ -37,9 +41,15 @@ PHP.Compiler.prototype.ENV = "ENV";
 
 PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
 
-PHP.Compiler.prototype.MAGIC_CONSTANTS = "$Constant";
+PHP.Compiler.prototype.CONSTANTS = "$Constants";
+
+PHP.Compiler.prototype.MAGIC_CONSTANTS = "$MConstants";
+
+PHP.Compiler.prototype.ADD = "$Add";
 
 PHP.Compiler.prototype.CONCAT = "$Concat";
+
+PHP.Compiler.prototype.UNSET = "$Unset";
 
 PHP.Compiler.prototype.LABEL = "LABEL";
 
@@ -77,8 +87,11 @@ PHP.Compiler.prototype.ARRAY_VALUE = "v";
 
 PHP.Compiler.prototype.ARRAY_KEY = "k";
 
-PHP.Compiler.prototype.ERROR  = "$ERROR"
+PHP.Compiler.prototype.ERROR  = "$ERROR";
 
+PHP.Compiler.prototype.GLOBAL  = "$Global";
+
+PHP.Compiler.prototype.SIGNATURE  = "$SIGNATURE";
 
 PHP.Compiler.prototype.fixString = function( $val) {
     

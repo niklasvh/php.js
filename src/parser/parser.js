@@ -1050,6 +1050,7 @@ function Parser( inst, tokens ) {
                 /* error */
 
                 console.log(this.yyastk);
+                console.log( tokens );
                 throw new Error('Unexpected token ' + terminals[ tokenId ] + ", tokenId " + tokenId + " line " + this.startAttributes['startLine']);
 
 
@@ -1137,7 +1138,7 @@ Parser.prototype.getNextToken = function( ) {
  * @return array The token map
  */
 
-Parser.prototype.createTokenMap = function( PHP ) {
+Parser.prototype.createTokenMap = function() {
     var tokenMap = {},
     name,
     i;
@@ -1146,16 +1147,16 @@ Parser.prototype.createTokenMap = function( PHP ) {
     // it is an ASCII value
     for ( i = 256; i < 1000; ++i ) {
         // T_DOUBLE_COLON is equivalent to T_PAAMAYIM_NEKUDOTAYIM
-        if (T_DOUBLE_COLON === i) {
+        if ( T_DOUBLE_COLON === i ) {
             tokenMap[ i ] = this.T_PAAMAYIM_NEKUDOTAYIM;
         // T_OPEN_TAG_WITH_ECHO with dropped T_OPEN_TAG results in T_ECHO
-        } else if(T_OPEN_TAG_WITH_ECHO === i) {
+        } else if( T_OPEN_TAG_WITH_ECHO === i ) {
             tokenMap[ i ] = T_ECHO;
         // T_CLOSE_TAG is equivalent to ';'
-        } else if(T_CLOSE_TAG === i) {
+        } else if( T_CLOSE_TAG === i ) {
             tokenMap[ i ] = 59;
         // and the others can be mapped directly
-        } else if ('UNKNOWN' !== (name = PHP.token_name(i)) ) {
+        } else if ( 'UNKNOWN' !== (name = PHP.Utils.TokenName( i ) ) ) {
             tokenMap[ i ] =  this[name];
         }
     }
@@ -1475,8 +1476,26 @@ Parser.prototype.yyn45 = function ( attributes ) {
     };
 };
 
+Parser.prototype.yyn46 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_InlineHTML",
+        value: this.yyastk[ this.stackPos-(1-1) ],
+        attributes: attributes
+    };
+};
+
 Parser.prototype.yyn47 = function () {
     this.yyval = this.yyastk[this.stackPos-(2-1)];
+};
+
+Parser.prototype.yyn48 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_Unset",
+        variables: this.yyastk[ this.stackPos-(5-3) ],
+        attributes: attributes
+    };
 };
 
 Parser.prototype.yyn49 = function ( attributes ) {
@@ -3046,12 +3065,12 @@ Parser.prototype.parseString = function( str ) {
     }
 
     if ('\'' === str[ bLength ]) {
-        str = str.substr(bLength + 1, str.length - 2).replace(
+        str = str.replace(
             ['\\\\', '\\\''],
             [  '\\',   '\'']);
     } else {
      
-        str = this.parseEscapeSequences(str.substr( bLength + 1, str.length - 2), '"');
+        str = this.parseEscapeSequences( str, '"');
 
     }
 

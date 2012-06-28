@@ -61,9 +61,13 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_Echo = function( action ) {
     
-    var src = this.CTX + 'echo( ';
+    var src = this.CTX + 'echo( ',
+    args = [];
     if ( Array.isArray(action.exprs) ) {
-        
+        action.exprs.forEach(function( arg ){
+            args.push( this.source( arg ) );
+        }, this);
+        src += args.join(", ");
     } else {
         src += this.source(action.exprs);
     }
@@ -106,6 +110,15 @@ PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
     }, this);
    
     return src;
+};
+
+PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
+  var src = "";
+
+  action.variables.forEach(function( variable ){
+      this.source( variable ) + "." + this.UNSET + "()";
+  }, this);
+  return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {

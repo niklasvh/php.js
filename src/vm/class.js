@@ -9,7 +9,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     
     var methodPrefix = "_",
     methodArgumentPrefix = "_$_",
-    propertyPrefix = "$$",
+    propertyPrefix = PHP.VM.Class.PROPERTY,
     COMPILER = PHP.Compiler.prototype,
     __call = "__call",
     __construct = "__construct";
@@ -20,6 +20,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         var className = arguments[ 0 ], 
         classType = arguments[ 1 ], 
         opts = arguments[ 2 ],
+        props = {},
         
         callMethod = function( methodName, args ) {
         
@@ -37,11 +38,22 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
            
         
             magicConstants.METHOD = this[ COMPILER.CLASS_NAME ] + ":" + methodName;
-            return this[ methodPrefix + methodName ]( $ );
+            return this[ methodPrefix + methodName ].call( this, $ );
         };
    
         var Class = function( ctx ) {
-        
+            
+           
+            Object.keys( props ).forEach(function( propertyName ){
+                if ( Array.isArray( props[ propertyName ] ) ) {
+                    this[ propertyPrefix + propertyName ] = new PHP.VM.Variable( [] );
+                } else {
+                    this[ propertyPrefix + propertyName ] = new PHP.VM.Variable( props[ propertyName ] );
+                }
+               
+            }, this);
+            
+              
             // call constructor
             if ( typeof this[ methodPrefix + __construct ] === "function" ) {
                 var args = Array.prototype.slice.call( arguments, 1 );    
@@ -58,11 +70,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
          */       
         
         methods [ COMPILER.CLASS_PROPERTY ] = function( propertyName, propertyType, propertyDefault ) {
-
+            props[ propertyName ] = propertyDefault;
+            
+            /*
             Object.defineProperty( Class.prototype, propertyPrefix + propertyName, {
                 value: new PHP.VM.Variable( propertyDefault )
             });
-            
+            */
             return methods;
         };
 
@@ -99,11 +113,20 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         };
         
         
-
+        
+        
+        if (opts.Extends  !== undefined) {
+            Class.prototype = new classRegistry[ opts.Extends ]( true );
+        } else {
+            Class.prototype = new PHP.VM.ClassPrototype();
+        }
+        
+        /*
     
         if (opts.Extends  !== undefined) {
             Class.prototype = new classRegistry[ opts.Extends ]( true );
         }
+        */
     
         if (opts.Implements !== undefined ) {
             implementArr = opts.Implements
@@ -151,6 +174,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
 
     
 };
+PHP.VM.ClassPrototype = function() {};
+
+PHP.VM.Class.PROPERTY = "$$";
+
 
 PHP.VM.Class.PUBLIC = 1;
 PHP.VM.Class.PROTECTED = 2;

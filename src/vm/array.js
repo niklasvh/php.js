@@ -16,7 +16,7 @@ PHP.VM.Array = function( ENV ) {
     [ COMPILER.CLASS_PROPERTY ]( $this.VALUES, PHP.VM.Class.PRIVATE, [] )
     
     // internal key of largest previously used (int) key
-    [ COMPILER.CLASS_PROPERTY ]( $this.INTKEY, PHP.VM.Class.PRIVATE, 0 )
+    [ COMPILER.CLASS_PROPERTY ]( $this.INTKEY, PHP.VM.Class.PRIVATE, -1 )
     
     /*
      * __construct method
@@ -24,26 +24,30 @@ PHP.VM.Array = function( ENV ) {
     [ COMPILER.CLASS_METHOD ]( "__construct", PHP.VM.Class.PUBLIC, [{
         "name":"input"
     }], function( $ ) {
-    
+        this[ COMPILER.CLASS_NAME ] = $this.CLASS_NAME;
+        
         var items = $('input').$;
         if ( Array.isArray( items ) ) {
-            
-
+           
             items.forEach( function( item ) {
-                
+               
                 this.$Prop( this, $this.VALUES ).$.push( item[ COMPILER.ARRAY_VALUE ] );
-                
+               
                 if ( item[ COMPILER.ARRAY_KEY ] !== undefined ) {
+                    
                     if ( /^\d+$/.test(item[ COMPILER.ARRAY_KEY ] )) {
                         // integer key
                         
+                        this.$Prop( this, $this.KEYS ).$.push( item[ COMPILER.ARRAY_KEY ] );
                         
                         // todo complete
-                        this.$Prop( this, $this.INTKEY )
+                        this.$Prop( this, $this.INTKEY ).$ = Math.max( this.$Prop( this, $this.INTKEY ).$, item[ COMPILER.ARRAY_KEY ] );
                     } else {
                         // custom text key
                         this.$Prop( this, $this.KEYS ).$.push( item[ COMPILER.ARRAY_KEY ] );
                     }
+                } else {
+                    this.$Prop( this, $this.KEYS ).$.push( ++this.$Prop( this, $this.INTKEY ).$ );
                 }
                 
                 
@@ -85,7 +89,46 @@ PHP.VM.Array = function( ENV ) {
     
 };
 
-PHP.VM.Array.fromObject = function( obj ) {
+/*
+ Convert JavaScript array/object into a PHP array 
+ */
+
+
+PHP.VM.Array.fromObject = function( items ) {
+
+    var arr = [],
+    obj,
+   
+    addItem = function( value, key ) {
+        obj = {};
+        obj[ PHP.Compiler.prototype.ARRAY_KEY ] = key;
+        
+        if ( Array.isArray( value ) ) {
+            obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = PHP.VM.Array.fromObject.call( this, value );
+        } else {
+            obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = new PHP.VM.Variable( value );
+        }
+        arr.push( obj );
+        
+    }.bind(this);
+     
+     
+     
+    if (Array.isArray( items ) ) {
+        items.forEach( addItem );
+    } else {
+        Object.keys( items ).forEach( function( key ) {
+            addItem( items[ key ], key );   
+        });
+    }
+    
+   
+ 
+
+    
+    
+
+    return this.array( arr );
 
 
 };
@@ -94,3 +137,5 @@ PHP.VM.Array.prototype.KEYS = "keys";
 PHP.VM.Array.prototype.VALUES = "values";
 
 PHP.VM.Array.prototype.INTKEY = "intkey";
+
+PHP.VM.Array.prototype.CLASS_NAME = "array";
