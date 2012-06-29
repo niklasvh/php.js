@@ -5,6 +5,7 @@
     // files to include
     var files = {
         core: "js",
+        
         compiler: {
             compiler: "js",
             expr: "js",
@@ -47,7 +48,8 @@
             vm: "js",
             "class": "js",
             variable: "js",
-            array: "js"
+            array: "js",
+            constants: "js"
         }
     };
     

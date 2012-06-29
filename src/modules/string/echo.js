@@ -10,7 +10,10 @@ PHP.Modules.prototype.echo = function() {
     Array.prototype.slice.call( arguments ).forEach(function( arg ){
         
         if (arg instanceof PHP.VM.VariableProto) {
-            this.OUTPUT_BUFFER += arg[ PHP.Compiler.prototype.VARIABLE_VALUE ];
+            if ( arg[ PHP.VM.Variable.prototype.TYPE ] !== PHP.VM.Variable.prototype.NULL ) {
+                this.OUTPUT_BUFFER += arg[ PHP.Compiler.prototype.VARIABLE_VALUE ];
+            }
+            
         } else {
             this.OUTPUT_BUFFER += arg;
         }

@@ -114,7 +114,7 @@ PHP.Compiler.prototype.Node_Expr_ConstFetch = function( action ) {
     if (/true|false|null/i.test(action.name.parts)) {
         return this.CREATE_VARIABLE + '(' + action.name.parts.toLowerCase() + ')';
     } else {
-        return this.CONSTANTS + '.get("' + this.source( action.name ) + '")';
+        return this.CTX + this.CONSTANTS + '.' + this.CONSTANT_GET + '("' + this.source( action.name ) + '")';
     }
     
 };

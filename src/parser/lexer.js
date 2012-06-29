@@ -115,6 +115,10 @@ PHP.Lexer = function( src ) {
         re: /^\/\/.*/
     }, 
     {
+        value: PHP.Constants.T_START_HEREDOC,
+        re: /^<<</
+    },
+    {
         value: PHP.Constants.T_FOREACH,
         re: /^foreach(?=[ (])/i
     },
@@ -149,7 +153,18 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_CONSTANT_ENCAPSED_STRING,
-        re: /^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/
+        re: /^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/,
+        func: function( result ) {
+           
+            if (result.match(/\r\n/) !== null) {
+                var quote = result.substring(0, 1);
+                
+                result = '[' + result.split(/\r\n/).join( quote + "," + quote ) + '].join("\\n")';
+                
+            }
+            
+            return result;
+        }
     },
     {
         value: PHP.Constants.T_STRING,
@@ -178,9 +193,13 @@ PHP.Lexer = function( src ) {
         
                 if ( result !== null ) {
                     if ( token.value !== -1) {
+                        var resultString = result[ 0 ];
+                        if (token.func !== undefined ) {
+                            resultString = token.func( resultString );
+                        }
                         results.push([
                             parseInt(token.value, 10), 
-                            result[ 0 ],
+                            resultString,
                             line
                             ]);
                         

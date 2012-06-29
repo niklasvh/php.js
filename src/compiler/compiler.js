@@ -43,6 +43,8 @@ PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
 
 PHP.Compiler.prototype.CONSTANTS = "$Constants";
 
+PHP.Compiler.prototype.CONSTANT_GET = "get";
+
 PHP.Compiler.prototype.MAGIC_CONSTANTS = "$MConstants";
 
 PHP.Compiler.prototype.ADD = "$Add";

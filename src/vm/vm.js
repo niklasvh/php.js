@@ -13,13 +13,14 @@ PHP.VM = function( src, opts ) {
     // bind global variablehandler to ENV
     ENV[ PHP.Compiler.prototype.GLOBAL ] = $;
  
+    ENV[ PHP.Compiler.prototype.CONSTANTS ] = PHP.VM.Constants( PHP.Constants );
     
     ENV.$Class = (function() {
         var classRegistry = {},
         magicConstants = {},
         classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants );
         
-        ENV.$Constant = function( constantName ) {
+        ENV[ PHP.Compiler.prototype.MAGIC_CONSTANTS ] = function( constantName ) {
             return new PHP.VM.Variable( magicConstants[ constantName ] );
         };
         

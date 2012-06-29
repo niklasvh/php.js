@@ -5,12 +5,41 @@
  */
 
 
-PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name, len ) {
-    var COMPILER = PHP.Compiler.prototype;
+PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name, len, types ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    typeStrings = {};
+    
+    typeStrings[ VARIABLE.NULL ] = "null";
+    typeStrings[ VARIABLE.BOOL ] = "boolean";
+    typeStrings[ VARIABLE.INT ] = "long";
+    typeStrings[ VARIABLE.FLOAT ] = "float";
+    typeStrings[ VARIABLE.STRING ] = "string";
+    typeStrings[ VARIABLE.ARRAY ] = "array";
+    typeStrings[ VARIABLE.OBJECT ] = "object";
+    typeStrings[ VARIABLE.RESOURCE ] = "resource";
+    
+    
+    if ( Array.isArray( types ) ) {
+        var fail = false;
+        types.forEach(function( type, paramIndex ){
+            if ( type !== args[ paramIndex ][ VARIABLE.TYPE ] ) {
+                
+                this[ COMPILER.ERROR ]( name + "() expects parameter " + ( paramIndex + 1 ) + " to be " + typeStrings[ type ] + ", " + typeStrings[ args[ paramIndex ][ VARIABLE.TYPE ] ] + " given in " + 
+                    this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
+                    " on line %d", PHP.Constants.E_CORE_WARNING );  
+                fail = true;
+            }
+        }, this);
+        if ( fail === true ) {
+            return false;
+        }
+    
+    } 
     
     if ( args.length !== len ) {
        
-        this[ PHP.Compiler.prototype.ERROR ]( name + "() expects exactly " + len + " parameter, " + args.length + " given in " + 
+        this[ COMPILER.ERROR ]( name + "() expects exactly " + len + " parameter, " + args.length + " given in " + 
             this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
             " on line " + 0, PHP.Constants.E_CORE_WARNING );    
         return false;

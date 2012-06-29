@@ -15,7 +15,7 @@ function parsePHPT( src ) {
     var result = {};
 
     for (var i = 0, len = results.length; i < len; i+=2) {
-        result[ results[ i ].trim() ] = results[ i + 1 ].trim();
+        result[ results[ i ].trim() ] = results[ i + 1 ];
     }
 
 
