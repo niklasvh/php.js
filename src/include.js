@@ -54,6 +54,7 @@
             "class": "js",
             variable: "js",
             array: "js",
+            resource: "js",
             constants: "js"
         },
         predefined: {

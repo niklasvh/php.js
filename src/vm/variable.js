@@ -74,6 +74,8 @@ PHP.VM.Variable = function( arg ) {
                 
                 this[ this.TYPE ] = this.OBJECT;
             }
+        } else if ( newValue instanceof PHP.VM.Resource ) {    
+            this[ this.TYPE ] = this.RESOURCE;
         } else {
          
         }

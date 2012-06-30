@@ -48,6 +48,8 @@ PHP.VM = function( src, opts ) {
         }
     })();
     
+    ENV[ PHP.Compiler.prototype.RESOURCES ] = PHP.VM.ResourceManager( ENV ); 
+    
     ENV.$Array = new PHP.VM.Array( ENV );
     
     $('_POST').$ = PHP.VM.Array.fromObject.call( this, opts.POST ).$;

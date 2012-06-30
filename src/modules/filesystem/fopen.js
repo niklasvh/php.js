@@ -7,5 +7,5 @@
 
 PHP.Modules.prototype.fopen = function( filename ) {
 
-    return new PHP.VM.Variable();
+    return new PHP.VM.Variable( new PHP.VM.Resource() );
 };

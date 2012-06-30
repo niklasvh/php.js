@@ -37,6 +37,8 @@ PHP.Compiler.prototype.source = function( action ) {
     return this[ action.type ]( action );
 };
 
+PHP.Compiler.prototype.RESOURCES = "\π";
+
 PHP.Compiler.prototype.ENV = "ENV";
 
 PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
