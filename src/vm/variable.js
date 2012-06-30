@@ -22,7 +22,7 @@ PHP.VM.VariableHandler = function() {
 
 PHP.VM.VariableProto = function() {
 
-}
+    }
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( combinedVariable ) {
     
@@ -33,7 +33,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( comb
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ADD ] = function( combinedVariable ) {
     
-     var COMPILER = PHP.Compiler.prototype;
+    var COMPILER = PHP.Compiler.prototype;
     
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) + ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
 };
@@ -41,6 +41,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ADD ] = function( combine
 PHP.VM.Variable = function( arg ) {
 
     var value,
+    __toString = "__toString",
     COMPILER = PHP.Compiler.prototype,
     setValue = function( newValue ) {
         
@@ -48,12 +49,29 @@ PHP.VM.Variable = function( arg ) {
             this[ this.TYPE ] = this.STRING;
         } else if ( typeof newValue === "number" ) {
             this[ this.TYPE ] = this.INT;
+            this[ this.CAST_STRING ] = function() {  
+                return new PHP.VM.Variable( value.toString() );
+            };
+            
         } else if ( newValue === null ) {   
             this[ this.TYPE ] = this.NULL;
+
+        } else if ( typeof newValue === "boolean" ) {
+            this[ this.TYPE ] = this.BOOL;
+            
+            this[ this.CAST_STRING ] = function() {    
+                return new PHP.VM.Variable( ( value ) ? "1" : "0" );
+            };
+            
         } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
             if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
                 this[ this.TYPE ] = this.ARRAY;
             } else {
+                // check for __toString();
+                if ( typeof newValue[PHP.VM.Class.METHOD + __toString ] === "function" ) {
+                    this[ this.CAST_STRING ] = newValue[PHP.VM.Class.METHOD + __toString ];
+                }
+                
                 this[ this.TYPE ] = this.OBJECT;
             }
         } else {
@@ -81,6 +99,24 @@ PHP.VM.Variable = function( arg ) {
         set : setValue
     }
     );
+        
+    Object.defineProperty( this, COMPILER.DIM_FETCH,
+    {
+        get : function(){
+         
+            return function( ctx, variable ) {
+                if ( this[ this.TYPE ] === this.ARRAY ) {
+                    //  console.log(value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ));
+                    return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                } else {
+                    //  console.log(new PHP.VM.Variable( null ));
+                    return new PHP.VM.Variable( null );
+                }
+            };
+        },  
+        set : setValue
+    }
+    );
     
     
     return this;
@@ -89,7 +125,7 @@ PHP.VM.Variable = function( arg ) {
 
 PHP.VM.Variable.prototype = new PHP.VM.VariableProto();
 
-
+PHP.VM.Variable.prototype.CAST_STRING = "$String";
 
 PHP.VM.Variable.prototype.NULL = 0;
 PHP.VM.Variable.prototype.BOOL = 1;

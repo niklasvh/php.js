@@ -7,7 +7,7 @@
 
 PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     
-    var methodPrefix = "_",
+    var methodPrefix = PHP.VM.Class.METHOD,
     methodArgumentPrefix = "_$_",
     propertyPrefix = PHP.VM.Class.PROPERTY,
     COMPILER = PHP.Compiler.prototype,
@@ -175,6 +175,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     
 };
 PHP.VM.ClassPrototype = function() {};
+
+PHP.VM.Class.METHOD = "_";
 
 PHP.VM.Class.PROPERTY = "$$";
 

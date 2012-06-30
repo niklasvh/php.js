@@ -90,7 +90,7 @@
                         shouldBef = shouldBef.replace(/\%s/g,"\\S+");
                         shouldBef = shouldBef.replace(/\%S/g,".*?");
                         
-                        var re = new RegExp("^" + shouldBef + "$");
+                        var re = new RegExp("^" + shouldBef + "$", "i");
                          
                         expectResult = re.test( output );
                         

@@ -7,7 +7,7 @@
 
 PHP.Modules.prototype.foreach = function( $, expr, func, value, key ) {
     
-    console.log( expr );
+    
     
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
@@ -23,14 +23,17 @@ PHP.Modules.prototype.foreach = function( $, expr, func, value, key ) {
         
         
         for ( pointer[ COMPILER.VARIABLE_VALUE ] = 0; pointer[ COMPILER.VARIABLE_VALUE ] < len; pointer[ COMPILER.VARIABLE_VALUE ]++ ) {
-            value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
+          //  console.log(value[ COMPILER.VARIABLE_VALUE ]);
+          // ref:  value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
+        //  console.log(values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ]);
+          value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
+          
             if ( key instanceof PHP.VM.Variable ) {
-                key[ COMPILER.VARIABLE_VALUE ] = keys[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
+           //ref:     key[ COMPILER.VARIABLE_VALUE ] = keys[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
             }
             
             func();
-            console.log( key );
-            console.log( value[ COMPILER.VARIABLE_VALUE ] );
+
         }
         
         

@@ -67,6 +67,8 @@ PHP.Compiler.prototype.ARRAY_GET = "offsetGet";
 
 PHP.Compiler.prototype.METHOD_CALL = "$Call";
 
+PHP.Compiler.prototype.DIM_FETCH = "$Dim";
+
 PHP.Compiler.prototype.STATIC_CALL = "$StaticCall";
 
 PHP.Compiler.prototype.CLASS_NAME = "$Name";

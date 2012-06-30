@@ -106,6 +106,8 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
 
     src += '}, ' + this.source( action.valueVar );
 
+  //  src += '}, "' + action.valueVar.name + '"';
+
     if (action.keyVar !== null) {
         src += ', ' + this.source( action.expr );
     }

@@ -225,6 +225,12 @@ PHP.Lexer = function( src ) {
     {
         value: PHP.Constants.T_DNUMBER,
         re: /^[-]?[0-9]*\.[0-9]+([eE][-]?[0-9]*)?/
+        /*,
+        func: function( result ) {
+           
+            // transform e to E - token_get_all_variation1.phpt
+            return (result - 0).toString().toUpperCase();
+        }*/
         
     },
     {
@@ -273,7 +279,11 @@ PHP.Lexer = function( src ) {
     insidePHP = false,
     cancel = true;
     
-    if (typeof src !== "string") {
+    if ( src === null ) {
+        return results;
+    }
+    
+    if ( typeof src !== "string" ) {
         src = src.toString();
     }
     

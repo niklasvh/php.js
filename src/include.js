@@ -27,6 +27,7 @@
                 trigger_error: "js"
             },
             filesystem: {
+                fclose: "js",
                 fopen: "js"
             },
             string: {
@@ -39,6 +40,7 @@
                 token_name: "js"
             },
             variable: {
+                isset: "js",
                 var_dump: "js"
             }
             

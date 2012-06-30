@@ -2,7 +2,7 @@
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
 
-    return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.METHOD_CALL + '( this, "' + this.ARRAY_GET + '", ' + this.source( action.dim ) + " )"; 
+    return this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )"; 
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
@@ -13,10 +13,24 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
     return src; 
 };
 
+PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
+    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " += " + this.source( action.expr );
+    if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
+        src += "." + this.VARIABLE_VALUE;
+    }
+    return src; 
+};
+
 PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
-     var src = "";
+   
      
     console.log( action );
+    return src; 
+};
+
+PHP.Compiler.prototype.Node_Expr_Ternary = function( action ) {
+    var src = "(( " + this.source( action.cond ) + "." + this.VARIABLE_VALUE + " ) ? " + this.source( action.If ) + " : " + this.source( action.Else ) + ")"; 
+     
     return src; 
 };
 
@@ -44,6 +58,22 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
     
     src += args.join(", ") + "))";
    
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
+    console.log( action );
+
+    var src = this.CTX + "isset( ";
+    
+    var args = [];
+    action.variables.forEach(function( arg ){
+        
+        args.push( this.source( arg) );
+    }, this);
+ 
+    src += args.join(", ") + " )";
+    
     return src;
 };
 
@@ -159,7 +189,7 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
 
 PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
-   console.log(action.items);
+    console.log(action.items);
     var src = this.CTX + "array([",
     items = [];
 
