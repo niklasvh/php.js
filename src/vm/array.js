@@ -18,6 +18,10 @@ PHP.VM.Array = function( ENV ) {
     // internal key of largest previously used (int) key
     [ COMPILER.CLASS_PROPERTY ]( $this.INTKEY, PHP.VM.Class.PRIVATE, -1 )
     
+    
+    // internal pointer
+    [ COMPILER.CLASS_PROPERTY ]( $this.POINTER, PHP.VM.Class.PRIVATE, 0 )
+    
     /*
      * __construct method
      */ 
@@ -137,5 +141,7 @@ PHP.VM.Array.prototype.KEYS = "keys";
 PHP.VM.Array.prototype.VALUES = "values";
 
 PHP.VM.Array.prototype.INTKEY = "intkey";
+
+PHP.VM.Array.prototype.POINTER = "pointer";
 
 PHP.VM.Array.prototype.CLASS_NAME = "array";

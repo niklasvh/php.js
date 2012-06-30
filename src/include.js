@@ -18,6 +18,9 @@
                 array: "js",
                 count: "js"
             },
+            control_structures: {
+                foreach: "js",
+            },
             error: {
                 constants: "js",
                 error_reporting: "js",
@@ -50,6 +53,11 @@
             variable: "js",
             array: "js",
             constants: "js"
+        },
+        predefined: {
+            classes: {
+                stdClass: "js"
+            }
         }
     };
     

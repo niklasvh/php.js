@@ -77,33 +77,39 @@
                         throw new Error( engine.error );
                     }
                     
-                    var expect = ((test.EXPECT === undefined) ? test.EXPECTF : test.EXPECT ),
+                    var expect = ((test.EXPECT === undefined) ? test.EXPECTF : test.EXPECT ).trim(),
+                    output = engine.vm.OUTPUT_BUFFER.replace(/\n/g, "\r\n").trim(),
                     expectResult;
                     
+
+                    // expect.replace(/\r/g,"");
+                    
                     if (test.EXPECT === undefined ) {
-                        var shouldBef = test.EXPECTF.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+                        var shouldBef = expect.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
                         shouldBef = shouldBef.replace(/\%d/g,"\\d+");
                         shouldBef = shouldBef.replace(/\%s/g,"\\S+");
                         shouldBef = shouldBef.replace(/\%S/g,".*?");
                         
-                         var re = new RegExp("^" + shouldBef + "$");
-                         console.log( re );
-                         expectResult = re.test( engine.vm.OUTPUT_BUFFER );
+                        var re = new RegExp("^" + shouldBef + "$");
+                         
+                        expectResult = re.test( output );
                         
                     } else {
-                        expectResult = (test.EXPECT === engine.vm.OUTPUT_BUFFER);
+                        expectResult = (expect === output);
                     }
-                   // if ( expectResult ) {
-                    if ( expect === engine.vm.OUTPUT_BUFFER ) {
+                    
+                    if ( expectResult ) {
+                        // if ( expect === engine.vm.OUTPUT_BUFFER ) {
                         li.style.color = "green";
-                        console.log( "-----OUTPUTTED-----", engine.vm.OUTPUT_BUFFER );
+                        console.log( "-----OUTPUTTED-----", output );
                     } else {
+                        this.diff( expect, output );
                         //li.style.color = "red";
                         console.log( test );
                         console.log( "-----EXPECTING-----", expect );
-                        console.log( "-----OUTPUTTED-----", engine.vm.OUTPUT_BUFFER );
+                        console.log( "-----OUTPUTTED-----", output );
                         var div = document.createElement("div");
-                        div.innerHTML = diffString( expect, engine.vm.OUTPUT_BUFFER );
+                        div.innerHTML = diffString( expect, output );
                         li.appendChild( div );
                         
                     }
@@ -112,6 +118,24 @@
                     
                 } );
                 console.log( testFile );
+            };
+            
+            PHP_Tests.prototype.diff = function( expect, result ) {
+                
+                var len = expect.length;
+                
+                
+                for (var i = 0; i < len; i++) {
+                    if (expect[ i ] !== result[ i ]) {
+                        console.log( i, expect[ i ], result[ i ], expect.charCodeAt( i ), result.charCodeAt( i ), expect.charCodeAt( i + 1 ), result.charCodeAt( i + 1 ), expect.charCodeAt( i - 1 ), result.charCodeAt( i - 1 ) );
+                        return;
+                    }
+                }
+                
+          
+                
+              
+                
             };
             
             PHP_Tests.prototype.buildTest = function( path, callback ) {
@@ -123,8 +147,8 @@
                         POST: ( json.POST !== undefined ) ? PHP.Utils.QueryString( json.POST ) : {},
                         GET: ( json.GET !== undefined ) ? PHP.Utils.QueryString( json.GET ) : {},
                         SERVER: {
-                          //  SCRIPT_FILENAME: path
-                          SCRIPT_FILENAME: "%s"
+                            SCRIPT_FILENAME: path
+                        //    SCRIPT_FILENAME: "%s"
                         }
                     } );
                     //    } catch( e ) {

@@ -19,6 +19,34 @@ PHP.Lexer = function( src ) {
         re: /^as\s/i
     },
     {
+        value: PHP.Constants.T_BOOLEAN_AND,
+        re: /^&&/
+    },
+    {
+        value: PHP.Constants.T_BOOLEAN_OR,
+        re: /^\|\|/
+    },
+    {
+        value: PHP.Constants.T_BREAK,
+        re: /^break(?=\s|;)/i
+    },
+    {
+        value: PHP.Constants.T_CASE,
+        re: /^case(?=\s)/i
+    },
+    {
+        value: PHP.Constants.T_DEFAULT,
+        re: /^default(?=\s|:)/i
+    },
+    {
+        value: PHP.Constants.T_SWITCH,
+        re: /^switch(?=[ (])/i
+    },
+    {
+        value: PHP.Constants.T_EXIT,
+        re: /^(exit|die)(?=[ \(;])/i
+    },
+    {
         value: PHP.Constants.T_CLOSE_TAG,
         re: /^(\?\>|\%\>)/
     },
@@ -67,9 +95,57 @@ PHP.Lexer = function( src ) {
         re: /^\+\+/
     },  
     {
+        value: PHP.Constants.T_DEC,
+        re: /^\-\-/
+    },  
+    {
         value: PHP.Constants.T_CONCAT_EQUAL,
         re: /^\.\=/
     },  
+    {
+        value: PHP.Constants.T_DIV_EQUAL,
+        re: /^\/\=/
+    },
+    {
+        value: PHP.Constants.T_XOR_EQUAL,
+        re: /^\^\=/
+    },
+    {
+        value: PHP.Constants.T_MUL_EQUAL,
+        re: /^\*\=/
+    },
+    {
+        value: PHP.Constants.T_MOD_EQUAL,
+        re: /^\%\=/
+    },
+    {
+        value: PHP.Constants.T_SL_EQUAL,
+        re: /^<<=/
+    }, 
+    {
+        value: PHP.Constants.T_SL,
+        re: /^<<=/
+    },
+    {
+        value: PHP.Constants.T_SR_EQUAL,
+        re: /^>>=/
+    }, 
+    {
+        value: PHP.Constants.T_SR,
+        re: /^>>/
+    },
+    {
+        value: PHP.Constants.T_OR_EQUAL,
+        re: /^\|\=/
+    },
+    {
+        value: PHP.Constants.T_PLUS_EQUAL,
+        re: /^\+\=/
+    },
+    {
+        value: PHP.Constants.T_MINUS_EQUAL,
+        re: /^-\=/
+    },
     {
         value: PHP.Constants.T_OBJECT_OPERATOR,
         re: /^\-\>/i
@@ -127,6 +203,22 @@ PHP.Lexer = function( src ) {
         re: /^isset(?=[ (])/i
     },
     {
+        value: PHP.Constants.T_IS_IDENTICAL,
+        re: /^===/
+    },
+    {
+        value: PHP.Constants.T_IS_EQUAL,
+        re: /^==/
+    },
+    {
+        value: PHP.Constants.T_IS_NOT_IDENTICAL,
+        re: /^\!==/
+    },
+    {
+        value: PHP.Constants.T_IS_NOT_EQUAL,
+        re: /^(\!=|\<\>)/
+    },
+    {
         value: PHP.Constants.T_FOR,
         re: /^for(?=[ (])/i
     },
@@ -141,7 +233,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_OPEN_TAG,
-        re: /^(\<\?php\s|\<\?\s|\<%\s)/i
+        re: /^(\<\?php\s|\<\?|\<%)/i
     },
     {
         value: PHP.Constants.T_VARIABLE,
@@ -172,7 +264,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: -1,
-        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@]/
+        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^]/
     }];
 
     
@@ -181,10 +273,14 @@ PHP.Lexer = function( src ) {
     insidePHP = false,
     cancel = true;
     
+    if (typeof src !== "string") {
+        src = src.toString();
+    }
     
-    
-    while (src.length >= 0 && cancel === true) {
-        
+
+   
+    while (src.length > 0 && cancel === true) {
+
         if ( insidePHP === true ) {
         
             cancel =  tokens.some(function( token ){
@@ -226,6 +322,7 @@ PHP.Lexer = function( src ) {
                 }
                 insidePHP = true;
             } else {
+                
                 results.push ([
                     parseInt(PHP.Constants.T_INLINE_HTML, 10), 
                     src,

@@ -56,6 +56,11 @@ PHP.VM = function( src, opts ) {
     //$('_POST').$ = ENV.array( $_POST ).$;
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, opts.SERVER ).$;
     
+    
+    Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
+        PHP.VM.Class.Predefined[ className]( ENV );
+    });
+    
     var exec = new Function( "$$", "$", "ENV", src  );
     exec.call(this, $$, $, ENV);
     

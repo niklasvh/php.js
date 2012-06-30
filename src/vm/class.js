@@ -178,6 +178,7 @@ PHP.VM.ClassPrototype = function() {};
 
 PHP.VM.Class.PROPERTY = "$$";
 
+PHP.VM.Class.Predefined = {};
 
 PHP.VM.Class.PUBLIC = 1;
 PHP.VM.Class.PROTECTED = 2;

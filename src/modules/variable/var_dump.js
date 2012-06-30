@@ -56,7 +56,7 @@ PHP.Modules.prototype.var_dump = function() {
         }
         return str;
     };
-
+    
     PHP.Utils.$A( arguments ).forEach( function( argument ) {
         str += $dump( argument, 0 );    
     }, this );

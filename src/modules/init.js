@@ -24,11 +24,12 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         var fail = false;
         types.forEach(function( type, paramIndex ){
             if ( type !== args[ paramIndex ][ VARIABLE.TYPE ] ) {
-                
-                this[ COMPILER.ERROR ]( name + "() expects parameter " + ( paramIndex + 1 ) + " to be " + typeStrings[ type ] + ", " + typeStrings[ args[ paramIndex ][ VARIABLE.TYPE ] ] + " given in " + 
-                    this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
-                    " on line %d", PHP.Constants.E_CORE_WARNING );  
-                fail = true;
+                if ( type !== VARIABLE.STRING || ( args[ paramIndex ][ VARIABLE.TYPE ] !== VARIABLE.INT )  ) {
+                    this[ COMPILER.ERROR ]( name + "() expects parameter " + ( paramIndex + 1 ) + " to be " + typeStrings[ type ] + ", " + typeStrings[ args[ paramIndex ][ VARIABLE.TYPE ] ] + " given in " + 
+                        this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
+                        " on line " + 0, PHP.Constants.E_CORE_WARNING );  
+                    fail = true;
+                }
             }
         }, this);
         if ( fail === true ) {

@@ -7,7 +7,7 @@
 
 PHP.Modules.prototype.token_get_all = function( code ) {
     
-    if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, "token_get_all", 1 ) ) {
+    if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, "token_get_all", 1, [ PHP.VM.Variable.prototype.STRING ] ) ) {
         return new PHP.VM.Variable( null );
     }
     

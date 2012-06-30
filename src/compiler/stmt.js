@@ -95,6 +95,27 @@ PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
     return src;
 };
 
+PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
+    console.log( action );
+    var src = this.CTX + 'foreach( ' + this.VARIABLE + ', ' + this.source( action.expr ) + ', function() {\n'; 
+    //( $, expr, func, value, key )
+
+    action.stmts.forEach(function( stmt ){
+        src += this.source( stmt )  + ";\n";
+    }, this);
+
+    src += '}, ' + this.source( action.valueVar );
+
+    if (action.keyVar !== null) {
+        src += ', ' + this.source( action.expr );
+    }
+    src += ');\n'
+    
+        
+
+    return src;
+};
+
 
 PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
     var src = "";
@@ -113,12 +134,12 @@ PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
-  var src = "";
+    var src = "";
 
-  action.variables.forEach(function( variable ){
-      this.source( variable ) + "." + this.UNSET + "()";
-  }, this);
-  return src;
+    action.variables.forEach(function( variable ){
+        this.source( variable ) + "." + this.UNSET + "()";
+    }, this);
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
@@ -132,7 +153,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
     ((Array.isArray(action.params[ 0 ])) ? action.params[ 0 ] : action.params).forEach(function( prop ){
         
         var obj = {
-             name: prop.name
+            name: prop.name
         };
         
         if (prop.def !== null) {
@@ -141,7 +162,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         
         props.push( obj );
         
-        }, this)   
+    }, this)   
         
     src += JSON.stringify( props ) + ', function() {\n';
     
