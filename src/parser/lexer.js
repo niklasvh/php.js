@@ -188,11 +188,27 @@ PHP.Lexer = function( src ) {
     }, 
     {
         value: PHP.Constants.T_COMMENT,
-        re: /^\/\/.*/
+        re: /^\/\/.*(\s)?/
+    }, 
+    {
+        value: PHP.Constants.T_COMMENT,
+        re: /^\#.*(\s)?/
     }, 
     {
         value: PHP.Constants.T_START_HEREDOC,
         re: /^<<</
+    },    
+    {
+        value: PHP.Constants.T_ELSEIF,
+        re: /^elseif(?=[\s(])/i
+    },
+    {
+        value: PHP.Constants.T_ELSE,
+        re: /^else(?=[\s{])/i
+    },
+    {
+        value: PHP.Constants.T_IF,
+        re: /^if(?=[\s(])/i
     },
     {
         value: PHP.Constants.T_FOREACH,
@@ -225,7 +241,7 @@ PHP.Lexer = function( src ) {
     {
         value: PHP.Constants.T_DNUMBER,
         re: /^[-]?[0-9]*\.[0-9]+([eE][-]?[0-9]*)?/
-        /*,
+    /*,
         func: function( result ) {
            
             // transform e to E - token_get_all_variation1.phpt
@@ -300,6 +316,9 @@ PHP.Lexer = function( src ) {
                 if ( result !== null ) {
                     if ( token.value !== -1) {
                         var resultString = result[ 0 ];
+                        
+                        
+                        
                         if (token.func !== undefined ) {
                             resultString = token.func( resultString );
                         }
@@ -308,8 +327,10 @@ PHP.Lexer = function( src ) {
                             resultString,
                             line
                             ]);
+                        line += resultString.split('\n').length - 1;
                         
                     } else {
+                        // character token
                         results.push( result[ 0 ] );
                     }
                 

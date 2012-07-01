@@ -9,7 +9,6 @@ PHP.Compiler = function( AST ) {
     }, this );
 
 
-    
 };
 
 
