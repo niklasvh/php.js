@@ -136,11 +136,15 @@ PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
-    var src = "";
+    var src = "" + this.CTX + "unset( ",
+    vars = [];
 
     action.variables.forEach(function( variable ){
-        this.source( variable ) + "." + this.UNSET + "()";
+        vars.push( this.source( variable ) );
     }, this);
+    
+    src += vars.join(", ") + " )";
+    
     return src;
 };
 

@@ -70,6 +70,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
 };
 
 
+
 PHP.Modules.prototype[ PHP.Compiler.prototype.ERROR ] = function( msg, level ) {
     var C = PHP.Constants;
     console.log( msg );

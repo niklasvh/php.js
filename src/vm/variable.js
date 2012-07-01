@@ -74,6 +74,10 @@ PHP.VM.Variable = function( arg ) {
     setValue = function( newValue ) {
         this[ this.DEFINED ] = true;
         
+        if ( newValue === undefined ) {
+            newValue = null;
+        }
+        
         if ( typeof newValue === "string" ) {
             this[ this.TYPE ] = this.STRING;
         } else if ( typeof newValue === "number" ) {
@@ -119,7 +123,10 @@ PHP.VM.Variable = function( arg ) {
     
     
    
-    
+    this[ PHP.Compiler.prototype.UNSET ] = function() {
+        setValue( null );
+        this.DEFINED = false;
+    };
     
     Object.defineProperty( this, COMPILER.VARIABLE_VALUE,
     {
@@ -127,7 +134,7 @@ PHP.VM.Variable = function( arg ) {
             
             if ( this[ this.DEFINED ] !== true ) {
                 this.ENV[ COMPILER.ERROR ](" Undefined variable " + this.DEFINED + " parameter, ", PHP.Constants.E_CORE_NOTICE );    
-                console.log("this");
+                
             }
             return value;
         },  

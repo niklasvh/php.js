@@ -43,6 +43,8 @@ PHP.Compiler.prototype.ENV = "ENV";
 
 PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
 
+PHP.Compiler.prototype.SUPPRESS = "$Suppress";
+
 PHP.Compiler.prototype.CONSTANTS = "$Constants";
 
 PHP.Compiler.prototype.CONSTANT_GET = "get";
