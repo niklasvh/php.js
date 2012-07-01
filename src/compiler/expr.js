@@ -35,10 +35,7 @@ PHP.Compiler.prototype.Node_Expr_Ternary = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_ErrorSuppress = function( action ) {
-    // TODO add;
-    console.log( action );
-    var src = "";
-    src += this.source( action.expr );
+    var src = this.CTX + this.SUPPRESS + "(function() { return " + this.source( action.expr ) + " })";
     return src; 
 };
 

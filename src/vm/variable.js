@@ -132,8 +132,8 @@ PHP.VM.Variable = function( arg ) {
     {
         get : function(){
             
-            if ( this[ this.DEFINED ] !== true ) {
-                this.ENV[ COMPILER.ERROR ](" Undefined variable " + this.DEFINED + " parameter, ", PHP.Constants.E_CORE_NOTICE );    
+            if ( this[ this.DEFINED ] !== true && this[ COMPILER.SUPPRESS ] !== true ) {
+                this.ENV[ COMPILER.ERROR ](" Undefined variable: " + this.DEFINED + " in ", PHP.Constants.E_CORE_NOTICE );    
                 
             }
             return value;

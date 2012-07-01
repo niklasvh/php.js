@@ -69,31 +69,54 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     }
 };
 
-
-
-PHP.Modules.prototype[ PHP.Compiler.prototype.ERROR ] = function( msg, level ) {
-    var C = PHP.Constants;
-    console.log( msg );
-    switch ( level ) {
+(function( MODULES ){
+    
+    var suppress = false;
+    
+    MODULES[ PHP.Compiler.prototype.SUPPRESS ] = function( expr ) {
+        suppress = true;
+        var result = expr();
+        
+        result[ PHP.Compiler.prototype.SUPPRESS ] = true;
+ 
+        
+        
+        suppress = false;
+        return result;
+    };
+    
+    MODULES[ PHP.Compiler.prototype.ERROR ] = function( msg, level ) {
+        var C = PHP.Constants;
+        if ( suppress === false ) {
             
-        case C.E_WARNING:
-        case C.E_CORE_WARNING:
-        case C.E_COMPILE_WARNING:
-        case C.E_USER_WARNING:
-            this.echo( new PHP.VM.Variable("\nWarning: " + msg + "\n"));
-            return;
-            break;
+            switch ( level ) {
             
-        case C.E_CORE_NOTICE:
-            this.echo( new PHP.VM.Variable("\nNotice: " + msg + "\n"));
-            return;
-            break;
-        default:
-            this.echo( new PHP.VM.Variable("\nWarning: " + msg + "\n"));
-            return;
+                case C.E_WARNING:
+                case C.E_CORE_WARNING:
+                case C.E_COMPILE_WARNING:
+                case C.E_USER_WARNING:
+                    this.echo( new PHP.VM.Variable("\nWarning: " + msg + "\n"));
+                    return;
+                    break;
+            
+                case C.E_CORE_NOTICE:
+                    this.echo( new PHP.VM.Variable("\nNotice: " + msg + "\n"));
+                    return;
+                    break;
+                default:
+                    this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + "\n"));
+                    return;
             
             
-    }
+            }
+        }
         
     
-};
+    };
+    
+})( PHP.Modules.prototype )
+
+
+
+
+
