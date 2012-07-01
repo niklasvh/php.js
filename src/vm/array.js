@@ -35,7 +35,8 @@ PHP.VM.Array = function( ENV ) {
            
             items.forEach( function( item ) {
                
-                this.$Prop( this, $this.VALUES ).$.push( item[ COMPILER.ARRAY_VALUE ] );
+               // this.$Prop( this, $this.VALUES ).$.push( item[ COMPILER.ARRAY_VALUE ] );
+                this.$Prop( this, $this.VALUES ).$.push( new PHP.VM.Variable( item[ COMPILER.ARRAY_VALUE ][ COMPILER.VARIABLE_VALUE ] ) );
                
                 if ( item[ COMPILER.ARRAY_KEY ] !== undefined ) {
                     

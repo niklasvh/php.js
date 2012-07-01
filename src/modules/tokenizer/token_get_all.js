@@ -8,10 +8,12 @@
 PHP.Modules.prototype.token_get_all = function( code ) {
     var VARIABLE = PHP.VM.Variable.prototype,
     COMPILER = PHP.Compiler.prototype;
+    
+    
     if ( !this[ COMPILER.SIGNATURE ]( arguments, "token_get_all", 1, [ [ VARIABLE.STRING, VARIABLE.NULL ] ] ) ) {
         return new PHP.VM.Variable( null );
     }
-    
+   
     switch( code[ VARIABLE.TYPE ] ) {
         
         case VARIABLE.BOOL:

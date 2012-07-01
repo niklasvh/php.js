@@ -1,7 +1,7 @@
 /* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 26.6.2012 
-* @website http://hertzen.com
+ * @author Niklas von Hertzen <niklas at hertzen.com>
+ * @created 26.6.2012 
+ * @website http://hertzen.com
  */
 
 
@@ -26,7 +26,22 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         
             var $ = PHP.VM.VariableHandler(),
             argumentObj = this[ methodArgumentPrefix + methodName ];
+             
+            argumentObj.forEach( function( arg, index ) {
+
+                if ( args[ index ] !== undefined ) {
+                    if ( args[ index ] instanceof PHP.VM.VariableProto) {
+                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
+                    } else {
+                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ];
+                    }
+                } else {
+                    $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+                }
                 
+
+            });
+            /*
             args.forEach(function( arg, index ) {
                 if (arg instanceof PHP.VM.VariableProto) {
                     $( argumentObj[ index ].name ).$ = arg.$;
@@ -35,7 +50,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 }
                 
             }, this);
-           
+           */
         
             magicConstants.METHOD = this[ COMPILER.CLASS_NAME ] + ":" + methodName;
             return this[ methodPrefix + methodName ].call( this, $ );
@@ -56,8 +71,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
               
             // call constructor
             if ( typeof this[ methodPrefix + __construct ] === "function" ) {
-                var args = Array.prototype.slice.call( arguments, 1 );    
-                return callMethod.call( this, __construct, args );         
+          //      var args = Array.prototype.slice.call( arguments, 1 );    
+            //    console.log( arguments ); 
+                return callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) );         
                  
             }
      
@@ -76,7 +92,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             Object.defineProperty( Class.prototype, propertyPrefix + propertyName, {
                 value: new PHP.VM.Variable( propertyDefault )
             });
-            */
+             */
             return methods;
         };
 
@@ -126,7 +142,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         if (opts.Extends  !== undefined) {
             Class.prototype = new classRegistry[ opts.Extends ]( true );
         }
-        */
+         */
     
         if (opts.Implements !== undefined ) {
             implementArr = opts.Implements
@@ -137,7 +153,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         Class.prototype[ COMPILER.METHOD_CALL ] = function( ctx, methodName ) {
               
             var args = Array.prototype.slice.call( arguments, 2 );
- 
+
             if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
                 // no method with that name found
                   

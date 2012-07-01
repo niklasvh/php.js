@@ -1,7 +1,7 @@
 
 PHP.VM = function( src, opts ) {
     
-    var $ = PHP.VM.VariableHandler();
+    var $ = PHP.VM.VariableHandler( this );
     // console.log($('_POST'));
   
     var $$ = function( arg ) {

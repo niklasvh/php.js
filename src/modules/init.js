@@ -20,7 +20,6 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     typeStrings[ VARIABLE.OBJECT ] = "object";
     typeStrings[ VARIABLE.RESOURCE ] = "resource";
     
-
     
     if ( args.length !== len ) {
        
@@ -38,7 +37,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     
                     if ( type.indexOf( args[ paramIndex ][ VARIABLE.TYPE ] ) === -1 ) {
                         if ( type.indexOf( VARIABLE.STRING ) === -1 || ( typeof args[ paramIndex ][ VARIABLE.CAST_STRING ] !== "function" )  ) {
-                            
+                          
                             this[ COMPILER.ERROR ]( name + "() expects parameter " + ( paramIndex + 1 ) + " to be " + typeStrings[ type[ 0 ] ] + ", " + typeStrings[ args[ paramIndex ][ VARIABLE.TYPE ] ] + " given in " + 
                                 _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
                                 " on line " + 0, PHP.Constants.E_CORE_WARNING );  
@@ -73,6 +72,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
 
 PHP.Modules.prototype[ PHP.Compiler.prototype.ERROR ] = function( msg, level ) {
     var C = PHP.Constants;
+    console.log( msg );
     switch ( level ) {
             
         case C.E_WARNING:
@@ -82,6 +82,15 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.ERROR ] = function( msg, level ) {
             this.echo( new PHP.VM.Variable("\nWarning: " + msg + "\n"));
             return;
             break;
+            
+        case C.E_CORE_NOTICE:
+            this.echo( new PHP.VM.Variable("\nNotice: " + msg + "\n"));
+            return;
+            break;
+        default:
+            this.echo( new PHP.VM.Variable("\nWarning: " + msg + "\n"));
+            return;
+            
             
     }
         

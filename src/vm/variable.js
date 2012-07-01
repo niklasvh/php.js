@@ -4,17 +4,45 @@
  * @website http://hertzen.com
  */
 
-PHP.VM.VariableHandler = function() {
+PHP.VM.VariableHandler = function( ENV ) {
     
     var variables = {};
     
     return function( variableName ) {
         if ( variables[ variableName ] === undefined ) { 
+            
+          
+            variables[ variableName ] = new PHP.VM.Variable();
+            variables[ variableName ][ PHP.VM.Variable.prototype.DEFINED ] = variableName;
+            variables[ variableName ].ENV = ENV;
+           
+        /*
             Object.defineProperty( variables, variableName, {
                 value: new PHP.VM.Variable()
             });
+            
+           
+           
+           
+            Object.defineProperty( variables, variableName, {
+                value: Object.defineProperty( {}, PHP.Compiler.prototype.VARIABLE_VALUE, {
+                        set: function( val ) {
+                            // we are setting a val to a newly created variable
+                           variables[ variableName ] = new PHP.VM.Variable( val );
+                        },
+                        get: function() {
+                            // attempting to retrieve a value of undefined property
+                            console.log( variables );
+                            console.log( variableName + " not defined");
+                        }
+                    }
+                
+                )
+            });
+             */
+            
         }
-
+        
         return variables[ variableName ];
     };
     
@@ -44,6 +72,7 @@ PHP.VM.Variable = function( arg ) {
     __toString = "__toString",
     COMPILER = PHP.Compiler.prototype,
     setValue = function( newValue ) {
+        this[ this.DEFINED ] = true;
         
         if ( typeof newValue === "string" ) {
             this[ this.TYPE ] = this.STRING;
@@ -95,7 +124,11 @@ PHP.VM.Variable = function( arg ) {
     Object.defineProperty( this, COMPILER.VARIABLE_VALUE,
     {
         get : function(){
-         
+            
+            if ( this[ this.DEFINED ] !== true ) {
+                this.ENV[ COMPILER.ERROR ](" Undefined variable " + this.DEFINED + " parameter, ", PHP.Constants.E_CORE_NOTICE );    
+                console.log("this");
+            }
             return value;
         },  
         set : setValue
@@ -127,6 +160,8 @@ PHP.VM.Variable = function( arg ) {
 
 PHP.VM.Variable.prototype = new PHP.VM.VariableProto();
 
+PHP.VM.Variable.prototype.DEFINED = "$Defined";
+
 PHP.VM.Variable.prototype.CAST_STRING = "$String";
 
 PHP.VM.Variable.prototype.NULL = 0;
@@ -137,5 +172,5 @@ PHP.VM.Variable.prototype.STRING = 4;
 PHP.VM.Variable.prototype.ARRAY = 5;
 PHP.VM.Variable.prototype.OBJECT = 6;
 PHP.VM.Variable.prototype.RESOURCE = 7;
-
 PHP.VM.Variable.prototype.TYPE = "type";
+
