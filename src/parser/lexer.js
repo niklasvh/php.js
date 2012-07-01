@@ -1,7 +1,17 @@
 PHP.Lexer = function( src ) {
     
     
-    var tokens = [
+    var heredoc,
+    lineBreaker = function( result ) {
+        if (result.match(/\n/) !== null) {
+            var quote = result.substring(0, 1);
+            result = '[' + result.split(/\n/).join( quote + "," + quote ) + '].join("\\n")';
+                
+        }
+        
+        return result;
+    },
+    tokens = [
     {
         value: PHP.Constants.T_ABSTRACT,
         re: /^abstract\s/i
@@ -16,7 +26,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_AS,
-        re: /^as\s/i
+        re: /^as(?=\s)/i
     },
     {
         value: PHP.Constants.T_BOOLEAN_AND,
@@ -123,6 +133,14 @@ PHP.Lexer = function( src ) {
         re: /^<<=/
     }, 
     {
+        value: PHP.Constants.T_START_HEREDOC,
+        re: /^<<<[A-Z_0-9]+\s\s/i,
+        func: function( result ){
+            heredoc = result.substring(3, result.length - 2);
+            return result;
+        }
+    },  
+    {
         value: PHP.Constants.T_SL,
         re: /^<</
     },
@@ -201,11 +219,7 @@ PHP.Lexer = function( src ) {
     {
         value: PHP.Constants.T_COMMENT,
         re: /^\#.*(\s)?/
-    }, 
-    {
-        value: PHP.Constants.T_START_HEREDOC,
-        re: /^<<</
-    },    
+    },   
     {
         value: PHP.Constants.T_ELSEIF,
         re: /^elseif(?=[\s(])/i
@@ -262,6 +276,10 @@ PHP.Lexer = function( src ) {
         re: /^(0x[0-9A-F]+|[-]?[0-9]+)/i
     },
     {
+        value: PHP.Constants.T_OPEN_TAG_WITH_ECHO,
+        re: /^(\<\?=|\<%=)/i
+    },
+    {
         value: PHP.Constants.T_OPEN_TAG,
         re: /^(\<\?php\s|\<\?|\<%)/i
     },
@@ -277,14 +295,74 @@ PHP.Lexer = function( src ) {
         value: PHP.Constants.T_CONSTANT_ENCAPSED_STRING,
         re: /^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/,
         func: function( result ) {
+          
+            if (result.substring( 0,1 ) === "'") {
+                return result;
+            }
            
+            var match = result.match( /(?:[^\\]|\\.)*\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/g );
+            if ( match !== null ) {
+               
+                while( result.length > 0 ) {
+                   
+                    match = result.match( /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\']/ );
+                    
+                    if ( match !== null ) {
+                        results.push( match[ 0 ] );
+                        result = result.substring( 1 );
+                    }
+                    
+                    match = result.match(/^\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/);
+                    
+                    if ( match !== null ) {
+                        results.push([
+                            parseInt(PHP.Constants.T_VARIABLE, 10), 
+                            match[ 0 ],
+                            line
+                            ]);
+                        
+                        result = result.substring( match[ 0 ].length ); 
+                    }
+                    
+
+                    while(( match = result.match( /^([^\\\$'"]|\\.)+/g )) !== null ) {
+                   
+
+                      
+                        if (result === "'" || result === '"') {
+                          
+                        }
+                      
+                        if (result.length === 1) {
+                            throw new Error(match);
+                        }
+           
+                        results.push([
+                            parseInt(PHP.Constants.T_CONSTANT_ENCAPSED_STRING, 10), 
+                            match[ 0 ],
+                            line
+                            ]);
+                        line += match[ 0 ].split('\n').length - 1;
+                    
+                        result = result.substring( match[ 0 ].length );           
+                            
+
+                    }         
+                
+                }
+                
+                return undefined;
+            //   console.log( result );
+            }
+         
+            /*
             if (result.match(/\r\n/) !== null) {
                 var quote = result.substring(0, 1);
                 
                 result = '[' + result.split(/\r\n/).join( quote + "," + quote ) + '].join("\\n")';
                 
             }
-            
+            */
             return result;
         }
     },
@@ -294,7 +372,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: -1,
-        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%]/
+        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\']/
     }];
 
     
@@ -317,39 +395,81 @@ PHP.Lexer = function( src ) {
 
         if ( insidePHP === true ) {
         
-            cancel =  tokens.some(function( token ){
-        
-                var result = src.match( token.re );
-        
-                if ( result !== null ) {
-                    if ( token.value !== -1) {
-                        var resultString = result[ 0 ];
-                        
-                        
-                        
-                        if (token.func !== undefined ) {
-                            resultString = token.func( resultString );
-                        }
-                        results.push([
-                            parseInt(token.value, 10), 
-                            resultString,
-                            line
-                            ]);
-                        line += resultString.split('\n').length - 1;
-                        
-                    } else {
-                        // character token
-                        results.push( result[ 0 ] );
-                    }
+            if ( heredoc !== undefined ) {
+                // we are in a heredoc
                 
-                    src = src.substring(result[ 0 ].length);
-                    //  console.log(result);
-                    return true;
+                var regexp = new RegExp('([\\S\\s]*)(\\r\\n|\\n)(' + heredoc + ')(;|\\r\\n|\\n)',"i");
+                
+                
+                
+                
+            
+                
+                var result = src.match( regexp );
+                if ( result !== null ) {
+                    // contents
+                    console.log( result[ 1 ]);
+                    results.push([
+                        parseInt(PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10), 
+                        result[ 1 ].replace(/\\\$/g,"$"),
+                        line
+                        ]);
+                    
+                    // heredoc end tag
+                    results.push([
+                        parseInt(PHP.Constants.T_END_HEREDOC, 10), 
+                        result[ 3 ],
+                        line
+                        ]);
+                        
+                    src = src.substring( result[1].length + result[2].length + result[3].length );   
+                    heredoc = undefined;
                 }
-                return false;
+                
+                if (result === null) {
+                    throw Error("sup");
+                }
+               
+                
+            } else {
+                cancel =  tokens.some(function( token ){
+        
+                    var result = src.match( token.re );
+        
+                    if ( result !== null ) {
+                        if ( token.value !== -1) {
+                            var resultString = result[ 0 ];
+                        
+                        
+                        
+                            if (token.func !== undefined ) {
+                                resultString = token.func( resultString );
+                            }
+                            if (resultString !== undefined ) {
+                                
+                           
+                                results.push([
+                                    parseInt(token.value, 10), 
+                                    resultString,
+                                    line
+                                    ]);
+                                line += resultString.split('\n').length - 1;
+                            }
+                        
+                        } else {
+                            // character token
+                            results.push( result[ 0 ] );
+                        }
+                
+                        src = src.substring(result[ 0 ].length);
+                        //  console.log(result);
+                        return true;
+                    }
+                    return false;
         
         
-            });
+                });
+            }
         
         } else {
    
@@ -362,11 +482,11 @@ PHP.Lexer = function( src ) {
                         parseInt(PHP.Constants.T_INLINE_HTML, 10), 
                         resultString,
                         line
-                     ]);
+                        ]);
                      
-                     line += resultString.split('\n').length - 1;
+                    line += resultString.split('\n').length - 1;
                      
-                     src = src.substring( result.index );
+                    src = src.substring( result.index );
                 }
 
                 insidePHP = true;

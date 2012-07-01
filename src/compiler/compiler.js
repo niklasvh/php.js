@@ -102,9 +102,23 @@ PHP.Compiler.prototype.GLOBAL  = "$Global";
 
 PHP.Compiler.prototype.SIGNATURE  = "$SIGNATURE";
 
-PHP.Compiler.prototype.fixString = function( $val) {
+PHP.Compiler.prototype.fixString =  function( result ) {
     
+    if ( result.match(/^("|')/) === null) {
+        result = '"' + result.replace(/([^"\\]*(?:\\.[^"\\]*)*)"/g, '$1\\"') + '"';
+    }
     
+    if (result.match(/\r\n/) !== null) {
+        var quote = result.substring(0, 1);
+        result = '[' + result.split(/\r\n/).map(function( result ){
+            return result.replace(/\r/g,"");
+        }).join( quote + "," + quote ) + '].join("\\n")';
+                
+    }
+    
+
+        
+    return result;
     
 /*
     $val = str_replace("\\", "\\\\", $val);
@@ -116,6 +130,6 @@ PHP.Compiler.prototype.fixString = function( $val) {
     $val = str_replace("\n", "\\n", $val);
     $val = str_replace("\t", "\\t", $val);
 */
-    return $val;
+
 
 }
