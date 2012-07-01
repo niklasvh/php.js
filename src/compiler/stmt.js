@@ -136,7 +136,7 @@ PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
-    var src = "" + this.CTX + "unset( ",
+    var src = this.CTX + "unset( ",
     vars = [];
 
     action.variables.forEach(function( variable ){
@@ -144,6 +144,12 @@ PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
     }, this);
     
     src += vars.join(", ") + " )";
+    
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Stmt_InlineHTML = function( action ) {
+    var src = this.CTX + this.OUTPUT_BUFFER + ' += "' + action.value + '"';
     
     return src;
 };

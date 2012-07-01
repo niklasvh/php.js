@@ -124,7 +124,11 @@ PHP.Lexer = function( src ) {
     }, 
     {
         value: PHP.Constants.T_SL,
-        re: /^<<=/
+        re: /^<</
+    },
+    {
+        value: PHP.Constants.T_IS_SMALLER_OR_EQUAL,
+        re: /^<=/
     },
     {
         value: PHP.Constants.T_SR_EQUAL,
@@ -133,6 +137,10 @@ PHP.Lexer = function( src ) {
     {
         value: PHP.Constants.T_SR,
         re: /^>>/
+    },
+    {
+        value: PHP.Constants.T_IS_GREATER_OR_EQUAL,
+        re: /^>=/
     },
     {
         value: PHP.Constants.T_OR_EQUAL,
@@ -286,7 +294,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: -1,
-        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^]/
+        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%]/
     }];
 
     
@@ -345,12 +353,22 @@ PHP.Lexer = function( src ) {
         
         } else {
    
-            var result = src.match(/(\s\S)*?(?=\<\?php\s|\<\?\s|\<%\s)/i);
-           
+            var result = /(\<\?php\s|\<\?|\<%)/i.exec( src );
+            //console.log('sup', result, result.index);
             if ( result !== null ) {
-                if (result[0].length > 0 ) {
-                    console.log('add inline');
+                if ( result.index > 0 ) {
+                    var resultString = src.substring(0, result.index);
+                    results.push ([
+                        parseInt(PHP.Constants.T_INLINE_HTML, 10), 
+                        resultString,
+                        line
+                     ]);
+                     
+                     line += resultString.split('\n').length - 1;
+                     
+                     src = src.substring( result.index );
                 }
+
                 insidePHP = true;
             } else {
                 
@@ -362,8 +380,8 @@ PHP.Lexer = function( src ) {
                 return results;
             }
             
-            src = src.substring(result[ 0 ].length);
-        //throw Error('sup')
+        //    src = src.substring(result[ 0 ].length);
+        
         }
 
         

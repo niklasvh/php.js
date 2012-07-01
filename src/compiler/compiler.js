@@ -40,6 +40,8 @@ PHP.Compiler.prototype.RESOURCES = "\π";
 
 PHP.Compiler.prototype.ENV = "ENV";
 
+PHP.Compiler.prototype.OUTPUT_BUFFER = "OUTPUT_BUFFER";
+
 PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
 
 PHP.Compiler.prototype.SUPPRESS = "$Suppress";
