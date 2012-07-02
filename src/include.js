@@ -55,6 +55,7 @@
         parser: {
             lexer: "js",
             parser: "js",
+            data: "js",
             actions: "js"
         },
         vm: {
