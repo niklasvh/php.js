@@ -17,6 +17,7 @@
             arithmetic: "js",
             array: {
                 array: "js",
+                is_array: "js",
                 count: "js"
             },
             control_structures: {
@@ -31,9 +32,13 @@
                 fclose: "js",
                 fopen: "js"
             },
+            misc: {
+              eval: "js"  
+            },
             string: {
                 echo: "js",
-                implode: "js"
+                implode: "js",
+                strncmp: "js"
             },
             tokenizer: {
                 constants: "js",
@@ -49,7 +54,8 @@
         },
         parser: {
             lexer: "js",
-            parser: "js"
+            parser: "js",
+            actions: "js"
         },
         vm: {
             vm: "js",

@@ -41,6 +41,10 @@ PHP.Lexer = function( src ) {
         re: /^\|\|/
     },
     {
+        value: PHP.Constants.T_CONTINUE,
+        re: /^continue(?=\s|;)/i
+    },
+    {
         value: PHP.Constants.T_BREAK,
         re: /^break(?=\s|;)/i
     },

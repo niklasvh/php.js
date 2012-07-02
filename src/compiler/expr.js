@@ -102,6 +102,10 @@ PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
     return this.source( action.left ) + "." + this.ADD + "(" + this.source( action.right ) + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_Equal = function( action ) {
+    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " == " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
+};
+
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {
     return this.source( action.left ) + "." + this.VARIABLE_VALUE + " < " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
 };

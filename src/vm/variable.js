@@ -167,7 +167,15 @@ PHP.VM.Variable = function( arg ) {
         set : setValue
     }
     );
-        
+    
+    Object.defineProperty( this, this.CAST_BOOL,
+    {
+        get : function(){
+            return value;
+        }
+    }
+    );
+
     Object.defineProperty( this, COMPILER.DIM_FETCH,
     {
         get : function(){
@@ -194,6 +202,8 @@ PHP.VM.Variable = function( arg ) {
 PHP.VM.Variable.prototype = new PHP.VM.VariableProto();
 
 PHP.VM.Variable.prototype.DEFINED = "$Defined";
+
+PHP.VM.Variable.prototype.CAST_BOOL = "$Bool";
 
 PHP.VM.Variable.prototype.CAST_STRING = "$String";
 
