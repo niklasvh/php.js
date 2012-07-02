@@ -1011,12 +1011,12 @@ function Parser( inst, tokens ) {
 
             if ( yyn === 0 ) {
                 /* accept */
-              //  console.log(this.yyastk);
+                //  console.log(this.yyastk);
                 return this.yyval;
             } else if (yyn !== this.YYUNEXPECTED ) {
                 /* reduce */
                 try {
-                //    console.log('yyn' + yyn);
+                    //    console.log('yyn' + yyn);
                     this['yyn' + yyn](
                         PHP.Utils.Merge(attributeStack[this.stackPos - yylen[ yyn ] ], this.endAttributes)
                         //      + endAttributes
@@ -1742,6 +1742,13 @@ Parser.prototype.yyn107 = function () {
     this.yyval = null;
 };
 
+Parser.prototype.yyn108 = function ( attributes ) {
+    this.yyval =  {
+        type: "Node_Stmt_Else",
+        stmts: Array.isArray( this.yyastk[ this.stackPos-(2-2) ] ) ? this.yyastk[ this.stackPos-(2-2) ] : [ this.yyastk[ this.stackPos-(2-2) ] ],
+        attributes: attributes
+    };
+};
 
 Parser.prototype.yyn109 = function () {
     this.yyval = null;
