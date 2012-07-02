@@ -10,10 +10,15 @@ PHP.Modules.prototype.strncmp = function( str1, str2, len ) {
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype;
     
+  //  console.log(( str1[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) === str2[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) ), str1[ COMPILER.VARIABLE_VALUE ], str2[ COMPILER.VARIABLE_VALUE ]);
+    // TODO add real
     
-    
-console.log(( str1[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) === str2[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) ) );
-    return new PHP.VM.Variable( ( str1[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) === str2[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) ) );
+    if ( ( str1[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) === str2[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) ) ) {
+         return new PHP.VM.Variable( 0 );
+    } else {
+         return new PHP.VM.Variable( 1 );
+    }
+   
     
     
 };

@@ -106,12 +106,12 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
 
     src += '}, ' + this.source( action.valueVar );
 
-  //  src += '}, "' + action.valueVar.name + '"';
+    //  src += '}, "' + action.valueVar.name + '"';
 
     if (action.keyVar !== null) {
         src += ', ' + this.source( action.expr );
     }
-    src += ');\n'
+    src += ')'
     
         
 
@@ -123,7 +123,7 @@ PHP.Compiler.prototype.Node_Stmt_Continue = function( action ) {
     // todo fix
     var src = "return";
     console.log( action );
-  return src;  
+    return src;  
 };
 
 
@@ -170,7 +170,18 @@ PHP.Compiler.prototype.Node_Stmt_If = function( action ) {
     }, this);
     console.log(action);
     
+    if ( action.Else !== null ) {
+        src += "} else {\n";
+        
+        action.Else.stmts.forEach(function( stmt ){
+            src += this.source( stmt) + ";\n";
+        }, this);
+    }
+    
     src += "}"
+    
+
+    
     return src;
 };
 

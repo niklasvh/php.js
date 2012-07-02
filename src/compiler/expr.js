@@ -41,13 +41,19 @@ PHP.Compiler.prototype.Node_Expr_ErrorSuppress = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
-    var src = "";
+    var src = "",
+    args = [];
     if ( action.func.type === "Node_Expr_Variable") {
         src += "(" + this.CTX + "[ " + this.source( action.func ) + "." + this.VARIABLE_VALUE + " ](";
     } else {
         src += "(" + this.CTX + this.getName( action.func ) + "(";
+        
+        if (this.getName( action.func ) === "eval") {
+            args.push("$");
+        }
+        
     }
-    var args = [];
+   
     action.args.forEach(function( arg ){
         
         args.push( this.source( arg.value ) );
@@ -103,7 +109,7 @@ PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Equal = function( action ) {
-    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " == " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
+    return this.source( action.left ) + "." + this.EQUAL + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {

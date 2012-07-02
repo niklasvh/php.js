@@ -6,19 +6,33 @@
 
 
 PHP.Modules.prototype.eval = function( $, code ) {
+    
+
+    
     var COMPILER = PHP.Compiler.prototype;
    
-    var AST = new Parser( this, tokens );
+    var source = code[ COMPILER.VARIABLE_VALUE ];
+        
+
+    // tokenizer
+    var tokens = new PHP.Lexer( "<?" + source );
+   
+    // build ast tree
+    
+    var AST = new PHP.Parser( tokens );
   
-    //console.log( this.AST );
-    //console.log( opts );
+    // compile tree into JS
     var compiler = new PHP.Compiler( AST );
    
-    console.log( code );
     
+
+    
+    
+    
+    // execture code in current context ($)
     var exec = new Function( "$$", "$", "ENV", compiler.src  );
-    exec.call(this, function() {
-        
+    exec.call(this, function( arg ) {
+        return new PHP.VM.Variable( arg );
     }, $, this);
     
 };

@@ -66,6 +66,8 @@ PHP.Compiler.prototype.CONCAT = "$Concat";
 
 PHP.Compiler.prototype.UNSET = "$Unset";
 
+PHP.Compiler.prototype.EQUAL = "$Equal";
+
 PHP.Compiler.prototype.LABEL = "LABEL";
 
 PHP.Compiler.prototype.LABEL_COUNT = 0;
@@ -111,6 +113,9 @@ PHP.Compiler.prototype.GLOBAL  = "$Global";
 PHP.Compiler.prototype.SIGNATURE  = "$SIGNATURE";
 
 PHP.Compiler.prototype.fixString =  function( result ) {
+    
+    
+
     
     if ( result.match(/^("|')/) === null) {
         result = '"' + result.replace(/([^"\\]*(?:\\.[^"\\]*)*)"/g, '$1\\"') + '"';

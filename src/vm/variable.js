@@ -42,6 +42,8 @@ PHP.VM.VariableHandler = function( ENV ) {
              */
             
         }
+
+        
         
         return variables[ variableName ];
     };
@@ -84,6 +86,21 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MINUS ] = function( combi
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) - ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
 };
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.METHOD_CALL ] = function() {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    
+    return this[ COMPILER.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ].apply( this[ COMPILER.VARIABLE_VALUE ], arguments );
+};
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compareTo ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) == ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+};
+
+
 
 PHP.VM.Variable = function( arg ) {
 

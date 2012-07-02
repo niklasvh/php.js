@@ -22,6 +22,7 @@ PHP.Parser = function ( tokens ) {
     yyp = this.yyp,
     yygoto = this.yygoto,
     yylhs = this.yylhs,
+    terminals = this.terminals,
     translate = this.translate,
     yygdefault = this.yygdefault;
     

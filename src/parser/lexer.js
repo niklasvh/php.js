@@ -301,9 +301,9 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_CONSTANT_ENCAPSED_STRING,
-        re: /^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/,
+        re: /^("(?:[^"\\]|\\[\s\S])*"|'(?:[^'\\]|\\[\s\S])*')/,
         func: function( result, token ) {
-          
+
             var curlyOpen = 0;
           
             if (result.substring( 0,1 ) === "'") {
@@ -314,7 +314,7 @@ PHP.Lexer = function( src ) {
             if ( match !== null ) {
                
                 while( result.length > 0 ) {
-                   
+
                     match = result.match( /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\']/ );
                     
                     if ( match !== null ) {
@@ -329,7 +329,10 @@ PHP.Lexer = function( src ) {
                     
                     match = result.match(/^\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/);
                     
+                   
+                    
                     if ( match !== null ) {
+                        
                         results.push([
                             parseInt(PHP.Constants.T_VARIABLE, 10), 
                             match[ 0 ],
@@ -337,27 +340,29 @@ PHP.Lexer = function( src ) {
                             ]);
                         
                         result = result.substring( match[ 0 ].length ); 
+
                     }
                     
 
                     while(( match = result.match( /^([^\\\$"\[\]{}]|\\.)+/g )) !== null ) {
                    
 
-                      
                         if (result.length === 1) {
                             throw new Error(match);
                         }
                         
+                        
+                       
                         results.push([
                             parseInt(( curlyOpen > 0 ) ? PHP.Constants.T_CONSTANT_ENCAPSED_STRING : PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10), 
-                            match[ 0 ],
+                            match[ 0 ].replace(/\n/g,"\\n").replace(/\r/g,""),
                             line
                             ]);
+                           
                         line += match[ 0 ].split('\n').length - 1;
-                    
+                   
                         result = result.substring( match[ 0 ].length );           
                             
-
                     }         
                 
                     if( result.match(/^{\$/) !== null ) {
@@ -373,6 +378,8 @@ PHP.Lexer = function( src ) {
                 
                 return undefined;
             //   console.log( result );
+            } else {
+                result = result.replace(/\n/g,"\\n").replace(/\r/g,"");
             }
          
             /*
@@ -471,7 +478,6 @@ PHP.Lexer = function( src ) {
                             }
                             if (resultString !== undefined ) {
                                 
-                           
                                 results.push([
                                     parseInt(token.value, 10), 
                                     resultString,

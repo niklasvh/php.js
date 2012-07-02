@@ -23,10 +23,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         props = {},
         
         callMethod = function( methodName, args ) {
-        
+           
             var $ = PHP.VM.VariableHandler(),
             argumentObj = this[ methodArgumentPrefix + methodName ];
-             
             argumentObj.forEach( function( arg, index ) {
 
                 if ( args[ index ] !== undefined ) {
