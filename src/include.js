@@ -14,6 +14,7 @@
         },
         modules: {
             init: "js",
+            arithmetic: "js",
             array: {
                 array: "js",
                 count: "js"

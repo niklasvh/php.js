@@ -52,7 +52,15 @@ PHP.Compiler.prototype.CONSTANT_GET = "get";
 
 PHP.Compiler.prototype.MAGIC_CONSTANTS = "$MConstants";
 
+PHP.Compiler.prototype.NEG = "$Neg";
+
 PHP.Compiler.prototype.ADD = "$Add";
+
+PHP.Compiler.prototype.MUL = "$Mul";
+
+PHP.Compiler.prototype.MUL = "$Div";
+
+PHP.Compiler.prototype.MINUS = "$Minus";
 
 PHP.Compiler.prototype.CONCAT = "$Concat";
 

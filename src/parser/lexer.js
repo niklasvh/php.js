@@ -266,7 +266,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_DNUMBER,
-        re: /^[-]?[0-9]*\.[0-9]+([eE][-]?[0-9]*)?/
+        re: /^[0-9]*\.[0-9]+([eE][-]?[0-9]*)?/
     /*,
         func: function( result ) {
            
@@ -277,7 +277,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_LNUMBER,
-        re: /^(0x[0-9A-F]+|[-]?[0-9]+)/i
+        re: /^(0x[0-9A-F]+|[0-9]+)/i
     },
     {
         value: PHP.Constants.T_OPEN_TAG_WITH_ECHO,
@@ -298,7 +298,9 @@ PHP.Lexer = function( src ) {
     {
         value: PHP.Constants.T_CONSTANT_ENCAPSED_STRING,
         re: /^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/,
-        func: function( result ) {
+        func: function( result, token ) {
+          
+            var curlyOpen = 0;
           
             if (result.substring( 0,1 ) === "'") {
                 return result;
@@ -314,6 +316,11 @@ PHP.Lexer = function( src ) {
                     if ( match !== null ) {
                         results.push( match[ 0 ] );
                         result = result.substring( 1 );
+                        
+                        if ( curlyOpen > 0 && match[ 0 ] === "}") {
+                            curlyOpen--;
+                        }
+                        
                     }
                     
                     match = result.match(/^\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/);
@@ -329,20 +336,16 @@ PHP.Lexer = function( src ) {
                     }
                     
 
-                    while(( match = result.match( /^([^\\\$'"]|\\.)+/g )) !== null ) {
+                    while(( match = result.match( /^([^\\\$"\[\]{}]|\\.)+/g )) !== null ) {
                    
 
-                      
-                        if (result === "'" || result === '"') {
-                          
-                        }
                       
                         if (result.length === 1) {
                             throw new Error(match);
                         }
-           
+                        
                         results.push([
-                            parseInt(PHP.Constants.T_CONSTANT_ENCAPSED_STRING, 10), 
+                            parseInt(( curlyOpen > 0 ) ? PHP.Constants.T_CONSTANT_ENCAPSED_STRING : PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10), 
                             match[ 0 ],
                             line
                             ]);
@@ -353,6 +356,15 @@ PHP.Lexer = function( src ) {
 
                     }         
                 
+                    if( result.match(/^{\$/) !== null ) {
+                        results.push([
+                            parseInt(PHP.Constants.T_CURLY_OPEN, 10), 
+                            "{",
+                            line
+                            ]);
+                        result = result.substring( 1 );
+                        curlyOpen++;
+                    }
                 }
                 
                 return undefined;
@@ -420,8 +432,8 @@ PHP.Lexer = function( src ) {
                         ]);
                         
                         
-                     // note the no - 1 for length as regexp include one line as well   
-                     line += result[ 1 ].split('\n').length;
+                    // note the no - 1 for length as regexp include one line as well   
+                    line += result[ 1 ].split('\n').length;
                      
                     // heredoc end tag
                     results.push([
@@ -451,7 +463,7 @@ PHP.Lexer = function( src ) {
                         
                         
                             if (token.func !== undefined ) {
-                                resultString = token.func( resultString );
+                                resultString = token.func( resultString, token );
                             }
                             if (resultString !== undefined ) {
                                 

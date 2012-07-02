@@ -108,7 +108,7 @@ PHP.VM.Array.fromObject = function( items ) {
         obj = {};
         obj[ PHP.Compiler.prototype.ARRAY_KEY ] = key;
         
-        if ( Array.isArray( value ) ) {
+        if ( typeof value === "object" && value !== null ) {
             obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = PHP.VM.Array.fromObject.call( this, value );
         } else {
             obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = new PHP.VM.Variable( value );

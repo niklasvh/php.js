@@ -4,6 +4,25 @@ PHP.Compiler.prototype.Node_Scalar_String = function( action ) {
     
 };
 
+PHP.Compiler.prototype.Node_Scalar_Encapsed = function( action ) {
+
+    var parts = []
+    action.parts.forEach(function( part ){
+        if ( typeof part === "string" ) {
+            parts.push( this.fixString( part ) )
+        } else {
+            
+            
+            
+            parts.push( this.source( (part[ 0 ] === undefined) ? part : part[ 0 ] ) + "." + this.VARIABLE_VALUE );
+        }
+    }, this);
+    
+    var src = this.CREATE_VARIABLE + "(" + parts.join(" + ") + ")";
+    return src;
+
+    
+};
 
 PHP.Compiler.prototype.Node_Scalar_LNumber = function( action ) {
 

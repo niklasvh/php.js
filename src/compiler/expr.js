@@ -74,6 +74,10 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
     return src;
 };
 
+PHP.Compiler.prototype.Node_Expr_UnaryMinus = function( action ) {
+    return this.source( action.expr ) + "." + this.NEG + "()";
+};
+
 PHP.Compiler.prototype.Node_Expr_BitwiseOr = function( action ) {
     return this.source( action.left ) + "." + this.VARIABLE_VALUE + " | " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
 };
@@ -83,15 +87,15 @@ PHP.Compiler.prototype.Node_Expr_BitwiseAnd = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Div = function( action ) {
-    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " / " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
+    return this.source( action.left ) + "." + this.DIV + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Minus = function( action ) {
-    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " - " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
+    return this.source( action.left ) + "." + this.MINUS + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Mul = function( action ) {
-    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " * " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
+    return this.source( action.left ) + "." + this.MUL + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {

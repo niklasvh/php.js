@@ -25,7 +25,13 @@ PHP.Modules.prototype.var_dump = function() {
             str += ") {\n";
             
             keys.forEach(function( key, index ){
-                str += $INDENT( indent + 2 ) + "[" + key + "]=>\n";
+                str += $INDENT( indent + 2 ) + "[";
+                if ( typeof key === "string" ) {
+                    str += '"' + key + '"';
+                } else {
+                    str += key;
+                } 
+                str += "]=>\n";
                 
                 str += $dump( values[ index ], indent + 2 );
                 

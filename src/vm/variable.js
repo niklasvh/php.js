@@ -59,11 +59,30 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( comb
     return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ].toString() + combinedVariable[ COMPILER.VARIABLE_VALUE ].toString() );
 };
 
+
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ADD ] = function( combinedVariable ) {
     
     var COMPILER = PHP.Compiler.prototype;
-    
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) + ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
+};
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MUL ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) * ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
+};
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.DIV ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) / ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
+};
+
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MINUS ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) - ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
 };
 
 PHP.VM.Variable = function( arg ) {
@@ -76,6 +95,10 @@ PHP.VM.Variable = function( arg ) {
         
         if ( newValue === undefined ) {
             newValue = null;
+        }
+        
+        if ( newValue instanceof PHP.VM.Variable ) {
+            newValue = newValue[ COMPILER.VARIABLE_VALUE ];
         }
         
         if ( typeof newValue === "string" ) {
@@ -121,7 +144,10 @@ PHP.VM.Variable = function( arg ) {
     
     setValue.call( this, arg );
     
-    
+    this[ PHP.Compiler.prototype.NEG ] = function() {
+        value = -value;
+        return this;
+    };
    
     this[ PHP.Compiler.prototype.UNSET ] = function() {
         setValue( null );

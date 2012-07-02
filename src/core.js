@@ -61,7 +61,7 @@ PHP.Utils.TokenName = function( token ) {
 };
 
 PHP.Utils.QueryString = function( str ) {
-    
+    str = str.trim();
     var variables = str.split(/&/);
     
     var items = {};
@@ -70,18 +70,59 @@ PHP.Utils.QueryString = function( str ) {
         
         var parts = variable.split(/=/),
             key = decodeURIComponent( parts[ 0 ] ),
-            value = (parts.length > 1 ) ? decodeURIComponent( parts[ 1 ] ) : null;
+            value = (parts.length > 1 ) ? decodeURIComponent( parts[ 1 ] ) : null,
+            
+            arrayManager = function( item, parse, value ) {
+               
+                
+                var arraySearch = parse.match(/^\[([a-z+0-9_\-])*\]/i);
+                
+                if ( arraySearch !== null ) {
+                    var key = ( arraySearch[ 1 ] === undefined ) ? Object.keys( item ).length : arraySearch[ 1 ];
+
+                    
+                    parse = parse.substring( arraySearch[ 0 ].length );
+                    
+                    if ( parse.length > 0 ) {
+                        if ( typeof item[ key ] !== "object" && item[ key ] !== null ) {
+                            item[ key ] = {};
+                        }
+                        
+                        arrayManager( item[ key ], parse, value );
+                    } else {
+                        item[ key ] = ( value !== null) ? value.replace(/\+/g," ") : null;
+                    }
+                    
+                }
+                
+                
+            };
+            
+            // 
         
-            var arraySearch = key.match(/^(.*)\[\]$/);
         
+            var arraySearch = key.match(/^(.*?)((\[[a-z+0-9_\-]*\])+)$/i);
+
             if ( arraySearch !== null ) {
-                console.log( arraySearch );
-            } else  {
+                key =  arraySearch[ 1 ];
+                
+                
+                
+                if ( typeof items[ key ] !== "object" ) {
+                    items[ key ] = {};
+
+                }
+                
+                arrayManager( items[ key ], arraySearch[ 2 ], value );
+                
+
+            }
+            else  {
                 items[ key ] = ( value !== null) ? value.replace(/\+/g," ") : null;
             }
         
         }, this);
-    
+   
     return items;
     
     };
