@@ -96,7 +96,7 @@ PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
-    console.log( action );
+   
     var src = this.CTX + 'foreach( ' + this.VARIABLE + ', ' + this.source( action.expr ) + ', function() {\n'; 
     //( $, expr, func, value, key )
 
@@ -151,6 +151,18 @@ PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_InlineHTML = function( action ) {
     var src = this.CTX + this.OUTPUT_BUFFER + ' += "' + action.value + '"';
     
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Stmt_If = function( action ) {
+    var src = "if ( " + this.source( action.cond ) + ") {\n"; 
+    
+    action.stmts.forEach(function( stmt ){
+        src += this.source( stmt) + ";\n";
+    }, this);
+    console.log(action);
+    
+    src += "}"
     return src;
 };
 
