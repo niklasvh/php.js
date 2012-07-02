@@ -6,7 +6,7 @@ function blah()
 {
   static $hey=0,$yo=0;
 
-  echo "hey=".$hey++.", ",$yo--."\n";
+  echo "hey=".$hey++.", ";
 }
     
 blah();

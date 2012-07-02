@@ -126,6 +126,28 @@ PHP.Compiler.prototype.Node_Stmt_Continue = function( action ) {
     return src;  
 };
 
+PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
+    // todo fix
+    var src = this.CTX +  action.name + " = function() {\n";
+    
+    action.stmts.forEach(function( stmt ){
+        src += this.source( stmt ) + ";\n";
+    }, this);
+    
+    src += "}.bind( null )";
+    console.log( action );
+    return src;  
+};
+
+PHP.Compiler.prototype.Node_Stmt_Static = function( action ) {
+    // todo fix
+    var src = "";
+    
+
+    console.log( action );
+    return src;  
+};
+
 
 PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
     var src = "";
@@ -163,7 +185,7 @@ PHP.Compiler.prototype.Node_Stmt_InlineHTML = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_If = function( action ) {
-    var src = "if ( (" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + ") {\n"; 
+    var src = "if ( (" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n"; 
     
     action.stmts.forEach(function( stmt ){
         src += this.source( stmt) + ";\n";

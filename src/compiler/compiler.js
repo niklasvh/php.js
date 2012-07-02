@@ -60,6 +60,10 @@ PHP.Compiler.prototype.MUL = "$Mul";
 
 PHP.Compiler.prototype.MUL = "$Div";
 
+PHP.Compiler.prototype.POST_INC = "$PostInc";
+
+PHP.Compiler.prototype.POST_DEC = "$PostDec";
+
 PHP.Compiler.prototype.MINUS = "$Minus";
 
 PHP.Compiler.prototype.CONCAT = "$Concat";

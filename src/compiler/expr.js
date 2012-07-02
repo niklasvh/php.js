@@ -117,11 +117,20 @@ PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_PostInc = function( action ) {
-    return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "++";
+    return this.source( action.variable ) + "." + this.POST_INC;
+};
+
+PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
+    return this.source( action.variable ) + "." + this.POST_DEC;
 };
 
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
     return this.source( action.left ) + "." + this.CONCAT + "(" + this.source( action.right ) + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_BooleanOr = function( action ) {
+    console.log( action );
+    return  this.source( action.left ) + " | " + this.source( action.right );
 };
 
 PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {

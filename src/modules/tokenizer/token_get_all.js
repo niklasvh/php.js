@@ -29,7 +29,7 @@ PHP.Modules.prototype.token_get_all = function( code ) {
             break;
             
          default:
-             return PHP.VM.Array.fromObject.call( this, PHP.Lexer( code[ VARIABLE.CAST_STRING ]()[ COMPILER.VARIABLE_VALUE ] ));
+             return PHP.VM.Array.fromObject.call( this, PHP.Lexer( code[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ] ));
         
     }
     

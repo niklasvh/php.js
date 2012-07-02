@@ -38,6 +38,8 @@
             string: {
                 echo: "js",
                 implode: "js",
+                parse_str: "js",
+                strlen: "js",
                 strncmp: "js"
             },
             tokenizer: {

@@ -36,7 +36,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                 if ( Array.isArray( type ) ) {
                     
                     if ( type.indexOf( args[ paramIndex ][ VARIABLE.TYPE ] ) === -1 ) {
-                        if ( type.indexOf( VARIABLE.STRING ) === -1 || ( typeof args[ paramIndex ][ VARIABLE.CAST_STRING ] !== "function" )  ) {
+                        if ( type.indexOf( VARIABLE.STRING ) === -1 || ( args[ paramIndex ][ VARIABLE.CAST_STRING ][ VARIABLE.TYPE ] !== VARIABLE.STRING )  ) {
                           
                             this[ COMPILER.ERROR ]( name + "() expects parameter " + ( paramIndex + 1 ) + " to be " + typeStrings[ type[ 0 ] ] + ", " + typeStrings[ args[ paramIndex ][ VARIABLE.TYPE ] ] + " given in " + 
                                 _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 

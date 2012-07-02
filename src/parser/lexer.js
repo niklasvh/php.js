@@ -18,6 +18,10 @@ tokens = [
         re: /^abstract(?=\s)/i
     },
     {
+        value: PHP.Constants.T_STATIC,
+        re: /^static(?=\s)/i
+    },
+    {
         value: PHP.Constants.T_EXTENDS,
         re: /^extends(?=\s)/i
     },
