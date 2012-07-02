@@ -128,26 +128,38 @@ PHP.Compiler.prototype.Node_Stmt_Continue = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
     // todo fix
-    var src = this.CTX +  action.name + " = function() {\n";
+    var src = this.CTX +  action.name + " = Function.prototype.bind.apply( function( " + this.VARIABLE + ", " + this.FUNCTION_STATIC + "  ) {\n";
+    
+    src += this.VARIABLE + " = " + this.VARIABLE + "();\n"
     
     action.stmts.forEach(function( stmt ){
         src += this.source( stmt ) + ";\n";
     }, this);
     
-    src += "}.bind( null )";
+    src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ")( this ))";
+
     console.log( action );
     return src;  
 };
 
 PHP.Compiler.prototype.Node_Stmt_Static = function( action ) {
     // todo fix
-    var src = "";
-    
+    var src = this.FUNCTION_STATIC;
+    action.vars.forEach( function( variable ){
+        src += this.source( variable );
+    }, this);
 
     console.log( action );
     return src;  
 };
 
+PHP.Compiler.prototype.Node_Stmt_StaticVar = function( action ) {
+    // todo fix
+    var src = "." + this.FUNCTION_STATIC_SET + '("' + action.name + '", ' + this.source( action.def ) + ")";
+
+    console.log( action );
+    return src;  
+};
 
 PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
     var src = "";

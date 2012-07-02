@@ -6,9 +6,14 @@
 
 PHP.VM.VariableHandler = function( ENV ) {
     
-    var variables = {};
-    
-    return function( variableName ) {
+    var variables = {},
+    methods = function( variableName, setTo ) {
+        
+        if (setTo instanceof PHP.VM.Variable) {
+            variables[ variableName ] = setTo;
+            return methods;
+        }
+        
         if ( variables[ variableName ] === undefined ) { 
             
           
@@ -47,6 +52,8 @@ PHP.VM.VariableHandler = function( ENV ) {
         
         return variables[ variableName ];
     };
+    
+    return methods;
     
 };
 
@@ -101,6 +108,10 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compa
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) == ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
 };
  
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_OR ] = function( compareTo ) { 
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ this.CAST_STRING ][ COMPILER.VARIABLE_VALUE ]) | ( compareTo[ this.CAST_STRING ][ COMPILER.VARIABLE_VALUE ]) ); 
+};
 
 PHP.VM.Variable = function( arg ) {
 
@@ -238,7 +249,7 @@ PHP.VM.Variable = function( arg ) {
             if ( value instanceof PHP.VM.ClassPrototype && value[ COMPILER.CLASS_NAME ] !== PHP.VM.Array.prototype.CLASS_NAME  ) {
                 // class
                 // check for __toString();
-                console.log(value);
+                
                 if ( typeof value[PHP.VM.Class.METHOD + __toString ] === "function" ) {
                     return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
                 }

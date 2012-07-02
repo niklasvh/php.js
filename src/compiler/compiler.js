@@ -60,6 +60,14 @@ PHP.Compiler.prototype.MUL = "$Mul";
 
 PHP.Compiler.prototype.MUL = "$Div";
 
+PHP.Compiler.prototype.FUNCTION_HANDLER = "$FHandler";
+
+PHP.Compiler.prototype.FUNCTION_STATIC = "$Static";
+
+PHP.Compiler.prototype.FUNCTION_STATIC_SET = "$Set";
+
+PHP.Compiler.prototype.BOOLEAN_OR = "$Or";
+
 PHP.Compiler.prototype.POST_INC = "$PostInc";
 
 PHP.Compiler.prototype.POST_DEC = "$PostDec";

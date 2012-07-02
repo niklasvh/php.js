@@ -65,7 +65,6 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
-    console.log( action );
 
     var src = this.CTX + "isset( ";
     
@@ -129,8 +128,8 @@ PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_BooleanOr = function( action ) {
-    console.log( action );
-    return  this.source( action.left ) + " | " + this.source( action.right );
+
+    return  this.source( action.left ) + "." + this.BOOLEAN_OR + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {

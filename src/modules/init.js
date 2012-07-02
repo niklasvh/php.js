@@ -4,6 +4,46 @@
 * @website http://hertzen.com
  */
 
+PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV ) {
+    var args = [ null ], // undefined context for bind
+    COMPILER = PHP.Compiler.prototype,
+    handler = PHP.VM.VariableHandler( ENV ),
+    staticVars = {}; // static variable storage
+    
+    
+    // initializer
+    args.push( function() {
+       
+        Object.keys( staticVars ).forEach( function( key ){
+            handler( key, staticVars[ key ] );
+        });
+        
+        return handler;
+    } );
+    
+    // static handler
+    var staticHandler = {};
+    staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
+        
+        if ( staticVars[ name ] !== undefined ) {
+            // already defined
+            return staticHandler;
+        }
+        // store it to storage for this func
+        staticVars[ name ] = def;
+        
+        // assign it to current running context as well
+        handler( name, def );
+        
+        return staticHandler;
+    };
+    
+    args.push( staticHandler );
+    
+    
+    return args;
+    
+};
 
 PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name, len, types ) {
     var COMPILER = PHP.Compiler.prototype,
