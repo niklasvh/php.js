@@ -4,7 +4,7 @@
         <title>php.js test suite</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="src/include.js"></script>
-        <script src="src/lib/jsdiff.js"></script>
+        <script src="src/lib/diff_match_patch.js"></script>
         <style>
             body {
                 font-family: Arial, Sans-Serif;
@@ -106,10 +106,15 @@
                         this.diff( expect, output );
                         //li.style.color = "red";
                         console.log( test );
-                        console.log( "-----EXPECTING-----", expect );
-                        console.log( "-----OUTPUTTED-----", output );
+                  //      console.log( "-----EXPECTING-----", expect );
+                  //      console.log( "-----OUTPUTTED-----", output );
                         var div = document.createElement("div");
-                        div.innerHTML = diffString( expect, output );
+                        var dmp = new diff_match_patch();
+                        
+                        var d = dmp.diff_main( expect, output );
+                        dmp.diff_cleanupSemantic( d );
+                      
+                        div.innerHTML = dmp.diff_prettyHtml( d );
                         li.appendChild( div );
                         
                     }

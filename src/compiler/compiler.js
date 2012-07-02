@@ -110,8 +110,15 @@ PHP.Compiler.prototype.fixString =  function( result ) {
     
     if (result.match(/\r\n/) !== null) {
         var quote = result.substring(0, 1);
-        result = '[' + result.split(/\r\n/).map(function( result ){
-            return result.replace(/\r/g,"");
+        
+
+        
+        // this might have unexpected consequenses
+        result = result.replace(/\r\n"$/,'"');
+        
+        result = '[' + result.split(/\r\n/).map(function( item ){
+            var a = item.replace(/\r/g,"").replace(/\n/,"\\n");
+            return a;
         }).join( quote + "," + quote ) + '].join("\\n")';
                 
     }

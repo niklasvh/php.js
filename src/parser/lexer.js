@@ -14,11 +14,11 @@ PHP.Lexer = function( src ) {
     tokens = [
     {
         value: PHP.Constants.T_ABSTRACT,
-        re: /^abstract\s/i
+        re: /^abstract(?=\s)/i
     },
     {
         value: PHP.Constants.T_EXTENDS,
-        re: /^extends\s/i
+        re: /^extends(?=\s)/i
     },
     {
         value: PHP.Constants.T_AND_EQUAL,
@@ -27,6 +27,10 @@ PHP.Lexer = function( src ) {
     {
         value: PHP.Constants.T_AS,
         re: /^as(?=\s)/i
+    },
+    {
+        value: PHP.Constants.T_INSTANCEOF,
+        re: /^instanceof(?=\s)/i
     },
     {
         value: PHP.Constants.T_BOOLEAN_AND,
@@ -134,9 +138,9 @@ PHP.Lexer = function( src ) {
     }, 
     {
         value: PHP.Constants.T_START_HEREDOC,
-        re: /^<<<[A-Z_0-9]+\s\s/i,
+        re: /^<<<[A-Z_0-9]+\s/i,
         func: function( result ){
-            heredoc = result.substring(3, result.length - 2);
+            heredoc = result.substring(3, result.length - 1);
             return result;
         }
     },  
@@ -300,7 +304,7 @@ PHP.Lexer = function( src ) {
                 return result;
             }
            
-            var match = result.match( /(?:[^\\]|\\.)*\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/g );
+            var match = result.match( /(?:[^\\]|\\.)*[^\\]\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/g );
             if ( match !== null ) {
                
                 while( result.length > 0 ) {
@@ -398,23 +402,27 @@ PHP.Lexer = function( src ) {
             if ( heredoc !== undefined ) {
                 // we are in a heredoc
                 
-                var regexp = new RegExp('([\\S\\s]*)(\\r\\n|\\n)(' + heredoc + ')(;|\\r\\n|\\n)',"i");
+                var regexp = new RegExp('([\\S\\s]*)(\\r\\n|\\n|\\r)(' + heredoc + ')(;|\\r\\n|\\n)',"i");
                 
                 
-                
-                
-            
                 
                 var result = src.match( regexp );
                 if ( result !== null ) {
                     // contents
-                    console.log( result[ 1 ]);
+
+                    var tmp = result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$");
+                    
+                    
                     results.push([
                         parseInt(PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10), 
-                        result[ 1 ].replace(/\\\$/g,"$"),
+                        result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$") + "\n",
                         line
                         ]);
-                    
+                        
+                        
+                     // note the no - 1 for length as regexp include one line as well   
+                     line += result[ 1 ].split('\n').length;
+                     
                     // heredoc end tag
                     results.push([
                         parseInt(PHP.Constants.T_END_HEREDOC, 10), 
