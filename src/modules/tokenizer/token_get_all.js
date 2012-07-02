@@ -25,7 +25,6 @@ PHP.Modules.prototype.token_get_all = function( code ) {
             break;
         case VARIABLE.STRING:
         case VARIABLE.NULL:
-            console.log(PHP.Lexer( code[ COMPILER.VARIABLE_VALUE ] ));
             return PHP.VM.Array.fromObject.call( this, PHP.Lexer( code[ COMPILER.VARIABLE_VALUE ] ));
             break;
             
