@@ -127,7 +127,11 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_CLOSE_TAG,
-        re: /^(\?\>|\%\>)/
+        re: /^(\?\>|\%\>)/,
+        func: function( result ) {
+            insidePHP = false;
+            return result;
+        }
     },
     {
         value: PHP.Constants.T_DOUBLE_ARROW,
@@ -472,7 +476,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: -1,
-        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\']/
+        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\'\$]/
     }];
 
     

@@ -304,7 +304,7 @@ PHP.Parser.prototype.yyn38 = function ( attributes ) {
 
     this.yyval =  {
         type: "Node_Stmt_Break",
-        num: null,
+        num: this.yyastk[ this.stackPos-(3-2) ],
         attributes: attributes
     };
 };

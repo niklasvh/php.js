@@ -61,6 +61,17 @@ PHP.VM.VariableProto = function() {
 
     }
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+
+    this[ COMPILER.VARIABLE_VALUE ] = combinedVariable[ COMPILER.VARIABLE_VALUE ];
+    
+    return this;
+    
+};
+
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( combinedVariable ) {
     
     var COMPILER = PHP.Compiler.prototype,
@@ -88,6 +99,11 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.DIV ] = function( combine
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) / ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
 };
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MOD ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) % ( combinedVariable[ COMPILER.VARIABLE_VALUE ]) );
+};
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MINUS ] = function( combinedVariable ) {
     
@@ -184,21 +200,38 @@ PHP.VM.Variable = function( arg ) {
         return this;
     };
     
-    Object.defineProperty( this, COMPILER.POST_INC,
+    Object.defineProperty( this, COMPILER.PRE_INC,
     {
         get : function(){
-            POST_MOD++;
-            var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
-            this.POST_MOD = POST_MOD;
+            value++;
             return this;
         }
     });
     
+    Object.defineProperty( this, COMPILER.PRE_DEC,
+    {
+        get : function(){
+            value--;
+            return this;
+        }
+    });
+
+    this[ COMPILER.POST_INC ] = function() {
+        var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+        POST_MOD++;
+        this.POST_MOD = POST_MOD;
+        return this;
+        
+    };
+
+
+    
     Object.defineProperty( this, COMPILER.POST_DEC,
     {
         get : function(){
-            POST_MOD--;
             var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+            
+            POST_MOD--;
             this.POST_MOD = POST_MOD;
             return this;
         }

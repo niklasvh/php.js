@@ -25,6 +25,10 @@
                 foreach: "js",
                 include: "js"
             },
+            date: {
+                mktime: "js",
+                time: "js"
+            },
             error: {
                 constants: "js",
                 error_reporting: "js",
@@ -35,7 +39,7 @@
                 fopen: "js"
             },
             misc: {
-              eval: "js"  
+                eval: "js"  
             },
             string: {
                 echo: "js",

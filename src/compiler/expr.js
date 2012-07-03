@@ -6,7 +6,42 @@ PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
-    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " = " + this.source( action.expr );
+    var src = this.source( action.variable ) + "." + this.ASSIGN + "(" + this.source( action.expr ) + ")";
+    /*
+    if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
+        src += "." + this.VARIABLE_VALUE;
+    }*/
+    return src; 
+};
+
+PHP.Compiler.prototype.Node_Expr_AssignMinus = function( action ) {
+    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " -= " + this.source( action.expr );
+    if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
+        src += "." + this.VARIABLE_VALUE;
+    }
+    return src; 
+};
+
+PHP.Compiler.prototype.Node_Expr_AssignPlus = function( action ) {
+    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " += " + this.source( action.expr );
+    if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
+        src += "." + this.VARIABLE_VALUE;
+    }
+    return src; 
+};
+
+
+PHP.Compiler.prototype.Node_Expr_AssignMul = function( action ) {
+    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " *= " + this.source( action.expr );
+    if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
+        src += "." + this.VARIABLE_VALUE;
+    }
+    return src; 
+};
+
+
+PHP.Compiler.prototype.Node_Expr_AssignDiv = function( action ) {
+    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " /= " + this.source( action.expr );
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
@@ -104,6 +139,10 @@ PHP.Compiler.prototype.Node_Expr_Mul = function( action ) {
     return this.source( action.left ) + "." + this.MUL + "(" + this.source( action.right ) + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_Mod = function( action ) {
+    return this.source( action.left ) + "." + this.MOD + "(" + this.source( action.right ) + ")";
+};
+
 PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
     return this.source( action.left ) + "." + this.ADD + "(" + this.source( action.right ) + ")";
 };
@@ -128,8 +167,16 @@ PHP.Compiler.prototype.Node_Expr_SmallerOrEqual = function( action ) {
     return this.source( action.left ) + "." + this.SMALLER_OR_EQUAL + "(" + this.source( action.right ) + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_PreInc = function( action ) {
+    return this.source( action.variable ) + "." + this.PRE_INC;
+};
+
+PHP.Compiler.prototype.Node_Expr_PreDec = function( action ) {
+    return this.source( action.variable ) + "." + this.PRE_DEC;
+};
+
 PHP.Compiler.prototype.Node_Expr_PostInc = function( action ) {
-    return this.source( action.variable ) + "." + this.POST_INC;
+    return this.source( action.variable ) + "." + this.POST_INC + "()";
 };
 
 PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
@@ -146,14 +193,22 @@ PHP.Compiler.prototype.Node_Expr_BooleanOr = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
+    var src = this.VARIABLE + "(";
 
     if ( action.name === "this" ) {
         return action.name;
     } else {
-        return this.VARIABLE + '("' + this.source( action.name ) + '")';       
+        
+        if ( typeof action.name === "string" ) {
+            src += '"' + this.source( action.name ) + '"';
+        } else {
+            src += this.source( action.name ) + "." + this.VARIABLE_VALUE;
+        }
+        
+      //  return this.VARIABLE + '("' + this.source( action.name ) + '")';       
     }
     
-
+    return src + ")";
 };
 
 

@@ -29,13 +29,13 @@ PHP.Modules.prototype.include = function( $, file ) {
     // compile tree into JS
     var compiler = new PHP.Compiler( AST );
    
-    
+       console.log( compiler.src );
     // execture code in current context ($)
     var exec = new Function( "$$", "$", "ENV", compiler.src  );
     exec.call(this, function( arg ) {
         return new PHP.VM.Variable( arg );
     }, $, this);
 
-    console.log( source );
+ 
     
 };

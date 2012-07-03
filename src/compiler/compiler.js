@@ -22,6 +22,23 @@ PHP.Compiler.prototype.getName = function( item ) {
 
 };
 
+PHP.Compiler.prototype.stmts = function( stmts ) {
+    var src = "";
+    
+    stmts.forEach(function( stmt ){
+        src += this.source( stmt );
+        
+        if ( /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
+            // trigger POST_MOD
+            src += "." + this.VARIABLE_VALUE;
+        }
+        
+        src += ";\n";
+    }, this);
+  
+    return src;
+};
+
 PHP.Compiler.prototype.source = function( action ) {
 
     if (typeof action === "string") {
@@ -56,13 +73,17 @@ PHP.Compiler.prototype.CONSTANT_GET = "get";
 
 PHP.Compiler.prototype.MAGIC_CONSTANTS = "$MConstants";
 
+PHP.Compiler.prototype.ASSIGN = "_";
+
 PHP.Compiler.prototype.NEG = "$Neg";
 
 PHP.Compiler.prototype.ADD = "$Add";
 
 PHP.Compiler.prototype.MUL = "$Mul";
 
-PHP.Compiler.prototype.MUL = "$Div";
+PHP.Compiler.prototype.MOD = "$Mod";
+
+PHP.Compiler.prototype.DIV = "$Div";
 
 PHP.Compiler.prototype.FUNCTION_HANDLER = "$FHandler";
 
@@ -71,6 +92,10 @@ PHP.Compiler.prototype.FUNCTION_STATIC = "$Static";
 PHP.Compiler.prototype.FUNCTION_STATIC_SET = "$Set";
 
 PHP.Compiler.prototype.BOOLEAN_OR = "$Or";
+
+PHP.Compiler.prototype.PRE_INC = "$PreInc";
+
+PHP.Compiler.prototype.PRE_DEC = "$PreDec";
 
 PHP.Compiler.prototype.POST_INC = "$PostInc";
 

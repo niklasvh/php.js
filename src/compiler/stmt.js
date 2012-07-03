@@ -3,37 +3,6 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
     
 
     
-    /*
-     * CLASS.Class("Male", Person).Public({
-                visible: "sup"
-            }).Create();
-    
-    
-          if ($item->extends !== null) {
-                $source .= "var " . $item->name . " = " . NEWCLASS . '("' . $item->name . "\", " . $item->type . ", \$getClass(\"" . $this->source($item->extends) . "\")";
-                $this->parent = $this->source($item->extends);
-            } else {
-                $source .= "var " . $item->name . " = " . NEWCLASS . '("' . $item->name . "\", " . $item->type;
-                if (count($item->implements) > 0) {
-                    $source .= ",undefined";
-                }
-            }
-
-            if (count($item->implements) > 0) {
-                $source .= ",[";
-                foreach ($item->implements as $i => $implement) {
-                    if ($i > 0) {
-                        $source .= ",";
-                    }
-                    $source .= '"' . $implement->parts[0] . '"';
-                }
-                $source .= "]";
-            }
-
-            $source .= ");\n";
-    
-     */
-    
     var src = this.CTX + this.CLASS_NEW + '( "' + action.name + '", ' + action.Type + ', {';
     
     if ( action.Extends !== null ) {
@@ -84,11 +53,9 @@ PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
     
     src += "(" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + "; ";
     
-    src += this.source( action.loop ) + " ) {\n";
+    src += this.source( action.loop ) + "." + this.VARIABLE_VALUE + " ) {\n";
     
-    action.stmts.forEach(function( stmt ){
-        src += this.source( stmt ) + ";\n";
-    }, this);
+    src += this.stmts( action.stmts );
     
     src += "}";
 
@@ -101,9 +68,7 @@ PHP.Compiler.prototype.Node_Stmt_While = function( action ) {
     
     src += "while( " + this.source( action.cond ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n";
     
-    action.stmts.forEach(function( stmt ){
-        src += this.source( stmt ) + ";\n";
-    }, this);
+    src += this.stmts( action.stmts );
     
     src += "}";
 
@@ -111,8 +76,8 @@ PHP.Compiler.prototype.Node_Stmt_While = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Switch = function( action ) {
-
-    var src = "switch(" + this.source( action.cond ) + "." + this.VARIABLE_VALUE+ ") {\n";
+    var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
+    src += "switch(" + this.source( action.cond ) + "." + this.VARIABLE_VALUE+ ") {\n";
     
     action.cases.forEach(function( item ){
         src += this.source( item ) + ";\n";
@@ -147,9 +112,7 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     var src = this.CTX + 'foreach( ' + this.VARIABLE + ', ' + this.source( action.expr ) + ', function() {\n'; 
     //( $, expr, func, value, key )
 
-    action.stmts.forEach(function( stmt ){
-        src += this.source( stmt )  + ";\n";
-    }, this);
+    src += this.stmts( action.stmts );
 
     src += '}, ' + this.source( action.valueVar );
 
@@ -174,7 +137,13 @@ PHP.Compiler.prototype.Node_Stmt_Continue = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Break = function( action ) {
-    return "break";
+    console.log( action );
+    var src = "break"
+    
+    if (action.num !== null) {
+        src += " " + this.LABEL + (this.LABEL_COUNT - action.num.value );
+    }
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
@@ -193,9 +162,9 @@ PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
     
     src += params.join(", ") + "], arguments);\n"
     
-    action.stmts.forEach(function( stmt ){
-        src += this.source( stmt ) + ";\n";
-    }, this);
+    src += this.stmts( action.stmts );
+    
+    
     
     src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ")( this ))";
 
@@ -252,7 +221,7 @@ PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_InlineHTML = function( action ) {
-    var src = this.CTX + this.OUTPUT_BUFFER + ' += "' + action.value + '"';
+    var src = this.CTX + this.OUTPUT_BUFFER + ' += "' + action.value.replace(/[\\"]/g, '\\$&').replace(/\n/g,"\\n").replace(/\r/g,"") + '"';
     
     return src;
 };
@@ -267,7 +236,7 @@ PHP.Compiler.prototype.Node_Stmt_If = function( action ) {
     action.elseifs.forEach(function( Elseif ){
         src += this.source( Elseif) + "\n";
     }, this);
-    console.log(action);
+   
     
     if ( action.Else !== null ) {
         src += "} else {\n";
