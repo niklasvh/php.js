@@ -269,6 +269,15 @@ PHP.Parser.prototype.yyn35 = function ( attributes ) {
     };
 };
 
+PHP.Parser.prototype.yyn36 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_Switch",
+        cond: this.yyastk[ this.stackPos-(5-3) ],
+        cases: this.yyastk[ this.stackPos-(5-5) ],
+        attributes: attributes
+    };
+};
 
 PHP.Parser.prototype.yyn37 = function ( attributes ) {
 
@@ -588,6 +597,31 @@ PHP.Parser.prototype.yyn92 = function () {
 
 PHP.Parser.prototype.yyn93 = function () {
     this.yyval = [];
+};
+
+PHP.Parser.prototype.yyn94 = function () {
+    this.yyastk[this.stackPos-(2-1)].push( this.yyastk[this.stackPos-(2-2)] );
+    this.yyval = this.yyastk[this.stackPos-(2-1)];
+};
+
+PHP.Parser.prototype.yyn95 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_Case",
+        cond: this.yyastk[ this.stackPos-(4-2) ],
+        stmts: this.yyastk[ this.stackPos-(4-4) ],
+        attributes: attributes
+    };
+};
+
+PHP.Parser.prototype.yyn96 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_Case",
+        cond: null,
+        stmts: this.yyastk[ this.stackPos-(3-3) ],
+        attributes: attributes
+    };
 };
 
 PHP.Parser.prototype.yyn97 = function () {

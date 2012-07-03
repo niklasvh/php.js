@@ -23,7 +23,7 @@ PHP.Compiler.prototype.getName = function( item ) {
 };
 
 PHP.Compiler.prototype.source = function( action ) {
-    
+
     if (typeof action === "string") {
         return action;
     } else if ( action === undefined ) {

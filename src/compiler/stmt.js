@@ -110,6 +110,38 @@ PHP.Compiler.prototype.Node_Stmt_While = function( action ) {
     return src;
 };
 
+PHP.Compiler.prototype.Node_Stmt_Switch = function( action ) {
+
+    var src = "switch(" + this.source( action.cond ) + "." + this.VARIABLE_VALUE+ ") {\n";
+    
+    action.cases.forEach(function( item ){
+        src += this.source( item ) + ";\n";
+    }, this);
+    src += "}";
+    
+    
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
+
+    var src = "";
+    if (action.cond === null) {
+        src += "default:\n";
+    } else {
+        src += "case (" + this.source( action.cond ) + "." + this.VARIABLE_VALUE+ "):\n";
+    }
+    
+   
+    action.stmts.forEach(function( item ){
+        src += this.source( item ) + ";\n";
+    }, this);
+    
+    
+    
+    return src;
+};
+
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
    
     var src = this.CTX + 'foreach( ' + this.VARIABLE + ', ' + this.source( action.expr ) + ', function() {\n'; 
