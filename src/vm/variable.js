@@ -116,6 +116,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_OR ] = function( 
 PHP.VM.Variable = function( arg ) {
 
     var value,
+    POST_MOD = 0,
     __toString = "__toString",
     COMPILER = PHP.Compiler.prototype,
     setValue = function( newValue ) {
@@ -133,31 +134,17 @@ PHP.VM.Variable = function( arg ) {
             this[ this.TYPE ] = this.STRING;
         } else if ( typeof newValue === "number" ) {
             this[ this.TYPE ] = this.INT;
-        /*
-            this[ this.CAST_STRING ] = function() {  
-                return new PHP.VM.Variable( value.toString() );
-            }; */
             
         } else if ( newValue === null ) {   
             this[ this.TYPE ] = this.NULL;
 
         } else if ( typeof newValue === "boolean" ) {
             this[ this.TYPE ] = this.BOOL;
-        /*
-            this[ this.CAST_STRING ] = function() {    
-                return new PHP.VM.Variable( ( value ) ? "1" : "0" );
-            };
-            */
         } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
             if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
                 this[ this.TYPE ] = this.ARRAY;
             } else {
-                // check for __toString();
-                /*
-                if ( typeof newValue[PHP.VM.Class.METHOD + __toString ] === "function" ) {
-                    this[ this.CAST_STRING ] = newValue[PHP.VM.Class.METHOD + __toString ];
-                }
-                 */
+
                 this[ this.TYPE ] = this.OBJECT;
             }
         } else if ( newValue instanceof PHP.VM.Resource ) {    
@@ -182,7 +169,8 @@ PHP.VM.Variable = function( arg ) {
     Object.defineProperty( this, COMPILER.POST_INC,
     {
         get : function(){
-            value++;
+            POST_MOD++;
+            this.POST_MOD = POST_MOD;
             return this;
         }
     });
@@ -190,7 +178,8 @@ PHP.VM.Variable = function( arg ) {
     Object.defineProperty( this, COMPILER.POST_DEC,
     {
         get : function(){
-            value--;
+            POST_MOD--;
+            this.POST_MOD = POST_MOD;
             return this;
         }
     });
@@ -210,7 +199,18 @@ PHP.VM.Variable = function( arg ) {
                 this.ENV[ COMPILER.ERROR ](" Undefined variable: " + this.DEFINED + " in ", PHP.Constants.E_CORE_NOTICE );    
                 
             }
-            return value;
+            
+            var returning = value;
+            
+            // perform POST_MOD change
+           
+            if ( POST_MOD !== 0 ) {
+                value = POST_MOD + (value - 0);
+                POST_MOD = 0; // reset counter
+            }
+            
+            
+            return returning;
         },  
         set : setValue
     }
@@ -220,6 +220,8 @@ PHP.VM.Variable = function( arg ) {
     {
         get : function(){
             // http://www.php.net/manual/en/language.types.boolean.php#language.types.boolean.casting
+            
+            var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
             
             if ( this[ this.TYPE ] === this.INT ) {
                 if ( value === 0 ) {
@@ -246,6 +248,9 @@ PHP.VM.Variable = function( arg ) {
     {
         get : function() {
             //   http://www.php.net/manual/en/language.types.string.php#language.types.string.casting
+            
+            var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+            
             if ( value instanceof PHP.VM.ClassPrototype && value[ COMPILER.CLASS_NAME ] !== PHP.VM.Array.prototype.CLASS_NAME  ) {
                 // class
                 // check for __toString();
