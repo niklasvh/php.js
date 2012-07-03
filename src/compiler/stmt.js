@@ -82,9 +82,24 @@ PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
     
     src += "for( " + this.source( action.init ) + "; ";
     
-    src += this.source( action.cond ) + "; ";
+    src += "(" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + "; ";
     
     src += this.source( action.loop ) + " ) {\n";
+    
+    action.stmts.forEach(function( stmt ){
+        src += this.source( stmt ) + ";\n";
+    }, this);
+    
+    src += "}";
+
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Stmt_While = function( action ) {
+
+    var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
+    
+    src += "while( " + this.source( action.cond ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n";
     
     action.stmts.forEach(function( stmt ){
         src += this.source( stmt ) + ";\n";
@@ -124,6 +139,10 @@ PHP.Compiler.prototype.Node_Stmt_Continue = function( action ) {
     var src = "return";
     console.log( action );
     return src;  
+};
+
+PHP.Compiler.prototype.Node_Stmt_Break = function( action ) {
+    return "break";
 };
 
 PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {

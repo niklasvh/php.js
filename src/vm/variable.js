@@ -108,6 +108,24 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compa
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) == ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
 };
  
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.SMALLER_OR_EQUAL ] = function( compareTo ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) <= ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+}; 
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.SMALLER ] = function( compareTo ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) < ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+}; 
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.GREATER ] = function( compareTo ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) > ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+}; 
+ 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_OR ] = function( compareTo ) { 
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ this.CAST_STRING ][ COMPILER.VARIABLE_VALUE ]) | ( compareTo[ this.CAST_STRING ][ COMPILER.VARIABLE_VALUE ]) ); 
@@ -170,6 +188,7 @@ PHP.VM.Variable = function( arg ) {
     {
         get : function(){
             POST_MOD++;
+            var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
             this.POST_MOD = POST_MOD;
             return this;
         }
@@ -179,6 +198,7 @@ PHP.VM.Variable = function( arg ) {
     {
         get : function(){
             POST_MOD--;
+            var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
             this.POST_MOD = POST_MOD;
             return this;
         }

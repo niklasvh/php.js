@@ -12,7 +12,7 @@ PHP.Lexer = function( src ) {
         return result;
     },
    
-tokens = [
+    tokens = [
     {
         value: PHP.Constants.T_ABSTRACT,
         re: /^abstract(?=\s)/i
@@ -274,6 +274,10 @@ tokens = [
         re: /^if(?=[\s(])/i
     },
     {
+        value: PHP.Constants.T_WHILE,
+        re: /^while(?=[ (])/i
+    },
+    {
         value: PHP.Constants.T_FOREACH,
         re: /^foreach(?=[ (])/i
     },
@@ -304,7 +308,7 @@ tokens = [
     {
         value: PHP.Constants.T_DNUMBER,
         re: /^[0-9]*\.[0-9]+([eE][-]?[0-9]*)?/
-        /*,
+    /*,
         func: function( result ) {
            
             // transform e to E - token_get_all_variation1.phpt
@@ -370,7 +374,7 @@ tokens = [
                             parseInt(PHP.Constants.T_VARIABLE, 10), 
                             match[ 0 ],
                             line
-                        ]);
+                            ]);
                         
                         result = result.substring( match[ 0 ].length ); 
 
@@ -390,7 +394,7 @@ tokens = [
                             parseInt(( curlyOpen > 0 ) ? PHP.Constants.T_CONSTANT_ENCAPSED_STRING : PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10), 
                             match[ 0 ].replace(/\n/g,"\\n").replace(/\r/g,""),
                             line
-                        ]);
+                            ]);
                            
                         line += match[ 0 ].split('\n').length - 1;
                    
@@ -403,14 +407,14 @@ tokens = [
                             parseInt(PHP.Constants.T_CURLY_OPEN, 10), 
                             "{",
                             line
-                        ]);
+                            ]);
                         result = result.substring( 1 );
                         curlyOpen++;
                     }
                 }
                 
                 return undefined;
-                //   console.log( result );
+            //   console.log( result );
             } else {
                 result = result.replace(/\n/g,"\\n").replace(/\r/g,"");
             }
@@ -436,144 +440,144 @@ tokens = [
     }];
 
     
-var results = [],
-line = 1,
-insidePHP = false,
-cancel = true;
+    var results = [],
+    line = 1,
+    insidePHP = false,
+    cancel = true;
     
-if ( src === null ) {
-    return results;
-}
+    if ( src === null ) {
+        return results;
+    }
     
-if ( typeof src !== "string" ) {
-    src = src.toString();
-}
+    if ( typeof src !== "string" ) {
+        src = src.toString();
+    }
     
 
    
-while (src.length > 0 && cancel === true) {
+    while (src.length > 0 && cancel === true) {
 
-    if ( insidePHP === true ) {
+        if ( insidePHP === true ) {
         
-        if ( heredoc !== undefined ) {
-            // we are in a heredoc
+            if ( heredoc !== undefined ) {
+                // we are in a heredoc
                 
-            var regexp = new RegExp('([\\S\\s]*)(\\r\\n|\\n|\\r)(' + heredoc + ')(;|\\r\\n|\\n)',"i");
+                var regexp = new RegExp('([\\S\\s]*)(\\r\\n|\\n|\\r)(' + heredoc + ')(;|\\r\\n|\\n)',"i");
                 
                 
                 
-            var result = src.match( regexp );
-            if ( result !== null ) {
-                // contents
+                var result = src.match( regexp );
+                if ( result !== null ) {
+                    // contents
 
-                var tmp = result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$");
+                    var tmp = result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$");
                     
                     
-                results.push([
-                    parseInt(PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10), 
-                    result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$") + "\n",
-                    line
-                ]);
+                    results.push([
+                        parseInt(PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10), 
+                        result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$") + "\n",
+                        line
+                        ]);
                         
                         
-                // note the no - 1 for length as regexp include one line as well   
-                line += result[ 1 ].split('\n').length;
+                    // note the no - 1 for length as regexp include one line as well   
+                    line += result[ 1 ].split('\n').length;
                      
-                // heredoc end tag
-                results.push([
-                    parseInt(PHP.Constants.T_END_HEREDOC, 10), 
-                    result[ 3 ],
-                    line
-                ]);
+                    // heredoc end tag
+                    results.push([
+                        parseInt(PHP.Constants.T_END_HEREDOC, 10), 
+                        result[ 3 ],
+                        line
+                        ]);
                         
-                src = src.substring( result[1].length + result[2].length + result[3].length );   
-                heredoc = undefined;
-            }
+                    src = src.substring( result[1].length + result[2].length + result[3].length );   
+                    heredoc = undefined;
+                }
                 
-            if (result === null) {
-                throw Error("sup");
-            }
+                if (result === null) {
+                    throw Error("sup");
+                }
                
                 
-        } else {
-            cancel =  tokens.some(function( token ){
+            } else {
+                cancel =  tokens.some(function( token ){
         
-                var result = src.match( token.re );
+                    var result = src.match( token.re );
         
-                if ( result !== null ) {
-                    if ( token.value !== -1) {
-                        var resultString = result[ 0 ];
+                    if ( result !== null ) {
+                        if ( token.value !== -1) {
+                            var resultString = result[ 0 ];
                         
                         
                         
-                        if (token.func !== undefined ) {
-                            resultString = token.func( resultString, token );
-                        }
-                        if (resultString !== undefined ) {
+                            if (token.func !== undefined ) {
+                                resultString = token.func( resultString, token );
+                            }
+                            if (resultString !== undefined ) {
                                 
-                            results.push([
-                                parseInt(token.value, 10), 
-                                resultString,
-                                line
-                            ]);
-                            line += resultString.split('\n').length - 1;
-                        }
+                                results.push([
+                                    parseInt(token.value, 10), 
+                                    resultString,
+                                    line
+                                    ]);
+                                line += resultString.split('\n').length - 1;
+                            }
                         
-                    } else {
-                        // character token
-                        results.push( result[ 0 ] );
-                    }
+                        } else {
+                            // character token
+                            results.push( result[ 0 ] );
+                        }
                 
-                    src = src.substring(result[ 0 ].length);
-                    //  console.log(result);
-                    return true;
-                }
-                return false;
+                        src = src.substring(result[ 0 ].length);
+                        //  console.log(result);
+                        return true;
+                    }
+                    return false;
         
         
-            });
-        }
+                });
+            }
         
-    } else {
+        } else {
    
-        var result = /(\<\?php\s|\<\?|\<%)/i.exec( src );
-        //console.log('sup', result, result.index);
-        if ( result !== null ) {
-            if ( result.index > 0 ) {
-                var resultString = src.substring(0, result.index);
+            var result = /(\<\?php\s|\<\?|\<%)/i.exec( src );
+            //console.log('sup', result, result.index);
+            if ( result !== null ) {
+                if ( result.index > 0 ) {
+                    var resultString = src.substring(0, result.index);
+                    results.push ([
+                        parseInt(PHP.Constants.T_INLINE_HTML, 10), 
+                        resultString,
+                        line
+                        ]);
+                     
+                    line += resultString.split('\n').length - 1;
+                     
+                    src = src.substring( result.index );
+                }
+
+                insidePHP = true;
+            } else {
+                
                 results.push ([
                     parseInt(PHP.Constants.T_INLINE_HTML, 10), 
-                    resultString,
+                    src,
                     line
-                ]);
-                     
-                line += resultString.split('\n').length - 1;
-                     
-                src = src.substring( result.index );
+                    ]);
+                return results;
             }
-
-            insidePHP = true;
-        } else {
-                
-            results.push ([
-                parseInt(PHP.Constants.T_INLINE_HTML, 10), 
-                src,
-                line
-            ]);
-            return results;
-        }
             
         //    src = src.substring(result[ 0 ].length);
         
-    }
+        }
 
         
         
-}
+    }
     
     
     
-return results;
+    return results;
         
     
 

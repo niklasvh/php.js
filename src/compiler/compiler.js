@@ -80,6 +80,14 @@ PHP.Compiler.prototype.UNSET = "$Unset";
 
 PHP.Compiler.prototype.EQUAL = "$Equal";
 
+PHP.Compiler.prototype.SMALLER = "$Smaller";
+
+PHP.Compiler.prototype.SMALLER_OR_EQUAL = "$S_Equal";
+
+PHP.Compiler.prototype.GREATER = "$Greater";
+
+PHP.Compiler.prototype.GREATER_OR_EQUAL = "$G_Equal";
+
 PHP.Compiler.prototype.LABEL = "LABEL";
 
 PHP.Compiler.prototype.LABEL_COUNT = 0;

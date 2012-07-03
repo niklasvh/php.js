@@ -79,6 +79,7 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
     return src;
 };
 
+
 PHP.Compiler.prototype.Node_Expr_UnaryMinus = function( action ) {
     return this.source( action.expr ) + "." + this.NEG + "()";
 };
@@ -112,7 +113,19 @@ PHP.Compiler.prototype.Node_Expr_Equal = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {
-    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " < " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
+    return this.source( action.left ) + "." + this.SMALLER+ "(" + this.source( action.right ) + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_Greater = function( action ) {
+    return this.source( action.left ) + "." + this.GREATER+ "(" + this.source( action.right ) + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_GreaterOrEqual = function( action ) {
+    return this.source( action.left ) + "." + this.GREATER_OR_EQUAL + "(" + this.source( action.right ) + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_SmallerOrEqual = function( action ) {
+    return this.source( action.left ) + "." + this.SMALLER_OR_EQUAL + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_PostInc = function( action ) {
