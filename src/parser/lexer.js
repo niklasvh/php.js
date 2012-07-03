@@ -274,6 +274,14 @@ PHP.Lexer = function( src ) {
         re: /^echo(?=[ "'(;])/i
     },
     {
+        value: PHP.Constants.T_INCLUDE,
+        re: /^include(?=[ "'(;])/i
+    },
+    {
+        value: PHP.Constants.T_INCLUDE_ONCE,
+        re: /^include_once(?=[ "'(;])/i
+    },
+    {
         value: PHP.Constants.T_NEW,
         re: /^new(?=[ ])/i
     },

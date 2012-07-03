@@ -32,7 +32,7 @@ http.createServer(function (req, res) {
     var urlParse = url.parse(req.url, true);
 
 
-    if (urlParse.path.substring(0,5) === "/src/") {
+    if (urlParse.path.substring(0,5) === "/src/" || urlParse.path.substring(0,10) === "/adapters/" || urlParse.path.substring(0,7) === "/tests/") {
         res.writeHead(200, {
             'Content-Type': 'application/javascript'
         });
@@ -61,7 +61,9 @@ http.createServer(function (req, res) {
             });
             fs.readdir("tests/php/" + urlParse.query.tests, function( err, files ) {
                 if (err) throw err;
-                res.end( JSON.stringify( files ));
+                res.end( JSON.stringify( files.filter(function( file ) {
+                    return (file.substr(-5) === ".phpt");
+                }) ));
             });
         } else  {
 
@@ -69,7 +71,7 @@ http.createServer(function (req, res) {
                 'Content-Type': 'application/json'
             });
             
-            fs.readFile('tests/' + urlParse.query.file, function (err, data) {
+            fs.readFile(urlParse.query.file.substring(1), function (err, data) {
                 if (err) throw err;
                 res.end( JSON.stringify( parsePHPT( data ) ));
             }); 

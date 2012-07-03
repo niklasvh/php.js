@@ -9,7 +9,9 @@ PHP.VM = function( src, opts ) {
     },
     ENV = this;
     
-
+    ENV [ PHP.Compiler.prototype.FILESYSTEM ] = opts.filesystem;
+    
+console.log( opts );
     // bind global variablehandler to ENV
     ENV[ PHP.Compiler.prototype.GLOBAL ] = $;
  

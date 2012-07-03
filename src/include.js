@@ -6,6 +6,7 @@
     var files = {
         core: "js",
         
+                
         compiler: {
             compiler: "js",
             expr: "js",
@@ -22,6 +23,7 @@
             },
             control_structures: {
                 foreach: "js",
+                include: "js"
             },
             error: {
                 constants: "js",

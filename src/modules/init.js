@@ -15,7 +15,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     args.push( function( args, values ) {
         
         var vals = Array.prototype.slice.call( values, 2 );
-       console.log( vals );
+       
         Object.keys( staticVars ).forEach( function( key ){
             handler( key, staticVars[ key ] );
         });

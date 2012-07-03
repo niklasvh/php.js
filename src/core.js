@@ -28,6 +28,7 @@ PHP.Modules = function() {
 
 };
 
+PHP.Adapters = {};
 
 PHP.Utils = {};
 
@@ -43,6 +44,13 @@ PHP.Utils.Merge = function(obj1, obj2) {
     });
     
     return obj1;
+};
+
+PHP.Utils.Path = function( path ) {
+    
+    path = path.substring(0, path.lastIndexOf("/"));
+    
+    return path;
 };
 
 PHP.Utils.TokenName = function( token ) {
