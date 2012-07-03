@@ -22,6 +22,10 @@ PHP.Lexer = function( src ) {
         re: /^static(?=\s)/i
     },
     {
+        value: PHP.Constants.T_GLOBAL,
+        re: /^global(?=\s)/i
+    },
+    {
         value: PHP.Constants.T_EXTENDS,
         re: /^extends(?=\s)/i
     },
@@ -80,6 +84,30 @@ PHP.Lexer = function( src ) {
     {
         value: PHP.Constants.T_BREAK,
         re: /^break(?=\s|;)/i
+    },
+    {
+        value: PHP.Constants.T_ENDDECLARE,
+        re: /^enddeclare(?=\s|;)/i
+    },
+    {
+        value: PHP.Constants.T_ENDFOR,
+        re: /^endfor(?=\s|;)/i
+    },
+    {
+        value: PHP.Constants.T_ENDFOREACH,
+        re: /^endforeach(?=\s|;)/i
+    },
+    {
+        value: PHP.Constants.T_ENDIF,
+        re: /^endif(?=\s|;)/i
+    },
+    {
+        value: PHP.Constants.T_ENDSWITCH,
+        re: /^endswitch(?=\s|;)/i
+    },
+    {
+        value: PHP.Constants.T_ENDWHILE,
+        re: /^endwhile(?=\s|;)/i
     },
     {
         value: PHP.Constants.T_CASE,

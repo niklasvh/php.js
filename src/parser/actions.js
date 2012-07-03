@@ -236,6 +236,17 @@ PHP.Parser.prototype.yyn31 = function ( attributes ) {
     };
 };
 
+PHP.Parser.prototype.yyn32 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_If",
+        cond: this.yyastk[ this.stackPos-(10-3) ],
+        stmts: this.yyastk[ this.stackPos-(10-6) ],
+        elseifs: this.yyastk[ this.stackPos-(10-7) ],
+        Else: this.yyastk[ this.stackPos-(10-8) ],
+        attributes: attributes
+    };
+};
 
 PHP.Parser.prototype.yyn33 = function ( attributes ) {
 
