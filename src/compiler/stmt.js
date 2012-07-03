@@ -180,8 +180,18 @@ PHP.Compiler.prototype.Node_Stmt_Break = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
     // todo fix
     var src = this.CTX +  action.name + " = Function.prototype.bind.apply( function( " + this.VARIABLE + ", " + this.FUNCTION_STATIC + "  ) {\n";
+    console.log( action );
+    src += this.VARIABLE + " = " + this.VARIABLE + "(["
+    var params = [];
+    ((action.params[ 0 ] === undefined || !Array.isArray( action.params[ 0 ] ) ) ? action.params : action.params[ 0 ]).forEach(function( param ){
+        
+        if ( param.type === "Node_Param" ) {
+            params.push( '{' + this.PARAM_NAME +':"' + param.name + '"}');
+        }
+        
+    }, this);
     
-    src += this.VARIABLE + " = " + this.VARIABLE + "();\n"
+    src += params.join(", ") + "], arguments);\n"
     
     action.stmts.forEach(function( stmt ){
         src += this.source( stmt ) + ";\n";
@@ -189,7 +199,7 @@ PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
     
     src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ")( this ))";
 
-    console.log( action );
+    
     return src;  
 };
 

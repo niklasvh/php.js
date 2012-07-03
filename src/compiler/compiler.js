@@ -44,6 +44,8 @@ PHP.Compiler.prototype.OUTPUT_BUFFER = "OUTPUT_BUFFER";
 
 PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
 
+PHP.Compiler.prototype.PARAM_NAME = "n";
+
 PHP.Compiler.prototype.SUPPRESS = "$Suppress";
 
 PHP.Compiler.prototype.CONSTANTS = "$Constants";

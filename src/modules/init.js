@@ -12,10 +12,17 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     
     
     // initializer
-    args.push( function() {
-       
+    args.push( function( args, values ) {
+        
+        var vals = Array.prototype.slice.call( values, 2 );
+       console.log( vals );
         Object.keys( staticVars ).forEach( function( key ){
             handler( key, staticVars[ key ] );
+        });
+        
+        args.forEach(function( argObject, index ){
+            var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
+            arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
         });
         
         return handler;
