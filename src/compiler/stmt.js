@@ -253,6 +253,10 @@ PHP.Compiler.prototype.Node_Stmt_If = function( action ) {
     action.stmts.forEach(function( stmt ){
         src += this.source( stmt) + ";\n";
     }, this);
+    
+    action.elseifs.forEach(function( Elseif ){
+        src += this.source( Elseif) + "\n";
+    }, this);
     console.log(action);
     
     if ( action.Else !== null ) {
@@ -266,6 +270,16 @@ PHP.Compiler.prototype.Node_Stmt_If = function( action ) {
     src += "}"
     
 
+    
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Stmt_ElseIf = function( action ) {
+    var src = "} else if ( (" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n"; 
+    
+    action.stmts.forEach(function( stmt ){
+        src += this.source( stmt) + ";\n";
+    }, this);
     
     return src;
 };

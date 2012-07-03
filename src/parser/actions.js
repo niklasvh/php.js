@@ -644,9 +644,33 @@ PHP.Parser.prototype.yyn101 = function () {
     this.yyval = [];
 };
 
+PHP.Parser.prototype.yyn102 = function () {
+    this.yyastk[this.stackPos-(2-1)].push( this.yyastk[this.stackPos-(2-2)] );
+    this.yyval = this.yyastk[this.stackPos-(2-1)];
+};
+
+PHP.Parser.prototype.yyn103 = function ( attributes ) {
+    this.yyval =  {
+        type: "Node_Stmt_ElseIf",
+        cond: this.yyastk[this.stackPos-(5-3)],
+        stmts: Array.isArray( this.yyastk[ this.stackPos-(5-5) ] ) ? this.yyastk[ this.stackPos-(5-5) ] : [ this.yyastk[ this.stackPos-(5-5) ] ],
+        attributes: attributes
+    };
+};
+
 PHP.Parser.prototype.yyn104 = function () {
     this.yyval = [];
 };
+
+PHP.Parser.prototype.yyn106 = function ( attributes ) {
+    this.yyval =  {
+        type: "Node_Stmt_ElseIf",
+        cond: this.yyastk[this.stackPos-(6-3)],
+        stmts: this.yyastk[this.stackPos-(6-6)],
+        attributes: attributes
+    };
+};
+
 
 PHP.Parser.prototype.yyn107 = function () {
     this.yyval = null;
