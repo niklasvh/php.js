@@ -7,13 +7,13 @@
 PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV ) {
     var args = [ null ], // undefined context for bind
     COMPILER = PHP.Compiler.prototype,
-    handler = PHP.VM.VariableHandler( ENV ),
+    handler,
     staticVars = {}; // static variable storage
     
     
     // initializer
     args.push( function( args, values ) {
-        
+        handler = PHP.VM.VariableHandler( ENV );
         var vals = Array.prototype.slice.call( values, 2 );
        
         Object.keys( staticVars ).forEach( function( key ){
