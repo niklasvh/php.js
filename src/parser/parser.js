@@ -10,7 +10,7 @@
  * Ported to JavaScript by Niklas von Hertzen
  */
 
-PHP.Parser = function ( tokens ) {
+PHP.Parser = function ( tokens, eval ) {
 
     var yybase = this.yybase,
     yydefault = this.yydefault,
@@ -176,8 +176,11 @@ PHP.Parser = function ( tokens ) {
 
                 console.log(this.yyastk);
                 console.log( tokens );
-                throw new Error('Unexpected token ' + terminals[ tokenId ] + ", tokenId " + tokenId + " line " + this.startAttributes['startLine']);
-
+                if (eval !== true) {
+                    throw new Error('Unexpected token ' + terminals[ tokenId ] + ", tokenId " + tokenId + " line " + this.startAttributes['startLine']);
+                } else {
+                    return this.startAttributes['startLine'];
+                }
 
             }
 

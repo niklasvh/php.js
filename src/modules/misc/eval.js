@@ -9,7 +9,8 @@ PHP.Modules.prototype.eval = function( $, code ) {
     
 
     
-    var COMPILER = PHP.Compiler.prototype;
+    var COMPILER = PHP.Compiler.prototype,
+    _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
    
     var source = code[ COMPILER.VARIABLE_VALUE ];
         
@@ -19,20 +20,32 @@ PHP.Modules.prototype.eval = function( $, code ) {
    
     // build ast tree
     
-    var AST = new PHP.Parser( tokens );
+    var AST = new PHP.Parser( tokens, true );
   
-    // compile tree into JS
-    var compiler = new PHP.Compiler( AST );
+    if ( Array.isArray(AST) ) {
+        
+    
+  
+        // compile tree into JS
+        var compiler = new PHP.Compiler( AST );
    
     
 
     
     
     
-    // execture code in current context ($)
-    var exec = new Function( "$$", "$", "ENV", compiler.src  );
-    exec.call(this, function( arg ) {
-        return new PHP.VM.Variable( arg );
-    }, $, this);
+        // execture code in current context ($)
+        var exec = new Function( "$$", "$", "ENV", compiler.src  );
+        exec.call(this, function( arg ) {
+            return new PHP.VM.Variable( arg );
+        }, $, this);
+    
+    } else {
+        
+                this[ COMPILER.ERROR ]( "syntax error, unexpected $end in " + 
+            _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
+            "(1) : eval()'d code on line " + 1, PHP.Constants.E_PARSE );    
+        
+    }
     
 };

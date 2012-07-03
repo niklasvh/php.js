@@ -145,7 +145,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     this.echo( new PHP.VM.Variable("\nWarning: " + msg + "\n"));
                     return;
                     break;
-            
+                case C.E_PARSE:
+                    this.echo( new PHP.VM.Variable("\nParse error: " + msg + "\n"));
+                    return;
+                    break;
                 case C.E_CORE_NOTICE:
                     this.echo( new PHP.VM.Variable("\nNotice: " + msg + "\n"));
                     return;
