@@ -167,8 +167,11 @@ PHP.VM.Variable = function( arg ) {
         if ( typeof newValue === "string" ) {
             this[ this.TYPE ] = this.STRING;
         } else if ( typeof newValue === "number" ) {
-            this[ this.TYPE ] = this.INT;
-            
+            if ( newValue % 1 === 0 ) {
+                this[ this.TYPE ] = this.INT;
+            } else {
+                this[ this.TYPE ] = this.FLOAT;
+            }
         } else if ( newValue === null ) {   
             this[ this.TYPE ] = this.NULL;
 

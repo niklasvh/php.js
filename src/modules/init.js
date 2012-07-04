@@ -132,29 +132,38 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         return result;
     };
     
-    MODULES[ PHP.Compiler.prototype.ERROR ] = function( msg, level ) {
-        var C = PHP.Constants;
+    MODULES[ PHP.Compiler.prototype.ERROR ] = function( msg, level, lineAppend ) {
+        var C = PHP.Constants,
+        COMPILER = PHP.Compiler.prototype,
+        _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
+        
+        lineAppend = ( lineAppend === true ) ? " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1 " : ""; 
+        
         if ( suppress === false ) {
             
             switch ( level ) {
+                case C.E_ERROR:
+                    this.echo( new PHP.VM.Variable("\nFatal error: " + msg + lineAppend + "\n"));
+                    return;
+                    break;
             
                 case C.E_WARNING:
                 case C.E_CORE_WARNING:
                 case C.E_COMPILE_WARNING:
                 case C.E_USER_WARNING:
-                    this.echo( new PHP.VM.Variable("\nWarning: " + msg + "\n"));
+                    this.echo( new PHP.VM.Variable("\nWarning: " + msg + lineAppend + "\n"));
                     return;
                     break;
                 case C.E_PARSE:
-                    this.echo( new PHP.VM.Variable("\nParse error: " + msg + "\n"));
+                    this.echo( new PHP.VM.Variable("\nParse error: " + msg + lineAppend + "\n"));
                     return;
                     break;
                 case C.E_CORE_NOTICE:
-                    this.echo( new PHP.VM.Variable("\nNotice: " + msg + "\n"));
+                    this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
                     return;
                     break;
                 default:
-                    this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + "\n"));
+                    this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + lineAppend + "\n"));
                     return;
             
             

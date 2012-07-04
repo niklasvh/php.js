@@ -25,21 +25,23 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         callMethod = function( methodName, args ) {
             var $ = PHP.VM.VariableHandler(),
             argumentObj = this[ methodArgumentPrefix + methodName ];
-            argumentObj.forEach( function( arg, index ) {
-                // assign arguments to correct variable names
-                if ( args[ index ] !== undefined ) {
-                    if ( args[ index ] instanceof PHP.VM.VariableProto) {
-                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
+            if ( Array.isArray(argumentObj) ) {
+                argumentObj.forEach( function( arg, index ) {
+                    // assign arguments to correct variable names
+                    if ( args[ index ] !== undefined ) {
+                        if ( args[ index ] instanceof PHP.VM.VariableProto) {
+                            $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
+                        } else {
+                            $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ];
+                        }
                     } else {
-                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ];
+                        // no argument passed for the specified index
+                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
                     }
-                } else {
-                    // no argument passed for the specified index
-                    $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
-                }
                 
 
-            });
+                });
+            }
             /*
             args.forEach(function( arg, index ) {
                 if (arg instanceof PHP.VM.VariableProto) {
@@ -51,12 +53,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             }, this);
            */
         
-            magicConstants.METHOD = this[ COMPILER.CLASS_NAME ] + ":" + methodName;
+            magicConstants.METHOD = this[ COMPILER.CLASS_NAME ] + "::" + methodName;
             return this[ methodPrefix + methodName ].call( this, $ );
         };
    
         var Class = function( ctx ) {
-            
            
             Object.keys( props ).forEach(function( propertyName ){
                 if ( Array.isArray( props[ propertyName ] ) ) {
@@ -69,12 +70,46 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             
               
             // call constructor
-            if ( typeof this[ methodPrefix + __construct ] === "function" ) {
-          //      var args = Array.prototype.slice.call( arguments, 1 );    
-            //    console.log( arguments ); 
-                return callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) );         
+            
+            if ( ctx !== true ) {
+                // check if we are extending class, i.e. don't call constructors
                  
+                // PHP 5 style constructor in current class
+                
+                if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
+                    return callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) );         
+                }
+                
+                // PHP 4 style constructor in current class
+                
+                else if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + className  ) ) {
+                    return callMethod.call( this, className, Array.prototype.slice.call( arguments, 1 ) );         
+                }
+                
+                // PHP 5 style constructor in any inherited class
+                
+                else if ( typeof this[ methodPrefix + __construct ] === "function" ) {
+                    return callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) );         
+                }
+                
+                // PHP 4 style constructor in any inherited class
+                
+                else {
+                    var proto = this;
+                    
+                    while ( ( proto = Object.getPrototypeOf( proto ) ) instanceof PHP.VM.ClassPrototype ) {
+                        
+                        if ( proto.hasOwnProperty( methodPrefix + proto[ COMPILER.CLASS_NAME  ] ) ) {
+                           
+                            return callMethod.call( proto, proto[ COMPILER.CLASS_NAME  ], Array.prototype.slice.call( arguments, 1 ) ); 
+                        }
+                            
+                            
+                    }
+                        
+                }
             }
+           
      
 
         }, 
@@ -104,8 +139,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             /*
              * signature checks
              */
-            if ( methodName === __call && methodProps.length !== 2 ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::__call() must take exactly 2 arguments in %s__call_002.php on line %d" );
+            if ( methodName === __call && methodProps.length !== 2 ) {            
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::__call() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
                 
             }
             
@@ -150,7 +185,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         Class.prototype[ COMPILER.CLASS_NAME ] = className;
         
         Class.prototype[ COMPILER.METHOD_CALL ] = function( ctx, methodName ) {
-              
+             
             var args = Array.prototype.slice.call( arguments, 2 );
 
             if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
@@ -158,7 +193,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                   
                 if ( typeof this[ methodPrefix + __call ] === "function" ) {
                     // __call method defined, let's call that instead then
-                    return callMethod.call( this, __call, args );
+                    return callMethod.call( this, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
                       
                 }
                   
@@ -170,7 +205,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         };
         
         Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodName ) {
-            Class.prototype[ COMPILER.METHOD_CALL ].apply( ctx, arguments );
+            
+            this[ COMPILER.METHOD_CALL ].apply( this, arguments );
         //   console.log( ctx );
         //  console.log( className );  
         };

@@ -13,7 +13,9 @@ PHP.Modules.prototype.var_dump = function() {
     VAR = PHP.VM.Variable.prototype;
     
     var $dump = function( argument, indent ) {
-        var str = "";
+        var str = "",
+        value;
+        
         if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
             str += $INDENT( indent ) + "array(";
 
@@ -32,7 +34,7 @@ PHP.Modules.prototype.var_dump = function() {
                     str += key;
                 } 
                 str += "]=>\n";
-                
+                console.log( values[ index ] );
                 str += $dump( values[ index ], indent + 2 );
                 
             }, this);
@@ -40,15 +42,19 @@ PHP.Modules.prototype.var_dump = function() {
             str += $INDENT( indent ) + "}\n";
         } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
             str += $INDENT( indent ) + "NULL\n";  
+        } else if( argument[ VAR.TYPE ] === VAR.BOOL ) {    
+            str += $INDENT( indent ) + "bool(" + argument[ COMPILER.VARIABLE_VALUE ] + ")\n";  
         } else if( argument[ VAR.TYPE ] === VAR.STRING ) {
             
-            var value = argument[ COMPILER.VARIABLE_VALUE ];
+            value = argument[ COMPILER.VARIABLE_VALUE ];
             str += $INDENT( indent ) + "string(" + value.length + ') "' + value + '"\n';  
         } else if( argument[ VAR.TYPE ] === VAR.INT ) {
             
-            var value = argument[ COMPILER.VARIABLE_VALUE ];
+            value = argument[ COMPILER.VARIABLE_VALUE ];
             str += $INDENT( indent ) + "int(" + value + ')\n';  
-            
+        } else if( argument[ VAR.TYPE ] === VAR.FLOAT ) {
+            value = argument[ COMPILER.VARIABLE_VALUE ];
+            str += $INDENT( indent ) + "float(" + value + ')\n';      
         } else {
             console.log( argument );
         }
