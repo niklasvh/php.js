@@ -157,9 +157,9 @@ PHP.Compiler.prototype.Node_Stmt_Break = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
-    // todo fix
+   
     var src = this.CTX +  action.name + " = Function.prototype.bind.apply( function( " + this.VARIABLE + ", " + this.FUNCTION_STATIC + "  ) {\n";
-    console.log( action );
+    
     src += this.VARIABLE + " = " + this.VARIABLE + "(["
     var params = [];
     ((action.params[ 0 ] === undefined || !Array.isArray( action.params[ 0 ] ) ) ? action.params : action.params[ 0 ]).forEach(function( param ){

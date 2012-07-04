@@ -38,6 +38,9 @@
                 fclose: "js",
                 fopen: "js"
             },
+            functions: {
+                call_user_func: "js"  
+            },
             misc: {
                 eval: "js"  
             },
@@ -45,6 +48,7 @@
                 echo: "js",
                 implode: "js",
                 parse_str: "js",
+                print: "js",
                 strlen: "js",
                 strncmp: "js"
             },

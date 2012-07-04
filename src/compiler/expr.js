@@ -192,6 +192,17 @@ PHP.Compiler.prototype.Node_Expr_BooleanOr = function( action ) {
     return  this.source( action.left ) + "." + this.BOOLEAN_OR + "(" + this.source( action.right ) + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_Print = function( action ) {
+
+    var src = this.CTX + 'print( ';
+
+    src += this.source(action.expr);
+  
+
+    src += ' )';
+    return src;
+};
+
 PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
     var src = this.VARIABLE + "(";
 
@@ -205,12 +216,15 @@ PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
             src += this.source( action.name ) + "." + this.VARIABLE_VALUE;
         }
         
-      //  return this.VARIABLE + '("' + this.source( action.name ) + '")';       
+        //  return this.VARIABLE + '("' + this.source( action.name ) + '")';       
     }
     
     return src + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_Cast_String = function( action ) {
+    return  this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_STRING;
+};
 
 PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
     return  this.CTX + "include( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";

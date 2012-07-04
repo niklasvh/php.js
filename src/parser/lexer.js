@@ -278,6 +278,10 @@ PHP.Lexer = function( src ) {
         re: /^echo(?=[ "'(;])/i
     },
     {
+        value: PHP.Constants.T_PRINT,
+        re: /^print(?=[ "'(;])/i
+    },
+    {
         value: PHP.Constants.T_INCLUDE,
         re: /^include(?=[ "'(;])/i
     },
