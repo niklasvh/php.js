@@ -295,7 +295,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         
     }, this)   
         
-    src += JSON.stringify( props ) + ', function() {\n';
+    src += JSON.stringify( props ) + ', function( ' + this.VARIABLE + ' ) {\n';
     
     action.stmts.forEach(function( stmt ){
         src += this.source( stmt ) + ";\n";

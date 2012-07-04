@@ -23,11 +23,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         props = {},
         
         callMethod = function( methodName, args ) {
-           
             var $ = PHP.VM.VariableHandler(),
             argumentObj = this[ methodArgumentPrefix + methodName ];
             argumentObj.forEach( function( arg, index ) {
-
+                // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
                     if ( args[ index ] instanceof PHP.VM.VariableProto) {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
@@ -35,6 +34,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ];
                     }
                 } else {
+                    // no argument passed for the specified index
                     $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
                 }
                 
