@@ -26,6 +26,10 @@ PHP.Lexer = function( src ) {
         re: /^global(?=\s)/i
     },
     {
+        value: PHP.Constants.T_THROW,
+        re: /^throw(?=\s)/i
+    },
+    {
         value: PHP.Constants.T_EXTENDS,
         re: /^extends(?=\s)/i
     },
@@ -64,6 +68,14 @@ PHP.Lexer = function( src ) {
     {
         value: PHP.Constants.T_UNSET_CAST,
         re: /^\(unset\)/i
+    },
+    {
+        value: PHP.Constants.T_TRY,
+        re: /^try(?=\s{)/i
+    },
+    {
+        value: PHP.Constants.T_CATCH,
+        re: /^catch(?=\s\()/i
     },
     {
         value: PHP.Constants.T_INSTANCEOF,

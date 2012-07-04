@@ -5,7 +5,23 @@
  */
 
 
-PHP.Modules.prototype.implode = function() {
+PHP.Modules.prototype.implode = function( glue, pieces ) {
+    var VARIABLE = PHP.VM.Variable.prototype,
+    COMPILER = PHP.Compiler.prototype;
     
-    return new PHP.VM.Variable("implode");
+    if ( glue[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+        // Defaults to an empty string
+        pieces = glue;
+        glue = "";
+    } else {
+        glue = glue[ COMPILER.VARIABLE_VALUE ];
+    }
+    
+    var values = pieces[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
+    
+    
+    
+    return new PHP.VM.Variable( values.map(function( val ){
+        return val[ COMPILER.VARIABLE_VALUE ];
+    }).join( glue ) );
 };

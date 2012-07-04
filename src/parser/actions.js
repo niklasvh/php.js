@@ -447,8 +447,41 @@ PHP.Parser.prototype.yyn53 = function () {
     this.yyval = [];
 };
 
+PHP.Parser.prototype.yyn54 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_TryCatch",
+        stmts: this.yyastk[ this.stackPos-(5-3) ],
+        catches: this.yyastk[ this.stackPos-(5-5) ],
+        attributes: attributes
+    };
+
+};
+
+PHP.Parser.prototype.yyn55 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_Throw",
+        expr: this.yyastk[ this.stackPos-(3-2) ],
+        attributes: attributes
+    };
+
+};
+
 PHP.Parser.prototype.yyn58 = function () {
     this.yyval = [ this.yyastk[this.stackPos-(1-1)] ];
+};
+
+PHP.Parser.prototype.yyn60 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_Catch",
+        Type: this.yyastk[ this.stackPos-(8-3) ],
+        variable: this.yyastk[ this.stackPos-(8-4) ].substring(1),
+        stmts: this.yyastk[ this.stackPos-(8-7) ],
+        attributes: attributes
+    };
+
 };
 
 PHP.Parser.prototype.yyn61 = function () {
@@ -941,11 +974,11 @@ PHP.Parser.prototype.yyn155 = function () {
 };
 
 PHP.Parser.prototype.yyn156 = function () {
-    this.yyval = this.MODIFIER_PRIVATE;
+    this.yyval = this.MODIFIER_PUBLIC;
 };
 
 PHP.Parser.prototype.yyn157 = function () {
-    this.yyval = this.MODIFIER_PRIVATE;
+    this.yyval = this.MODIFIER_PUBLIC;
 };
 
 PHP.Parser.prototype.yyn158 = function () {

@@ -273,6 +273,36 @@ PHP.Compiler.prototype.Node_Stmt_ElseIf = function( action ) {
     return src;
 };
 
+
+PHP.Compiler.prototype.Node_Stmt_Throw = function( action ) {
+    var src = "throw " + this.source( action.expr ); 
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Stmt_TryCatch = function( action ) {
+    var src = "try {\n";
+    src += this.stmts( action.stmts ) + "} catch( emAll ) {\n";
+    src += this.CTX + this.EXCEPTION + '( emAll )';
+    
+    action.catches.forEach(function( Catch ){
+        src += this.source( Catch );
+    }, this);
+    
+    src += ";\n }"
+
+        console.log( action );
+             this.source( action.expr ); 
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Stmt_Catch = function( action ) {
+    var src = "." + this.CATCH + '( "' + action.variable + '", "' + action.Type.parts + '", function() {\n';
+    src += this.stmts( action.stmts );
+    src += "})"
+    return src;
+    
+};
+
 PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
 
     

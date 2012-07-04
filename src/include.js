@@ -82,6 +82,7 @@
         },
         predefined: {
             classes: {
+                Exception: "js",
                 stdClass: "js"
             }
         }

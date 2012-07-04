@@ -15,6 +15,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     __construct = "__construct";
     
     
+    // helper function for checking whether variable/method is of type
+    function checkType( value, type) {
+        return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]);
+    }
+    
     return function() {
        
         var className = arguments[ 0 ], 
@@ -52,8 +57,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 
             }, this);
            */
-        
-            magicConstants.METHOD = this[ COMPILER.CLASS_NAME ] + "::" + methodName;
+
+            magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
             return this[ methodPrefix + methodName ].call( this, $ );
         };
    
@@ -139,12 +144,29 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             /*
              * signature checks
              */
-            if ( methodName === __call && methodProps.length !== 2 ) {            
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::__call() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
+            
+            
+           
+            // __call
+            if ( methodName === __call  ) { 
+                
+                if ( methodProps.length !== 2 ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::__call() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
+                }
+                
+                if ( !checkType( methodType, "PUBLIC" ) || checkType( methodType, "STATIC" ) ) {
+                    console.log( className );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "The magic method __call() must have public visibility and cannot be static", PHP.Constants.E_CORE_WARNING, true );
+                }
                 
             }
             
+            // end signature checks
             
+            Object.defineProperty( Class.prototype, PHP.VM.Class.METHOD_PROTOTYPE + methodName, {
+                value: Class.prototype 
+            });
+              
             Object.defineProperty( Class.prototype, methodPrefix + methodName, {
                 value: methodFunc 
             });
@@ -207,7 +229,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 }
                   
             }
-            console.log( ctx );
+            
            
             return this.callMethod.call( this, methodName, args );
             
@@ -244,6 +266,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
 PHP.VM.ClassPrototype = function() {};
 
 PHP.VM.Class.METHOD = "_";
+
+PHP.VM.Class.METHOD_PROTOTYPE = "$MP";
 
 PHP.VM.Class.PROPERTY = "$$";
 

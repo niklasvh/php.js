@@ -80,16 +80,7 @@ PHP.VM.Array = function( ENV ) {
 
         
     } )
-    .Method( "__call", 4, [{
-        "name":"m"
-    },{
-        "name":"a"
-    }], function() {
-        ENV.echo( $$("Method $m called:\n") );
-        (ENV.var_dump($("a").$));
-        return this.$Prop( this, "x" );
-
-    } )
+    
     .Create();
     
 };

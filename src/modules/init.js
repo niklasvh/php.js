@@ -118,13 +118,14 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
 
 (function( MODULES ){
     
-    var suppress = false;
+    var COMPILER = PHP.Compiler.prototype,
+    suppress = false;
     
-    MODULES[ PHP.Compiler.prototype.SUPPRESS ] = function( expr ) {
+    MODULES[ COMPILER.SUPPRESS ] = function( expr ) {
         suppress = true;
         var result = expr();
         
-        result[ PHP.Compiler.prototype.SUPPRESS ] = true;
+        result[ COMPILER.SUPPRESS ] = true;
  
         
         
@@ -132,13 +133,31 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         return result;
     };
     
-    MODULES[ PHP.Compiler.prototype.ERROR ] = function( msg, level, lineAppend ) {
-        var C = PHP.Constants,
-        COMPILER = PHP.Compiler.prototype,
+    MODULES[ COMPILER.EXCEPTION ] = function( variable ) {
+       
+        var methods =  {},
+        VARIABLE = PHP.VM.Variable.prototype;
+        
+        methods[ COMPILER.CATCH ] = function( name, type, func ) {
+                  
+            if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
+                if ( variable[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] === type ) {
+                    // TODO pass variable to func
+                    func();
+                }
+            }
+            
+        };
+       
+        return methods;
+    };
+    
+    MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
+        var C = PHP.Constants,        
         _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
         
-        lineAppend = ( lineAppend === true ) ? " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1 " : ""; 
-        
+        lineAppend = ( lineAppend === true ) ? " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1" : ""; 
+       
         if ( suppress === false ) {
             
             switch ( level ) {

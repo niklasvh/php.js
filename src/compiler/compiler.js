@@ -65,6 +65,10 @@ PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
 
 PHP.Compiler.prototype.PARAM_NAME = "n";
 
+PHP.Compiler.prototype.CATCH = "$Catch";
+
+PHP.Compiler.prototype.EXCEPTION = "$Exception";
+
 PHP.Compiler.prototype.SUPPRESS = "$Suppress";
 
 PHP.Compiler.prototype.CONSTANTS = "$Constants";
