@@ -314,6 +314,10 @@ PHP.Lexer = function( src ) {
         re: /^if(?=[\s(])/i
     },
     {
+        value: PHP.Constants.T_DO,
+        re: /^do(?=[ {])/i
+    },
+    {
         value: PHP.Constants.T_WHILE,
         re: /^while(?=[ (])/i
     },

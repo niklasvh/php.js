@@ -75,6 +75,16 @@ PHP.Compiler.prototype.Node_Stmt_While = function( action ) {
     return src;
 };
 
+PHP.Compiler.prototype.Node_Stmt_Do = function( action ) {
+
+    var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
+    src += "do {\n"
+    src += this.stmts( action.stmts );
+    src += "} while( " + this.source( action.cond ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
+
+    return src;
+};
+
 PHP.Compiler.prototype.Node_Stmt_Switch = function( action ) {
     var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
     src += "switch(" + this.source( action.cond ) + "." + this.VARIABLE_VALUE+ ") {\n";
