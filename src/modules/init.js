@@ -123,12 +123,15 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     
     MODULES[ COMPILER.SUPPRESS ] = function( expr ) {
         suppress = true;
+        
         var result = expr();
+        
+        if ( result === undefined ) {
+            result = new PHP.VM.Variable();
+        }
         
         result[ COMPILER.SUPPRESS ] = true;
  
-        
-        
         suppress = false;
         return result;
     };
@@ -139,8 +142,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         VARIABLE = PHP.VM.Variable.prototype;
         
         methods[ COMPILER.CATCH ] = function( name, type, func ) {
-                  
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
+                
                 if ( variable[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] === type ) {
                     // TODO pass variable to func
                     func();
@@ -163,6 +166,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             switch ( level ) {
                 case C.E_ERROR:
                     this.echo( new PHP.VM.Variable("\nFatal error: " + msg + lineAppend + "\n"));
+                    throw new PHP.Halt( level );
                     return;
                     break;
             

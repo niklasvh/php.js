@@ -10,6 +10,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     var methodPrefix = PHP.VM.Class.METHOD,
     methodArgumentPrefix = "_$_",
     propertyPrefix = PHP.VM.Class.PROPERTY,
+    methodTypePrefix = "$£",
     COMPILER = PHP.Compiler.prototype,
     __call = "__call",
     __construct = "__construct";
@@ -145,6 +146,15 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
              * signature checks
              */
             
+            // can't make static non-static
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], "STATIC" ) && !checkType( methodType, "STATIC" ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() non static in class " + className, PHP.Constants.E_ERROR, true );
+            }
+            
+            // can't make non-static  static
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && !checkType( Class.prototype[ methodTypePrefix + methodName ], "STATIC" ) && checkType( methodType, "STATIC" ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make non static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() static in class " + className, PHP.Constants.E_ERROR, true );
+            }
             
            
             // __call
@@ -155,7 +165,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 }
                 
                 if ( !checkType( methodType, "PUBLIC" ) || checkType( methodType, "STATIC" ) ) {
-                    console.log( className );
                     ENV[ PHP.Compiler.prototype.ERROR ]( "The magic method __call() must have public visibility and cannot be static", PHP.Constants.E_CORE_WARNING, true );
                 }
                 
@@ -166,7 +175,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             Object.defineProperty( Class.prototype, PHP.VM.Class.METHOD_PROTOTYPE + methodName, {
                 value: Class.prototype 
             });
-              
+            
+            Object.defineProperty( Class.prototype, methodTypePrefix + methodName, {
+                value: methodType 
+            });
+            
             Object.defineProperty( Class.prototype, methodPrefix + methodName, {
                 value: methodFunc 
             });

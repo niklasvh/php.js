@@ -282,6 +282,10 @@ PHP.Lexer = function( src ) {
         re: /^array(?=[ \(])/i
     },
     {
+        value: PHP.Constants.T_ISSET,
+        re: /^isset(?=[ \(])/i
+    },
+    {
         value: PHP.Constants.T_UNSET,
         re: /^unset(?=[ \(])/i
     },
@@ -449,7 +453,7 @@ PHP.Lexer = function( src ) {
                     }
                     
 
-                    while(( match = result.match( /^([^\\\$"\[\]{}]|\\.)+/g )) !== null ) {
+                    while(( match = result.match( /^([^\\\$"{}]|\\.)+/g )) !== null ) {
                    
 
                         if (result.length === 1) {
