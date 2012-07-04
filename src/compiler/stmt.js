@@ -1,7 +1,7 @@
 
 PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
     
-console.log( action );
+    console.log( action );
     
     var src = this.CTX + this.CLASS_NEW + '( "' + action.name + '", ' + action.Type + ', {';
     
@@ -297,9 +297,13 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         
     src += JSON.stringify( props ) + ', function( ' + this.VARIABLE + ' ) {\n';
     
-    action.stmts.forEach(function( stmt ){
-        src += this.source( stmt ) + ";\n";
-    }, this);
+    if (action.stmts !== null ) {
+        
+        action.stmts.forEach(function( stmt ){
+            src += this.source( stmt ) + ";\n";
+        }, this);
+    
+    }
     
     src += '\n} )\n';
     

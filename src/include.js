@@ -59,6 +59,7 @@
             },
             variable: {
                 isset: "js",
+                print_r: "js",
                 unset: "js",
                 var_dump: "js"
             }

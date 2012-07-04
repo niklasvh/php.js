@@ -258,6 +258,14 @@ PHP.Lexer = function( src ) {
         re: /^public(?=[\s])/i
     },
     {
+        value: PHP.Constants.T_PRIVATE,
+        re: /^private(?=[\s])/i
+    },
+    {
+        value: PHP.Constants.T_PROTECTED,
+        re: /^protected(?=[\s])/i
+    },
+    {
         value: PHP.Constants.T_ARRAY,
         re: /^array(?=[ \(])/i
     },
