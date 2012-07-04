@@ -52,6 +52,9 @@ PHP.Modules.prototype.var_dump = function() {
             
             value = argument[ COMPILER.VARIABLE_VALUE ];
             str += $INDENT( indent ) + "int(" + value + ')\n';  
+        } else if( argument instanceof PHP.VM.ClassPrototype ) {
+            // todo, complete
+            str += $INDENT( indent ) + "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 (0) {\n}\n';  
         } else if( argument[ VAR.TYPE ] === VAR.FLOAT ) {
             value = argument[ COMPILER.VARIABLE_VALUE ];
             str += $INDENT( indent ) + "float(" + value + ')\n';      

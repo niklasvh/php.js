@@ -193,22 +193,38 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                   
                 if ( typeof this[ methodPrefix + __call ] === "function" ) {
                     // __call method defined, let's call that instead then
-                    return callMethod.call( this, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
-                      
+                    
+                    
+                    // determine which __call to use in case there are several defined
+                    if ( ctx instanceof PHP.VM ) {
+                        // normal call, use current context
+                        return callMethod.call( this, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
+                    } else {
+                        // static call, ensure current scope's __call() is favoured over the specified class's  __call()
+                        return ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
+                    }
+               
                 }
                   
             }
+            console.log( ctx );
+           
+            return this.callMethod.call( this, methodName, args );
             
-            return callMethod.call( this, methodName, args );
+           
+            
            
               
         };
         
+        Class.prototype.callMethod = callMethod;
+        
         Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodName ) {
             
+            return Class.prototype[ COMPILER.METHOD_CALL ].apply( this, arguments);
+            
             this[ COMPILER.METHOD_CALL ].apply( this, arguments );
-        //   console.log( ctx );
-        //  console.log( className );  
+ 
         };
         
        
