@@ -1014,10 +1014,8 @@ PHP.Parser.prototype.yyn167 = function () {
 
 PHP.Parser.prototype.yyn168 = function () {
     this.yyastk[ this.stackPos-(3-1) ].push(this.yyastk[ this.stackPos-(3-3) ]);
-    this.yyval = [ this.yyastk[ this.stackPos-(3-1) ] ];
+    this.yyval = this.yyastk[ this.stackPos-(3-1) ];
 };
-
-
 
 PHP.Parser.prototype.yyn169 = function ( attributes ) {
     this.yyval =  {

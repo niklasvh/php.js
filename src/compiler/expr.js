@@ -245,6 +245,7 @@ PHP.Compiler.prototype.Node_Expr_New = function( action ) {
 };
 
 
+
 PHP.Compiler.prototype.Node_Expr_ConstFetch = function( action ) {
 
     if (/true|false|null/i.test(action.name.parts)) {
@@ -258,7 +259,7 @@ PHP.Compiler.prototype.Node_Expr_ConstFetch = function( action ) {
 PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 
     if ( action.variable.name !== "this" ) {
-        return this.source( action.variable ) + this.CLASS_PROPERTY_GET + '.( this, "' + this.source( action.name ) + '" )';
+        return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     } else {
         return "this." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     }

@@ -1,7 +1,7 @@
 
 PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
     
-
+console.log( action );
     
     var src = this.CTX + this.CLASS_NEW + '( "' + action.name + '", ' + action.Type + ', {';
     
