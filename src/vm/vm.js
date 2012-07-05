@@ -33,9 +33,9 @@ PHP.VM = function( src, opts ) {
                
                 if ( !/(self|parent)/i.test( className ) ) {
                     if (state !== undefined) {
-                        return classRegistry[ className ].prototype;
+                        return classRegistry[ className.toLowerCase() ].prototype;
                     } else {
-                        return classRegistry[ className ];
+                        return classRegistry[ className.toLowerCase() ];
                     }
                 } else if ( /self/i.test( className ) ) {
                     return Object.getPrototypeOf( state );  
@@ -63,15 +63,20 @@ PHP.VM = function( src, opts ) {
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className]( ENV );
     });
+   
+    var exec = new Function( "$$", "$", "ENV", src  );
+        exec.call(this, $$, $, ENV);
     
+
+       /*
     try {
         var exec = new Function( "$$", "$", "ENV", src  );
         exec.call(this, $$, $, ENV);
     } catch( e ) {
         console.log("Caught: ", e);
     }
-    
-    
+       */
+   
 };
 
 PHP.VM.prototype = new PHP.Modules();

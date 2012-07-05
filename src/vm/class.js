@@ -12,7 +12,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     propertyPrefix = PHP.VM.Class.PROPERTY,
     methodTypePrefix = "$£",
     COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
     __call = "__call",
+    __set = "__set",
+    __get = "__get",
     __construct = "__construct";
     
     
@@ -31,6 +34,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         callMethod = function( methodName, args ) {
             var $ = PHP.VM.VariableHandler(),
             argumentObj = this[ methodArgumentPrefix + methodName ];
+            
+            
             if ( Array.isArray(argumentObj) ) {
                 argumentObj.forEach( function( arg, index ) {
                     // assign arguments to correct variable names
@@ -58,8 +63,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 
             }, this);
            */
-
+console.log( methodName );
             magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
+            console.log( this )
             return this[ methodPrefix + methodName ].call( this, $ );
         };
    
@@ -74,7 +80,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                
             }, this);
             
-              
             // call constructor
             
             if ( ctx !== true ) {
@@ -161,13 +166,29 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             if ( methodName === __call  ) { 
                 
                 if ( methodProps.length !== 2 ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::__call() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + methodName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
                 }
                 
                 if ( !checkType( methodType, "PUBLIC" ) || checkType( methodType, "STATIC" ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "The magic method __call() must have public visibility and cannot be static", PHP.Constants.E_CORE_WARNING, true );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "The magic method " + methodName + "() must have public visibility and cannot be static", PHP.Constants.E_CORE_WARNING, true );
                 }
                 
+            }
+            
+            // __get
+            
+            else if ( methodName === __get  ) { 
+                if ( methodProps.length !== 1 ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + methodName + "() must take exactly 1 argument", PHP.Constants.E_ERROR, true );
+                }
+            }
+            
+            // __set
+            
+            else if ( methodName === __set  ) { 
+                if ( methodProps.length !== 2 ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + methodName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
+                }
             }
             
             // end signature checks
@@ -192,7 +213,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         };
             
         methods [ COMPILER.CLASS_DECLARE ] = function() {
-            classRegistry[ className ] = Class;
+            classRegistry[ className.toLowerCase() ] = Class;
                
             return Class;
         };
@@ -201,7 +222,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         
         
         if (opts.Extends  !== undefined) {
-            Class.prototype = new classRegistry[ opts.Extends ]( true );
+            Class.prototype = new classRegistry[ opts.Extends.toLowerCase() ]( true );
         } else {
             Class.prototype = new PHP.VM.ClassPrototype();
         }
@@ -265,7 +286,94 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
        
         
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
-            return this[ propertyPrefix + propertyName ];
+           
+            if ( this[ propertyPrefix + propertyName ] === undefined ) {
+
+
+                var obj = {}, props = {};
+                
+                // property set
+                if ( this[ methodPrefix + __set ] !== undefined ) {
+                    obj [ COMPILER.ASSIGN ] = function( value ) {
+                        console.log( propertyName, value );
+                        callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), value ] );        
+                    }.bind( this );
+                }
+                
+                // Post inc ++
+                // getting value
+                obj [ COMPILER.POST_INC ] = function() {
+                    console.log( "getting ");
+                    if ( this[ methodPrefix + __get ] !== undefined ) {
+                     
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
+                        
+                        console.log('sup', obj);
+                        // setting ++
+                        if ( this[ methodPrefix + __set ] !== undefined ) {
+                            
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? ++value[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+                        }
+                        console.log( obj );
+                        return value;
+                
+                    }
+                }.bind( this );
+                
+                var $this = this;
+                // property get
+                if ( this[ methodPrefix + __get ] !== undefined ) {
+                  
+                    props[ COMPILER.VARIABLE_VALUE ] = {
+                        get : function(){
+                            console.log( "getting", propertyName );
+                        console.log( $this );
+                            return callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] )[ COMPILER.VARIABLE_VALUE ];   
+                             
+                            
+                        }
+                    };
+                    
+                    props[ VARIABLE.TYPE ] = {
+                        get: function() {
+                            console.log( VARIABLE.TYPE );
+                            obj = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] );   
+                            return obj[ VARIABLE.TYPE ];
+                        }
+                      
+                    };
+                    
+                    Object.defineProperties( obj, props );
+                          
+                }
+                return obj;
+            /*
+                Object.defineProperty( obj, COMPILER.VARIABLE_VALUE,
+                {
+                    get : function(){
+                        
+                        if ( this[ methodPrefix + __get ] !== undefined ) {
+                            var value = callMethod.call( this, __get,  new PHP.VM.Variable( propertyName ) );   
+                            return value[ COMPILER.VARIABLE_VALUE ]; 
+                        }
+                    },  
+                    set : function( value ) {
+                        if ( this[ methodPrefix + __set ] !== undefined ) {
+                            callMethod.call( this, __set,  new PHP.VM.Variable( propertyName ), value );                      
+                        }
+                    }
+                }
+                );
+                    
+                    */
+                    
+                
+                
+                
+            } else {
+                return this[ propertyPrefix + propertyName ];
+            }
+            
             
         };
         

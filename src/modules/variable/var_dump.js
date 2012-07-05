@@ -27,6 +27,7 @@ PHP.Modules.prototype.var_dump = function() {
             str += ") {\n";
             
             keys.forEach(function( key, index ){
+                
                 str += $INDENT( indent + 2 ) + "[";
                 if ( typeof key === "string" ) {
                     str += '"' + key + '"';
@@ -34,7 +35,7 @@ PHP.Modules.prototype.var_dump = function() {
                     str += key;
                 } 
                 str += "]=>\n";
-                console.log( values[ index ] );
+               
                 str += $dump( values[ index ], indent + 2 );
                 
             }, this);
@@ -52,9 +53,26 @@ PHP.Modules.prototype.var_dump = function() {
             
             value = argument[ COMPILER.VARIABLE_VALUE ];
             str += $INDENT( indent ) + "int(" + value + ')\n';  
-        } else if( argument instanceof PHP.VM.ClassPrototype ) {
+        } else if( argument instanceof PHP.VM.ClassPrototype || argument[ VAR.TYPE ] === VAR.OBJECT ) {
             // todo, complete
-            str += $INDENT( indent ) + "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 (0) {\n}\n';  
+            if( argument[ VAR.TYPE ] === VAR.OBJECT ) {
+                argument = argument[ COMPILER.VARIABLE_VALUE ];
+            }
+            
+            str += $INDENT( indent ) + "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
+            
+            var props = Object.keys( argument );
+            
+         
+            
+            str += '(' + props.length + ') {\n';
+            
+            props.forEach(function( prop ){
+                str += $INDENT( indent + 2 ) + '["' + prop.substring( PHP.VM.Class.PROPERTY.length ) + '"]=>\n';
+                str += $dump( argument[ prop ], indent + 2 );
+            });
+            
+            str += '}\n';  
         } else if( argument[ VAR.TYPE ] === VAR.FLOAT ) {
             value = argument[ COMPILER.VARIABLE_VALUE ];
             str += $INDENT( indent ) + "float(" + value + ')\n';      

@@ -7,6 +7,7 @@
 PHP.VM.Array = function( ENV ) {
    
     var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
     $this = this;
     
     ENV.$Class.New( "ArrayObject", 0, {})
@@ -30,29 +31,31 @@ PHP.VM.Array = function( ENV ) {
     }], function( $ ) {
         this[ COMPILER.CLASS_NAME ] = $this.CLASS_NAME;
         
-        var items = $('input').$;
+        var items = $('input')[ COMPILER.VARIABLE_VALUE ];
         if ( Array.isArray( items ) ) {
            
             items.forEach( function( item ) {
                
                 // this.$Prop( this, $this.VALUES ).$.push( item[ COMPILER.ARRAY_VALUE ] );
-                this.$Prop( this, $this.VALUES ).$.push( new PHP.VM.Variable( item[ COMPILER.ARRAY_VALUE ][ COMPILER.VARIABLE_VALUE ] ) );
+                this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( new PHP.VM.Variable( item[ COMPILER.ARRAY_VALUE ][ COMPILER.VARIABLE_VALUE ] ) );
                
+                
                 if ( item[ COMPILER.ARRAY_KEY ] !== undefined ) {
-                    
-                    if ( /^\d+$/.test(item[ COMPILER.ARRAY_KEY ] )) {
+                    var key = ( item[ COMPILER.ARRAY_KEY ] instanceof PHP.VM.Variable ) ? item[ COMPILER.ARRAY_KEY ][ COMPILER.VARIABLE_VALUE ] : item[ COMPILER.ARRAY_KEY ];
+                   
+                    if ( /^\d+$/.test( key )) {
                         // integer key
                         
-                        this.$Prop( this, $this.KEYS ).$.push( item[ COMPILER.ARRAY_KEY ] );
+                        this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( key );
                         
                         // todo complete
-                        this.$Prop( this, $this.INTKEY ).$ = Math.max( this.$Prop( this, $this.INTKEY ).$, item[ COMPILER.ARRAY_KEY ] );
+                        this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] = Math.max( this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ], key );
                     } else {
                         // custom text key
-                        this.$Prop( this, $this.KEYS ).$.push( item[ COMPILER.ARRAY_KEY ] );
+                        this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( key );
                     }
                 } else {
-                    this.$Prop( this, $this.KEYS ).$.push( ++this.$Prop( this, $this.INTKEY ).$ );
+                    this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( ++this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] );
                 }
                 
                 
@@ -72,10 +75,21 @@ PHP.VM.Array = function( ENV ) {
         "name":"index"
     }], function( $ ) {
          
-        var index = this.$Prop( this, $this.KEYS ).$.indexOf( $('index').$ );
-        
+        var index = this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].indexOf( $('index')[ COMPILER.VARIABLE_VALUE ] );
+        console.log( index, $('index')[ COMPILER.VARIABLE_VALUE ], this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ] );
         if ( index !== -1 ) {
-            return this.$Prop( this, $this.VALUES ).$[ index ];
+            return this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ][ index ];
+        } else {
+            // no such key found in array, let's create one
+        //    this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( $('index')[ COMPILER.VARIABLE_VALUE ] );
+            var variable = new PHP.VM.Variable();
+        //    this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( variable );
+            variable[ VARIABLE.DEFINED  ] = false;
+            // todo add handlers
+            
+            console.log( variable );
+            return variable;
+            
         }
 
         
