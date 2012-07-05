@@ -5,9 +5,12 @@ PHP.VM = function( src, opts ) {
     // console.log($('_POST'));
   
     var $$ = function( arg ) {
+        
+        
         return new PHP.VM.Variable( arg );
     },
     ENV = this;
+    PHP.VM.Variable.prototype.ENV = ENV;
     
     ENV [ PHP.Compiler.prototype.FILESYSTEM ] = opts.filesystem;
     
@@ -63,19 +66,19 @@ PHP.VM = function( src, opts ) {
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className]( ENV );
     });
-   
+    /*
     var exec = new Function( "$$", "$", "ENV", src  );
         exec.call(this, $$, $, ENV);
     
-
-       /*
+ */
+      
     try {
         var exec = new Function( "$$", "$", "ENV", src  );
         exec.call(this, $$, $, ENV);
     } catch( e ) {
         console.log("Caught: ", e);
     }
-       */
+      
    
 };
 

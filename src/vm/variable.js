@@ -193,6 +193,11 @@ PHP.VM.Variable = function( arg ) {
         
         // remove this later, debugging only
         this.val = newValue;
+        
+        if ( typeof this[this.REGISTER_SETTER ] === "function" ) {
+            this[ this.REGISTER_SETTER ]( value );
+        }
+        
     };
     
     
@@ -332,13 +337,16 @@ PHP.VM.Variable = function( arg ) {
         get : function(){
          
             return function( ctx, variable ) {
-                if ( this[ this.TYPE ] === this.ARRAY ) {
-                    //  console.log(value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ));
-                    return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
-                } else {
-                    //  console.log(new PHP.VM.Variable( null ));
-                    return new PHP.VM.Variable( null );
-                }
+                
+                
+                
+                if ( this[ this.TYPE ] !== this.ARRAY ) {
+                    this [ COMPILER.VARIABLE_VALUE ] = this.ENV.array([]);
+                } 
+                
+                //  console.log(value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ));
+                return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                
             };
         },  
         set : setValue
@@ -368,3 +376,5 @@ PHP.VM.Variable.prototype.OBJECT = 6;
 PHP.VM.Variable.prototype.RESOURCE = 7;
 PHP.VM.Variable.prototype.TYPE = "type";
 
+
+PHP.VM.Variable.prototype.REGISTER_SETTER = "$Setter";

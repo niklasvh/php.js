@@ -63,9 +63,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 
             }, this);
            */
-console.log( methodName );
+
             magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
-            console.log( this )
+            
             return this[ methodPrefix + methodName ].call( this, $ );
         };
    

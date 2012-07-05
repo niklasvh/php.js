@@ -76,18 +76,22 @@ PHP.VM.Array = function( ENV ) {
     }], function( $ ) {
          
         var index = this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].indexOf( $('index')[ COMPILER.VARIABLE_VALUE ] );
-        console.log( index, $('index')[ COMPILER.VARIABLE_VALUE ], this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ] );
+
         if ( index !== -1 ) {
             return this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ][ index ];
         } else {
             // no such key found in array, let's create one
-        //    this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( $('index')[ COMPILER.VARIABLE_VALUE ] );
+        //    
             var variable = new PHP.VM.Variable();
-        //    this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( variable );
+        //    
             variable[ VARIABLE.DEFINED  ] = false;
-            // todo add handlers
+            variable[ VARIABLE.REGISTER_SETTER ] = function() {
+                // the value was actually defined, let's register item into array
+                this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( $('index')[ COMPILER.VARIABLE_VALUE ] );
+                this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( variable );
+                delete variable[ VARIABLE.REGISTER_SETTER ];
+            }.bind(this);
             
-            console.log( variable );
             return variable;
             
         }
