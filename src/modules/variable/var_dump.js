@@ -61,9 +61,12 @@ PHP.Modules.prototype.var_dump = function() {
             
             str += $INDENT( indent ) + "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
             
-            var props = Object.keys( argument );
+            var props = Object.keys( argument ).filter(function( item ){
+                if (item.substring(PHP.VM.Class.PROPERTY.length) === "PHP.VM.Class.PROPERTY") {
+                    return item;
+                }
+            });
             
-         
             
             str += '(' + props.length + ') {\n';
             

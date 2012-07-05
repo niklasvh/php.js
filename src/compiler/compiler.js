@@ -8,6 +8,7 @@ PHP.Compiler = function( AST ) {
         this.src += this[ action.type ]( action ) + ";\n";     
     }, this );
 
+    this.INSIDE_METHOD = false;
 
 };
 

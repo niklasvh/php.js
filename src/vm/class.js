@@ -11,6 +11,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     methodArgumentPrefix = "_$_",
     propertyPrefix = PHP.VM.Class.PROPERTY,
     methodTypePrefix = "$£",
+    propertyTypePrefix = "$£$",
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     __call = "__call",
@@ -30,6 +31,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         var className = arguments[ 0 ], 
         classType = arguments[ 1 ], 
         opts = arguments[ 2 ],
+        INTERNAL_PROP_FETCH = "$InternalPropFetch",
         props = {},
         
         callMethod = function( methodName, args ) {
@@ -64,10 +66,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 
             }, this);
            */
-
+            console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ]);
             magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
             
-            return this[ methodPrefix + methodName ].call( this, $ );
+            return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
         };
    
         var Class = function( ctx ) {
@@ -78,7 +80,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 } else {
                     this[ propertyPrefix + propertyName ] = new PHP.VM.Variable( props[ propertyName ] );
                 }
-               
+                
+                this [ PHP.VM.Class.CLASS_PROPERTY + className + "_" + propertyPrefix + propertyName] = this[ propertyPrefix + propertyName ];
             }, this);
             
             // call constructor
@@ -134,11 +137,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         methods [ COMPILER.CLASS_PROPERTY ] = function( propertyName, propertyType, propertyDefault ) {
             props[ propertyName ] = propertyDefault;
             
-            /*
-            Object.defineProperty( Class.prototype, propertyPrefix + propertyName, {
-                value: new PHP.VM.Variable( propertyDefault )
+            
+            Object.defineProperty( Class.prototype, propertyTypePrefix + propertyName, {
+                value: propertyType
             });
-             */
+             
             return methods;
         };
 
@@ -264,18 +267,34 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 }
                   
             } else {
-              
-                if ( checkType( this[ methodTypePrefix + methodName ], PRIVATE ) && this[ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
-                    console.log( ctx );
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + className + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
-   
+               
+                if ( checkType( this[ methodTypePrefix + methodName ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                   
+                    // targeted function is private and inaccessible from current context, 
+                    // but let's make sure current context doesn't have it's own private method that has been overwritten
+                    if ( !ctx instanceof PHP.VM.ClassPrototype || 
+                        ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] === undefined ||
+                        ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
+                    }
                     
                 }
                 
               
             }
             
-           
+            // favor current context's private method
+            if ( ctx instanceof PHP.VM.ClassPrototype && 
+                ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined &&
+                checkType( this[ methodTypePrefix + methodName ], PRIVATE ) &&
+                ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] === ctx[ COMPILER.CLASS_NAME ] ) {
+                console.log( ctx );
+                
+                return this.callMethod.call( ctx, methodName, args );
+                
+            }
+            
+
             return this.callMethod.call( this, methodName, args );
             
            
@@ -286,10 +305,46 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         
         Class.prototype.callMethod = callMethod;
         
+        
         Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodName ) {
-            return Class.prototype[ COMPILER.METHOD_CALL ].apply( this, arguments);
             
-            this[ COMPILER.METHOD_CALL ].apply( this, arguments );
+            var args = Array.prototype.slice.call( arguments, 2 );
+
+            if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
+                // no method with that name found
+                  
+                if ( typeof this[ methodPrefix + __call ] === "function" ) {
+                    // __call method defined, let's call that instead then
+                    
+                    
+                    // determine which __call to use in case there are several defined
+                    if ( ctx instanceof PHP.VM ) {
+                        // normal call, use current context
+                        return callMethod.call( this, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
+                    } else {
+                        // static call, ensure current scope's __call() is favoured over the specified class's  __call()
+                        return ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
+                    }
+               
+                }
+                  
+            } else {
+               
+                if ( checkType( this[ methodTypePrefix + methodName ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                }
+                
+              
+            }
+           
+
+           
+            return this.callMethod.call( this, methodName, args );
+            
+            
+        //    return Class.prototype[ COMPILER.METHOD_CALL ].apply( this, arguments);
+            
+   
  
         };
         
@@ -381,6 +436,18 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 
                 
             } else {
+                //    console.log( propertyName, ctx);
+                //    console.log( this, ctx[ COMPILER.CLASS_NAME ] );
+                
+                
+                
+                if ( ctx instanceof PHP.VM.ClassPrototype && this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] !== undefined ) {
+                    // favor current context over object
+                    
+                    return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
+                }
+                
+                
                 return this[ propertyPrefix + propertyName ];
             }
             
@@ -397,6 +464,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
 PHP.VM.ClassPrototype = function() {};
 
 PHP.VM.Class.METHOD = "_";
+
+PHP.VM.Class.CLASS_PROPERTY = "_£";
 
 PHP.VM.Class.METHOD_PROTOTYPE = "$MP";
 

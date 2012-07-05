@@ -21,7 +21,7 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
     }, this);
     
     
-    src += "." + this.CLASS_DECLARE + '();\n;'
+    src += "." + this.CLASS_DECLARE + '()'
     
     
     return src;
@@ -305,7 +305,7 @@ PHP.Compiler.prototype.Node_Stmt_Catch = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
 
-    
+    this.INSIDE_METHOD = true;
     var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', ';
     var props = [];
     
@@ -325,7 +325,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         
     }, this)   
         
-    src += JSON.stringify( props ) + ', function( ' + this.VARIABLE + ' ) {\n';
+    src += JSON.stringify( props ) + ', function( ' + this.VARIABLE + ', ctx ) {\n';
     
     if (action.stmts !== null ) {
         
@@ -335,8 +335,8 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
     
     }
     
-    src += '\n} )\n';
-    
+    src += '})\n';
+    this.INSIDE_METHOD = false;
     return src;
 };
 

@@ -216,7 +216,7 @@ PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
             src += this.source( action.name ) + "." + this.VARIABLE_VALUE;
         }
         
-        //  return this.VARIABLE + '("' + this.source( action.name ) + '")';       
+    //  return this.VARIABLE + '("' + this.source( action.name ) + '")';       
     }
     
     return src + ")";
@@ -261,18 +261,24 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
     if ( action.variable.name !== "this" ) {
         return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     } else {
-        return "this." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
+        return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
     }
     
 };
 
 PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
-    var src = this.source( action.variable ) + "." + this.METHOD_CALL + '( this, "' + action.name + '"';
+    var src = this.source( action.variable ) + "." + this.METHOD_CALL + '( ';
+    
+    src += ( action.variable.name === "this") ? "ctx" : "this";
+
+    src += ', "' + action.name + '"';
 
     action.args.forEach(function( arg ) {
         src += ", " + this.source( arg.value );
     }, this);
+  
+    
   
     src += ")";
   
@@ -282,7 +288,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
     console.log(action);
-    var src = this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_CALL + '( this, "' + action.func + '"';
+    var src = this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.func + '"';
 
     action.args.forEach(function( arg ) {
         src += ", " + this.source( arg.value );

@@ -18,6 +18,10 @@ PHP.Lexer = function( src ) {
         re: /^abstract(?=\s)/i
     },
     {
+        value: PHP.Constants.T_IMPLEMENTS,
+        re: /^implements(?=\s)/i
+    },
+    {
         value: PHP.Constants.T_STATIC,
         re: /^static(?=\s)/i
     },
