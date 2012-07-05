@@ -16,6 +16,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     __call = "__call",
     __set = "__set",
     __get = "__get",
+    PRIVATE = "PRIVATE",
     __construct = "__construct";
     
     
@@ -262,6 +263,16 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                
                 }
                   
+            } else {
+              
+                if ( checkType( this[ methodTypePrefix + methodName ], PRIVATE ) && this[ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                    console.log( ctx );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + className + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
+   
+                    
+                }
+                
+              
             }
             
            
@@ -276,7 +287,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         Class.prototype.callMethod = callMethod;
         
         Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodName ) {
-            
             return Class.prototype[ COMPILER.METHOD_CALL ].apply( this, arguments);
             
             this[ COMPILER.METHOD_CALL ].apply( this, arguments );
@@ -327,7 +337,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                     props[ COMPILER.VARIABLE_VALUE ] = {
                         get : function(){
                             console.log( "getting", propertyName );
-                        console.log( $this );
+                            console.log( $this );
                             return callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] )[ COMPILER.VARIABLE_VALUE ];   
                              
                             
@@ -396,7 +406,7 @@ PHP.VM.Class.Predefined = {};
 
 PHP.VM.Class.PUBLIC = 1;
 PHP.VM.Class.PROTECTED = 2;
-PHP.VM.Class.PRIVATE = 2;
+PHP.VM.Class.PRIVATE = 4;
 PHP.VM.Class.STATIC = 8;
 PHP.VM.Class.ABSTRACT = 16;
 PHP.VM.Class.FINAL = 32;

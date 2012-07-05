@@ -69,16 +69,16 @@ PHP.VM = function( src, opts ) {
     /*
     var exec = new Function( "$$", "$", "ENV", src  );
         exec.call(this, $$, $, ENV);
-    
- */
-      
+
+       */
     try {
         var exec = new Function( "$$", "$", "ENV", src  );
         exec.call(this, $$, $, ENV);
     } catch( e ) {
         console.log("Caught: ", e);
     }
-      
+          
+
    
 };
 

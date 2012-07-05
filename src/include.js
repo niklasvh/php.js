@@ -46,6 +46,9 @@
             misc: {
                 eval: "js"  
             },
+            options: {
+                ini_set: "js"
+            },
             string: {
                 echo: "js",
                 implode: "js",
