@@ -148,6 +148,8 @@ PHP.Compiler.prototype.CLASS_GET = "$Class.Get";
 
 PHP.Compiler.prototype.CLASS_PROPERTY_GET = "$Prop";
 
+PHP.Compiler.prototype.STATIC_PROPERTY_GET = "$SProp";
+
 PHP.Compiler.prototype.CLASS_METHOD = "Method";
 
 PHP.Compiler.prototype.CLASS_PROPERTY = "Variable";

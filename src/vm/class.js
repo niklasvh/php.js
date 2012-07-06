@@ -19,6 +19,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     __get = "__get",
     PRIVATE = "PRIVATE",
     PUBLIC = "PUBLIC",
+    STATIC = "STATIC",
     PROTECTED = "PROTECTED",
     __construct = "__construct";
     
@@ -77,12 +78,20 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         };
    
         var Class = function( ctx ) {
-           
+         
             Object.keys( props ).forEach(function( propertyName ){
-                if ( Array.isArray( props[ propertyName ] ) ) {
-                    this[ propertyPrefix + propertyName ] = new PHP.VM.Variable( [] );
+                
+                if ( checkType(this[propertyTypePrefix + propertyName], STATIC)) {
+                // static, so refer to the one and only same value defined in actual prototype
+
+                //  this[ propertyPrefix + propertyName ] = this[ propertyPrefix + propertyName ];
+                    
                 } else {
-                    this[ propertyPrefix + propertyName ] = new PHP.VM.Variable( props[ propertyName ] );
+                    if ( Array.isArray( props[ propertyName ] ) ) {
+                        this[ propertyPrefix + propertyName ] = new PHP.VM.Variable( [] );
+                    } else {
+                        this[ propertyPrefix + propertyName ] = new PHP.VM.Variable( props[ propertyName ] );
+                    }
                 }
                 
                 this [ PHP.VM.Class.CLASS_PROPERTY + className + "_" + propertyPrefix + propertyName] = this[ propertyPrefix + propertyName ];
@@ -153,9 +162,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 }
                 
 
-                console.log(  );
+                
             } 
             
+            if ( checkType( propertyType, STATIC )) {
+                Object.defineProperty( Class.prototype,  propertyPrefix + propertyName, {
+                    value: propertyDefault
+                });
+            } 
             
             
             
@@ -386,6 +400,17 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
  
         };
         
+        Class.prototype[ COMPILER.STATIC_PROPERTY_GET ] = function( ctx, propertyClass, propertyName ) {
+            
+            var methodCTX;
+            if ( /^self$/i.test( propertyClass ) ) {
+                methodCTX = ctx;
+            }
+            
+            return methodCTX[ propertyPrefix + propertyName ];
+            
+            
+        };
        
         
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
@@ -450,34 +475,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                           
                 }
                 return obj;
-            /*
-                Object.defineProperty( obj, COMPILER.VARIABLE_VALUE,
-                {
-                    get : function(){
-                        
-                        if ( this[ methodPrefix + __get ] !== undefined ) {
-                            var value = callMethod.call( this, __get,  new PHP.VM.Variable( propertyName ) );   
-                            return value[ COMPILER.VARIABLE_VALUE ]; 
-                        }
-                    },  
-                    set : function( value ) {
-                        if ( this[ methodPrefix + __set ] !== undefined ) {
-                            callMethod.call( this, __set,  new PHP.VM.Variable( propertyName ), value );                      
-                        }
-                    }
-                }
-                );
-                    
-                    */
-                    
-                
-                
+              
                 
             } else {
-                //    console.log( propertyName, ctx);
-                //    console.log( this, ctx[ COMPILER.CLASS_NAME ] );
-                
-                
+
                 
                 if ( ctx instanceof PHP.VM.ClassPrototype && this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] !== undefined ) {
                     // favor current context over object

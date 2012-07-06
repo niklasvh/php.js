@@ -256,15 +256,6 @@ PHP.Compiler.prototype.Node_Expr_ConstFetch = function( action ) {
     
 };
 
-PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
-
-    if ( action.variable.name !== "this" ) {
-        return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
-    } else {
-        return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
-    }
-    
-};
 
 PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
@@ -284,6 +275,16 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
   
     return src;
 
+};
+
+PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
+
+    if ( action.variable.name !== "this" ) {
+        return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
+    } else {
+        return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
+    }
+    
 };
 
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
@@ -306,6 +307,20 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
 };
 
+PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
+    console.log( action );
+    var src = "";
+    if (/^(parent|self)$/i.test( action.Class.parts )) {
+        src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name.substring(1) + '"';
+    } else {
+        src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name.substring(1) + '"';
+    }
+    
+    src += ")";
+    
+    return src;
+    
+};
 
 PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
     console.log(action.items);
