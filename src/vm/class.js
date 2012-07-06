@@ -22,6 +22,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
     STATIC = "STATIC",
     ABSTRACT = "ABSTRACT",
     FINAL = "FINAL",
+    INTERFACE = "INTERFACE",
     PROTECTED = "PROTECTED",
     __destruct = "__destruct",
     __construct = "__construct";
@@ -112,7 +113,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
                 if (checkType( this[ COMPILER.CLASS_TYPE ], ABSTRACT ) ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot instantiate abstract class " + className, PHP.Constants.E_ERROR, true ); 
                 }
-                
+
+                // make sure we aren't initiating an interface 
+                if (checkType( this[ COMPILER.CLASS_TYPE ], INTERFACE ) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot instantiate interface " + className, PHP.Constants.E_ERROR, true ); 
+                }
                  
                 // register new class initiated into registry (for destructors at shutdown) 
                 initiatedClasses.push ( this ); 
@@ -164,6 +169,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
         
         methods [ COMPILER.CLASS_PROPERTY ] = function( propertyName, propertyType, propertyDefault ) {
             props[ propertyName ] = propertyDefault;
+            
+            // can't define members for interface
+            if ( classType === PHP.VM.Class.INTERFACE ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Interfaces may not include member variables", PHP.Constants.E_ERROR, true ); 
+            }
             
             if ( Class.prototype[ propertyTypePrefix + propertyName ] !== undefined &&  Class.prototype[ propertyTypePrefix + propertyName ] !== propertyType ) {
                 // property has been defined in an inherited class and isn't of same type as newly defined one, 
