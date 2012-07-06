@@ -173,6 +173,11 @@ PHP.VM.Variable = function( arg ) {
                 this[ this.TYPE ] = this.FLOAT;
             }
         } else if ( newValue === null ) {   
+            
+            if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
+                value[ COMPILER.CLASS_DESTRUCT ]();
+            }
+            
             this[ this.TYPE ] = this.NULL;
 
         } else if ( typeof newValue === "boolean" ) {

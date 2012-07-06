@@ -22,12 +22,20 @@ PHP.Lexer = function( src ) {
         re: /^implements(?=\s)/i
     },
     {
+        value: PHP.Constants.T_INTERFACE,
+        re: /^interface(?=\s)/i
+    },
+    {
         value: PHP.Constants.T_STATIC,
         re: /^static(?=\s)/i
     },
     {
         value: PHP.Constants.T_GLOBAL,
         re: /^global(?=\s)/i
+    },
+    {
+        value: PHP.Constants.T_CLONE,
+        re: /^clone(?=\s)/i
     },
     {
         value: PHP.Constants.T_THROW,

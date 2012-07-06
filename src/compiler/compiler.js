@@ -28,7 +28,6 @@ PHP.Compiler.prototype.stmts = function( stmts ) {
     
     stmts.forEach(function( stmt ){
         src += this.source( stmt );
-        
         if ( /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
             // trigger POST_MOD
             src += "." + this.VARIABLE_VALUE;
@@ -160,6 +159,8 @@ PHP.Compiler.prototype.CLASS_PROPERTY = "Variable";
 PHP.Compiler.prototype.CLASS_DECLARE = "Create";
 
 PHP.Compiler.prototype.CLASS_NAMES = "$CLASSNAMES";
+
+PHP.Compiler.prototype.CLASS_DESTRUCT = "$Destruct";
 
 PHP.Compiler.prototype.ARRAY_VALUE = "v";
 

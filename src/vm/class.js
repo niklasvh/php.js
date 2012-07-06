@@ -5,7 +5,7 @@
  */
 
 
-PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
+PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) {
     
     var methodPrefix = PHP.VM.Class.METHOD,
     methodArgumentPrefix = "_$_",
@@ -21,6 +21,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     PUBLIC = "PUBLIC",
     STATIC = "STATIC",
     PROTECTED = "PROTECTED",
+    __destruct = "__destruct",
     __construct = "__construct";
     
     
@@ -71,7 +72,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             
             var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
            
-            console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ]);
+            console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             //magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
             
             return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
@@ -101,6 +102,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             
             if ( ctx !== true ) {
                 // check if we are extending class, i.e. don't call constructors
+                 
+                // register new class initiated into registry (for destructors at shutdown) 
+                initiatedClasses.push ( this ); 
                  
                 // PHP 5 style constructor in current class
                 
@@ -364,7 +368,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         
         Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodClass, methodName ) {
             
-            var args = Array.prototype.slice.call( arguments, 2 );
+            var args = Array.prototype.slice.call( arguments, 3 );
 
             if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
                 // no method with that name found
@@ -436,7 +440,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             
             
         };
-       
+        
         
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
            
@@ -519,6 +523,25 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             
         };
         
+        
+        Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx ) {
+            
+             console.log('destruct', ctx);
+            if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
+                return callMethod.call( this, __destruct, [] );         
+            }
+                
+
+                
+            // PHP 5 style constructor in any inherited class
+                
+            else if ( typeof this[ methodPrefix + __construct ] === "function" ) {
+                return callMethod.call( this, __destruct, [] );         
+            }
+            
+           
+            
+        };
         
         return methods;
     };

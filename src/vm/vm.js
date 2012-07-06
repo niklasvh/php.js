@@ -22,7 +22,8 @@ PHP.VM = function( src, opts ) {
     ENV.$Class = (function() {
         var classRegistry = {},
         magicConstants = {},
-        classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants );
+        initiatedClasses = [],
+        classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants, initiatedClasses );
         
         ENV[ PHP.Compiler.prototype.MAGIC_CONSTANTS ] = function( constantName ) {
             return new PHP.VM.Variable( magicConstants[ constantName ] );
