@@ -75,7 +75,8 @@ PHP.VM = function( src, opts ) {
         var exec = new Function( "$$", "$", "ENV", src  );
         exec.call(this, $$, $, ENV);
     } catch( e ) {
-        console.log("Caught: ", e);
+        console.log("Caught: ", e.message, e);
+        console.log("Buffer: ", this.OUTPUT_BUFFER);
     }
           
 
