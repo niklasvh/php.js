@@ -502,9 +502,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
 
                 
                 if ( ctx instanceof PHP.VM.ClassPrototype && this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] !== undefined ) {
-                    // favor current context over object
-                    
-                    return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
+                    // favor current context over object only if current context property is private
+                    if ( checkType( ctx[ propertyTypePrefix + propertyName ], PRIVATE ) ) {
+                        return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
+                    }
                 }
                 
                 
