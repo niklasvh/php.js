@@ -18,6 +18,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
     __set = "__set",
     __get = "__get",
     PRIVATE = "PRIVATE",
+    PUBLIC = "PUBLIC",
+    PROTECTED = "PROTECTED",
     __construct = "__construct";
     
     
@@ -138,6 +140,24 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         
         methods [ COMPILER.CLASS_PROPERTY ] = function( propertyName, propertyType, propertyDefault ) {
             props[ propertyName ] = propertyDefault;
+            
+            if ( !checkType( propertyType, PUBLIC ) && Class.prototype[ propertyTypePrefix + propertyName ] !== undefined &&  Class.prototype[ propertyTypePrefix + propertyName ] !== propertyType ) {
+                // property has been defined in an inherited class and isn't of same type as newly defined one, 
+                // so let's make sure it is weaker or throw an error
+                
+                var type = Class.prototype[ propertyTypePrefix + propertyName ],
+                inheritClass = Object.getPrototypeOf( Class.prototype )[ COMPILER.CLASS_NAME ];
+                
+                if ( ( checkType( propertyType, PRIVATE ) || checkType( propertyType, PROTECTED ) ) && checkType( type, PUBLIC )  ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::$" + propertyName + " must be public (as in class " + inheritClass + ")", PHP.Constants.E_ERROR, true );
+                }
+                
+
+                console.log(  );
+            } 
+            
+            
+            
             
             
             Object.defineProperty( Class.prototype, propertyTypePrefix + propertyName, {
