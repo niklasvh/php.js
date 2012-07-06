@@ -150,20 +150,41 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         methods [ COMPILER.CLASS_PROPERTY ] = function( propertyName, propertyType, propertyDefault ) {
             props[ propertyName ] = propertyDefault;
             
-            if ( !checkType( propertyType, PUBLIC ) && Class.prototype[ propertyTypePrefix + propertyName ] !== undefined &&  Class.prototype[ propertyTypePrefix + propertyName ] !== propertyType ) {
+            if ( Class.prototype[ propertyTypePrefix + propertyName ] !== undefined &&  Class.prototype[ propertyTypePrefix + propertyName ] !== propertyType ) {
                 // property has been defined in an inherited class and isn't of same type as newly defined one, 
                 // so let's make sure it is weaker or throw an error
                 
                 var type = Class.prototype[ propertyTypePrefix + propertyName ],
                 inheritClass = Object.getPrototypeOf( Class.prototype )[ COMPILER.CLASS_NAME ];
                 
-                if ( ( checkType( propertyType, PRIVATE ) || checkType( propertyType, PROTECTED ) ) && checkType( type, PUBLIC )  ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::$" + propertyName + " must be public (as in class " + inheritClass + ")", PHP.Constants.E_ERROR, true );
+                // redeclaring a (non-private) static as non-static
+                if (!checkType( propertyType, STATIC ) && checkType( type, STATIC ) && !checkType( type, PRIVATE ) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redeclare static " + inheritClass + "::$" + propertyName + " as non static " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
+                }
+                
+                // redeclaring a (non-private) non-static as static
+                if (checkType( propertyType, STATIC ) && !checkType( type, STATIC ) && !checkType( type, PRIVATE ) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redeclare non static " + inheritClass + "::$" + propertyName + " as static " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
+                }
+                
+                if (!checkType( propertyType, PUBLIC ) ) {
+                    
+                    if ( ( checkType( propertyType, PRIVATE ) || checkType( propertyType, PROTECTED ) ) && checkType( type, PUBLIC )  ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::$" + propertyName + " must be public (as in class " + inheritClass + ")", PHP.Constants.E_ERROR, true );
+                    }
+                    
+                    if ( ( checkType( propertyType, PRIVATE )  ) && checkType( type, PROTECTED )  ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::$" + propertyName + " must be protected (as in class " + inheritClass + ") or weaker", PHP.Constants.E_ERROR, true );
+                    }
+                    
                 }
                 
 
+
                 
-            } 
+            }
+            
+           
             
             if ( checkType( propertyType, STATIC )) {
                 Object.defineProperty( Class.prototype,  propertyPrefix + propertyName, {
