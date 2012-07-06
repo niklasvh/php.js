@@ -28,5 +28,5 @@ Redeclare inherited protected static property as private static.
 ?>
 --EXPECTF--
 
-Fatal error: Access level to B::$p must be protected (as in class A) or weaker in %s on line 18
+Fatal error: Access level to B::$p must be protected (as in class A) or weaker in %s on line %d
 

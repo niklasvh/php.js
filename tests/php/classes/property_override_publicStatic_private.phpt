@@ -29,5 +29,5 @@ Redeclare inherited public static property as private.
 ?>
 --EXPECTF--
 
-Fatal error: Cannot redeclare static A::$p as non static B::$p in %s on line 18
+Fatal error: Cannot redeclare static A::$p as non static B::$p in %s on line %d
 
