@@ -41,7 +41,10 @@ PHP.Compiler.prototype.stmts = function( stmts ) {
 };
 
 PHP.Compiler.prototype.source = function( action ) {
-
+    if ( action === null ) {
+        return "undefined";
+    }
+    
     if (typeof action === "string") {
         return action;
     } else if ( action === undefined ) {

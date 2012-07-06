@@ -87,7 +87,7 @@ PHP.VM.Array = function( ENV ) {
             variable[ VARIABLE.DEFINED  ] = false;
             variable[ VARIABLE.REGISTER_SETTER ] = function() {
                 // the value was actually defined, let's register item into array
-                this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( $('index')[ COMPILER.VARIABLE_VALUE ] );
+                this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( ($('index')[ COMPILER.VARIABLE_VALUE ] !== null) ? $('index')[ COMPILER.VARIABLE_VALUE ] : ++this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] );
                 this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( variable );
                 delete variable[ VARIABLE.REGISTER_SETTER ];
             }.bind(this);

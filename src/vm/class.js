@@ -426,6 +426,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             var methodCTX;
             if ( /^self$/i.test( propertyClass ) ) {
                 methodCTX = ctx;
+            } else if ( /^parent$/i.test( propertyClass )) {
+                methodCTX = Object.getPrototypeOf( ctx );
+            } else {
+                methodCTX = this;
             }
             
             return methodCTX[ propertyPrefix + propertyName ];
