@@ -288,8 +288,14 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
     console.log(action);
-    var src = this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.func + '"';
-
+    var src = "";
+    if (/^(parent|self)$/i.test( action.Class.parts )) {
+        src += "this." + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.func + '"';
+    } else {
+        src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.func + '"';
+    }
+    
+ 
     action.args.forEach(function( arg ) {
         src += ", " + this.source( arg.value );
     }, this);

@@ -26,48 +26,50 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]);
     }
     
+    var buildVariableContext = function( methodName, args, className ) {
+        
+        var $ = PHP.VM.VariableHandler(),
+        argumentObj = this[ methodArgumentPrefix + methodName ];
+        
+        if ( Array.isArray(argumentObj) ) {
+            argumentObj.forEach( function( arg, index ) {
+                // assign arguments to correct variable names
+                if ( args[ index ] !== undefined ) {
+                    if ( args[ index ] instanceof PHP.VM.VariableProto) {
+                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
+                    } else {
+                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ];
+                    }
+                } else {
+                    // no argument passed for the specified index
+                    $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+                }
+                
+
+            });
+        }
+        
+        $("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className + "::" + methodName;
+        
+        return $;
+    }
+    
+    
+    
     return function() {
        
         var className = arguments[ 0 ], 
         classType = arguments[ 1 ], 
         opts = arguments[ 2 ],
-        INTERNAL_PROP_FETCH = "$InternalPropFetch",
         props = {},
         
         callMethod = function( methodName, args ) {
-            var $ = PHP.VM.VariableHandler(),
-            argumentObj = this[ methodArgumentPrefix + methodName ];
-            
-            
-            if ( Array.isArray(argumentObj) ) {
-                argumentObj.forEach( function( arg, index ) {
-                    // assign arguments to correct variable names
-                    if ( args[ index ] !== undefined ) {
-                        if ( args[ index ] instanceof PHP.VM.VariableProto) {
-                            $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
-                        } else {
-                            $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ];
-                        }
-                    } else {
-                        // no argument passed for the specified index
-                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
-                    }
-                
 
-                });
-            }
-            /*
-            args.forEach(function( arg, index ) {
-                if (arg instanceof PHP.VM.VariableProto) {
-                    $( argumentObj[ index ].name ).$ = arg.$;
-                } else {
-                    $( argumentObj[ index ].name ).$ = arg;
-                }
-                
-            }, this);
-           */
+            
+            var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
+           
             console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ]);
-            magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
+            //magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
             
             return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
         };
@@ -306,7 +308,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
         Class.prototype.callMethod = callMethod;
         
         
-        Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodName ) {
+        Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodClass, methodName ) {
             
             var args = Array.prototype.slice.call( arguments, 2 );
 
@@ -337,7 +339,24 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
               
             }
            
-
+           
+         
+            //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ]);
+            //  magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
+            
+            if ( /^parent$/i.test( methodClass ) ) {
+                var parent = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
+                console.log('static ', methodName, parent, this);
+                
+                
+                var $ = buildVariableContext.call( this, methodName, args, parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
+           
+   
+                return parent[ methodPrefix + methodName ].call( this, $, parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
+            }
+            
+            
+           
            
             return this.callMethod.call( this, methodName, args );
             

@@ -46,7 +46,7 @@ PHP.Compiler.prototype.Node_Scalar_LNumber = function( action ) {
 
 PHP.Compiler.prototype.Node_Scalar_MethodConst = function( action ) {
 
-    return this.CTX + PHP.Compiler.prototype.MAGIC_CONSTANTS + '("METHOD")';
+    return this.VARIABLE + '("$__METHOD__")';
     
 };
 
