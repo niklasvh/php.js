@@ -105,6 +105,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
             if ( ctx !== true ) {
                 // check if we are extending class, i.e. don't call constructors
                  
+                 
+                 
+                 
                 // make sure we aren't initiating an abstract class 
                 if (checkType( this[ COMPILER.CLASS_TYPE ], ABSTRACT ) ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot instantiate abstract class " + className, PHP.Constants.E_ERROR, true ); 
@@ -222,19 +225,25 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
              * signature checks
              */
             
+                        
+            // can't override final 
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], FINAL ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "()", PHP.Constants.E_ERROR, true );
+            }
+            
             // can't make static non-static
-            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], "STATIC" ) && !checkType( methodType, "STATIC" ) ) {
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], STATIC ) && !checkType( methodType, STATIC ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() non static in class " + className, PHP.Constants.E_ERROR, true );
             }
             
             // can't make non-static  static
-            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && !checkType( Class.prototype[ methodTypePrefix + methodName ], "STATIC" ) && checkType( methodType, "STATIC" ) ) {
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && !checkType( Class.prototype[ methodTypePrefix + methodName ], STATIC ) && checkType( methodType, STATIC ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make non static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() static in class " + className, PHP.Constants.E_ERROR, true );
             }
  
             // A final method cannot be abstract
             if ( checkType( methodType, ABSTRACT ) && checkType( methodType, FINAL ) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member", PHP.Constants.E_ERROR, true );
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member in class", PHP.Constants.E_ERROR );
             }
            
             // __call
@@ -306,6 +315,23 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
                     }
                 });
                 
+                // interfaces
+                Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
+                    
+                    var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;
+                    Object.keys( interfaceProto ).forEach(function( item ){
+                        if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
+                        
+                            var methodName = item.substring( methodPrefix.length );
+                            if (Class.prototype[ methodTypePrefix + methodName ] === undefined ) {
+                                ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + interfaceName + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
+                            }
+                        }
+                    });
+                    
+                });
+
+                
             }
             
             
@@ -314,24 +340,44 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
         };
         
         
-        
+        /*
+         * Extends and implements
+         */
         
         if (opts.Extends  !== undefined) {
-            Class.prototype = new classRegistry[ opts.Extends.toLowerCase() ]( true );
+            
+            var Extends = classRegistry[ opts.Extends.toLowerCase() ];
+            
+            if ( Extends.prototype[ COMPILER.CLASS_TYPE ] === PHP.VM.Class.INTERFACE ) {
+                // can't extend interface
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " cannot extend from interface " + opts.Extends, PHP.Constants.E_ERROR, true );
+              
+            }
+            
+            Class.prototype = new Extends( true );
         } else {
             Class.prototype = new PHP.VM.ClassPrototype();
+            Class.prototype[ PHP.VM.Class.INTERFACES ] = [];
         }
         
-        /*
-    
-        if (opts.Extends  !== undefined) {
-            Class.prototype = new classRegistry[ opts.Extends ]( true );
-        }
-         */
-    
         if (opts.Implements !== undefined ) {
-            implementArr = opts.Implements
+
+            opts.Implements.forEach(function( interfaceName ){
+                var Implements = classRegistry[ interfaceName.toLowerCase() ];
+                
+                if ( Implements.prototype[ COMPILER.CLASS_TYPE ] !== PHP.VM.Class.INTERFACE ) {
+                    // can't implement non-interface
+                    ENV[ PHP.Compiler.prototype.ERROR ]( className + " cannot implement " + interfaceName + " - it is not an interface", PHP.Constants.E_ERROR, true );
+                }
+                
+                if ( Class.prototype[ PHP.VM.Class.INTERFACES ].indexOf( interfaceName) === -1 ) {
+                    // only add interface if it isn't present already
+                    Class.prototype[ PHP.VM.Class.INTERFACES ].push( interfaceName );
+                }
+                
+            });
         }
+
         
         Class.prototype[ COMPILER.CLASS_TYPE ] = classType;
         
@@ -593,6 +639,8 @@ PHP.VM.ClassPrototype = function() {};
 PHP.VM.Class.METHOD = "_";
 
 PHP.VM.Class.CLASS_PROPERTY = "_£";
+
+PHP.VM.Class.INTERFACES = "$Interfaces";
 
 PHP.VM.Class.METHOD_PROTOTYPE = "$MP";
 

@@ -63,6 +63,7 @@
                 token_name: "js"
             },
             variable: {
+                empty: "js",
                 is_callable: "js",
                 isset: "js",
                 print_r: "js",
