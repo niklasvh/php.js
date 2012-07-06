@@ -284,13 +284,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
                 
               
             }
-            
+
             // favor current context's private method
             if ( ctx instanceof PHP.VM.ClassPrototype && 
                 ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined &&
-                checkType( this[ methodTypePrefix + methodName ], PRIVATE ) &&
+                checkType( ctx[ methodTypePrefix + methodName ], PRIVATE ) &&
                 ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] === ctx[ COMPILER.CLASS_NAME ] ) {
-                console.log( ctx );
                 
                 return this.callMethod.call( ctx, methodName, args );
                 
@@ -340,30 +339,30 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants ) {
             }
            
            
-         
-            //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ]);
-            //  magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
+            var methodToCall,
+            methodCTX,
+            $;
             
             if ( /^parent$/i.test( methodClass ) ) {
                 var parent = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
-                console.log('static ', methodName, parent, this);
                 
-                
-                var $ = buildVariableContext.call( this, methodName, args, parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
+                $ = buildVariableContext.call( this, methodName, args, parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
            
+                methodToCall = parent[ methodPrefix + methodName ];
+                methodCTX = parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
    
-                return parent[ methodPrefix + methodName ].call( this, $, parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
-            }
+                if ( checkType( parent[ methodTypePrefix + methodName ], PRIVATE ) && parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                }
+   
+                return methodToCall.call( this, $, methodCTX );
+            } 
             
             
            
            
             return this.callMethod.call( this, methodName, args );
             
-            
-        //    return Class.prototype[ COMPILER.METHOD_CALL ].apply( this, arguments);
-            
-   
  
         };
         
