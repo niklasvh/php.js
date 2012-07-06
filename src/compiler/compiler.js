@@ -144,6 +144,8 @@ PHP.Compiler.prototype.STATIC_CALL = "$StaticCall";
 
 PHP.Compiler.prototype.CLASS_NAME = "$Name";
 
+PHP.Compiler.prototype.INTERFACE_NEW = "$Class.INew";
+
 PHP.Compiler.prototype.CLASS_NEW = "$Class.New";
 
 PHP.Compiler.prototype.CLASS_GET = "$Class.Get";
@@ -161,6 +163,8 @@ PHP.Compiler.prototype.CLASS_DECLARE = "Create";
 PHP.Compiler.prototype.CLASS_NAMES = "$CLASSNAMES";
 
 PHP.Compiler.prototype.CLASS_DESTRUCT = "$Destruct";
+
+PHP.Compiler.prototype.CLASS_TYPE = "$CType";
 
 PHP.Compiler.prototype.ARRAY_VALUE = "v";
 

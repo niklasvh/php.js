@@ -1,4 +1,32 @@
 
+PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
+    
+    console.log( action );
+    
+    var src = this.CTX + this.INTERFACE_NEW + '( "' + action.name + '", [';
+    
+    var exts = [];
+    
+    action.Extends.forEach(function( ext ){
+        exts.push( '"' + ext + '"' );
+    }, this);
+    
+    src += exts.join(", ")
+    
+    src += "])\n";
+    
+    this.currentClass = action.name;
+    action.stmts.forEach(function( stmt ) {
+        src += this.source( stmt );
+    }, this);
+    
+    
+    src += "." + this.CLASS_DECLARE + '()'
+    
+    
+    return src;
+};
+
 PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
     
     console.log( action );
@@ -10,7 +38,12 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
     }
     
     if ( action.Implements.length > 0 ) {
-        src += 'Implements: ' + action.Implements;
+        if ( action.Extends !== null ) {
+            src += ", "
+        }
+        src += 'Implements: [' + action.Implements.map(function( item ){
+            return '"' + item.parts + '"';
+        }).join(", ") + "]";
     }
     
     src += "})\n";

@@ -20,6 +20,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
     PRIVATE = "PRIVATE",
     PUBLIC = "PUBLIC",
     STATIC = "STATIC",
+    ABSTRACT = "ABSTRACT",
+    FINAL = "FINAL",
     PROTECTED = "PROTECTED",
     __destruct = "__destruct",
     __construct = "__construct";
@@ -103,6 +105,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
             if ( ctx !== true ) {
                 // check if we are extending class, i.e. don't call constructors
                  
+                // make sure we aren't initiating an abstract class 
+                if (checkType( this[ COMPILER.CLASS_TYPE ], ABSTRACT ) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot instantiate abstract class " + className, PHP.Constants.E_ERROR, true ); 
+                }
+                
+                 
                 // register new class initiated into registry (for destructors at shutdown) 
                 initiatedClasses.push ( this ); 
                  
@@ -182,8 +190,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
                     }
                     
                 }
-                
-
 
                 
             }
@@ -225,7 +231,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && !checkType( Class.prototype[ methodTypePrefix + methodName ], "STATIC" ) && checkType( methodType, "STATIC" ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make non static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() static in class " + className, PHP.Constants.E_ERROR, true );
             }
-            
+ 
+            // A final method cannot be abstract
+            if ( checkType( methodType, ABSTRACT ) && checkType( methodType, FINAL ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member", PHP.Constants.E_ERROR, true );
+            }
            
             // __call
             if ( methodName === __call  ) { 
@@ -234,7 +244,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + methodName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
                 }
                 
-                if ( !checkType( methodType, "PUBLIC" ) || checkType( methodType, "STATIC" ) ) {
+                if ( !checkType( methodType, PUBLIC ) || checkType( methodType, STATIC ) ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "The magic method " + methodName + "() must have public visibility and cannot be static", PHP.Constants.E_CORE_WARNING, true );
                 }
                 
@@ -259,7 +269,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
             // end signature checks
             
             Object.defineProperty( Class.prototype, PHP.VM.Class.METHOD_PROTOTYPE + methodName, {
-                value: Class.prototype 
+                value: Class.prototype
             });
             
             Object.defineProperty( Class.prototype, methodTypePrefix + methodName, {
@@ -267,7 +277,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
             });
             
             Object.defineProperty( Class.prototype, methodPrefix + methodName, {
-                value: methodFunc 
+                value: methodFunc,
+                enumerable: true
             });
             
             Object.defineProperty( Class.prototype, methodArgumentPrefix + methodName, {
@@ -279,7 +290,26 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
             
         methods [ COMPILER.CLASS_DECLARE ] = function() {
             classRegistry[ className.toLowerCase() ] = Class;
-               
+            
+            if ( !checkType( classType, ABSTRACT ) ) {
+                // make sure there are no abstract methods left undeclared
+                
+                
+                Object.keys( Class.prototype ).forEach(function( item ){
+                    if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
+                        
+                        var methodName = item.substring( methodPrefix.length );
+                        if ( checkType( Class.prototype[ methodTypePrefix + methodName ], ABSTRACT ) ) {
+                            ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + className + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
+                        }
+                        console.log( methodName );
+                    }
+                });
+                
+            }
+            
+            
+            
             return Class;
         };
         
@@ -302,6 +332,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
         if (opts.Implements !== undefined ) {
             implementArr = opts.Implements
         }
+        
+        Class.prototype[ COMPILER.CLASS_TYPE ] = classType;
         
         Class.prototype[ COMPILER.CLASS_NAME ] = className;
         
@@ -403,15 +435,22 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
             $;
             
             if ( /^parent$/i.test( methodClass ) ) {
-                var parent = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
+                var proto = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
                 
-                $ = buildVariableContext.call( this, methodName, args, parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
+                methodToCall = proto[ methodPrefix + methodName ];
+                methodCTX = proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
+                
+                $ = buildVariableContext.call( this, methodName, args, methodCTX[ COMPILER.CLASS_NAME ] );
            
-                methodToCall = parent[ methodPrefix + methodName ];
-                methodCTX = parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
+
    
-                if ( checkType( parent[ methodTypePrefix + methodName ], PRIVATE ) && parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + parent[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                if ( checkType( proto[ methodTypePrefix + methodName ], PRIVATE ) && methodCTX[ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                }
+               
+                if ( checkType( proto[ methodTypePrefix + methodName ], ABSTRACT ) ) {
+                    
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call abstract method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + methodName + "()", PHP.Constants.E_ERROR, true ); 
                 }
    
                 return methodToCall.call( this, $, methodCTX );
@@ -526,7 +565,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
         
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx ) {
             
-             console.log('destruct', ctx);
+            console.log('destruct', ctx);
             if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
                 return callMethod.call( this, __destruct, [] );         
             }
@@ -567,4 +606,5 @@ PHP.VM.Class.PRIVATE = 4;
 PHP.VM.Class.STATIC = 8;
 PHP.VM.Class.ABSTRACT = 16;
 PHP.VM.Class.FINAL = 32;
+PHP.VM.Class.INTERFACE = 64;
 

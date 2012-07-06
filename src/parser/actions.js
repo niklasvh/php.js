@@ -1009,11 +1009,11 @@ PHP.Parser.prototype.yyn160 = function () {
     if (a & this.MODIFIER_FINAL && b & this.MODIFIER_FINAL) {
         throw new Error('Multiple final modifiers are not allowed');
     }
-
+/*
     if (a & 48 && b & 48) {
         throw new Error('Cannot use the final and abstract modifier at the same time');
     }
-
+*/
     this.yyval =  a | b;
 };
 

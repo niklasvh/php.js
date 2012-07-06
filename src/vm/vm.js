@@ -30,6 +30,9 @@ PHP.VM = function( src, opts ) {
         };
         
         return {
+            INew: function( name, exts ) {
+                return classHandler( name, PHP.VM.Class.INTERFACE, exts );
+            },
             New: function() {
                 return classHandler.apply( null, arguments );
             },

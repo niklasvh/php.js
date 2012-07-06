@@ -29,6 +29,10 @@ PHP.Lexer = function( src ) {
         value: PHP.Constants.T_STATIC,
         re: /^static(?=\s)/i
     },
+        {
+        value: PHP.Constants.T_FINAL,
+        re: /^final(?=\s)/i
+    },
     {
         value: PHP.Constants.T_GLOBAL,
         re: /^global(?=\s)/i
