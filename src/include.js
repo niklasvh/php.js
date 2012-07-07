@@ -44,6 +44,8 @@
                 call_user_func: "js"  
             },
             misc: {
+                define: "js",
+                defined: "js",
                 eval: "js"  
             },
             options: {

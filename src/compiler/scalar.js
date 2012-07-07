@@ -46,12 +46,27 @@ PHP.Compiler.prototype.Node_Scalar_LNumber = function( action ) {
 
 PHP.Compiler.prototype.Node_Scalar_MethodConst = function( action ) {
 
-    return this.VARIABLE + '("$__METHOD__")';
-    
+    return this.VARIABLE + '("$__METHOD__")';  
+};
+
+PHP.Compiler.prototype.Node_Scalar_FuncConst = function( action ) {
+
+    return this.VARIABLE + '("$__FUNCTION__")';  
+};
+
+PHP.Compiler.prototype.Node_Scalar_ClassConst = function( action ) {
+
+    return this.VARIABLE + '("$__CLASS__")';  
 };
 
 PHP.Compiler.prototype.Node_Scalar_FileConst = function( action ) {
 
     return this.CTX + PHP.Compiler.prototype.MAGIC_CONSTANTS + '("FILE")';
+    
+};
+
+PHP.Compiler.prototype.Node_Scalar_LineConst = function( action ) {
+
+    return this.CTX + PHP.Compiler.prototype.MAGIC_CONSTANTS + '("LINE")';
     
 };

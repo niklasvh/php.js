@@ -114,6 +114,9 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
     return src;
 };
 
+PHP.Compiler.prototype.Node_Expr_UnaryPlus = function( action ) {
+    return this.source( action.expr );
+};
 
 PHP.Compiler.prototype.Node_Expr_UnaryMinus = function( action ) {
     return this.source( action.expr ) + "." + this.NEG + "()";
@@ -287,8 +290,16 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
     
 };
 
+PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
+
+   
+        return this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).'  + this.CLASS_CONSTANT_FETCH + '( this, "' + action.name  + '" )';
+    
+    
+};
+
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
-    console.log(action);
+
     var src = "";
     if (/^(parent|self)$/i.test( action.Class.parts )) {
         src += "this." + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.func + '"';
@@ -308,7 +319,7 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
-    console.log( action );
+   
     var src = "";
     if (/^(parent|self)$/i.test( action.Class.parts )) {
         src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name.substring(1) + '"';

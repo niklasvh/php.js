@@ -164,6 +164,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
         methods = {};
         
         /*
+         * Declare class constant
+         */ 
+        methods [ COMPILER.CLASS_CONSTANT ] = function( constantName, constantValue ) {
+            
+            return methods;
+        };
+        
+        /*
          * Declare class property
          */       
         
@@ -308,7 +316,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
         };
             
         methods [ COMPILER.CLASS_DECLARE ] = function() {
-            classRegistry[ className.toLowerCase() ] = Class;
             
             if ( !checkType( classType, ABSTRACT ) ) {
                 // make sure there are no abstract methods left undeclared
@@ -536,6 +543,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
             
         };
         
+        Class.prototype[ COMPILER.CLASS_CONSTANT_FETCH ] = function( ctx, constantName ) {
+            
+            
+        };
         
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
            
@@ -637,6 +648,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
            
             
         };
+        
+        // register class
+        classRegistry[ className.toLowerCase() ] = Class;
         
         return methods;
     };

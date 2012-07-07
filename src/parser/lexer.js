@@ -26,6 +26,10 @@ PHP.Lexer = function( src ) {
         re: /^interface(?=\s)/i
     },
     {
+        value: PHP.Constants.T_CONST,
+        re: /^const(?=\s)/i
+    },
+    {
         value: PHP.Constants.T_STATIC,
         re: /^static(?=\s)/i
     },

@@ -369,6 +369,15 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
     return src;
 };
 
+PHP.Compiler.prototype.Node_Stmt_ClassConst = function( action ) {
+    var src = "";
+   
+    ((Array.isArray( action.consts[ 0 ] )) ?  action.consts[ 0 ] : action.consts ).forEach(function( constant ){
+        src += "." + this.CLASS_CONSTANT + '("' + constant.name + '", ' + this.source( constant.value ) + ")\n"
+     }, this);
+    return src;
+
+};
 
 PHP.Compiler.prototype.Node_Stmt_Return = function( action ) {
     return "return " + this.source( action.expr );
