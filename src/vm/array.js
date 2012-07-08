@@ -37,22 +37,34 @@ PHP.VM.Array = function( ENV ) {
                 items.forEach( function( item ) {
                
                     // this.$Prop( this, $this.VALUES ).$.push( item[ COMPILER.ARRAY_VALUE ] );
-                    this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( new PHP.VM.Variable( item[ COMPILER.ARRAY_VALUE ][ COMPILER.VARIABLE_VALUE ] ) );
-               
+                    if (item[ COMPILER.ARRAY_VALUE ][ VARIABLE.CLASS_CONSTANT ] !== true && item[ COMPILER.ARRAY_VALUE ][ VARIABLE.CONSTANT ] !== true) {
+                        this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( new PHP.VM.Variable( item[ COMPILER.ARRAY_VALUE ][ COMPILER.VARIABLE_VALUE ] ) );
+                    } else {
+                        console.log(item[ COMPILER.ARRAY_VALUE ]);
+                        this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( item[ COMPILER.ARRAY_VALUE ] );
+                    }
+                    
                 
                     if ( item[ COMPILER.ARRAY_KEY ] !== undefined ) {
-                        var key = ( item[ COMPILER.ARRAY_KEY ] instanceof PHP.VM.Variable ) ? item[ COMPILER.ARRAY_KEY ][ COMPILER.VARIABLE_VALUE ] : item[ COMPILER.ARRAY_KEY ];
+                        if ( !item[ COMPILER.ARRAY_KEY ] instanceof PHP.VM.Variable || (item[ COMPILER.ARRAY_KEY ][ VARIABLE.CLASS_CONSTANT ] !== true && item[ COMPILER.ARRAY_KEY ][ VARIABLE.CONSTANT ] !== true )) {
+                            var key = ( item[ COMPILER.ARRAY_KEY ] instanceof PHP.VM.Variable ) ? item[ COMPILER.ARRAY_KEY ][ COMPILER.VARIABLE_VALUE ] : item[ COMPILER.ARRAY_KEY ];
                    
-                        if ( /^\d+$/.test( key )) {
-                            // integer key
+                            if ( /^\d+$/.test( key )) {
+                                // integer key
                         
-                            this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( key );
+                                this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( key );
                         
-                            // todo complete
-                            this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] = Math.max( this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ], key );
+                                // todo complete
+                                this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] = Math.max( this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ], key );
+                            } else {
+                                // custom text key
+                                this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( key );
+                            }
                         } else {
-                            // custom text key
-                            this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( key );
+                            // class constant as key
+                           
+                            this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( item[ COMPILER.ARRAY_KEY ] );
+                      
                         }
                     } else {
                         this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( ++this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] );
@@ -75,7 +87,23 @@ PHP.VM.Array = function( ENV ) {
             "name":"index"
         }], function( $ ) {
          
-            var index = this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].indexOf( $('index')[ COMPILER.VARIABLE_VALUE ] );
+            var index = -1,
+            value = $('index')[ COMPILER.VARIABLE_VALUE ];
+            this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].some(function( item, i ){
+                
+                if ( item instanceof PHP.VM.Variable ) {
+                    item = item[ COMPILER.VARIABLE_VALUE ];
+                } 
+                
+          
+                
+                if ( item === value) {
+                    index = i;
+                    return true;
+                }
+                
+                return false;
+            });
 
             if ( index !== -1 ) {
                 return this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ][ index ];

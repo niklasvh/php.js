@@ -7,7 +7,7 @@
 PHP.VM.Constants = function(  predefined, ENV ) {
     
     var constants = {},
-    
+    constantVariables = {},
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     methods = {};
@@ -21,16 +21,30 @@ PHP.VM.Constants = function(  predefined, ENV ) {
         
         var variable = new PHP.VM.Variable( constants[ constantName ] ); 
         
-        if ( constants[ constantName ] === undefined ) {
+        if ( constants[ constantName ] === undefined  ) {
+            
+            if ( constantVariables[ constantName ] === undefined ) {
+                constantVariables[ constantName ] = variable;
+            } else {
+                return constantVariables[ constantName ];
+            }  
+            
             variable[ VARIABLE.DEFINED ] = constantName;
             variable[ VARIABLE.CONSTANT ] = true;
-            console.log( variable );
+            
+            
+            
+            
         }
         
         return variable;    
     };
     
     methods[ COMPILER.CONSTANT_SET ] = function( constantName, constantValue ) {
+              
+        if ( constantVariables[ constantName ] !== undefined ) {
+            constantVariables[ constantName ][ COMPILER.VARIABLE_VALUE ] = constantValue;
+        }
         constants[ constantName ] = constantValue;
     };
     

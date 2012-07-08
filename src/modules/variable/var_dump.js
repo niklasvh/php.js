@@ -15,7 +15,6 @@ PHP.Modules.prototype.var_dump = function() {
     var $dump = function( argument, indent ) {
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ]; // trigger get for undefined
-        
         if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
             str += $INDENT( indent ) + "array(";
 
@@ -27,6 +26,10 @@ PHP.Modules.prototype.var_dump = function() {
             str += ") {\n";
             
             keys.forEach(function( key, index ){
+                
+                if (key instanceof PHP.VM.Variable) {
+                    key = key[ COMPILER.VARIABLE_VALUE ];
+                }
                 
                 str += $INDENT( indent + 2 ) + "[";
                 if ( typeof key === "string" ) {
@@ -61,12 +64,15 @@ PHP.Modules.prototype.var_dump = function() {
             
             str += $INDENT( indent ) + "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
             
-            var props = Object.keys( argument ).filter(function( item ){
-                if (item.substring(PHP.VM.Class.PROPERTY.length) === "PHP.VM.Class.PROPERTY") {
-                    return item;
-                }
-            });
+            var props = [];
             
+            // search whole prototype chain
+            for ( var item in argument ) {
+                if (item.substring(0, PHP.VM.Class.PROPERTY.length) === PHP.VM.Class.PROPERTY) {
+                    props.push( item );
+                }
+            }
+         
             
             str += '(' + props.length + ') {\n';
             

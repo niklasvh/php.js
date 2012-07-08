@@ -260,19 +260,28 @@ PHP.VM.Variable = function( arg ) {
     Object.defineProperty( this, COMPILER.VARIABLE_VALUE,
     {
         get : function(){
-            
-            if ( this[ this.DEFINED ] !== true && this[ COMPILER.SUPPRESS ] !== true ) {
-                
-                if ( this[ this.CONSTANT ] === true ) {
-                    this.ENV[ COMPILER.ERROR ]("Use of undefined constant " + this[ this.DEFINED ] + " - assumed '" + this[ this.DEFINED ] + "'", PHP.Constants.E_CORE_NOTICE, true );
-                    this[ this.TYPE ] = this.STRING;
-                    return this[ this.DEFINED ];
-                } else {
-                    this.ENV[ COMPILER.ERROR ]("Undefined " + (this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + this[ this.DEFINED ], PHP.Constants.E_CORE_NOTICE, true );    
-                }
+            var $this = this,
+            returning;
+            if ( this[ this.REFERRING ] !== undefined ) {
+                $this = this[this.REFERRING];
             }
             
-            var returning = value;
+            if ( $this[ this.DEFINED ] !== true && $this[ COMPILER.SUPPRESS ] !== true ) {
+                
+                if ( $this[ this.CONSTANT ] === true ) {
+                    this.ENV[ COMPILER.ERROR ]("Use of undefined constant " + $this[ this.DEFINED ] + " - assumed '" + $this[ this.DEFINED ] + "'", PHP.Constants.E_CORE_NOTICE, true );
+                    $this[ this.TYPE ] = this.STRING;
+                    return $this[ this.DEFINED ];
+                } else {
+                    this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_CORE_NOTICE, true );    
+                }
+            }
+            if ( this[ this.REFERRING ] === undefined ) {
+                returning = value;
+            } else { 
+                this[ this.TYPE ] = $this[ this.TYPE ];
+                returning = $this[ COMPILER.VARIABLE_VALUE ];
+            }
             
             // perform POST_MOD change
            
@@ -390,5 +399,9 @@ PHP.VM.Variable.prototype.TYPE = "type";
 PHP.VM.Variable.prototype.PROPERTY = "$Property";
 
 PHP.VM.Variable.prototype.CONSTANT = "$Constant";
+
+PHP.VM.Variable.prototype.CLASS_CONSTANT = "$ClassConstant";
+
+PHP.VM.Variable.prototype.REFERRING = "$Referring";
 
 PHP.VM.Variable.prototype.REGISTER_SETTER = "$Setter";

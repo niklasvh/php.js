@@ -21,20 +21,42 @@ PHP.VM = function( src, opts ) {
     
     ENV.$Class = (function() {
         var classRegistry = {},
+        COMPILER = PHP.Compiler.prototype,
+        VARIABLE = PHP.VM.Variable.prototype,
         magicConstants = {},
         initiatedClasses = [],
-        classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants, initiatedClasses );
+        undefinedConstants = {},
+        classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants );
         
-        ENV[ PHP.Compiler.prototype.MAGIC_CONSTANTS ] = function( constantName ) {
+        ENV[ COMPILER.MAGIC_CONSTANTS ] = function( constantName ) {
             return new PHP.VM.Variable( magicConstants[ constantName ] );
         };
         
-        return {
+        var methods =  {
             INew: function( name, exts, func ) {
                 return classHandler( name, PHP.VM.Class.INTERFACE, exts, func );
             },
             New: function() {
                 return classHandler.apply( null, arguments );
+            },
+            ConstantGet: function( className, state, constantName ) {
+                
+                if ( !/(self|parent)/i.test( className ) && classRegistry[ className.toLowerCase() ] === undefined ) {
+                    if ( undefinedConstants[ className + "::" + constantName] === undefined ) {
+                        var variable = new PHP.VM.Variable();
+                        variable[ VARIABLE.CLASS_CONSTANT ] = true;
+                        variable[ VARIABLE.DEFINED ] = className + "::$" + constantName;
+                        undefinedConstants[ className + "::" + constantName] = variable;
+                    
+                    }
+                
+                    return undefinedConstants[ className + "::" + constantName];
+                    
+                } else {
+                    return methods.Get(  className, state )[ COMPILER.CLASS_CONSTANT_FETCH ]( state, constantName );
+                    
+                }
+                
             },
             Get: function( className, state ) {
                
@@ -46,15 +68,18 @@ PHP.VM = function( src, opts ) {
                     }
                 } else if ( /self/i.test( className ) ) {
                     return state.prototype;
-              //      return Object.getPrototypeOf( state );  
+                //      return Object.getPrototypeOf( state );  
                 } else if ( /parent/i.test( className ) ) {
-                    return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
+                    return Object.getPrototypeOf( state.prototype  ); 
+                 //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
                 }
                 
                 
                 
             }
-        }
+        };
+        
+        return methods;
     })();
     
     ENV[ PHP.Compiler.prototype.RESOURCES ] = PHP.VM.ResourceManager( ENV ); 

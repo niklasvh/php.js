@@ -239,6 +239,7 @@ PHP.Compiler.prototype.Node_Stmt_StaticVar = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
     var src = "";
+    console.log( action );
     action.props.forEach(function( prop ){
        
         src += "." + this.CLASS_PROPERTY + '( "' + prop.name + '", ' + action.Type;

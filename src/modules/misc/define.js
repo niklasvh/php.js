@@ -14,5 +14,5 @@ PHP.Modules.prototype.define = function( name, value, case_insensitive ) {
     this[ COMPILER.CONSTANTS ][ COMPILER.CONSTANT_SET ]( name[ COMPILER.VARIABLE_VALUE ], variableValue );
     
     
-    console.log( value );
+  
 };

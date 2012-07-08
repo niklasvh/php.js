@@ -293,7 +293,7 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 
    
-        return this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).'  + this.CLASS_CONSTANT_FETCH + '( this, "' + action.name  + '" )';
+        return this.CTX + this.CLASS_CONSTANT_GET + '("' + this.source( action.Class ) + '", this, "' + action.name  + '" )';
     
     
 };
@@ -334,11 +334,11 @@ PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
-    console.log(action.items);
+    
     var src = this.CTX + "array([",
     items = [];
 
-    ((Array.isArray(action.items)) ? action.items : []).forEach(function( item ){
+    ((Array.isArray(action.items)) ? action.items : [ action.items ]).forEach(function( item ){
         
         items.push("{" + this.ARRAY_VALUE + ":" + this.source( item.value ) + ( ( item.key !== undefined) ? ", " + this.ARRAY_KEY + ":" + this.source( item.key ) : "") +  "}");
     }, this);

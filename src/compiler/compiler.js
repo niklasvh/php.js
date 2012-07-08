@@ -78,6 +78,8 @@ PHP.Compiler.prototype.CONSTANTS = "$Constants";
 
 PHP.Compiler.prototype.CONSTANT_GET = "get";
 
+PHP.Compiler.prototype.CLASS_CONSTANT_GET = "$Class.ConstantGet";
+
 PHP.Compiler.prototype.CONSTANT_SET = "set";
 
 PHP.Compiler.prototype.MAGIC_CONSTANTS = "$MConstants";
