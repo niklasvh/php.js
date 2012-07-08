@@ -17,7 +17,7 @@ PHP.VM = function( src, opts ) {
     // bind global variablehandler to ENV
     ENV[ PHP.Compiler.prototype.GLOBAL ] = $;
  
-    ENV[ PHP.Compiler.prototype.CONSTANTS ] = PHP.VM.Constants( PHP.Constants );
+    ENV[ PHP.Compiler.prototype.CONSTANTS ] = PHP.VM.Constants( PHP.Constants, ENV );
     
     ENV.$Class = (function() {
         var classRegistry = {},
@@ -30,8 +30,8 @@ PHP.VM = function( src, opts ) {
         };
         
         return {
-            INew: function( name, exts ) {
-                return classHandler( name, PHP.VM.Class.INTERFACE, exts );
+            INew: function( name, exts, func ) {
+                return classHandler( name, PHP.VM.Class.INTERFACE, exts, func );
             },
             New: function() {
                 return classHandler.apply( null, arguments );
@@ -45,7 +45,8 @@ PHP.VM = function( src, opts ) {
                         return classRegistry[ className.toLowerCase() ];
                     }
                 } else if ( /self/i.test( className ) ) {
-                    return Object.getPrototypeOf( state );  
+                    return state.prototype;
+              //      return Object.getPrototypeOf( state );  
                 } else if ( /parent/i.test( className ) ) {
                     return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
                 }
@@ -63,7 +64,6 @@ PHP.VM = function( src, opts ) {
     $('_POST').$ = PHP.VM.Array.fromObject.call( this, opts.POST ).$;
     $('_GET').$ = PHP.VM.Array.fromObject.call( this, opts.GET ).$;
 
-    //$('_POST').$ = ENV.array( $_POST ).$;
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, opts.SERVER ).$;
     
     

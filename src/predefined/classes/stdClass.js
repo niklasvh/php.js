@@ -7,10 +7,11 @@
 
 PHP.VM.Class.Predefined.stdClass = function( ENV) {
     
-   // var COMPILER = PHP.Compiler.prototype,
-  //  $this = this;
+    // var COMPILER = PHP.Compiler.prototype,
+    //  $this = this;
     
-    ENV.$Class.New( "stdClass", 0, {}).Create();
-    
+    ENV.$Class.New( "stdClass", 0, {}, function( M ) {
+        M.Create();
+    });
     
 };

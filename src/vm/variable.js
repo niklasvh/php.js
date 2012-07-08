@@ -262,8 +262,14 @@ PHP.VM.Variable = function( arg ) {
         get : function(){
             
             if ( this[ this.DEFINED ] !== true && this[ COMPILER.SUPPRESS ] !== true ) {
-                this.ENV[ COMPILER.ERROR ](" Undefined variable: " + this.DEFINED + " in ", PHP.Constants.E_CORE_NOTICE );    
                 
+                if ( this[ this.CONSTANT ] === true ) {
+                    this.ENV[ COMPILER.ERROR ]("Use of undefined constant " + this[ this.DEFINED ] + " - assumed '" + this[ this.DEFINED ] + "'", PHP.Constants.E_CORE_NOTICE, true );
+                    this[ this.TYPE ] = this.STRING;
+                    return this[ this.DEFINED ];
+                } else {
+                    this.ENV[ COMPILER.ERROR ]("Undefined " + (this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + this[ this.DEFINED ], PHP.Constants.E_CORE_NOTICE, true );    
+                }
             }
             
             var returning = value;
@@ -381,5 +387,8 @@ PHP.VM.Variable.prototype.OBJECT = 6;
 PHP.VM.Variable.prototype.RESOURCE = 7;
 PHP.VM.Variable.prototype.TYPE = "type";
 
+PHP.VM.Variable.prototype.PROPERTY = "$Property";
+
+PHP.VM.Variable.prototype.CONSTANT = "$Constant";
 
 PHP.VM.Variable.prototype.REGISTER_SETTER = "$Setter";

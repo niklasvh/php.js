@@ -61,12 +61,13 @@ PHP.Compiler.prototype.Node_Scalar_ClassConst = function( action ) {
 
 PHP.Compiler.prototype.Node_Scalar_FileConst = function( action ) {
 
-    return this.CTX + PHP.Compiler.prototype.MAGIC_CONSTANTS + '("FILE")';
+    return this.VARIABLE + '("$__FILE__")';  
+//   return this.CTX + PHP.Compiler.prototype.MAGIC_CONSTANTS + '("FILE")';
     
 };
 
 PHP.Compiler.prototype.Node_Scalar_LineConst = function( action ) {
-
-    return this.CTX + PHP.Compiler.prototype.MAGIC_CONSTANTS + '("LINE")';
+    return this.VARIABLE + '("$__LINE__")';  
+//    return this.CTX + PHP.Compiler.prototype.MAGIC_CONSTANTS + '("LINE")';
     
 };

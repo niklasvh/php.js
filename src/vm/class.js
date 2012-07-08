@@ -68,6 +68,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
         var className = arguments[ 0 ], 
         classType = arguments[ 1 ], 
         opts = arguments[ 2 ],
+        classDefinition = arguments[ 3 ],
+        DECLARED = false,
         props = {},
         
         callMethod = function( methodName, args ) {
@@ -168,6 +170,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
          */ 
         methods [ COMPILER.CLASS_CONSTANT ] = function( constantName, constantValue ) {
             
+            Class.prototype[ PHP.VM.Class.CONSTANT + constantName ] = constantValue;
+                  
             return methods;
         };
         
@@ -352,6 +356,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
             }
             
             
+            DECLARED = true;
             
             return Class;
         };
@@ -538,14 +543,19 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
                 methodCTX = this;
             }
             
+            
             return methodCTX[ propertyPrefix + propertyName ];
             
             
         };
         
         Class.prototype[ COMPILER.CLASS_CONSTANT_FETCH ] = function( ctx, constantName ) {
+            if ( this[ PHP.VM.Class.CONSTANT + constantName ] === undefined && DECLARED === true ) {  
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Undefined class constant '" + constantName + "'", PHP.Constants.E_ERROR, true ); 
+            }
             
-            
+            return this[ PHP.VM.Class.CONSTANT + constantName ];
+
         };
         
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
@@ -608,6 +618,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
                     
                     Object.defineProperties( obj, props );
                           
+                } else {
+                    var variable = new PHP.VM.Variable();
+                    variable[ VARIABLE.PROPERTY ] = true;
+                    variable[ VARIABLE.DEFINED ] = className + "::$" + propertyName;
+                    return variable;
+                    
                 }
                 return obj;
               
@@ -652,6 +668,24 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses ) 
         // register class
         classRegistry[ className.toLowerCase() ] = Class;
         
+        
+        var constant$ = PHP.VM.VariableHandler();
+        
+   
+        constant$("$__FILE__")[ COMPILER.VARIABLE_VALUE ] = "__FILE__";
+         
+        //   constant$("$__FILE__")[ COMPILER.VARIABLE_VALUE ] = ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( ENV, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ];
+        
+        constant$("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className;
+        
+        constant$("$__CLASS__")[ COMPILER.VARIABLE_VALUE ] = className;
+        
+        constant$("$__FUNCTION__")[ COMPILER.VARIABLE_VALUE ] = "";
+        
+        constant$("$__LINE__")[ COMPILER.VARIABLE_VALUE ] = 1;
+        
+        classDefinition.call( Class, methods, constant$ );
+        
         return methods;
     };
     
@@ -667,6 +701,8 @@ PHP.VM.Class.CLASS_PROPERTY = "_£";
 PHP.VM.Class.INTERFACES = "$Interfaces";
 
 PHP.VM.Class.METHOD_PROTOTYPE = "$MP";
+
+PHP.VM.Class.CONSTANT = "€";
 
 PHP.VM.Class.PROPERTY = "$$";
 

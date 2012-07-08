@@ -59,7 +59,7 @@ Class constant declarations
 ?>
 --EXPECTF--
 
-Notice: Undefined variable: undef in %s on line 5
+Notice: Undefined variable: undef in %s on line %d
 
 Attempt to access various kinds of class constants:
 
@@ -71,7 +71,7 @@ int(1)
 float(1.5)
 int(-1)
 float(-1.5)
-int(15)
+int(%d)
 string(%d) "%s"
 string(1) "C"
 string(1) "C"
@@ -86,4 +86,4 @@ string(6) "hello2"
 
 Expecting fatal error:
 
-Fatal error: Undefined class constant 'c19' in %s on line 53
+Fatal error: Undefined class constant 'c19' in %s on line %d

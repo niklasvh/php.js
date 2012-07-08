@@ -7,10 +7,12 @@
 
 PHP.VM.Class.Predefined.Exception = function( ENV) {
     
-   // var COMPILER = PHP.Compiler.prototype,
-  //  $this = this;
+    // var COMPILER = PHP.Compiler.prototype,
+    //  $this = this;
     
-    ENV.$Class.New( "Exception", 0, {}).Create();
+    ENV.$Class.New( "Exception", 0, {}, function( M ) {
+        M.Create();
+    });
     
     
 };

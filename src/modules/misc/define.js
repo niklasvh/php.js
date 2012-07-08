@@ -7,5 +7,12 @@
 
 PHP.Modules.prototype.define = function( name, value, case_insensitive ) {
     
+    var COMPILER = PHP.Compiler.prototype,
     
+    variableValue = value[ COMPILER.VARIABLE_VALUE ];
+    
+    this[ COMPILER.CONSTANTS ][ COMPILER.CONSTANT_SET ]( name[ COMPILER.VARIABLE_VALUE ], variableValue );
+    
+    
+    console.log( value );
 };

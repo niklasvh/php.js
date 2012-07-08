@@ -13,7 +13,7 @@ PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
     src += exts.join(", ")
     
-    src += "])\n";
+    src += "], function( M, $ ){\n M";
     
     this.currentClass = action.name;
     action.stmts.forEach(function( stmt ) {
@@ -21,7 +21,7 @@ PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     }, this);
     
     
-    src += "." + this.CLASS_DECLARE + '()'
+    src += "." + this.CLASS_DECLARE + '()})'
     
     
     return src;
@@ -46,15 +46,18 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
         }).join(", ") + "]";
     }
     
-    src += "})\n";
+    src += "}, function( M, $ ){\n M";
     
     this.currentClass = action.name;
     action.stmts.forEach(function( stmt ) {
         src += this.source( stmt );
     }, this);
     
-    
     src += "." + this.CLASS_DECLARE + '()'
+    
+    src += "})"
+    
+    
     
     
     return src;
