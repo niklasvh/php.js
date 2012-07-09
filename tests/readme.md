@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 187 out of 672 (27.8%)
+Passed 189 out of 672 (28.1%)
 
 Failed tests:
 
@@ -158,7 +158,6 @@ Failed tests:
  - tests/php/classes/interface_optional_arg_002.phpt
  - tests/php/classes/interface_optional_arg_003.phpt
  - tests/php/classes/iterators_002.phpt
- - tests/php/classes/iterators_003.phpt
  - tests/php/classes/iterators_004.phpt
  - tests/php/classes/iterators_005.phpt
  - tests/php/classes/iterators_006.phpt
@@ -488,4 +487,3 @@ Failed tests:
  - tests/php/ext/tokenizer/bug54089.phpt
  - tests/php/ext/tokenizer/token_get_all_error.phpt
  - tests/php/ext/tokenizer/token_get_all_variation1.phpt
- - tests/php/ext/tokenizer/token_get_all_variation19.phpt

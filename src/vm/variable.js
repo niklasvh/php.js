@@ -175,6 +175,7 @@ PHP.VM.Variable = function( arg ) {
         } else if ( newValue === null ) {   
             
             if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
+                console.log('yo');
                 value[ COMPILER.CLASS_DESTRUCT ]();
             }
             
@@ -253,6 +254,7 @@ PHP.VM.Variable = function( arg ) {
 
    
     this[ PHP.Compiler.prototype.UNSET ] = function() {
+
         setValue( null );
         this.DEFINED = false;
     };

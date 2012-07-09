@@ -3,7 +3,7 @@
 * @created 30.6.2012 
 * @website http://hertzen.com
  */
-PHP.Modules.prototype.foreachInit = function( expr ) {
+PHP.Modules.prototype.$foreachInit = function( expr ) {
      
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
@@ -22,8 +22,12 @@ PHP.Modules.prototype.foreachInit = function( expr ) {
         
         
         // iteratorAggregate implemented objects
-        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("IteratorAggregate") !== -1 ) {
+        console.log(objectValue[ PHP.VM.Class.INTERFACES ]);
+        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
             var iterator = objectValue[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
+            
+            iterator[ COMPILER.METHOD_CALL ]( this, "rewind" );
+            
             return {
                 expr: expr,  
                 Class:iterator
@@ -33,13 +37,28 @@ PHP.Modules.prototype.foreachInit = function( expr ) {
    
 };
 
+PHP.Modules.prototype.$foreachEnd = function( iterator ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    
+    // destruct iterator
+    if ( iterator !== undefined && iterator.Class !== undefined ) {
+        iterator.Class[ COMPILER.CLASS_DESTRUCT ]();
+    }
+ 
+};
+
 PHP.Modules.prototype.foreach = function( iterator, value, key ) {
      
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
-    ARRAY = PHP.VM.Array.prototype;
-    
-    var expr = iterator.expr;
+    ARRAY = PHP.VM.Array.prototype,
+    expr;
+   
+    if ( iterator === undefined  || iterator.expr === undefined ) {
+        return false;
+    }
+    expr = iterator.expr;
     
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
         var values = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
@@ -69,7 +88,7 @@ PHP.Modules.prototype.foreach = function( iterator, value, key ) {
         
         
         // iteratorAggregate implemented objects
-        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("IteratorAggregate") !== -1 ) {
+        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
             
             
             if ( iterator.first === undefined ) {
@@ -94,6 +113,8 @@ PHP.Modules.prototype.foreach = function( iterator, value, key ) {
         }
         
        
+    } else {
+        return false;
     }
     
     

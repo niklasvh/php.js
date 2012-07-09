@@ -886,7 +886,7 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
-    var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "foreachInit(" + this.source( action.expr ) + "), first = {};\n";
+    var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
     src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + this.source( action.valueVar );
 
     if (action.keyVar !== null) {
@@ -896,16 +896,16 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     
     src += this.stmts( action.stmts );
  
-    src += '}'
+    src += '} '
 
+    src += this.CTX + "$foreachEnd( iterator" + this.FOREACH_COUNT + " )";
     return src;
 };
 
 
 PHP.Compiler.prototype.Node_Stmt_Continue = function( action ) {
-    // todo fix
-    var src = "return";
-    console.log( action );
+
+    var src = "continue";
     return src;  
 };
 
@@ -1509,7 +1509,7 @@ PHP.Modules.prototype.get_class = function( object ) {
 * @created 30.6.2012 
 * @website http://hertzen.com
  */
-PHP.Modules.prototype.foreachInit = function( expr ) {
+PHP.Modules.prototype.$foreachInit = function( expr ) {
      
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
@@ -1528,8 +1528,12 @@ PHP.Modules.prototype.foreachInit = function( expr ) {
         
         
         // iteratorAggregate implemented objects
-        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("IteratorAggregate") !== -1 ) {
+        console.log(objectValue[ PHP.VM.Class.INTERFACES ]);
+        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
             var iterator = objectValue[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
+            
+            iterator[ COMPILER.METHOD_CALL ]( this, "rewind" );
+            
             return {
                 expr: expr,  
                 Class:iterator
@@ -1539,13 +1543,28 @@ PHP.Modules.prototype.foreachInit = function( expr ) {
    
 };
 
+PHP.Modules.prototype.$foreachEnd = function( iterator ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    
+    // destruct iterator
+    if ( iterator !== undefined && iterator.Class !== undefined ) {
+        iterator.Class[ COMPILER.CLASS_DESTRUCT ]();
+    }
+ 
+};
+
 PHP.Modules.prototype.foreach = function( iterator, value, key ) {
      
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
-    ARRAY = PHP.VM.Array.prototype;
-    
-    var expr = iterator.expr;
+    ARRAY = PHP.VM.Array.prototype,
+    expr;
+   
+    if ( iterator === undefined  || iterator.expr === undefined ) {
+        return false;
+    }
+    expr = iterator.expr;
     
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
         var values = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
@@ -1575,7 +1594,7 @@ PHP.Modules.prototype.foreach = function( iterator, value, key ) {
         
         
         // iteratorAggregate implemented objects
-        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("IteratorAggregate") !== -1 ) {
+        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
             
             
             if ( iterator.first === undefined ) {
@@ -1600,6 +1619,8 @@ PHP.Modules.prototype.foreach = function( iterator, value, key ) {
         }
         
        
+    } else {
+        return false;
     }
     
     
@@ -7931,9 +7952,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             Class.prototype[ PHP.VM.Class.INTERFACES ] = [];
         }
         
-        if (opts.Implements !== undefined ) {
+        if (opts.Implements !== undefined || classType === PHP.VM.Class.INTERFACE) {
 
-            opts.Implements.forEach(function( interfaceName ){
+            (( classType === PHP.VM.Class.INTERFACE) ? opts : opts.Implements).forEach(function( interfaceName ){
+                
                 var Implements = classRegistry[ interfaceName.toLowerCase() ];
                 
                 if ( Implements.prototype[ COMPILER.CLASS_TYPE ] !== PHP.VM.Class.INTERFACE ) {
@@ -7941,10 +7963,21 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ PHP.Compiler.prototype.ERROR ]( className + " cannot implement " + interfaceName + " - it is not an interface", PHP.Constants.E_ERROR, true );
                 }
                 
-                if ( Class.prototype[ PHP.VM.Class.INTERFACES ].indexOf( interfaceName) === -1 ) {
+                if ( Class.prototype[ PHP.VM.Class.INTERFACES ].indexOf( interfaceName ) === -1 ) {
                     // only add interface if it isn't present already
                     Class.prototype[ PHP.VM.Class.INTERFACES ].push( interfaceName );
                 }
+                
+                // add interfaces from interface
+                
+                Implements.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ) {
+                    
+                    if ( Class.prototype[ PHP.VM.Class.INTERFACES ].indexOf( interfaceName ) === -1 ) {
+                        // only add interface if it isn't present already
+                        Class.prototype[ PHP.VM.Class.INTERFACES ].push( interfaceName );
+                    }
+                    
+                });
                 
             });
         }
@@ -7975,7 +8008,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         value = ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
                     }
                     
-                     return (( value === undefined ) ? new PHP.VM.Variable() : value);
+                    return (( value === undefined ) ? new PHP.VM.Variable() : value);
                
                 }
                   
@@ -8215,20 +8248,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx ) {
             
-            console.log('destruct', ctx);
-            if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
+            console.log('destruct', ctx, className);
+            if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __destruct  ) ) {
                 return callMethod.call( this, __destruct, [] );         
             }
-                
-
-                
-            // PHP 5 style constructor in any inherited class
-                
-            else if ( typeof this[ methodPrefix + __construct ] === "function" ) {
-                return callMethod.call( this, __destruct, [] );         
-            }
-            
-           
+     
             
         };
         
@@ -8460,6 +8484,7 @@ PHP.VM.Variable = function( arg ) {
         } else if ( newValue === null ) {   
             
             if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
+                console.log('yo');
                 value[ COMPILER.CLASS_DESTRUCT ]();
             }
             
@@ -8538,6 +8563,7 @@ PHP.VM.Variable = function( arg ) {
 
    
     this[ PHP.Compiler.prototype.UNSET ] = function() {
+
         setValue( null );
         this.DEFINED = false;
     };
@@ -9001,6 +9027,11 @@ PHP.VM.Class.Predefined.stdClass = function( ENV ) {
 ENV.$Class.New( "stdClass", 0, {}, function( M, $ ){
  M.Create()});
 
+};/* automatically built from Traversable.php*/
+PHP.VM.Class.Predefined.Traversable = function( ENV ) {
+ENV.$Class.INew( "Traversable", [], function( M, $ ){
+ M.Create()});
+
 };/* automatically built from ArrayAccess.php*/
 PHP.VM.Class.Predefined.ArrayAccess = function( ENV ) {
 ENV.$Class.INew( "ArrayAccess", [], function( M, $ ){
@@ -9035,10 +9066,5 @@ ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $ ){
  M.Method( "getIterator", 17, [], function( $, ctx ) {
 })
 .Create()});
-
-};/* automatically built from Traversable.php*/
-PHP.VM.Class.Predefined.Traversable = function( ENV ) {
-ENV.$Class.INew( "Traversable", [], function( M, $ ){
- M.Create()});
 
 };

@@ -428,9 +428,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             Class.prototype[ PHP.VM.Class.INTERFACES ] = [];
         }
         
-        if (opts.Implements !== undefined ) {
+        if (opts.Implements !== undefined || classType === PHP.VM.Class.INTERFACE) {
 
-            opts.Implements.forEach(function( interfaceName ){
+            (( classType === PHP.VM.Class.INTERFACE) ? opts : opts.Implements).forEach(function( interfaceName ){
+                
                 var Implements = classRegistry[ interfaceName.toLowerCase() ];
                 
                 if ( Implements.prototype[ COMPILER.CLASS_TYPE ] !== PHP.VM.Class.INTERFACE ) {
@@ -438,10 +439,21 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ PHP.Compiler.prototype.ERROR ]( className + " cannot implement " + interfaceName + " - it is not an interface", PHP.Constants.E_ERROR, true );
                 }
                 
-                if ( Class.prototype[ PHP.VM.Class.INTERFACES ].indexOf( interfaceName) === -1 ) {
+                if ( Class.prototype[ PHP.VM.Class.INTERFACES ].indexOf( interfaceName ) === -1 ) {
                     // only add interface if it isn't present already
                     Class.prototype[ PHP.VM.Class.INTERFACES ].push( interfaceName );
                 }
+                
+                // add interfaces from interface
+                
+                Implements.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ) {
+                    
+                    if ( Class.prototype[ PHP.VM.Class.INTERFACES ].indexOf( interfaceName ) === -1 ) {
+                        // only add interface if it isn't present already
+                        Class.prototype[ PHP.VM.Class.INTERFACES ].push( interfaceName );
+                    }
+                    
+                });
                 
             });
         }
@@ -472,7 +484,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         value = ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
                     }
                     
-                     return (( value === undefined ) ? new PHP.VM.Variable() : value);
+                    return (( value === undefined ) ? new PHP.VM.Variable() : value);
                
                 }
                   
@@ -712,20 +724,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx ) {
             
-            console.log('destruct', ctx);
-            if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
+            console.log('destruct', ctx, className);
+            if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __destruct  ) ) {
                 return callMethod.call( this, __destruct, [] );         
             }
-                
-
-                
-            // PHP 5 style constructor in any inherited class
-                
-            else if ( typeof this[ methodPrefix + __construct ] === "function" ) {
-                return callMethod.call( this, __destruct, [] );         
-            }
-            
-           
+     
             
         };
         

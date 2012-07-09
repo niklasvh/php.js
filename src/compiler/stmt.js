@@ -154,7 +154,7 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
-    var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "foreachInit(" + this.source( action.expr ) + "), first = {};\n";
+    var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
     src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + this.source( action.valueVar );
 
     if (action.keyVar !== null) {
@@ -164,16 +164,16 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     
     src += this.stmts( action.stmts );
  
-    src += '}'
+    src += '} '
 
+    src += this.CTX + "$foreachEnd( iterator" + this.FOREACH_COUNT + " )";
     return src;
 };
 
 
 PHP.Compiler.prototype.Node_Stmt_Continue = function( action ) {
-    // todo fix
-    var src = "return";
-    console.log( action );
+
+    var src = "continue";
     return src;  
 };
 

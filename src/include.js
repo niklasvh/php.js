@@ -98,10 +98,11 @@ var files = {
             stdClass: "js"
         },
         interfaces: {
+            Traversable: "js",
             ArrayAccess: "js",
             Iterator: "js",
-            IteratorAggregate: "js",
-            Traversable: "js"
+            IteratorAggregate: "js"
+            
         }
     }
 };
