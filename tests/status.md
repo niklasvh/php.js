@@ -3,167 +3,168 @@
 Passed 107 out of 271 (39.5%)
 
 Failed tests:
-tests/php/classes/abstract_derived.phpt
-tests/php/classes/abstract_final.phpt
-tests/php/classes/abstract_static.phpt
-tests/php/classes/abstract_user_call.phpt
-tests/php/classes/arrayobject_001.phpt
-tests/php/classes/array_access_001.phpt
-tests/php/classes/array_access_002.phpt
-tests/php/classes/array_access_003.phpt
-tests/php/classes/array_access_004.phpt
-tests/php/classes/array_access_005.phpt
-tests/php/classes/array_access_007.phpt
-tests/php/classes/array_access_008.phpt
-tests/php/classes/array_access_009.phpt
-tests/php/classes/array_access_010.phpt
-tests/php/classes/array_access_011.phpt
-tests/php/classes/array_access_012.phpt
-tests/php/classes/array_access_013.phpt
-tests/php/classes/assign_op_property_001.phpt
-tests/php/classes/autoload_001.phpt
-tests/php/classes/autoload_002.phpt
-tests/php/classes/autoload_003.phpt
-tests/php/classes/autoload_004.phpt
-tests/php/classes/autoload_005.phpt
-tests/php/classes/autoload_006.phpt
-tests/php/classes/autoload_007.phpt
-tests/php/classes/autoload_008.phpt
-tests/php/classes/autoload_009.phpt
-tests/php/classes/autoload_010.phpt
-tests/php/classes/autoload_011.phpt
-tests/php/classes/autoload_012.phpt
-tests/php/classes/autoload_013.phpt
-tests/php/classes/autoload_014.phpt
-tests/php/classes/autoload_015.phpt
-tests/php/classes/autoload_016.phpt
-tests/php/classes/autoload_017.phpt
-tests/php/classes/autoload_018.phpt
-tests/php/classes/autoload_019.phpt
-tests/php/classes/autoload_020.phpt
-tests/php/classes/bug23951.phpt
-tests/php/classes/bug24399.phpt
-tests/php/classes/bug24445.phpt
-tests/php/classes/bug26737.phpt
-tests/php/classes/bug27468.phpt
-tests/php/classes/bug27504.phpt
-tests/php/classes/bug29446.phpt
-tests/php/classes/class_stdclass.phpt
-tests/php/classes/clone_001.phpt
-tests/php/classes/clone_002.phpt
-tests/php/classes/clone_003.phpt
-tests/php/classes/clone_004.phpt
-tests/php/classes/clone_006.phpt
-tests/php/classes/constants_error_004.phpt
-tests/php/classes/constants_error_005.phpt
-tests/php/classes/constants_error_006.phpt
-tests/php/classes/constants_error_007.phpt
-tests/php/classes/constants_scope_001.phpt
-tests/php/classes/ctor_dtor.phpt
-tests/php/classes/ctor_dtor_inheritance.phpt
-tests/php/classes/ctor_failure.phpt
-tests/php/classes/ctor_in_interface_01.phpt
-tests/php/classes/ctor_in_interface_02.phpt
-tests/php/classes/ctor_in_interface_03.phpt
-tests/php/classes/ctor_in_interface_04.phpt
-tests/php/classes/ctor_name_clash.phpt
-tests/php/classes/ctor_visibility.phpt
-tests/php/classes/dereferencing_001.phpt
-tests/php/classes/destructor_and_echo.phpt
-tests/php/classes/destructor_and_exceptions.phpt
-tests/php/classes/destructor_and_globals.phpt
-tests/php/classes/destructor_and_references.phpt
-tests/php/classes/destructor_inheritance.phpt
-tests/php/classes/destructor_visibility_001.phpt
-tests/php/classes/destructor_visibility_002.phpt
-tests/php/classes/destructor_visibility_003.phpt
-tests/php/classes/factory_and_singleton_001.phpt
-tests/php/classes/factory_and_singleton_002.phpt
-tests/php/classes/factory_and_singleton_003.phpt
-tests/php/classes/factory_and_singleton_004.phpt
-tests/php/classes/factory_and_singleton_005.phpt
-tests/php/classes/factory_and_singleton_006.phpt
-tests/php/classes/factory_and_singleton_007.phpt
-tests/php/classes/factory_and_singleton_008.phpt
-tests/php/classes/factory_and_singleton_009.phpt
-tests/php/classes/factory_and_singleton_010.phpt
-tests/php/classes/final_ctor1.phpt
-tests/php/classes/final_ctor2.phpt
-tests/php/classes/implicit_instantiation_001.phpt
-tests/php/classes/incdec_property_003.phpt
-tests/php/classes/incdec_property_004.phpt
-tests/php/classes/inheritance_003.phpt
-tests/php/classes/inheritance_004.phpt
-tests/php/classes/inheritance_006.phpt
-tests/php/classes/inheritance_007.phpt
-tests/php/classes/interfaces_003.phpt
-tests/php/classes/interface_constant_inheritance_001.phpt
-tests/php/classes/interface_constant_inheritance_002.phpt
-tests/php/classes/interface_constant_inheritance_003.phpt
-tests/php/classes/interface_constant_inheritance_004.phpt
-tests/php/classes/interface_doubled.phpt
-tests/php/classes/interface_implemented.phpt
-tests/php/classes/interface_method.phpt
-tests/php/classes/interface_method_final.phpt
-tests/php/classes/interface_method_private.phpt
-tests/php/classes/interface_optional_arg_002.phpt
-tests/php/classes/interface_optional_arg_003.phpt
-tests/php/classes/iterators_001.phpt
-tests/php/classes/iterators_002.phpt
-tests/php/classes/iterators_003.phpt
-tests/php/classes/iterators_004.phpt
-tests/php/classes/iterators_005.phpt
-tests/php/classes/iterators_006.phpt
-tests/php/classes/iterators_007.phpt
-tests/php/classes/iterators_008.phpt
-tests/php/classes/method_call_variation_001.phpt
-tests/php/classes/method_override_optional_arg_001.phpt
-tests/php/classes/method_override_optional_arg_002.phpt
-tests/php/classes/new_001.phpt
-tests/php/classes/private_members.phpt
-tests/php/classes/property_recreate_private.phpt
-tests/php/classes/property_recreate_protected.phpt
-tests/php/classes/protected_001.phpt
-tests/php/classes/protected_001b.phpt
-tests/php/classes/protected_002.phpt
-tests/php/classes/serialize_001.phpt
-tests/php/classes/static_properties_003.phpt
-tests/php/classes/static_properties_003_error1.phpt
-tests/php/classes/static_properties_003_error2.phpt
-tests/php/classes/static_properties_003_error3.phpt
-tests/php/classes/static_properties_003_error4.phpt
-tests/php/classes/static_properties_004.phpt
-tests/php/classes/static_properties_undeclared_assign.phpt
-tests/php/classes/static_properties_undeclared_assignInc.phpt
-tests/php/classes/static_properties_undeclared_assignRef.phpt
-tests/php/classes/static_properties_undeclared_inc.phpt
-tests/php/classes/static_properties_undeclared_isset.phpt
-tests/php/classes/static_properties_undeclared_read.phpt
-tests/php/classes/static_this.phpt
-tests/php/classes/this.phpt
-tests/php/classes/tostring_001.phpt
-tests/php/classes/tostring_002.phpt
-tests/php/classes/tostring_003.phpt
-tests/php/classes/tostring_004.phpt
-tests/php/classes/type_hinting_001.phpt
-tests/php/classes/type_hinting_002.phpt
-tests/php/classes/type_hinting_003.phpt
-tests/php/classes/type_hinting_004.phpt
-tests/php/classes/type_hinting_005a.phpt
-tests/php/classes/type_hinting_005b.phpt
-tests/php/classes/type_hinting_005c.phpt
-tests/php/classes/type_hinting_005d.phpt
-tests/php/classes/visibility_000a.phpt
-tests/php/classes/visibility_000b.phpt
-tests/php/classes/visibility_001a.phpt
-tests/php/classes/visibility_001b.phpt
-tests/php/classes/visibility_002a.phpt
-tests/php/classes/visibility_002b.phpt
-tests/php/classes/visibility_003b.phpt
-tests/php/classes/visibility_005.phpt
-tests/php/classes/__call_003.phpt
-tests/php/classes/__call_006.phpt
-tests/php/classes/__call_007.phpt
-tests/php/classes/__set_data_corrupt.phpt
-tests/php/classes/__set__get_004.phpt
-tests/php/classes/__set__get_005.phpt
+
+ - tests/php/classes/abstract_derived.phpt
+ - tests/php/classes/abstract_final.phpt
+ - tests/php/classes/abstract_static.phpt
+ - tests/php/classes/abstract_user_call.phpt
+ - tests/php/classes/arrayobject_001.phpt
+ - tests/php/classes/array_access_001.phpt
+ - tests/php/classes/array_access_002.phpt
+ - tests/php/classes/array_access_003.phpt
+ - tests/php/classes/array_access_004.phpt
+ - tests/php/classes/array_access_005.phpt
+ - tests/php/classes/array_access_007.phpt
+ - tests/php/classes/array_access_008.phpt
+ - tests/php/classes/array_access_009.phpt
+ - tests/php/classes/array_access_010.phpt
+ - tests/php/classes/array_access_011.phpt
+ - tests/php/classes/array_access_012.phpt
+ - tests/php/classes/array_access_013.phpt
+ - tests/php/classes/assign_op_property_001.phpt
+ - tests/php/classes/autoload_001.phpt
+ - tests/php/classes/autoload_002.phpt
+ - tests/php/classes/autoload_003.phpt
+ - tests/php/classes/autoload_004.phpt
+ - tests/php/classes/autoload_005.phpt
+ - tests/php/classes/autoload_006.phpt
+ - tests/php/classes/autoload_007.phpt
+ - tests/php/classes/autoload_008.phpt
+ - tests/php/classes/autoload_009.phpt
+ - tests/php/classes/autoload_010.phpt
+ - tests/php/classes/autoload_011.phpt
+ - tests/php/classes/autoload_012.phpt
+ - tests/php/classes/autoload_013.phpt
+ - tests/php/classes/autoload_014.phpt
+ - tests/php/classes/autoload_015.phpt
+ - tests/php/classes/autoload_016.phpt
+ - tests/php/classes/autoload_017.phpt
+ - tests/php/classes/autoload_018.phpt
+ - tests/php/classes/autoload_019.phpt
+ - tests/php/classes/autoload_020.phpt
+ - tests/php/classes/bug23951.phpt
+ - tests/php/classes/bug24399.phpt
+ - tests/php/classes/bug24445.phpt
+ - tests/php/classes/bug26737.phpt
+ - tests/php/classes/bug27468.phpt
+ - tests/php/classes/bug27504.phpt
+ - tests/php/classes/bug29446.phpt
+ - tests/php/classes/class_stdclass.phpt
+ - tests/php/classes/clone_001.phpt
+ - tests/php/classes/clone_002.phpt
+ - tests/php/classes/clone_003.phpt
+ - tests/php/classes/clone_004.phpt
+ - tests/php/classes/clone_006.phpt
+ - tests/php/classes/constants_error_004.phpt
+ - tests/php/classes/constants_error_005.phpt
+ - tests/php/classes/constants_error_006.phpt
+ - tests/php/classes/constants_error_007.phpt
+ - tests/php/classes/constants_scope_001.phpt
+ - tests/php/classes/ctor_dtor.phpt
+ - tests/php/classes/ctor_dtor_inheritance.phpt
+ - tests/php/classes/ctor_failure.phpt
+ - tests/php/classes/ctor_in_interface_01.phpt
+ - tests/php/classes/ctor_in_interface_02.phpt
+ - tests/php/classes/ctor_in_interface_03.phpt
+ - tests/php/classes/ctor_in_interface_04.phpt
+ - tests/php/classes/ctor_name_clash.phpt
+ - tests/php/classes/ctor_visibility.phpt
+ - tests/php/classes/dereferencing_001.phpt
+ - tests/php/classes/destructor_and_echo.phpt
+ - tests/php/classes/destructor_and_exceptions.phpt
+ - tests/php/classes/destructor_and_globals.phpt
+ - tests/php/classes/destructor_and_references.phpt
+ - tests/php/classes/destructor_inheritance.phpt
+ - tests/php/classes/destructor_visibility_001.phpt
+ - tests/php/classes/destructor_visibility_002.phpt
+ - tests/php/classes/destructor_visibility_003.phpt
+ - tests/php/classes/factory_and_singleton_001.phpt
+ - tests/php/classes/factory_and_singleton_002.phpt
+ - tests/php/classes/factory_and_singleton_003.phpt
+ - tests/php/classes/factory_and_singleton_004.phpt
+ - tests/php/classes/factory_and_singleton_005.phpt
+ - tests/php/classes/factory_and_singleton_006.phpt
+ - tests/php/classes/factory_and_singleton_007.phpt
+ - tests/php/classes/factory_and_singleton_008.phpt
+ - tests/php/classes/factory_and_singleton_009.phpt
+ - tests/php/classes/factory_and_singleton_010.phpt
+ - tests/php/classes/final_ctor1.phpt
+ - tests/php/classes/final_ctor2.phpt
+ - tests/php/classes/implicit_instantiation_001.phpt
+ - tests/php/classes/incdec_property_003.phpt
+ - tests/php/classes/incdec_property_004.phpt
+ - tests/php/classes/inheritance_003.phpt
+ - tests/php/classes/inheritance_004.phpt
+ - tests/php/classes/inheritance_006.phpt
+ - tests/php/classes/inheritance_007.phpt
+ - tests/php/classes/interfaces_003.phpt
+ - tests/php/classes/interface_constant_inheritance_001.phpt
+ - tests/php/classes/interface_constant_inheritance_002.phpt
+ - tests/php/classes/interface_constant_inheritance_003.phpt
+ - tests/php/classes/interface_constant_inheritance_004.phpt
+ - tests/php/classes/interface_doubled.phpt
+ - tests/php/classes/interface_implemented.phpt
+ - tests/php/classes/interface_method.phpt
+ - tests/php/classes/interface_method_final.phpt
+ - tests/php/classes/interface_method_private.phpt
+ - tests/php/classes/interface_optional_arg_002.phpt
+ - tests/php/classes/interface_optional_arg_003.phpt
+ - tests/php/classes/iterators_001.phpt
+ - tests/php/classes/iterators_002.phpt
+ - tests/php/classes/iterators_003.phpt
+ - tests/php/classes/iterators_004.phpt
+ - tests/php/classes/iterators_005.phpt
+ - tests/php/classes/iterators_006.phpt
+ - tests/php/classes/iterators_007.phpt
+ - tests/php/classes/iterators_008.phpt
+ - tests/php/classes/method_call_variation_001.phpt
+ - tests/php/classes/method_override_optional_arg_001.phpt
+ - tests/php/classes/method_override_optional_arg_002.phpt
+ - tests/php/classes/new_001.phpt
+ - tests/php/classes/private_members.phpt
+ - tests/php/classes/property_recreate_private.phpt
+ - tests/php/classes/property_recreate_protected.phpt
+ - tests/php/classes/protected_001.phpt
+ - tests/php/classes/protected_001b.phpt
+ - tests/php/classes/protected_002.phpt
+ - tests/php/classes/serialize_001.phpt
+ - tests/php/classes/static_properties_003.phpt
+ - tests/php/classes/static_properties_003_error1.phpt
+ - tests/php/classes/static_properties_003_error2.phpt
+ - tests/php/classes/static_properties_003_error3.phpt
+ - tests/php/classes/static_properties_003_error4.phpt
+ - tests/php/classes/static_properties_004.phpt
+ - tests/php/classes/static_properties_undeclared_assign.phpt
+ - tests/php/classes/static_properties_undeclared_assignInc.phpt
+ - tests/php/classes/static_properties_undeclared_assignRef.phpt
+ - tests/php/classes/static_properties_undeclared_inc.phpt
+ - tests/php/classes/static_properties_undeclared_isset.phpt
+ - tests/php/classes/static_properties_undeclared_read.phpt
+ - tests/php/classes/static_this.phpt
+ - tests/php/classes/this.phpt
+ - tests/php/classes/tostring_001.phpt
+ - tests/php/classes/tostring_002.phpt
+ - tests/php/classes/tostring_003.phpt
+ - tests/php/classes/tostring_004.phpt
+ - tests/php/classes/type_hinting_001.phpt
+ - tests/php/classes/type_hinting_002.phpt
+ - tests/php/classes/type_hinting_003.phpt
+ - tests/php/classes/type_hinting_004.phpt
+ - tests/php/classes/type_hinting_005a.phpt
+ - tests/php/classes/type_hinting_005b.phpt
+ - tests/php/classes/type_hinting_005c.phpt
+ - tests/php/classes/type_hinting_005d.phpt
+ - tests/php/classes/visibility_000a.phpt
+ - tests/php/classes/visibility_000b.phpt
+ - tests/php/classes/visibility_001a.phpt
+ - tests/php/classes/visibility_001b.phpt
+ - tests/php/classes/visibility_002a.phpt
+ - tests/php/classes/visibility_002b.phpt
+ - tests/php/classes/visibility_003b.phpt
+ - tests/php/classes/visibility_005.phpt
+ - tests/php/classes/__call_003.phpt
+ - tests/php/classes/__call_006.phpt
+ - tests/php/classes/__call_007.phpt
+ - tests/php/classes/__set_data_corrupt.phpt
+ - tests/php/classes/__set__get_004.phpt
+ - tests/php/classes/__set__get_005.phpt
