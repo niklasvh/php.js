@@ -15,39 +15,37 @@ PHP.Modules.prototype.print_r = function() {
     var $dump = function( argument, indent ) {
         var str = "";
         if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
-            str += $INDENT( indent ) + "array(";
-
+            str += "Array\n";
+            str += $INDENT( indent ) + "(";
             var values = argument[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
             var keys = argument[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
             
-            str += values.length;
+           
        
-            str += ") {\n";
+            str += "\n";
             
             keys.forEach(function( key, index ){
-                str += $INDENT( indent + 2 ) + "[";
-                if ( typeof key === "string" ) {
-                    str += '"' + key + '"';
-                } else {
-                    str += key;
-                } 
-                str += "]=>\n";
+                str += $INDENT( indent + 4 ) + "[";
+
+                str += key;
                 
-                str += $dump( values[ index ], indent + 2 );
+                str += "] => ";
+                
+                str += $dump( values[ index ], indent + 8 );
                 
             }, this);
             
-            str += $INDENT( indent ) + "}\n";
+            str += $INDENT( indent ) + ")\n\n";
         } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
             str += $INDENT( indent ) + "NULL\n";  
         } else if( argument[ VAR.TYPE ] === VAR.STRING ) {
             
             var value = argument[ COMPILER.VARIABLE_VALUE ];
-            str += $INDENT( indent ) + "string(" + value.length + ') "' + value + '"\n';  
+            str += value + '\n';  
         } else if( argument[ VAR.TYPE ] === VAR.INT ) {
             
             var value = argument[ COMPILER.VARIABLE_VALUE ];
-            str += $INDENT( indent ) + "int(" + value + ')\n';  
+            str += value + '\n';  
             
         } else {
             console.log( argument );

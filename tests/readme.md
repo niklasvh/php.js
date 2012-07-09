@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 195 out of 672 (29%)
+Passed 199 out of 672 (29.6%)
 
 Failed tests:
 
@@ -232,10 +232,6 @@ Failed tests:
  - tests/php/lang/043.phpt
  - tests/php/lang/044.phpt
  - tests/php/lang/045.phpt
- - tests/php/lang/array_shortcut_001.phpt
- - tests/php/lang/array_shortcut_002.phpt
- - tests/php/lang/array_shortcut_003.phpt
- - tests/php/lang/array_shortcut_005.phpt
  - tests/php/lang/bison1.phpt
  - tests/php/lang/bug17115.phpt
  - tests/php/lang/bug18872.phpt
