@@ -1,1 +1,1 @@
-bin\node.exe tests\server.js
+node tests/runtests.js
