@@ -153,17 +153,19 @@ PHP.VM.Variable = function( arg ) {
     POST_MOD = 0,
     __toString = "__toString",
     COMPILER = PHP.Compiler.prototype,
+    
     setValue = function( newValue ) {
+         
         this[ this.DEFINED ] = true;
-        
+
         if ( newValue === undefined ) {
             newValue = null;
         }
-        
+       
         if ( newValue instanceof PHP.VM.Variable ) {
             newValue = newValue[ COMPILER.VARIABLE_VALUE ];
         }
-        
+     
         if ( typeof newValue === "string" ) {
             this[ this.TYPE ] = this.STRING;
         } else if ( typeof newValue === "number" ) {
@@ -173,9 +175,7 @@ PHP.VM.Variable = function( arg ) {
                 this[ this.TYPE ] = this.FLOAT;
             }
         } else if ( newValue === null ) {   
-            
             if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
-                console.log('yo');
                 value[ COMPILER.CLASS_DESTRUCT ]();
             }
             
@@ -195,6 +195,7 @@ PHP.VM.Variable = function( arg ) {
         } else {
          
         }
+       
         value = newValue;
         
         // remove this later, debugging only
@@ -204,7 +205,7 @@ PHP.VM.Variable = function( arg ) {
             this[ this.REGISTER_SETTER ]( value );
         }
         
-    };
+    }.bind( this ); // something strange going on with context in node.js?? iterators_2.phpt
     
     
     setValue.call( this, arg );
@@ -254,7 +255,7 @@ PHP.VM.Variable = function( arg ) {
 
    
     this[ PHP.Compiler.prototype.UNSET ] = function() {
-
+console.log("unset");
         setValue( null );
         this.DEFINED = false;
     };

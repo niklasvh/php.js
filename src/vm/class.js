@@ -724,7 +724,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx ) {
             
-            console.log('destruct', ctx, className);
+            console.log('destruct');
             if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __destruct  ) ) {
                 return callMethod.call( this, __destruct, [] );         
             }
