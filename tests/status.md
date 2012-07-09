@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 110 out of 271 (40.6%)
+Passed 109 out of 271 (40.2%)
 
 Failed tests:
 
@@ -12,6 +12,7 @@ Failed tests:
  - tests/php/classes/array_access_003.phpt
  - tests/php/classes/array_access_004.phpt
  - tests/php/classes/array_access_005.phpt
+ - tests/php/classes/array_access_006.phpt
  - tests/php/classes/array_access_007.phpt
  - tests/php/classes/array_access_008.phpt
  - tests/php/classes/array_access_009.phpt

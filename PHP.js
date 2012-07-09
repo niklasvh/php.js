@@ -2384,17 +2384,18 @@ PHP.Modules.prototype.empty = function() {
 
     while( ++i < len ) {
         arg = arguments[ i ];
+          console.log(arg); 
         // http://www.php.net/manual/en/types.comparisons.php
         if ( arg[ VARIABLE.TYPE ] === VARIABLE.NULL ) {
-            console.log(arg); 
-            return new PHP.VM.Variable( false );
+          
+            return new PHP.VM.Variable( true );
         }
 
       
         
     }
 
-    return new PHP.VM.Variable( true );
+    return new PHP.VM.Variable( false );
 
 };
 /* 
@@ -8520,13 +8521,21 @@ PHP.VM.Variable = function( arg ) {
                 
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
                     if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
-                        value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable ); // trigger offsetExists
-                        return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                       
+                       var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+                       console.log( exists, value );
+                        if ( exists === true ) { 
+                            return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                        } else {
+                            return new PHP.VM.Variable();
+                        }
+                        
                     } else {
+                                      console.log( this );
                         this [ COMPILER.VARIABLE_VALUE ] = this.ENV.array([]);
                     }
                 } 
-                
+  
                 //  console.log(value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ));
                 return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
                 

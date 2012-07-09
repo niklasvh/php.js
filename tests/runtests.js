@@ -43,7 +43,7 @@ var logger = console.log;
 
 console.log=function(){};
 
-function runTest ( file ) {
+function runTest ( file, complete ) {
 
 
 
@@ -120,15 +120,10 @@ function runTest ( file ) {
         
         if ( ++i < len ) {
             
-            runTest( globalPath + "/" + items[ i ] );
+            runTest( globalPath + "/" + items[ i ], complete );
         } else {
-            var content = "### Test results ###\n\nPassed " + success + " out of " + total + " (" + Math.round( (success/total) * 1000 ) / 10 + "%)\n\nFailed tests:\n\n - " + failed.join("\n - ");
-            
-            
-            fs.writeFile('tests/status.md', content, function (err) {
-                if (err) throw err;
-                logger('status updated');
-            });
+            complete();
+          
             
         }
         
@@ -143,16 +138,36 @@ var content = fs.readFileSync( 'php.js', 'utf8') ;
 
 eval( content );
 
-var path = "tests/php/classes";
+var p = 0;
 
-fs.readdir( path, function( err, files ) {
-    if (err) throw err;
-    items = files.filter(function( file ) {
-        return (file.substr(-5) === ".phpt");
-    });
-    len = items.length;
-    i = 0;
-    globalPath = path;
-    runTest( globalPath + "/" + items[ i++ ] );
+function runTests( paths, complete ) {
+
+    globalPath = paths[ p++ ];
+       
+    fs.readdir( globalPath, function( err, files ) {
+        if (err) throw err;
+        items = files.filter(function( file ) {
+            return (file.substr(-5) === ".phpt");
+        });
+        len = items.length;
+        i = 0;
+        
+        runTest( globalPath + "/" + items[ i++ ], function() {
+            if ( p < paths.length ) {
+                runTests( paths, complete);
+            }   
+        } );
     
-});
+    });
+
+}
+
+runTests( [ "tests/php/basic", "tests/php/classes" ], function() {
+    var content = "### Test results ###\n\nPassed " + success + " out of " + total + " (" + Math.round( (success/total) * 1000 ) / 10 + "%)\n\nFailed tests:\n\n - " + failed.join("\n - ");
+            
+            
+    fs.writeFile('tests/status.md', content, function (err) {
+        if (err) throw err;
+        logger('status updated');
+    });   
+} );
