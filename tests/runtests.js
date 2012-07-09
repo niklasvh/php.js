@@ -168,7 +168,7 @@ runTests( [ "tests/php/basic", "tests/php/classes", "tests/php/func", "tests/php
     var content = "### Test results ###\n\nPassed " + success + " out of " + total + " (" + Math.round( (success/total) * 1000 ) / 10 + "%)\n\nFailed tests:\n\n - " + failed.join("\n - ");
             
             
-    fs.writeFile('tests/status.md', content, function (err) {
+    fs.writeFile('tests/readme.md', content, function (err) {
         if (err) throw err;
         logger('status updated');
     });   
