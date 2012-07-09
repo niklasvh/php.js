@@ -54,7 +54,7 @@ PHP.Modules.prototype.$foreachEnd = function( iterator ) {
 };
 
 PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
-    console.log('sup');
+   
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,

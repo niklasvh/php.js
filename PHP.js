@@ -1498,6 +1498,34 @@ PHP.Modules.prototype.count = function( variable ) {
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.current = function( array ) {
+      var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+        ARRAY = PHP.VM.Array.prototype;
+    
+
+        
+    if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+        var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
+        values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
+        
+        if ( pointer[ COMPILER.VARIABLE_VALUE ] >= values.length ) {
+            return new PHP.VM.Variable( false );
+        } else {
+            return new PHP.VM.Variable( pointer[ COMPILER.VARIABLE_VALUE ] );
+        }
+        
+       
+    } 
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 9.7.2012 
 * @website http://hertzen.com
  */
@@ -1564,7 +1592,7 @@ PHP.Modules.prototype.$foreachEnd = function( iterator ) {
 };
 
 PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
-    console.log('sup');
+   
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,
