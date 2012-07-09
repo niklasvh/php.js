@@ -43,7 +43,11 @@ var files = {
         misc: {
             define: "js",
             defined: "js",
-            eval: "js"  
+            eval: "js",
+            php_egg_logo_guid: "js",
+            php_logo_guid: "js",
+            php_real_logo_guid: "js",
+            zend_logo_guid: "js"
         },
         options: {
             ini_set: "js"

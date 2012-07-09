@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 182 out of 672 (27.1%)
+Passed 186 out of 672 (27.7%)
 
 Failed tests:
 
@@ -38,9 +38,6 @@ Failed tests:
  - tests/php/basic/enable_post_data_reading_02.phpt
  - tests/php/basic/enable_post_data_reading_03.phpt
  - tests/php/basic/enable_post_data_reading_04.phpt
- - tests/php/basic/php_egg_logo_guid.phpt
- - tests/php/basic/php_logo_guid.phpt
- - tests/php/basic/php_real_logo_guid.phpt
  - tests/php/basic/req44164.phpt
  - tests/php/basic/rfc1867_anonymous_upload.phpt
  - tests/php/basic/rfc1867_array_upload.phpt
@@ -58,7 +55,6 @@ Failed tests:
  - tests/php/basic/rfc1867_missing_boundary_2.phpt
  - tests/php/basic/rfc1867_post_max_filesize.phpt
  - tests/php/basic/rfc1867_post_max_size.phpt
- - tests/php/basic/zend_logo_guid.phpt
  - tests/php/classes/abstract_static.phpt
  - tests/php/classes/abstract_user_call.phpt
  - tests/php/classes/arrayobject_001.phpt
