@@ -122,7 +122,7 @@ function runTest ( file ) {
             
             runTest( globalPath + "/" + items[ i ] );
         } else {
-            var content = "===Test results===\n\nPassed " + success + " out of " + total + " (" + Math.round( (success/total) * 1000 ) / 10 + "%)\n\nFailed tests:\n" + failed.join("\n");
+            var content = "### Test results ###\n\nPassed " + success + " out of " + total + " (" + Math.round( (success/total) * 1000 ) / 10 + "%)\n\nFailed tests:\n" + failed.join("\n");
             
             
             fs.writeFile('tests/status.md', content, function (err) {
