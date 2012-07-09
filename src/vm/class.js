@@ -87,7 +87,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
         };
-   
+
         var Class = function( ctx ) {
          
             Object.keys( props ).forEach(function( propertyName ){
@@ -298,14 +298,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             }
            
             
-                // visibility from public
-                if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PUBLIC ) && (checkType( methodType, PROTECTED ) || checkType( methodType, PRIVATE ) ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be public (as in class same)", PHP.Constants.E_ERROR, true );
-                } 
-                // visibility from protected
-                if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PROTECTED ) && checkType( methodType, PRIVATE ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be protected (as in class same) or weaker", PHP.Constants.E_ERROR, true );
-                }
+            // visibility from public
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PUBLIC ) && (checkType( methodType, PROTECTED ) || checkType( methodType, PRIVATE ) ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be public (as in class same)", PHP.Constants.E_ERROR, true );
+            } 
+            // visibility from protected
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PROTECTED ) && checkType( methodType, PRIVATE ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be protected (as in class same) or weaker", PHP.Constants.E_ERROR, true );
+            }
            
             
             // __call
@@ -364,33 +364,35 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             if ( !checkType( classType, ABSTRACT ) ) {
                 // make sure there are no abstract methods left undeclared
                 
-                
-                Object.keys( Class.prototype ).forEach(function( item ){
-                    if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
-                        
-                        var methodName = item.substring( methodPrefix.length );
-                        if ( checkType( Class.prototype[ methodTypePrefix + methodName ], ABSTRACT ) ) {
-                            ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + className + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
-                        }
-                     
-                    }
-                });
-                
-                // interfaces
-                Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
-                    
-                    var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;
-                    Object.keys( interfaceProto ).forEach(function( item ){
+                if ( classType !== PHP.VM.Class.INTERFACE) {
+                    Object.keys( Class.prototype ).forEach(function( item ){
                         if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
                         
                             var methodName = item.substring( methodPrefix.length );
-                            if (Class.prototype[ methodTypePrefix + methodName ] === undefined ) {
-                                ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + interfaceName + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
+                            if ( checkType( Class.prototype[ methodTypePrefix + methodName ], ABSTRACT ) ) {
+                                ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + className + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
                             }
+                     
                         }
                     });
+                
+                    // interfaces
+                
+                    Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
+                  
+                        var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;
+                        Object.keys( interfaceProto ).forEach(function( item ){
+                            if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
+                        
+                                var methodName = item.substring( methodPrefix.length );
+                                if (Class.prototype[ methodTypePrefix + methodName ] === undefined ) {
+                                    ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + interfaceName + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
+                                }
+                            }
+                        });
                     
-                });
+                    });
+                }
 
                 
             }
@@ -421,7 +423,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             }
             
             Class.prototype = new Extends( true );
-        } else {
+        } else {      
             Class.prototype = new PHP.VM.ClassPrototype();
             Class.prototype[ PHP.VM.Class.INTERFACES ] = [];
         }

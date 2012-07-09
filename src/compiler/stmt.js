@@ -8,7 +8,7 @@ PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     var exts = [];
     
     action.Extends.forEach(function( ext ){
-        exts.push( '"' + ext + '"' );
+        exts.push( '"' + ext.parts + '"' );
     }, this);
     
     src += exts.join(", ")

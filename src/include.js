@@ -13,7 +13,6 @@ var files = {
     },
     modules: {
         init: "js",
-        arithmetic: "js",
         array: {
             array: "js",
             array_key_exists: "js",
@@ -99,7 +98,10 @@ var files = {
             stdClass: "js"
         },
         interfaces: {
-            ArrayAccess: "js"
+            ArrayAccess: "js",
+            Iterator: "js",
+            IteratorAggregate: "js",
+            Traversable: "js"
         }
     }
 };

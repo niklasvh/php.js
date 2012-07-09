@@ -93,7 +93,7 @@ PHP.VM = function( src, opts ) {
     
     
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
-        PHP.VM.Class.Predefined[ className]( ENV );
+        PHP.VM.Class.Predefined[ className ]( ENV );
     });
     /*
     var exec = new Function( "$$", "$", "ENV", src  );

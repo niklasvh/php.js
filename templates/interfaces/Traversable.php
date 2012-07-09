@@ -1,0 +1,7 @@
+<?php
+
+interface Traversable {
+    
+}
+
+?>

@@ -739,7 +739,7 @@ PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     var exts = [];
     
     action.Extends.forEach(function( ext ){
-        exts.push( '"' + ext + '"' );
+        exts.push( '"' + ext.parts + '"' );
     }, this);
     
     src += exts.join(", ")
@@ -7428,7 +7428,7 @@ PHP.VM = function( src, opts ) {
     
     
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
-        PHP.VM.Class.Predefined[ className]( ENV );
+        PHP.VM.Class.Predefined[ className ]( ENV );
     });
     /*
     var exec = new Function( "$$", "$", "ENV", src  );
@@ -7538,7 +7538,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
         };
-   
+
         var Class = function( ctx ) {
          
             Object.keys( props ).forEach(function( propertyName ){
@@ -7749,14 +7749,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             }
            
             
-                // visibility from public
-                if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PUBLIC ) && (checkType( methodType, PROTECTED ) || checkType( methodType, PRIVATE ) ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be public (as in class same)", PHP.Constants.E_ERROR, true );
-                } 
-                // visibility from protected
-                if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PROTECTED ) && checkType( methodType, PRIVATE ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be protected (as in class same) or weaker", PHP.Constants.E_ERROR, true );
-                }
+            // visibility from public
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PUBLIC ) && (checkType( methodType, PROTECTED ) || checkType( methodType, PRIVATE ) ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be public (as in class same)", PHP.Constants.E_ERROR, true );
+            } 
+            // visibility from protected
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PROTECTED ) && checkType( methodType, PRIVATE ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be protected (as in class same) or weaker", PHP.Constants.E_ERROR, true );
+            }
            
             
             // __call
@@ -7815,33 +7815,35 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             if ( !checkType( classType, ABSTRACT ) ) {
                 // make sure there are no abstract methods left undeclared
                 
-                
-                Object.keys( Class.prototype ).forEach(function( item ){
-                    if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
-                        
-                        var methodName = item.substring( methodPrefix.length );
-                        if ( checkType( Class.prototype[ methodTypePrefix + methodName ], ABSTRACT ) ) {
-                            ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + className + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
-                        }
-                     
-                    }
-                });
-                
-                // interfaces
-                Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
-                    
-                    var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;
-                    Object.keys( interfaceProto ).forEach(function( item ){
+                if ( classType !== PHP.VM.Class.INTERFACE) {
+                    Object.keys( Class.prototype ).forEach(function( item ){
                         if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
                         
                             var methodName = item.substring( methodPrefix.length );
-                            if (Class.prototype[ methodTypePrefix + methodName ] === undefined ) {
-                                ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + interfaceName + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
+                            if ( checkType( Class.prototype[ methodTypePrefix + methodName ], ABSTRACT ) ) {
+                                ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + className + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
                             }
+                     
                         }
                     });
+                
+                    // interfaces
+                
+                    Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
+                  
+                        var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;
+                        Object.keys( interfaceProto ).forEach(function( item ){
+                            if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
+                        
+                                var methodName = item.substring( methodPrefix.length );
+                                if (Class.prototype[ methodTypePrefix + methodName ] === undefined ) {
+                                    ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + interfaceName + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
+                                }
+                            }
+                        });
                     
-                });
+                    });
+                }
 
                 
             }
@@ -7872,7 +7874,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             }
             
             Class.prototype = new Extends( true );
-        } else {
+        } else {      
             Class.prototype = new PHP.VM.ClassPrototype();
             Class.prototype[ PHP.VM.Class.INTERFACES ] = [];
         }
@@ -8954,5 +8956,32 @@ ENV.$Class.INew( "ArrayAccess", [], function( M, $ ){
 .Method( "offsetUnset", 1, [{"name":"offset"}], function( $, ctx ) {
 })
 .Create()});
+
+};/* automatically built from Iterator.php*/
+PHP.VM.Class.Predefined.Iterator = function( ENV ) {
+ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $ ){
+ M.Method( "current", 1, [], function( $, ctx ) {
+})
+.Method( "key", 1, [], function( $, ctx ) {
+})
+.Method( "next", 1, [], function( $, ctx ) {
+})
+.Method( "rewind", 1, [], function( $, ctx ) {
+})
+.Method( "valid", 1, [], function( $, ctx ) {
+})
+.Create()});
+
+};/* automatically built from IteratorAggregate.php*/
+PHP.VM.Class.Predefined.IteratorAggregate = function( ENV ) {
+ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $ ){
+ M.Method( "getIterator", 17, [], function( $, ctx ) {
+})
+.Create()});
+
+};/* automatically built from Traversable.php*/
+PHP.VM.Class.Predefined.Traversable = function( ENV ) {
+ENV.$Class.INew( "Traversable", [], function( M, $ ){
+ M.Create()});
 
 };
