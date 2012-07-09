@@ -2,7 +2,7 @@
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
 
-    return this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )"; 
+    return this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )";
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
@@ -11,7 +11,7 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }*/
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignMinus = function( action ) {
@@ -19,7 +19,7 @@ PHP.Compiler.prototype.Node_Expr_AssignMinus = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignPlus = function( action ) {
@@ -27,7 +27,7 @@ PHP.Compiler.prototype.Node_Expr_AssignPlus = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 
@@ -36,7 +36,7 @@ PHP.Compiler.prototype.Node_Expr_AssignMul = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 
@@ -45,7 +45,7 @@ PHP.Compiler.prototype.Node_Expr_AssignDiv = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
@@ -53,25 +53,25 @@ PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
-   
-     
+
+
     console.log( action );
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Ternary = function( action ) {
-    var src = "(( " + this.source( action.cond ) + "." + this.VARIABLE_VALUE + " ) ? " + this.source( action.If ) + " : " + this.source( action.Else ) + ")"; 
-     
-    return src; 
+    var src = "(( " + this.source( action.cond ) + "." + this.VARIABLE_VALUE + " ) ? " + this.source( action.If ) + " : " + this.source( action.Else ) + ")";
+
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_ErrorSuppress = function( action ) {
     var src = this.CTX + this.SUPPRESS + "(function() { return " + this.source( action.expr ) + " })";
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
@@ -82,41 +82,56 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
         src += "(" + this.CTX + "[ " + this.source( action.func ) + "." + this.VARIABLE_VALUE + " ](";
     } else {
         src += "(" + this.CTX + this.getName( action.func ) + "(";
-        
+
         if (this.getName( action.func ) === "eval") {
             args.push("$");
         }
-        
+
     }
-   
+
     action.args.forEach(function( arg ){
-        
+
         args.push( this.source( arg.value ) );
     }, this);
-    
+
     src += args.join(", ") + "))";
-   
+
     return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Exit = function( action ) {
     var src = this.CTX + "exit( " + this.source(action.expr) + " )";
 
-    return src;  
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
+   
+    var src = this.CTX + "list( " + this.source(action.expr);
+
+    var args = [];
+
+    action.assignList.forEach(function( item ){
+        src += ", " + this.source(item) ;
+        }, this);
+
+    src += " )";
+
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 
     var src = this.CTX + "isset( ";
-    
+
     var args = [];
     action.variables.forEach(function( arg ){
-        
+
         args.push( this.source( arg) );
     }, this);
- 
+
     src += args.join(", ") + " )";
-    
+
     return src;
 };
 
@@ -158,6 +173,10 @@ PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_Equal = function( action ) {
     return this.source( action.left ) + "." + this.EQUAL + "(" + this.source( action.right ) + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_NotIdentical = function( action ) {
+    return this.source( action.left ) + "." + this.NOT_IDENTICAL + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {
@@ -206,7 +225,7 @@ PHP.Compiler.prototype.Node_Expr_Print = function( action ) {
     var src = this.CTX + 'print( ';
 
     src += this.source(action.expr);
-  
+
 
     src += ' )';
     return src;
@@ -218,16 +237,16 @@ PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
     if ( action.name === "this" ) {
         return action.name;
     } else {
-        
+
         if ( typeof action.name === "string" ) {
             src += '"' + this.source( action.name ) + '"';
         } else {
             src += this.source( action.name ) + "." + this.VARIABLE_VALUE;
         }
-        
-    //  return this.VARIABLE + '("' + this.source( action.name ) + '")';       
+
+    //  return this.VARIABLE + '("' + this.source( action.name ) + '")';
     }
-    
+
     return src + ")";
 };
 
@@ -242,15 +261,15 @@ PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
 PHP.Compiler.prototype.Node_Expr_New = function( action ) {
 
     var src = this.CREATE_VARIABLE + '(new (' + this.CTX + this.CLASS_GET + '("' + this.getName( action.Class ) + '"))( this';
-    
+
     action.args.forEach(function( arg ) {
-        
+
         src += ", "  + this.source( arg.value );
     }, this);
-    
+
     src += " ))";
 
-    return src; 
+    return src;
 };
 
 
@@ -262,14 +281,14 @@ PHP.Compiler.prototype.Node_Expr_ConstFetch = function( action ) {
     } else {
         return this.CTX + this.CONSTANTS + '.' + this.CONSTANT_GET + '("' + this.source( action.name ) + '")';
     }
-    
+
 };
 
 
 PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
     var src = this.source( action.variable ) + "." + this.METHOD_CALL + '( ';
-    
+
     src += ( action.variable.name === "this") ? "ctx" : "this";
 
     src += ', "' + action.name + '"';
@@ -277,11 +296,11 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
     action.args.forEach(function( arg ) {
         src += ", " + this.source( arg.value );
     }, this);
-  
-    
-  
+
+
+
     src += ")";
-  
+
     return src;
 
 };
@@ -293,15 +312,15 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
     } else {
         return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
     }
-    
+
 };
 
 PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 
-   
+
     return this.CTX + this.CLASS_CONSTANT_GET + '("' + this.source( action.Class ) + '", this, "' + action.name  + '" )';
-    
-    
+
+
 };
 
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
@@ -312,46 +331,45 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
     } else {
         src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.func + '"';
     }
-    
- 
+
+
     action.args.forEach(function( arg ) {
         src += ", " + this.source( arg.value );
     }, this);
-  
+
     src += ")";
-  
+
     return src;
 
 };
 
 PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
-   
+
     var src = "";
     if (/^(parent|self)$/i.test( action.Class.parts )) {
         src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name.substring(1) + '"';
     } else {
         src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name.substring(1) + '"';
     }
-    
+
     src += ")";
-    
+
     return src;
-    
+
 };
 
 PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
-    
+
     var src = this.CTX + "array([",
     items = [];
 
     ((Array.isArray(action.items)) ? action.items : [ action.items ]).forEach(function( item ){
-        
+
         items.push("{" + this.ARRAY_VALUE + ":" + this.source( item.value ) + ( ( item.key !== undefined) ? ", " + this.ARRAY_KEY + ":" + this.source( item.key ) : "") +  "}");
     }, this);
-      
+
     src += items.join(", ") + "])";
     return src;
 
 };
 
-  

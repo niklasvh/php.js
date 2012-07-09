@@ -121,6 +121,8 @@ PHP.Compiler.prototype.CONCAT = "$Concat";
 
 PHP.Compiler.prototype.UNSET = "$Unset";
 
+PHP.Compiler.prototype.NOT_IDENTICAL = "$NIdentical";
+
 PHP.Compiler.prototype.EQUAL = "$Equal";
 
 PHP.Compiler.prototype.SMALLER = "$Smaller";

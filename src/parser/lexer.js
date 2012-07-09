@@ -299,7 +299,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_ARRAY,
-        re: /^array(?=[ \(])/i
+        re: /^array(?=\s*?\()/i
     },
     {
         value: PHP.Constants.T_ISSET,
@@ -320,6 +320,10 @@ PHP.Lexer = function( src ) {
     {
         value: PHP.Constants.T_ECHO,
         re: /^echo(?=[ "'(;])/i
+    },
+    {
+        value: PHP.Constants.T_LIST,
+        re: /^list(?=\s*?\()/i
     },
     {
         value: PHP.Constants.T_PRINT,

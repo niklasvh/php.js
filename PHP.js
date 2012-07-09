@@ -268,6 +268,8 @@ PHP.Compiler.prototype.CONCAT = "$Concat";
 
 PHP.Compiler.prototype.UNSET = "$Unset";
 
+PHP.Compiler.prototype.NOT_IDENTICAL = "$NIdentical";
+
 PHP.Compiler.prototype.EQUAL = "$Equal";
 
 PHP.Compiler.prototype.SMALLER = "$Smaller";
@@ -378,7 +380,7 @@ PHP.Compiler.prototype.fixString =  function( result ) {
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
 
-    return this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )"; 
+    return this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )";
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
@@ -387,7 +389,7 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }*/
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignMinus = function( action ) {
@@ -395,7 +397,7 @@ PHP.Compiler.prototype.Node_Expr_AssignMinus = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignPlus = function( action ) {
@@ -403,7 +405,7 @@ PHP.Compiler.prototype.Node_Expr_AssignPlus = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 
@@ -412,7 +414,7 @@ PHP.Compiler.prototype.Node_Expr_AssignMul = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 
@@ -421,7 +423,7 @@ PHP.Compiler.prototype.Node_Expr_AssignDiv = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
@@ -429,25 +431,25 @@ PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
-   
-     
+
+
     console.log( action );
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Ternary = function( action ) {
-    var src = "(( " + this.source( action.cond ) + "." + this.VARIABLE_VALUE + " ) ? " + this.source( action.If ) + " : " + this.source( action.Else ) + ")"; 
-     
-    return src; 
+    var src = "(( " + this.source( action.cond ) + "." + this.VARIABLE_VALUE + " ) ? " + this.source( action.If ) + " : " + this.source( action.Else ) + ")";
+
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_ErrorSuppress = function( action ) {
     var src = this.CTX + this.SUPPRESS + "(function() { return " + this.source( action.expr ) + " })";
-    return src; 
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
@@ -458,41 +460,56 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
         src += "(" + this.CTX + "[ " + this.source( action.func ) + "." + this.VARIABLE_VALUE + " ](";
     } else {
         src += "(" + this.CTX + this.getName( action.func ) + "(";
-        
+
         if (this.getName( action.func ) === "eval") {
             args.push("$");
         }
-        
+
     }
-   
+
     action.args.forEach(function( arg ){
-        
+
         args.push( this.source( arg.value ) );
     }, this);
-    
+
     src += args.join(", ") + "))";
-   
+
     return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Exit = function( action ) {
     var src = this.CTX + "exit( " + this.source(action.expr) + " )";
 
-    return src;  
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
+   
+    var src = this.CTX + "list( " + this.source(action.expr);
+
+    var args = [];
+
+    action.assignList.forEach(function( item ){
+        src += ", " + this.source(item) ;
+        }, this);
+
+    src += " )";
+
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 
     var src = this.CTX + "isset( ";
-    
+
     var args = [];
     action.variables.forEach(function( arg ){
-        
+
         args.push( this.source( arg) );
     }, this);
- 
+
     src += args.join(", ") + " )";
-    
+
     return src;
 };
 
@@ -534,6 +551,10 @@ PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_Equal = function( action ) {
     return this.source( action.left ) + "." + this.EQUAL + "(" + this.source( action.right ) + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_NotIdentical = function( action ) {
+    return this.source( action.left ) + "." + this.NOT_IDENTICAL + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {
@@ -582,7 +603,7 @@ PHP.Compiler.prototype.Node_Expr_Print = function( action ) {
     var src = this.CTX + 'print( ';
 
     src += this.source(action.expr);
-  
+
 
     src += ' )';
     return src;
@@ -594,16 +615,16 @@ PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
     if ( action.name === "this" ) {
         return action.name;
     } else {
-        
+
         if ( typeof action.name === "string" ) {
             src += '"' + this.source( action.name ) + '"';
         } else {
             src += this.source( action.name ) + "." + this.VARIABLE_VALUE;
         }
-        
-    //  return this.VARIABLE + '("' + this.source( action.name ) + '")';       
+
+    //  return this.VARIABLE + '("' + this.source( action.name ) + '")';
     }
-    
+
     return src + ")";
 };
 
@@ -618,15 +639,15 @@ PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
 PHP.Compiler.prototype.Node_Expr_New = function( action ) {
 
     var src = this.CREATE_VARIABLE + '(new (' + this.CTX + this.CLASS_GET + '("' + this.getName( action.Class ) + '"))( this';
-    
+
     action.args.forEach(function( arg ) {
-        
+
         src += ", "  + this.source( arg.value );
     }, this);
-    
+
     src += " ))";
 
-    return src; 
+    return src;
 };
 
 
@@ -638,14 +659,14 @@ PHP.Compiler.prototype.Node_Expr_ConstFetch = function( action ) {
     } else {
         return this.CTX + this.CONSTANTS + '.' + this.CONSTANT_GET + '("' + this.source( action.name ) + '")';
     }
-    
+
 };
 
 
 PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
     var src = this.source( action.variable ) + "." + this.METHOD_CALL + '( ';
-    
+
     src += ( action.variable.name === "this") ? "ctx" : "this";
 
     src += ', "' + action.name + '"';
@@ -653,11 +674,11 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
     action.args.forEach(function( arg ) {
         src += ", " + this.source( arg.value );
     }, this);
-  
-    
-  
+
+
+
     src += ")";
-  
+
     return src;
 
 };
@@ -669,15 +690,15 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
     } else {
         return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
     }
-    
+
 };
 
 PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 
-   
+
     return this.CTX + this.CLASS_CONSTANT_GET + '("' + this.source( action.Class ) + '", this, "' + action.name  + '" )';
-    
-    
+
+
 };
 
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
@@ -688,49 +709,49 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
     } else {
         src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.func + '"';
     }
-    
- 
+
+
     action.args.forEach(function( arg ) {
         src += ", " + this.source( arg.value );
     }, this);
-  
+
     src += ")";
-  
+
     return src;
 
 };
 
 PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
-   
+
     var src = "";
     if (/^(parent|self)$/i.test( action.Class.parts )) {
         src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name.substring(1) + '"';
     } else {
         src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name.substring(1) + '"';
     }
-    
+
     src += ")";
-    
+
     return src;
-    
+
 };
 
 PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
-    
+
     var src = this.CTX + "array([",
     items = [];
 
     ((Array.isArray(action.items)) ? action.items : [ action.items ]).forEach(function( item ){
-        
+
         items.push("{" + this.ARRAY_VALUE + ":" + this.source( item.value ) + ( ( item.key !== undefined) ? ", " + this.ARRAY_KEY + ":" + this.source( item.key ) : "") +  "}");
     }, this);
-      
+
     src += items.join(", ") + "])";
     return src;
 
 };
 
-  
+
 PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
     console.log( action );
@@ -1464,22 +1485,6 @@ PHP.Modules.prototype.array_key_exists = function( key, search ) {
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 2.7.2012 
-* @website http://hertzen.com
- */
-
-
-PHP.Modules.prototype.is_array = function( variable ) {
-    
-    var COMPILER = PHP.Compiler.prototype,
-    VAR = PHP.VM.Variable.prototype;
-    
-
-    return new PHP.VM.Variable( ( variable[ VAR.TYPE ] === VAR.ARRAY ) );
-    
-    
-};/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 29.6.2012 
 * @website http://hertzen.com
  */
@@ -1519,6 +1524,103 @@ PHP.Modules.prototype.current = function( array ) {
         } else {
             return new PHP.VM.Variable( pointer[ COMPILER.VARIABLE_VALUE ] );
         }
+        
+       
+    } 
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.each = function( array ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    ARRAY = PHP.VM.Array.prototype;
+    
+
+        
+    if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+        var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
+        values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
+        
+        pointer[ COMPILER.VARIABLE_VALUE ] = 0;
+        
+        return new PHP.VM.Variable(false);
+        
+       
+    } 
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 2.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.is_array = function( variable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VAR = PHP.VM.Variable.prototype;
+    
+
+    return new PHP.VM.Variable( ( variable[ VAR.TYPE ] === VAR.ARRAY ) );
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+
+PHP.Modules.prototype.list = function( array ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    ARRAY = PHP.VM.Array.prototype;
+    
+
+        
+    if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+        var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
+        values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
+        
+        pointer[ COMPILER.VARIABLE_VALUE ] = 0;
+        
+        return new PHP.VM.Variable(false);
+        
+       
+    } 
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.reset = function( array ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    ARRAY = PHP.VM.Array.prototype;
+    
+
+        
+    if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+        var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
+        values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
+        
+        pointer[ COMPILER.VARIABLE_VALUE ] = 0;
+        
+  
         
        
     } 
@@ -3114,7 +3216,7 @@ PHP.Modules.prototype.var_dump = function() {
     },
     {
         value: PHP.Constants.T_ARRAY,
-        re: /^array(?=[ \(])/i
+        re: /^array(?=\s*?\()/i
     },
     {
         value: PHP.Constants.T_ISSET,
@@ -3135,6 +3237,10 @@ PHP.Modules.prototype.var_dump = function() {
     {
         value: PHP.Constants.T_ECHO,
         re: /^echo(?=[ "'(;])/i
+    },
+    {
+        value: PHP.Constants.T_LIST,
+        re: /^list(?=\s*?\()/i
     },
     {
         value: PHP.Constants.T_PRINT,
@@ -8490,6 +8596,12 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.METHOD_CALL ] = function(
     return this[ COMPILER.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ].apply( this[ COMPILER.VARIABLE_VALUE ], arguments );
 };
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.NOT_IDENTICAL ] = function( compareTo ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) !== ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+};
+
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compareTo ) {
     
     var COMPILER = PHP.Compiler.prototype;
@@ -8627,7 +8739,6 @@ PHP.VM.Variable = function( arg ) {
 
    
     this[ PHP.Compiler.prototype.UNSET ] = function() {
-console.log("unset");
         setValue( null );
         this.DEFINED = false;
     };

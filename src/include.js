@@ -16,9 +16,13 @@ var files = {
         array: {
             array: "js",
             array_key_exists: "js",
-            is_array: "js",
             count: "js",
-            current: "js"
+            current: "js",
+            each: "js",
+            is_array: "js",
+            list: "js",
+            reset: "js"
+            
         },
         classes: {
             get_class: "js"
