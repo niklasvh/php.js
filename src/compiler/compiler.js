@@ -3,11 +3,12 @@ PHP.Compiler = function( AST ) {
     
     
     this.src = "";
-    
+    this.FOREACH_COUNT = 0;
     AST.forEach( function( action ){
         this.src += this[ action.type ]( action ) + ";\n";     
     }, this );
 
+    
     this.INSIDE_METHOD = false;
 
 };

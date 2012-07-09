@@ -453,7 +453,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         Class.prototype[ COMPILER.METHOD_CALL ] = function( ctx, methodName ) {
              
-            var args = Array.prototype.slice.call( arguments, 2 );
+            var args = Array.prototype.slice.call( arguments, 2 ),
+            value;
 
             if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
                 // no method with that name found
@@ -465,11 +466,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     // determine which __call to use in case there are several defined
                     if ( ctx instanceof PHP.VM ) {
                         // normal call, use current context
-                        return callMethod.call( this, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
+                        value = callMethod.call( this, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
                     } else {
                         // static call, ensure current scope's __call() is favoured over the specified class's  __call()
-                        return ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
+                        value = ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
                     }
+                    
+                     return (( value === undefined ) ? new PHP.VM.Variable() : value);
                
                 }
                   
@@ -490,20 +493,22 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
               
             }
 
+           
+
             // favor current context's private method
             if ( ctx instanceof PHP.VM.ClassPrototype && 
                 ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined &&
                 checkType( ctx[ methodTypePrefix + methodName ], PRIVATE ) &&
                 ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] === ctx[ COMPILER.CLASS_NAME ] ) {
                 
-                return this.callMethod.call( ctx, methodName, args );
+                value = this.callMethod.call( ctx, methodName, args );
                 
+            } else {
+                value = this.callMethod.call( this, methodName, args );
+            
             }
             
-
-            return this.callMethod.call( this, methodName, args );
-            
-           
+            return (( value === undefined ) ? new PHP.VM.Variable() : value);
             
            
               

@@ -154,22 +154,17 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
-   
-    var src = this.CTX + 'foreach( ' + this.VARIABLE + ', ' + this.source( action.expr ) + ', function() {\n'; 
-    //( $, expr, func, value, key )
-
-    src += this.stmts( action.stmts );
-
-    src += '}, ' + this.source( action.valueVar );
-
-    //  src += '}, "' + action.valueVar.name + '"';
+    var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "foreachInit(" + this.source( action.expr ) + "), first = {};\n";
+    src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + this.source( action.valueVar );
 
     if (action.keyVar !== null) {
-        src += ', ' + this.source( action.expr );
+        src += ', ' + this.source( action.keyVar );
     }
-    src += ')'
+    src += ')) {\n'
     
-        
+    src += this.stmts( action.stmts );
+ 
+    src += '}'
 
     return src;
 };

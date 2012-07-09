@@ -150,11 +150,12 @@ PHP.Compiler = function( AST ) {
     
     
     this.src = "";
-    
+    this.FOREACH_COUNT = 0;
     AST.forEach( function( action ){
         this.src += this[ action.type ]( action ) + ";\n";     
     }, this );
 
+    
     this.INSIDE_METHOD = false;
 
 };
@@ -885,22 +886,17 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
-   
-    var src = this.CTX + 'foreach( ' + this.VARIABLE + ', ' + this.source( action.expr ) + ', function() {\n'; 
-    //( $, expr, func, value, key )
-
-    src += this.stmts( action.stmts );
-
-    src += '}, ' + this.source( action.valueVar );
-
-    //  src += '}, "' + action.valueVar.name + '"';
+    var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "foreachInit(" + this.source( action.expr ) + "), first = {};\n";
+    src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + this.source( action.valueVar );
 
     if (action.keyVar !== null) {
-        src += ', ' + this.source( action.expr );
+        src += ', ' + this.source( action.keyVar );
     }
-    src += ')'
+    src += ')) {\n'
     
-        
+    src += this.stmts( action.stmts );
+ 
+    src += '}'
 
     return src;
 };
@@ -1513,15 +1509,43 @@ PHP.Modules.prototype.get_class = function( object ) {
 * @created 30.6.2012 
 * @website http://hertzen.com
  */
-
-
-PHP.Modules.prototype.foreach = function( $, expr, func, value, key ) {
-    
-    
-    
+PHP.Modules.prototype.foreachInit = function( expr ) {
+     
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype;
+    
+    if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
+        var pointer = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
+        pointer[ COMPILER.VARIABLE_VALUE ] = 0;
+      
+        return {
+            expr: expr
+        };
+      
+    } else if ( expr[ VAR.TYPE ] === VAR.OBJECT ) {
+        var objectValue = expr[ COMPILER.VARIABLE_VALUE ]
+        
+        
+        // iteratorAggregate implemented objects
+        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("IteratorAggregate") !== -1 ) {
+            var iterator = objectValue[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
+            return {
+                expr: expr,  
+                Class:iterator
+            };
+        }
+    }
+   
+};
+
+PHP.Modules.prototype.foreach = function( iterator, value, key ) {
+     
+    var COMPILER = PHP.Compiler.prototype,
+    VAR = PHP.VM.Variable.prototype,
+    ARRAY = PHP.VM.Array.prototype;
+    
+    var expr = iterator.expr;
     
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
         var values = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
@@ -1529,25 +1553,53 @@ PHP.Modules.prototype.foreach = function( $, expr, func, value, key ) {
         len = values.length,
         pointer = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
         
+        var result = ( pointer[ COMPILER.VARIABLE_VALUE ] < len );
         
-        
-        
-        for ( pointer[ COMPILER.VARIABLE_VALUE ] = 0; pointer[ COMPILER.VARIABLE_VALUE ] < len; pointer[ COMPILER.VARIABLE_VALUE ]++ ) {
-          //  console.log(value[ COMPILER.VARIABLE_VALUE ]);
-          // ref:  value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
-        //  console.log(values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ]);
-          value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
-          
+        if ( result === true ) {
+            value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
+            
             if ( key instanceof PHP.VM.Variable ) {
-           //ref:     key[ COMPILER.VARIABLE_VALUE ] = keys[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
+                key[ COMPILER.VARIABLE_VALUE ] = keys[ pointer[ COMPILER.VARIABLE_VALUE ] ];
             }
             
-            func();
-
+            pointer[ COMPILER.VARIABLE_VALUE ]++;
         }
         
+        return result;
         
-    //    return new PHP.VM.Variable( values.length );
+        
+        
+  
+    } else if ( expr[ VAR.TYPE ] === VAR.OBJECT ) {
+        var objectValue = expr[ COMPILER.VARIABLE_VALUE ]
+        
+        
+        // iteratorAggregate implemented objects
+        if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("IteratorAggregate") !== -1 ) {
+            
+            
+            if ( iterator.first === undefined ) {
+                iterator.first = true;
+            } else {
+                iterator.Class[ COMPILER.METHOD_CALL ]( this, "next" );
+            }
+            
+            var result = iterator.Class[ COMPILER.METHOD_CALL ]( this, "valid" )[ VAR.CAST_BOOL ][ COMPILER.VARIABLE_VALUE ];
+            
+            if ( result === true ) {
+                
+                value[ COMPILER.VARIABLE_VALUE ] = iterator.Class[ COMPILER.METHOD_CALL ]( this, "current" )[ COMPILER.VARIABLE_VALUE ];
+                
+                if ( key instanceof PHP.VM.Variable ) {
+                    key[ COMPILER.VARIABLE_VALUE ] = iterator.Class[ COMPILER.METHOD_CALL ]( this, "key" )[ COMPILER.VARIABLE_VALUE ];
+                }
+            }
+
+            return result;
+        
+        }
+        
+       
     }
     
     
@@ -7904,7 +7956,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         Class.prototype[ COMPILER.METHOD_CALL ] = function( ctx, methodName ) {
              
-            var args = Array.prototype.slice.call( arguments, 2 );
+            var args = Array.prototype.slice.call( arguments, 2 ),
+            value;
 
             if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
                 // no method with that name found
@@ -7916,11 +7969,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     // determine which __call to use in case there are several defined
                     if ( ctx instanceof PHP.VM ) {
                         // normal call, use current context
-                        return callMethod.call( this, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
+                        value = callMethod.call( this, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
                     } else {
                         // static call, ensure current scope's __call() is favoured over the specified class's  __call()
-                        return ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
+                        value = ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
                     }
+                    
+                     return (( value === undefined ) ? new PHP.VM.Variable() : value);
                
                 }
                   
@@ -7941,20 +7996,22 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
               
             }
 
+           
+
             // favor current context's private method
             if ( ctx instanceof PHP.VM.ClassPrototype && 
                 ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined &&
                 checkType( ctx[ methodTypePrefix + methodName ], PRIVATE ) &&
                 ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] === ctx[ COMPILER.CLASS_NAME ] ) {
                 
-                return this.callMethod.call( ctx, methodName, args );
+                value = this.callMethod.call( ctx, methodName, args );
                 
+            } else {
+                value = this.callMethod.call( this, methodName, args );
+            
             }
             
-
-            return this.callMethod.call( this, methodName, args );
-            
-           
+            return (( value === undefined ) ? new PHP.VM.Variable() : value);
             
            
               
