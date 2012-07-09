@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 186 out of 672 (27.7%)
+Passed 187 out of 672 (27.8%)
 
 Failed tests:
 
@@ -99,7 +99,6 @@ Failed tests:
  - tests/php/classes/bug27468.phpt
  - tests/php/classes/bug27504.phpt
  - tests/php/classes/bug29446.phpt
- - tests/php/classes/class_stdclass.phpt
  - tests/php/classes/clone_001.phpt
  - tests/php/classes/clone_002.phpt
  - tests/php/classes/clone_003.phpt

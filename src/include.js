@@ -20,6 +20,9 @@ var files = {
             is_array: "js",
             count: "js"
         },
+        classes: {
+            get_class: "js"
+        },
         control_structures: {
             foreach: "js",
             include: "js"
