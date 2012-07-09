@@ -474,6 +474,12 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
     return src;
 };
 
+PHP.Compiler.prototype.Node_Expr_Exit = function( action ) {
+    var src = this.CTX + "exit( " + this.source(action.expr) + " )";
+
+    return src;  
+};
+
 PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 
     var src = this.CTX + "isset( ";
@@ -668,7 +674,7 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 
    
-        return this.CTX + this.CLASS_CONSTANT_GET + '("' + this.source( action.Class ) + '", this, "' + action.name  + '" )';
+    return this.CTX + this.CLASS_CONSTANT_GET + '("' + this.source( action.Class ) + '", this, "' + action.name  + '" )';
     
     
 };
@@ -7682,7 +7688,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
  
             // A final method cannot be abstract
             if ( checkType( methodType, ABSTRACT ) && checkType( methodType, FINAL ) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member in class", PHP.Constants.E_ERROR );
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member", PHP.Constants.E_ERROR, true );
             }
            
             // __call

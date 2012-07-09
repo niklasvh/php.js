@@ -289,7 +289,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
  
             // A final method cannot be abstract
             if ( checkType( methodType, ABSTRACT ) && checkType( methodType, FINAL ) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member in class", PHP.Constants.E_ERROR );
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member", PHP.Constants.E_ERROR, true );
             }
            
             // __call

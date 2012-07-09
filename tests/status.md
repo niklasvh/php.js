@@ -1,11 +1,9 @@
 ### Test results ###
 
-Passed 107 out of 271 (39.5%)
+Passed 110 out of 271 (40.6%)
 
 Failed tests:
 
- - tests/php/classes/abstract_derived.phpt
- - tests/php/classes/abstract_final.phpt
  - tests/php/classes/abstract_static.phpt
  - tests/php/classes/abstract_user_call.phpt
  - tests/php/classes/arrayobject_001.phpt
@@ -105,7 +103,6 @@ Failed tests:
  - tests/php/classes/interface_doubled.phpt
  - tests/php/classes/interface_implemented.phpt
  - tests/php/classes/interface_method.phpt
- - tests/php/classes/interface_method_final.phpt
  - tests/php/classes/interface_method_private.phpt
  - tests/php/classes/interface_optional_arg_002.phpt
  - tests/php/classes/interface_optional_arg_003.phpt
