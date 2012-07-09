@@ -428,6 +428,18 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             Class.prototype[ PHP.VM.Class.INTERFACES ] = [];
         }
         
+        var pushInterface = function( interfaceName, interfaces, ignore ) {
+            
+            if ( interfaceName.toLowerCase() === "traversable" && ignore !== true && !/^iterato(r|raggregate)$/i.test( className ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " must implement interface Traversable as part of either Iterator or IteratorAggregate", PHP.Constants.E_ERROR, true );
+            } 
+            
+            if ( interfaces.indexOf( interfaceName ) === -1 ) {
+                // only add interface if it isn't present already
+                interfaces.push( interfaceName );
+            }
+        }
+        
         if (opts.Implements !== undefined || classType === PHP.VM.Class.INTERFACE) {
 
             (( classType === PHP.VM.Class.INTERFACE) ? opts : opts.Implements).forEach(function( interfaceName ){
@@ -439,20 +451,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ PHP.Compiler.prototype.ERROR ]( className + " cannot implement " + interfaceName + " - it is not an interface", PHP.Constants.E_ERROR, true );
                 }
                 
-                if ( Class.prototype[ PHP.VM.Class.INTERFACES ].indexOf( interfaceName ) === -1 ) {
-                    // only add interface if it isn't present already
-                    Class.prototype[ PHP.VM.Class.INTERFACES ].push( interfaceName );
-                }
-                
+                pushInterface( interfaceName, Class.prototype[ PHP.VM.Class.INTERFACES ] ); 
+          
                 // add interfaces from interface
                 
                 Implements.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ) {
-                    
-                    if ( Class.prototype[ PHP.VM.Class.INTERFACES ].indexOf( interfaceName ) === -1 ) {
-                        // only add interface if it isn't present already
-                        Class.prototype[ PHP.VM.Class.INTERFACES ].push( interfaceName );
-                    }
-                    
+                    pushInterface( interfaceName, Class.prototype[ PHP.VM.Class.INTERFACES ], true );               
                 });
                 
             });
