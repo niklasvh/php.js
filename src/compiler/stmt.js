@@ -154,8 +154,12 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
+    
+    
+    console.log( action );
+    
     var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
-    src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + this.source( action.valueVar );
+    src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + action.byRef + ", " + this.source( action.valueVar );
 
     if (action.keyVar !== null) {
         src += ', ' + this.source( action.keyVar );

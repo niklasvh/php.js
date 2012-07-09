@@ -145,4 +145,4 @@ function runTest ( file ) {
 
 
 
-runTest("tests/php/classes/iterators_002.phpt");
+runTest("tests/php/lang/foreachLoopIterator.002.phpt");

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 191 out of 672 (28.4%)
+Passed 193 out of 672 (28.7%)
 
 Failed tests:
 
@@ -336,7 +336,6 @@ Failed tests:
  - tests/php/lang/foreachLoop.015.phpt
  - tests/php/lang/foreachLoop.016.phpt
  - tests/php/lang/foreachLoopIterator.001.phpt
- - tests/php/lang/foreachLoopIterator.002.phpt
  - tests/php/lang/foreachLoopIteratorAggregate.001.phpt
  - tests/php/lang/foreachLoopIteratorAggregate.002.phpt
  - tests/php/lang/foreachLoopIteratorAggregate.003.phpt
@@ -483,5 +482,4 @@ Failed tests:
  - tests/php/ext/tokenizer/001.phpt
  - tests/php/ext/tokenizer/003.phpt
  - tests/php/ext/tokenizer/bug54089.phpt
- - tests/php/ext/tokenizer/token_get_all_error.phpt
  - tests/php/ext/tokenizer/token_get_all_variation1.phpt

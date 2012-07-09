@@ -886,8 +886,12 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
+    
+    
+    console.log( action );
+    
     var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
-    src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + this.source( action.valueVar );
+    src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + action.byRef + ", " + this.source( action.valueVar );
 
     if (action.keyVar !== null) {
         src += ', ' + this.source( action.keyVar );
@@ -1528,12 +1532,17 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
         
         
         // iteratorAggregate implemented objects
-        console.log(objectValue[ PHP.VM.Class.INTERFACES ]);
+        
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
-            var iterator = objectValue[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
+            console.log(objectValue[ COMPILER.CLASS_NAME ]);
+            var iterator = objectValue;
+            
+            if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1 ) {
+                iterator = objectValue[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
+            }
             
             iterator[ COMPILER.METHOD_CALL ]( this, "rewind" );
-            
+            console.log("hey");
             return {
                 expr: expr,  
                 Class:iterator
@@ -1554,8 +1563,8 @@ PHP.Modules.prototype.$foreachEnd = function( iterator ) {
  
 };
 
-PHP.Modules.prototype.foreach = function( iterator, value, key ) {
-     
+PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
+    console.log('sup');
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,
@@ -1596,6 +1605,9 @@ PHP.Modules.prototype.foreach = function( iterator, value, key ) {
         // iteratorAggregate implemented objects
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
             
+            if ( byRef === true ) {
+                this.ENV[ PHP.Compiler.prototype.ERROR ]( "An iterator cannot be used with foreach by reference", PHP.Constants.E_ERROR, true );
+            }
             
             if ( iterator.first === undefined ) {
                 iterator.first = true;
@@ -2808,7 +2820,7 @@ PHP.Modules.prototype.var_dump = function() {
         value: PHP.Constants.T_STATIC,
         re: /^static(?=\s)/i
     },
-        {
+    {
         value: PHP.Constants.T_FINAL,
         re: /^final(?=\s)/i
     },
@@ -3216,6 +3228,7 @@ PHP.Modules.prototype.var_dump = function() {
            
             var match = result.match( /(?:[^\\]|\\.)*[^\\]\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/g );
             if ( match !== null ) {
+                // string has a variable
                
                 while( result.length > 0 ) {
 
@@ -3244,7 +3257,22 @@ PHP.Modules.prototype.var_dump = function() {
                             ]);
                         
                         result = result.substring( match[ 0 ].length ); 
-
+/*
+                        match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
+                        if ( match !== null ) {
+                            console.log( match );
+                            results.push([
+                                parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10), 
+                                match[ 1 ],
+                                line
+                                ]);
+                            results.push([
+                                parseInt(PHP.Constants.T_STRING, 10), 
+                                match[ 2 ],
+                                line
+                                ]);
+                            result = result.substring( match[ 0 ].length ); 
+                        } */
                     }
                     
 
@@ -7346,7 +7374,7 @@ PHP.Parser.prototype.yyn372 = function ( attributes ) {
             attributes: attributes
         },
         name: this.yyastk[this.stackPos-(3-3)],
-        type: "Node_Expr_StaticPropertyFetch",
+        type: "Node_Expr_PropertyFetch",
         attributes: attributes
     };
 };
@@ -7418,6 +7446,9 @@ PHP.VM = function( src, opts ) {
         return new PHP.VM.Variable( arg );
     },
     ENV = this;
+    
+    this.ENV = ENV;
+    
     PHP.VM.Variable.prototype.ENV = ENV;
     
     ENV [ PHP.Compiler.prototype.FILESYSTEM ] = (opts.filesystem === undefined ) ? {} : opts.filesystem;

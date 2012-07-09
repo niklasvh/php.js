@@ -52,6 +52,9 @@ function runTest ( file, complete ) {
         if (err) throw err;
         var test = parsePHPT( data );
         
+         var content = fs.readFileSync( 'PHP.js', 'utf8') ;
+
+            eval( content );
         
         var engine = {},
         opts = {
@@ -81,6 +84,7 @@ function runTest ( file, complete ) {
         opts.filesystem = fs;
                     
         try {
+           
             engine = new PHP( PHP.Lexer(test.FILE), opts );
               
             var expect = ((test.EXPECT === undefined) ? test.EXPECTF : test.EXPECT ).trim(),
@@ -134,9 +138,7 @@ function runTest ( file, complete ) {
 }
 
 
-var content = fs.readFileSync( 'php.js', 'utf8') ;
 
-eval( content );
 
 var p = 0;
 

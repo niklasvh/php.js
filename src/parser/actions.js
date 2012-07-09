@@ -2637,7 +2637,7 @@ PHP.Parser.prototype.yyn372 = function ( attributes ) {
             attributes: attributes
         },
         name: this.yyastk[this.stackPos-(3-3)],
-        type: "Node_Expr_StaticPropertyFetch",
+        type: "Node_Expr_PropertyFetch",
         attributes: attributes
     };
 };

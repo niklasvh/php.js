@@ -10,6 +10,9 @@ PHP.VM = function( src, opts ) {
         return new PHP.VM.Variable( arg );
     },
     ENV = this;
+    
+    this.ENV = ENV;
+    
     PHP.VM.Variable.prototype.ENV = ENV;
     
     ENV [ PHP.Compiler.prototype.FILESYSTEM ] = (opts.filesystem === undefined ) ? {} : opts.filesystem;

@@ -21,4 +21,4 @@ foreach ($f as $k=>&$v) {
 --EXPECTF--
 -----( Try to iterate with &$value: )-----
 
-Fatal error: An iterator cannot be used with foreach by reference in %s on line 13
+Fatal error: An iterator cannot be used with foreach by reference in %s on line %d

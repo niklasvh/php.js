@@ -33,7 +33,7 @@ PHP.Lexer = function( src ) {
         value: PHP.Constants.T_STATIC,
         re: /^static(?=\s)/i
     },
-        {
+    {
         value: PHP.Constants.T_FINAL,
         re: /^final(?=\s)/i
     },
@@ -441,6 +441,7 @@ PHP.Lexer = function( src ) {
            
             var match = result.match( /(?:[^\\]|\\.)*[^\\]\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/g );
             if ( match !== null ) {
+                // string has a variable
                
                 while( result.length > 0 ) {
 
@@ -469,7 +470,22 @@ PHP.Lexer = function( src ) {
                             ]);
                         
                         result = result.substring( match[ 0 ].length ); 
-
+/*
+                        match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
+                        if ( match !== null ) {
+                            console.log( match );
+                            results.push([
+                                parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10), 
+                                match[ 1 ],
+                                line
+                                ]);
+                            results.push([
+                                parseInt(PHP.Constants.T_STRING, 10), 
+                                match[ 2 ],
+                                line
+                                ]);
+                            result = result.substring( match[ 0 ].length ); 
+                        } */
                     }
                     
 

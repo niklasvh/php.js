@@ -22,12 +22,17 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
         
         
         // iteratorAggregate implemented objects
-        console.log(objectValue[ PHP.VM.Class.INTERFACES ]);
+        
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
-            var iterator = objectValue[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
+            console.log(objectValue[ COMPILER.CLASS_NAME ]);
+            var iterator = objectValue;
+            
+            if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1 ) {
+                iterator = objectValue[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
+            }
             
             iterator[ COMPILER.METHOD_CALL ]( this, "rewind" );
-            
+            console.log("hey");
             return {
                 expr: expr,  
                 Class:iterator
@@ -48,8 +53,8 @@ PHP.Modules.prototype.$foreachEnd = function( iterator ) {
  
 };
 
-PHP.Modules.prototype.foreach = function( iterator, value, key ) {
-     
+PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
+    console.log('sup');
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,
@@ -90,6 +95,9 @@ PHP.Modules.prototype.foreach = function( iterator, value, key ) {
         // iteratorAggregate implemented objects
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
             
+            if ( byRef === true ) {
+                this.ENV[ PHP.Compiler.prototype.ERROR ]( "An iterator cannot be used with foreach by reference", PHP.Constants.E_ERROR, true );
+            }
             
             if ( iterator.first === undefined ) {
                 iterator.first = true;
