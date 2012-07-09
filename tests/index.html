@@ -3,6 +3,10 @@
     <head>
         <title>php.js test suite</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+            var exports = {};
+        </script>
+
         <script src="src/include.js"></script>
 
         <script src="adapters/filesystem/xhr.js"></script>
@@ -46,6 +50,7 @@
             // new PHP_Tests( "func", document.getElementById("tests") );
             //  new PHP_Tests( "lang", document.getElementById("tests") );
             new PHP_Tests( "classes", document.getElementById("tests") );
+         
         </script>
     </body>
 </html>

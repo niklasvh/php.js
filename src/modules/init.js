@@ -7,6 +7,7 @@
 PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV ) {
     var args = [ null ], // undefined context for bind
     COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
     handler,
     staticVars = {}; // static variable storage
     
@@ -15,6 +16,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     args.push( function( args, values ) {
         handler = PHP.VM.VariableHandler( ENV );
         var vals = Array.prototype.slice.call( values, 2 );
+       console.log( vals );
        
         Object.keys( staticVars ).forEach( function( key ){
             handler( key, staticVars[ key ] );
@@ -22,6 +24,12 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
         
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
+            
+            // check that we aren't passing a constant for arg which is defined byRef
+            if ( argObject[ COMPILER.PARAM_BYREF ] === true && ( vals[ index ][ VARIABLE.CLASS_CONSTANT ] === true || vals[ index ][ VARIABLE.CONSTANT ] === true) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );  
+            }
+            
             arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
         });
         

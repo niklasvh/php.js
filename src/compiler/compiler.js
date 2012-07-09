@@ -68,6 +68,8 @@ PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
 
 PHP.Compiler.prototype.PARAM_NAME = "n";
 
+PHP.Compiler.prototype.PARAM_BYREF = "r";
+
 PHP.Compiler.prototype.CATCH = "$Catch";
 
 PHP.Compiler.prototype.EXCEPTION = "$Exception";

@@ -9,4 +9,4 @@ Error case: class constant as an array
 ?>
 --EXPECTF--
 
-Fatal error: Arrays are not allowed in class constants in %s on line 4
+Fatal error: Arrays are not allowed in class constants in %s on line %d

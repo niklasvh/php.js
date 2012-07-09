@@ -17,4 +17,4 @@ Basic class support - attempting to pass a class constant by reference.
 ?>
 --EXPECTF--
 
-Fatal error: Only variables can be passed by reference in %s on line 12
+Fatal error: Only variables can be passed by reference in %s on line %d

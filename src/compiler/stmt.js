@@ -201,7 +201,14 @@ PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
     ((action.params[ 0 ] === undefined || !Array.isArray( action.params[ 0 ] ) ) ? action.params : action.params[ 0 ]).forEach(function( param ){
         
         if ( param.type === "Node_Param" ) {
-            params.push( '{' + this.PARAM_NAME +':"' + param.name + '"}');
+            var item = '{' + this.PARAM_NAME +':"' + param.name + '"';
+            
+            if ( param.byRef === true ) {
+                item += "," + this.PARAM_BYREF + ':true'
+            }
+           
+            item += '}'
+            params.push( item );
         }
         
     }, this);
