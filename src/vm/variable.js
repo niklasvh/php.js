@@ -201,11 +201,20 @@ PHP.VM.Variable = function( arg ) {
         } else {
          
         }
-       
-        value = newValue;
         
-        // remove this later, debugging only
-        this.val = newValue;
+        // is variable a reference
+        if ( this[ this.REFERRING ] !== undefined ) {
+            
+             this[ this.REFERRING ][ COMPILER.VARIABLE_VALUE ] = newValue;
+        } else {
+       
+            value = newValue;
+            
+            // remove this later, debugging only
+            this.val = newValue;
+            
+        }
+        
         
         if ( typeof this[this.REGISTER_SETTER ] === "function" ) {
             this[ this.REGISTER_SETTER ]( value );
@@ -216,15 +225,23 @@ PHP.VM.Variable = function( arg ) {
     
     setValue.call( this, arg );
     
+    this [ this.REF ] = function( variable ) {
+        this[ this.REFERRING ] = variable;
+        console.log( variable );
+        variable[ this.IS_REF ] = true;
+        
+        return this;
+    };
+    
     this[ PHP.Compiler.prototype.NEG ] = function() {
-        value = -value;
+        this[ COMPILER.VARIABLE_VALUE ] = -this[ COMPILER.VARIABLE_VALUE ];
         return this;
     };
     
     Object.defineProperty( this, COMPILER.PRE_INC,
     {
         get : function(){
-            value++;
+            this[ COMPILER.VARIABLE_VALUE ]++;
             return this;
         }
     });
@@ -232,7 +249,7 @@ PHP.VM.Variable = function( arg ) {
     Object.defineProperty( this, COMPILER.PRE_DEC,
     {
         get : function(){
-            value--;
+            this[ COMPILER.VARIABLE_VALUE ]--;
             return this;
         }
     });
@@ -294,8 +311,11 @@ PHP.VM.Variable = function( arg ) {
             // perform POST_MOD change
            
             if ( POST_MOD !== 0 ) {
-                value = POST_MOD + (value - 0);
+                var setPOST_MOD = POST_MOD;
                 POST_MOD = 0; // reset counter
+                $this[ COMPILER.VARIABLE_VALUE ] += setPOST_MOD - 0;
+           //     value = POST_MOD + (value - 0);
+               
             }
             
             
@@ -371,8 +391,8 @@ PHP.VM.Variable = function( arg ) {
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
                     if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
                        
-                       var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
-                       console.log( exists, value );
+                        var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+                        console.log( exists, value );
                         if ( exists === true ) { 
                             return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
                         } else {
@@ -380,7 +400,7 @@ PHP.VM.Variable = function( arg ) {
                         }
                         
                     } else {
-                                      console.log( this );
+                        console.log( this );
                         this [ COMPILER.VARIABLE_VALUE ] = this.ENV.array([]);
                     }
                 } 
@@ -422,6 +442,10 @@ PHP.VM.Variable.prototype.PROPERTY = "$Property";
 PHP.VM.Variable.prototype.CONSTANT = "$Constant";
 
 PHP.VM.Variable.prototype.CLASS_CONSTANT = "$ClassConstant";
+
+PHP.VM.Variable.prototype.REF = "$Ref";
+
+PHP.VM.Variable.prototype.IS_REF = "$IsRef";
 
 PHP.VM.Variable.prototype.REFERRING = "$Referring";
 

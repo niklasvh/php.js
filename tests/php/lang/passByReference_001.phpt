@@ -25,13 +25,13 @@ $c=array(1);
 g($c,$c[0]);
 
 ?>
---EXPECT--
+--EXPECTF--
 int(7)
 int(15)
 int(7)
 int(16)
 array(1) {
   [0]=>
-  &int(1)
+  %Sint(1)
 }
 int(1)

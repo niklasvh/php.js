@@ -15,8 +15,16 @@ PHP.Modules.prototype.var_dump = function() {
     var $dump = function( argument, indent ) {
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ]; // trigger get for undefined
+       
+        str += $INDENT( indent );
+        
+        /*
+        if (argument[ VAR.IS_REF] !== undefined ) {
+            str += "&";
+        }*/
+       
         if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
-            str += $INDENT( indent ) + "array(";
+            str += "array(";
 
             var values = value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
             var keys = value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
@@ -46,23 +54,21 @@ PHP.Modules.prototype.var_dump = function() {
             str += $INDENT( indent ) + "}\n";
         } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
             
-            str += $INDENT( indent ) + "NULL\n";  
+            str += "NULL\n";  
         } else if( argument[ VAR.TYPE ] === VAR.BOOL ) {    
-            str += $INDENT( indent ) + "bool(" + value + ")\n";  
+            str += "bool(" + value + ")\n";  
         } else if( argument[ VAR.TYPE ] === VAR.STRING ) {
             
-            str += $INDENT( indent ) + "string(" + value.length + ') "' + value + '"\n';  
+            str += "string(" + value.length + ') "' + value + '"\n';  
         } else if( argument[ VAR.TYPE ] === VAR.INT ) {
-            
-            value = argument[ COMPILER.VARIABLE_VALUE ];
-            str += $INDENT( indent ) + "int(" + value + ')\n';  
+            str += "int(" + value + ')\n';  
         } else if( argument instanceof PHP.VM.ClassPrototype || argument[ VAR.TYPE ] === VAR.OBJECT ) {
             // todo, complete
             if( argument[ VAR.TYPE ] === VAR.OBJECT ) {
                 argument = value;
             }
             
-            str += $INDENT( indent ) + "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
+            str += "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
             
             var props = [];
             
@@ -83,7 +89,7 @@ PHP.Modules.prototype.var_dump = function() {
             
             str += '}\n';  
         } else if( argument[ VAR.TYPE ] === VAR.FLOAT ) {
-            str += $INDENT( indent ) + "float(" + value + ')\n';      
+            str += "float(" + value + ')\n';      
         } else {
             console.log( argument );
         }

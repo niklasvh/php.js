@@ -60,8 +60,8 @@ PHP_Tests.prototype.runTest = function( li ) {
         expectResult;
                     
 
-        // expect.replace(/\r/g,"");
-                    
+      
+        // http://qa.php.net/phpt_details.php#expectf_section
         if (test.EXPECT === undefined ) {
             var shouldBef = expect.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
             shouldBef = shouldBef.replace(/\%d/g,"\\d+");

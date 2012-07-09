@@ -16,7 +16,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     args.push( function( args, values ) {
         handler = PHP.VM.VariableHandler( ENV );
         var vals = Array.prototype.slice.call( values, 2 );
-       console.log( vals );
+        
        
         Object.keys( staticVars ).forEach( function( key ){
             handler( key, staticVars[ key ] );
@@ -30,7 +30,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );  
             }
             
-            arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
+            if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
+                arg[ VARIABLE.REF ]( vals[ index ] );
+            } else {
+                arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
+            }
         });
         
         return handler;

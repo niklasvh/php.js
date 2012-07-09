@@ -1235,7 +1235,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     args.push( function( args, values ) {
         handler = PHP.VM.VariableHandler( ENV );
         var vals = Array.prototype.slice.call( values, 2 );
-       console.log( vals );
+        
        
         Object.keys( staticVars ).forEach( function( key ){
             handler( key, staticVars[ key ] );
@@ -1249,7 +1249,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );  
             }
             
-            arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
+            if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
+                arg[ VARIABLE.REF ]( vals[ index ] );
+            } else {
+                arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
+            }
         });
         
         return handler;
@@ -2816,8 +2820,16 @@ PHP.Modules.prototype.var_dump = function() {
     var $dump = function( argument, indent ) {
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ]; // trigger get for undefined
+       
+        str += $INDENT( indent );
+        
+        /*
+        if (argument[ VAR.IS_REF] !== undefined ) {
+            str += "&";
+        }*/
+       
         if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
-            str += $INDENT( indent ) + "array(";
+            str += "array(";
 
             var values = value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
             var keys = value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
@@ -2847,23 +2859,21 @@ PHP.Modules.prototype.var_dump = function() {
             str += $INDENT( indent ) + "}\n";
         } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
             
-            str += $INDENT( indent ) + "NULL\n";  
+            str += "NULL\n";  
         } else if( argument[ VAR.TYPE ] === VAR.BOOL ) {    
-            str += $INDENT( indent ) + "bool(" + value + ")\n";  
+            str += "bool(" + value + ")\n";  
         } else if( argument[ VAR.TYPE ] === VAR.STRING ) {
             
-            str += $INDENT( indent ) + "string(" + value.length + ') "' + value + '"\n';  
+            str += "string(" + value.length + ') "' + value + '"\n';  
         } else if( argument[ VAR.TYPE ] === VAR.INT ) {
-            
-            value = argument[ COMPILER.VARIABLE_VALUE ];
-            str += $INDENT( indent ) + "int(" + value + ')\n';  
+            str += "int(" + value + ')\n';  
         } else if( argument instanceof PHP.VM.ClassPrototype || argument[ VAR.TYPE ] === VAR.OBJECT ) {
             // todo, complete
             if( argument[ VAR.TYPE ] === VAR.OBJECT ) {
                 argument = value;
             }
             
-            str += $INDENT( indent ) + "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
+            str += "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
             
             var props = [];
             
@@ -2884,7 +2894,7 @@ PHP.Modules.prototype.var_dump = function() {
             
             str += '}\n';  
         } else if( argument[ VAR.TYPE ] === VAR.FLOAT ) {
-            str += $INDENT( indent ) + "float(" + value + ')\n';      
+            str += "float(" + value + ')\n';      
         } else {
             console.log( argument );
         }
@@ -8677,11 +8687,20 @@ PHP.VM.Variable = function( arg ) {
         } else {
          
         }
-       
-        value = newValue;
         
-        // remove this later, debugging only
-        this.val = newValue;
+        // is variable a reference
+        if ( this[ this.REFERRING ] !== undefined ) {
+            
+             this[ this.REFERRING ][ COMPILER.VARIABLE_VALUE ] = newValue;
+        } else {
+       
+            value = newValue;
+            
+            // remove this later, debugging only
+            this.val = newValue;
+            
+        }
+        
         
         if ( typeof this[this.REGISTER_SETTER ] === "function" ) {
             this[ this.REGISTER_SETTER ]( value );
@@ -8692,15 +8711,23 @@ PHP.VM.Variable = function( arg ) {
     
     setValue.call( this, arg );
     
+    this [ this.REF ] = function( variable ) {
+        this[ this.REFERRING ] = variable;
+        console.log( variable );
+        variable[ this.IS_REF ] = true;
+        
+        return this;
+    };
+    
     this[ PHP.Compiler.prototype.NEG ] = function() {
-        value = -value;
+        this[ COMPILER.VARIABLE_VALUE ] = -this[ COMPILER.VARIABLE_VALUE ];
         return this;
     };
     
     Object.defineProperty( this, COMPILER.PRE_INC,
     {
         get : function(){
-            value++;
+            this[ COMPILER.VARIABLE_VALUE ]++;
             return this;
         }
     });
@@ -8708,7 +8735,7 @@ PHP.VM.Variable = function( arg ) {
     Object.defineProperty( this, COMPILER.PRE_DEC,
     {
         get : function(){
-            value--;
+            this[ COMPILER.VARIABLE_VALUE ]--;
             return this;
         }
     });
@@ -8770,8 +8797,11 @@ PHP.VM.Variable = function( arg ) {
             // perform POST_MOD change
            
             if ( POST_MOD !== 0 ) {
-                value = POST_MOD + (value - 0);
+                var setPOST_MOD = POST_MOD;
                 POST_MOD = 0; // reset counter
+                $this[ COMPILER.VARIABLE_VALUE ] += setPOST_MOD - 0;
+           //     value = POST_MOD + (value - 0);
+               
             }
             
             
@@ -8847,8 +8877,8 @@ PHP.VM.Variable = function( arg ) {
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
                     if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
                        
-                       var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
-                       console.log( exists, value );
+                        var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+                        console.log( exists, value );
                         if ( exists === true ) { 
                             return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
                         } else {
@@ -8856,7 +8886,7 @@ PHP.VM.Variable = function( arg ) {
                         }
                         
                     } else {
-                                      console.log( this );
+                        console.log( this );
                         this [ COMPILER.VARIABLE_VALUE ] = this.ENV.array([]);
                     }
                 } 
@@ -8898,6 +8928,10 @@ PHP.VM.Variable.prototype.PROPERTY = "$Property";
 PHP.VM.Variable.prototype.CONSTANT = "$Constant";
 
 PHP.VM.Variable.prototype.CLASS_CONSTANT = "$ClassConstant";
+
+PHP.VM.Variable.prototype.REF = "$Ref";
+
+PHP.VM.Variable.prototype.IS_REF = "$IsRef";
 
 PHP.VM.Variable.prototype.REFERRING = "$Referring";
 
