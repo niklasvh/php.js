@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 153 out of 564 (27.1%)
+Passed 182 out of 672 (27.1%)
 
 Failed tests:
 
@@ -207,13 +207,6 @@ Failed tests:
  - tests/php/classes/type_hinting_005b.phpt
  - tests/php/classes/type_hinting_005c.phpt
  - tests/php/classes/type_hinting_005d.phpt
- - tests/php/classes/visibility_000a.phpt
- - tests/php/classes/visibility_000b.phpt
- - tests/php/classes/visibility_001a.phpt
- - tests/php/classes/visibility_001b.phpt
- - tests/php/classes/visibility_002a.phpt
- - tests/php/classes/visibility_002b.phpt
- - tests/php/classes/visibility_003b.phpt
  - tests/php/classes/visibility_005.phpt
  - tests/php/classes/__call_003.phpt
  - tests/php/classes/__call_006.phpt
@@ -415,3 +408,89 @@ Failed tests:
  - tests/php/lang/type_hints_001.phpt
  - tests/php/lang/type_hints_002.phpt
  - tests/php/lang/type_hints_003.phpt
+ - tests/php/output/bug46897.phpt
+ - tests/php/output/bug60321.phpt
+ - tests/php/output/bug60322.phpt
+ - tests/php/output/bug60768.phpt
+ - tests/php/output/flush_basic_001.phpt
+ - tests/php/output/flush_error_001.phpt
+ - tests/php/output/ob_002.phpt
+ - tests/php/output/ob_003.phpt
+ - tests/php/output/ob_004.phpt
+ - tests/php/output/ob_005.phpt
+ - tests/php/output/ob_006.phpt
+ - tests/php/output/ob_007.phpt
+ - tests/php/output/ob_008.phpt
+ - tests/php/output/ob_009.phpt
+ - tests/php/output/ob_010.phpt
+ - tests/php/output/ob_011.phpt
+ - tests/php/output/ob_012.phpt
+ - tests/php/output/ob_013.phpt
+ - tests/php/output/ob_014.phpt
+ - tests/php/output/ob_015.phpt
+ - tests/php/output/ob_017.phpt
+ - tests/php/output/ob_018.phpt
+ - tests/php/output/ob_020.phpt
+ - tests/php/output/ob_clean_basic_001.phpt
+ - tests/php/output/ob_clean_error_001.phpt
+ - tests/php/output/ob_end_clean_basic_001.phpt
+ - tests/php/output/ob_end_clean_error_001.phpt
+ - tests/php/output/ob_end_flush_basic_001.phpt
+ - tests/php/output/ob_end_flush_error_001.phpt
+ - tests/php/output/ob_flush_basic_001.phpt
+ - tests/php/output/ob_flush_error_001.phpt
+ - tests/php/output/ob_get_clean_basic_001.phpt
+ - tests/php/output/ob_get_clean_basic_002.phpt
+ - tests/php/output/ob_get_clean_error_001.phpt
+ - tests/php/output/ob_get_contents_basic_001.phpt
+ - tests/php/output/ob_get_contents_error_001.phpt
+ - tests/php/output/ob_get_length_basic_001.phpt
+ - tests/php/output/ob_get_length_error_001.phpt
+ - tests/php/output/ob_get_level_basic_001.phpt
+ - tests/php/output/ob_get_level_error_001.phpt
+ - tests/php/output/ob_get_status.phpt
+ - tests/php/output/ob_implicit_flush_basic_001.phpt
+ - tests/php/output/ob_implicit_flush_basic_002.phpt
+ - tests/php/output/ob_implicit_flush_error_001.phpt
+ - tests/php/output/ob_implicit_flush_variation_001.phpt
+ - tests/php/output/ob_start_basic_001.phpt
+ - tests/php/output/ob_start_basic_002.phpt
+ - tests/php/output/ob_start_basic_003.phpt
+ - tests/php/output/ob_start_basic_004.phpt
+ - tests/php/output/ob_start_basic_005.phpt
+ - tests/php/output/ob_start_basic_006.phpt
+ - tests/php/output/ob_start_basic_unerasable_001.phpt
+ - tests/php/output/ob_start_basic_unerasable_002.phpt
+ - tests/php/output/ob_start_basic_unerasable_003.phpt
+ - tests/php/output/ob_start_basic_unerasable_004.phpt
+ - tests/php/output/ob_start_basic_unerasable_005.phpt
+ - tests/php/output/ob_start_callbacks.phpt
+ - tests/php/output/ob_start_error_001.phpt
+ - tests/php/output/ob_start_error_002.phpt
+ - tests/php/output/ob_start_error_003.phpt
+ - tests/php/output/ob_start_error_004.phpt
+ - tests/php/output/ob_start_error_005.phpt
+ - tests/php/run-test/test003.phpt
+ - tests/php/run-test/test004.phpt
+ - tests/php/run-test/test005.phpt
+ - tests/php/run-test/test006.phpt
+ - tests/php/run-test/test007.phpt
+ - tests/php/run-test/test008.phpt
+ - tests/php/run-test/test008a.phpt
+ - tests/php/run-test/test009.phpt
+ - tests/php/run-test/test010.phpt
+ - tests/php/strings/001.phpt
+ - tests/php/strings/004.phpt
+ - tests/php/strings/bug22592.phpt
+ - tests/php/strings/bug26703.phpt
+ - tests/php/strings/offsets_chaining_1.phpt
+ - tests/php/strings/offsets_chaining_2.phpt
+ - tests/php/strings/offsets_chaining_3.phpt
+ - tests/php/strings/offsets_chaining_4.phpt
+ - tests/php/strings/offsets_chaining_5.phpt
+ - tests/php/strings/offsets_general.phpt
+ - tests/php/ext/tokenizer/001.phpt
+ - tests/php/ext/tokenizer/003.phpt
+ - tests/php/ext/tokenizer/bug54089.phpt
+ - tests/php/ext/tokenizer/token_get_all_error.phpt
+ - tests/php/ext/tokenizer/token_get_all_variation1.phpt

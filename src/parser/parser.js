@@ -212,7 +212,6 @@ PHP.Parser.prototype.YYNLSTATES   = 544;
 PHP.Parser.prototype.YYUNEXPECTED = 32767;
 PHP.Parser.prototype.YYDEFAULT    = -32766;
 
-// {{{ Tokens
 PHP.Parser.prototype.YYERRTOK = 256;
 PHP.Parser.prototype.T_INCLUDE = 257;
 PHP.Parser.prototype.T_INCLUDE_ONCE = 258;

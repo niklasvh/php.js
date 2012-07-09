@@ -3539,7 +3539,6 @@ PHP.Parser.prototype.YYNLSTATES   = 544;
 PHP.Parser.prototype.YYUNEXPECTED = 32767;
 PHP.Parser.prototype.YYDEFAULT    = -32766;
 
-// {{{ Tokens
 PHP.Parser.prototype.YYERRTOK = 256;
 PHP.Parser.prototype.T_INCLUDE = 257;
 PHP.Parser.prototype.T_INCLUDE_ONCE = 258;
@@ -7430,7 +7429,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
     
     // helper function for checking whether variable/method is of type
     function checkType( value, type) {
-        return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]);
+        if ( type === PUBLIC) {
+            return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]) || (value  === PHP.VM.Class[ STATIC ]);
+        } else {
+            return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]);
+        }
+        
     }
     
     var buildVariableContext = function( methodName, args, className ) {
@@ -7571,7 +7575,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         methods [ COMPILER.CLASS_CONSTANT ] = function( constantName, constantValue ) {
             
             if ( Class.prototype[ PHP.VM.Class.CONSTANT + constantName ] !== undefined ) {
-                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redefine class constant " + className + "::" + constantName, PHP.Constants.E_ERROR, true );    
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redefine class constant " + className + "::" + constantName, PHP.Constants.E_ERROR, true );    
             }
             
             
@@ -7692,6 +7696,17 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member", PHP.Constants.E_ERROR, true );
             }
            
+            
+                // visibility from public
+                if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PUBLIC ) && (checkType( methodType, PROTECTED ) || checkType( methodType, PRIVATE ) ) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be public (as in class same)", PHP.Constants.E_ERROR, true );
+                } 
+                // visibility from protected
+                if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PROTECTED ) && checkType( methodType, PRIVATE ) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be protected (as in class same) or weaker", PHP.Constants.E_ERROR, true );
+                }
+           
+            
             // __call
             if ( methodName === __call  ) { 
                 

@@ -164,7 +164,7 @@ function runTests( paths, complete ) {
 
 }
 
-runTests( [ "tests/php/basic", "tests/php/classes", "tests/php/func", "tests/php/lang" ], function() {
+runTests( [ "tests/php/basic", "tests/php/classes", "tests/php/func", "tests/php/lang", "tests/php/output", "tests/php/run-test", "tests/php/strings", "tests/php/ext/tokenizer" ], function() {
     var content = "### Test results ###\n\nPassed " + success + " out of " + total + " (" + Math.round( (success/total) * 1000 ) / 10 + "%)\n\nFailed tests:\n\n - " + failed.join("\n - ");
             
             
