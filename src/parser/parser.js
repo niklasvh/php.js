@@ -494,7 +494,7 @@ PHP.Parser.prototype.parseEscapeSequences = function( str, quote ) {
         't': "\t",
         'f': "\f",
         'v': "\v",
-        'e': "\x1B",
+        'e': "\x1B"
     };
 
     return str.replace(

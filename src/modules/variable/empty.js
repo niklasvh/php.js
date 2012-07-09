@@ -12,12 +12,13 @@ PHP.Modules.prototype.empty = function() {
 
     while( ++i < len ) {
         arg = arguments[ i ];
-        
         // http://www.php.net/manual/en/types.comparisons.php
         if ( arg[ VARIABLE.TYPE ] === VARIABLE.NULL ) {
+            console.log(arg); 
             return new PHP.VM.Variable( false );
         }
 
+      
         
     }
 

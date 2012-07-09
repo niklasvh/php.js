@@ -358,10 +358,15 @@ PHP.VM.Variable = function( arg ) {
          
             return function( ctx, variable ) {
                 
-                
+               
                 
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
-                    this [ COMPILER.VARIABLE_VALUE ] = this.ENV.array([]);
+                    if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
+                        value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable ); // trigger offsetExists
+                        return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                    } else {
+                        this [ COMPILER.VARIABLE_VALUE ] = this.ENV.array([]);
+                    }
                 } 
                 
                 //  console.log(value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ));

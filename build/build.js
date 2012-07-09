@@ -30,7 +30,7 @@ function includeFiles( path, obj ) {
 includeFiles("src/", files.files );
 
 
-fs.writeFile('php.js', content, function (err) {
+fs.writeFile('PHP.js', content, function (err) {
   if (err) throw err;
   console.log('php.js compiled');
 });

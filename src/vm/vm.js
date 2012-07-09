@@ -12,7 +12,7 @@ PHP.VM = function( src, opts ) {
     ENV = this;
     PHP.VM.Variable.prototype.ENV = ENV;
     
-    ENV [ PHP.Compiler.prototype.FILESYSTEM ] = opts.filesystem;
+    ENV [ PHP.Compiler.prototype.FILESYSTEM ] = (opts.filesystem === undefined ) ? {} : opts.filesystem;
     
     // bind global variablehandler to ENV
     ENV[ PHP.Compiler.prototype.GLOBAL ] = $;

@@ -16,6 +16,7 @@ var files = {
         arithmetic: "js",
         array: {
             array: "js",
+            array_key_exists: "js",
             is_array: "js",
             count: "js"
         },
@@ -89,6 +90,9 @@ var files = {
         classes: {
             Exception: "js",
             stdClass: "js"
+        },
+        interfaces: {
+            ArrayAccess: "js"
         }
     }
 };
