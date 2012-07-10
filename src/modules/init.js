@@ -91,12 +91,13 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     typeStrings[ VARIABLE.OBJECT ] = "object";
     typeStrings[ VARIABLE.RESOURCE ] = "resource";
     
-    
-    if ( args.length !== len ) {
+    if ( len < 0 && args.length > -len) {
+        len = -len;
+        this[ COMPILER.ERROR ]( name + "() expects at most " + len + " parameter" + (( len !== 1 ) ? "s" : "") + ", " + args.length + " given", PHP.Constants.E_WARNING, true );    
+        return false;
+    } else if ( args.length !== len && len >= 0 ) {
        
-        this[ COMPILER.ERROR ]( name + "() expects exactly " + len + " parameter" + (( len !== 1 ) ? "s" : "") + ", " + args.length + " given in " + 
-            _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
-            " on line " + 0, PHP.Constants.E_CORE_WARNING );    
+        this[ COMPILER.ERROR ]( name + "() expects exactly " + len + " parameter" + (( len !== 1 ) ? "s" : "") + ", " + args.length + " given", PHP.Constants.E_WARNING, true );    
         return false;
     } else {
         
@@ -143,6 +144,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
 (function( MODULES ){
     
     var COMPILER = PHP.Compiler.prototype,
+    lastError,
     suppress = false;
     
     MODULES[ COMPILER.SUPPRESS ] = function( expr ) {
@@ -179,9 +181,27 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         return methods;
     };
     
+    MODULES.error_get_last = function()  {
+        var item = PHP.VM.Array.arrayItem;
+       
+        return this.array([ 
+            item("type", lastError.type), 
+            item("message", lastError.message), 
+            item("file", lastError.file),
+            item("line", lastError.line)
+            ]);
+  
+    };
+    
     MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
         var C = PHP.Constants,        
         _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
+        lastError = {
+            message: msg,
+            line: 1,
+            type: level,
+            file: _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ]
+        };
         
         lineAppend = ( lineAppend === true ) ? " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1" : ""; 
        

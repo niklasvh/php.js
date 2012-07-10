@@ -12,6 +12,7 @@
     CONSTANTS = PHP.Constants,
     flags = [],
     types = [],
+    recurring = 0,
     NO_BUFFER_MSG = "(): failed to delete buffer. No buffer to delete",
     handlers = [];
     
@@ -21,10 +22,36 @@
         types.pop();
     }
     
-    MODULES.$ob = function() {
+    MODULES.$obreset = function() {
         flags = [];
         types = [];
         handlers = [];
+    };
+    
+    MODULES.$ob = function( str )  {
+        var index = this[ COMPILER.OUTPUT_BUFFERS ].length - 1,
+        VARIABLE = PHP.VM.Variable.prototype;
+      
+
+      
+        // trigger flush
+        if ( handlers[ index - 1 ] !== DEFAULT &&  handlers[ index - 1 ] !== undefined ) {
+            
+            recurring++;
+            // check that we aren't ending up in any endless error loop
+            if ( recurring <= 10 ) {
+                var result = this[ handlers[ index - 1 ] ]( new PHP.VM.Variable( str ), new PHP.VM.Variable( types[ index - 1 ] ) );
+                recurring = 0;
+                if ( result[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
+                    this[ COMPILER.OUTPUT_BUFFERS ][ index ] += result[ COMPILER.VARIABLE_VALUE ];
+                }
+            }
+           
+        } else {
+            this[ COMPILER.OUTPUT_BUFFERS ][ index ] += str;
+        }
+        
+
     };
     
     MODULES.ob_start = function( output_callback, chunk_size, erase ) {
@@ -33,7 +60,7 @@
         
         if ( output_callback !== undefined ) {
             handler = output_callback[ COMPILER.VARIABLE_VALUE ];
-            type = CONSTANTS.PHP_OUTPUT_HANDLER_START;
+            type = CONSTANTS.PHP_OUTPUT_HANDLER_START;          
         } else {
             type = CONSTANTS.PHP_OUTPUT_HANDLER_WRITE;
         }
@@ -155,6 +182,13 @@
        
     };
     
-    
+    MODULES.ob_implicit_flush = function() {
+        var FUNCTION_NAME = "ob_implicit_flush";
+        
+        if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, -1, [ ] ) ) {
+            return new PHP.VM.Variable( null );
+        }
+        return new PHP.VM.Variable();
+    };
     
 })( PHP.Modules.prototype );

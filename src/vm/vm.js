@@ -111,7 +111,7 @@ PHP.VM = function( src, opts ) {
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
      
     this.OUTPUT_BUFFERS = [""];
-    this.$ob();
+    this.$obreset();
       
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );

@@ -18,5 +18,5 @@ Array
     [type] => 2
     [message] => str_rot13() expects exactly 1 parameter, 2 given
     [file] => %s
-    [line] => 7
+    [line] => %d
 )

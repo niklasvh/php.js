@@ -1320,12 +1320,13 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     typeStrings[ VARIABLE.OBJECT ] = "object";
     typeStrings[ VARIABLE.RESOURCE ] = "resource";
     
-    
-    if ( args.length !== len ) {
+    if ( len < 0 && args.length > -len) {
+        len = -len;
+        this[ COMPILER.ERROR ]( name + "() expects at most " + len + " parameter" + (( len !== 1 ) ? "s" : "") + ", " + args.length + " given", PHP.Constants.E_WARNING, true );    
+        return false;
+    } else if ( args.length !== len && len >= 0 ) {
        
-        this[ COMPILER.ERROR ]( name + "() expects exactly " + len + " parameter" + (( len !== 1 ) ? "s" : "") + ", " + args.length + " given in " + 
-            _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
-            " on line " + 0, PHP.Constants.E_CORE_WARNING );    
+        this[ COMPILER.ERROR ]( name + "() expects exactly " + len + " parameter" + (( len !== 1 ) ? "s" : "") + ", " + args.length + " given", PHP.Constants.E_WARNING, true );    
         return false;
     } else {
         
@@ -1372,6 +1373,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
 (function( MODULES ){
     
     var COMPILER = PHP.Compiler.prototype,
+    lastError,
     suppress = false;
     
     MODULES[ COMPILER.SUPPRESS ] = function( expr ) {
@@ -1408,9 +1410,27 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         return methods;
     };
     
+    MODULES.error_get_last = function()  {
+        var item = PHP.VM.Array.arrayItem;
+       
+        return this.array([ 
+            item("type", lastError.type), 
+            item("message", lastError.message), 
+            item("file", lastError.file),
+            item("line", lastError.line)
+            ]);
+  
+    };
+    
     MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
         var C = PHP.Constants,        
         _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
+        lastError = {
+            message: msg,
+            line: 1,
+            type: level,
+            file: _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ]
+        };
         
         lineAppend = ( lineAppend === true ) ? " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1" : ""; 
        
@@ -2123,6 +2143,7 @@ PHP.Modules.prototype.flush = function() {
     CONSTANTS = PHP.Constants,
     flags = [],
     types = [],
+    recurring = 0,
     NO_BUFFER_MSG = "(): failed to delete buffer. No buffer to delete",
     handlers = [];
     
@@ -2132,10 +2153,35 @@ PHP.Modules.prototype.flush = function() {
         types.pop();
     }
     
-    MODULES.$ob = function() {
+    MODULES.$obreset = function() {
         flags = [];
         types = [];
         handlers = [];
+    };
+    
+    MODULES.$ob = function( str )  {
+        var index = this[ COMPILER.OUTPUT_BUFFERS ].length - 1,
+        VARIABLE = PHP.VM.Variable.prototype;
+      
+
+      
+        // trigger flush
+        if ( handlers[ index - 1 ] !== DEFAULT &&  handlers[ index - 1 ] !== undefined ) {
+            
+            recurring++;
+            if ( recurring <= 10 ) {
+                var result = this[ handlers[ index - 1 ] ]( new PHP.VM.Variable( str ), new PHP.VM.Variable( types[ index - 1 ] ) );
+                recurring = 0;
+                if ( result[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
+                    this[ COMPILER.OUTPUT_BUFFERS ][ index ] += result[ COMPILER.VARIABLE_VALUE ];
+                }
+            }
+           
+        } else {
+            this[ COMPILER.OUTPUT_BUFFERS ][ index ] += str;
+        }
+        
+
     };
     
     MODULES.ob_start = function( output_callback, chunk_size, erase ) {
@@ -2144,7 +2190,7 @@ PHP.Modules.prototype.flush = function() {
         
         if ( output_callback !== undefined ) {
             handler = output_callback[ COMPILER.VARIABLE_VALUE ];
-            type = CONSTANTS.PHP_OUTPUT_HANDLER_START;
+            type = CONSTANTS.PHP_OUTPUT_HANDLER_START;          
         } else {
             type = CONSTANTS.PHP_OUTPUT_HANDLER_WRITE;
         }
@@ -2266,7 +2312,14 @@ PHP.Modules.prototype.flush = function() {
        
     };
     
-    
+    MODULES.ob_implicit_flush = function() {
+        var FUNCTION_NAME = "ob_implicit_flush";
+        
+        if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, -1, [ ] ) ) {
+            return new PHP.VM.Variable( null );
+        }
+        return new PHP.VM.Variable();
+    };
     
 })( PHP.Modules.prototype );
 /* 
@@ -2396,11 +2449,13 @@ PHP.Modules.prototype.echo = function() {
         
         if (arg instanceof PHP.VM.VariableProto) {
             if ( arg[ PHP.VM.Variable.prototype.TYPE ] !== PHP.VM.Variable.prototype.NULL ) {
-                this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg[ COMPILER.VARIABLE_VALUE ];
+              //  this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg[ COMPILER.VARIABLE_VALUE ];
+                this.$ob( arg[ COMPILER.VARIABLE_VALUE ] );
             }
             
         } else {
-            this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg;
+            this.$ob( arg );
+         //   this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg;
         }
         
     }, this);
@@ -2461,8 +2516,19 @@ PHP.Modules.prototype.print = function( variable ) {
 * @website http://hertzen.com
  */
 
-
-/* 
+PHP.Modules.prototype.str_rot13 = function( str, arr ) {
+    
+    var FUNCTION_NAME = "str_rot13";
+        
+    if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 1, [ ] ) ) {
+        return new PHP.VM.Variable( null );
+    }
+ 
+    
+    
+    
+};
+  /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 3.7.2012 
 * @website http://hertzen.com
@@ -8042,7 +8108,7 @@ PHP.VM = function( src, opts ) {
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
      
     this.OUTPUT_BUFFERS = [""];
-    this.$ob();
+    this.$obreset();
       
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );

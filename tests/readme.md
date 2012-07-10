@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 240 out of 672 (35.7%)
+Passed 245 out of 672 (36.5%)
 
 Failed tests:
 
@@ -389,13 +389,8 @@ Failed tests:
  - tests/php/output/bug60768.phpt
  - tests/php/output/ob_010.phpt
  - tests/php/output/ob_011.phpt
- - tests/php/output/ob_014.phpt
- - tests/php/output/ob_015.phpt
  - tests/php/output/ob_017.phpt
  - tests/php/output/ob_018.phpt
- - tests/php/output/ob_implicit_flush_basic_001.phpt
- - tests/php/output/ob_implicit_flush_basic_002.phpt
- - tests/php/output/ob_implicit_flush_error_001.phpt
  - tests/php/output/ob_implicit_flush_variation_001.phpt
  - tests/php/output/ob_start_basic_002.phpt
  - tests/php/output/ob_start_basic_003.phpt
