@@ -195,6 +195,8 @@ PHP.Compiler.prototype.GLOBAL  = "$Global";
 
 PHP.Compiler.prototype.SIGNATURE  = "$SIGNATURE";
 
+PHP.Compiler.prototype.DISPLAY_HANDLER  = "$DisplayHandler";
+
 PHP.Compiler.prototype.fixString =  function( result ) {
     
     

@@ -12,6 +12,10 @@ PHP.Modules.prototype.print_r = function() {
     COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype;
     
+    if (this[ COMPILER.DISPLAY_HANDLER ] === true) {
+        this[ COMPILER.ERROR ]( "print_r(): Cannot use output buffering in output buffering display handlers", PHP.Constants.E_ERROR, true );  
+    }
+    
     var $dump = function( argument, indent ) {
         var str = "";
         if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {

@@ -202,14 +202,15 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             type: level,
             file: _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ]
         };
-        
         lineAppend = ( lineAppend === true ) ? " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1" : ""; 
        
         if ( suppress === false ) {
             
             switch ( level ) {
                 case C.E_ERROR:
-                    this.echo( new PHP.VM.Variable("\nFatal error: " + msg + lineAppend + "\n"));
+                    this[ COMPILER.DISPLAY_HANDLER ] = false;
+                    
+                    this.$ob( "\nFatal error: " + msg + lineAppend + "\n");
                     throw new PHP.Halt( level );
                     return;
                     break;

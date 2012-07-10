@@ -35,16 +35,20 @@
 
       
         // trigger flush
-        if ( handlers[ index - 1 ] !== DEFAULT &&  handlers[ index - 1 ] !== undefined ) {
+        if ( handlers[ index - 1 ] !== DEFAULT &&  handlers[ index - 1 ] !== undefined &&  this[ COMPILER.DISPLAY_HANDLER ] !== false) {
             
             recurring++;
             // check that we aren't ending up in any endless error loop
             if ( recurring <= 10 ) {
+                this[ COMPILER.DISPLAY_HANDLER ] = true;
                 var result = this[ handlers[ index - 1 ] ]( new PHP.VM.Variable( str ), new PHP.VM.Variable( types[ index - 1 ] ) );
                 recurring = 0;
+                
                 if ( result[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
                     this[ COMPILER.OUTPUT_BUFFERS ][ index ] += result[ COMPILER.VARIABLE_VALUE ];
                 }
+                
+                this[ COMPILER.DISPLAY_HANDLER ] = undefined;
             }
            
         } else {
@@ -116,6 +120,11 @@
     };
 
     MODULES.ob_get_flush = function() {
+        
+        if (this[ COMPILER.DISPLAY_HANDLER ] === true) {
+            this[ COMPILER.ERROR ]( "ob_get_flush(): Cannot use output buffering in output buffering display handlers", PHP.Constants.E_ERROR, true );  
+        }
+        
         var flush = this[ OUTPUT_BUFFERS ].pop();
         pop();
         this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1 ] += flush;
