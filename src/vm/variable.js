@@ -205,7 +205,7 @@ PHP.VM.Variable = function( arg ) {
         // is variable a reference
         if ( this[ this.REFERRING ] !== undefined ) {
             
-             this[ this.REFERRING ][ COMPILER.VARIABLE_VALUE ] = newValue;
+            this[ this.REFERRING ][ COMPILER.VARIABLE_VALUE ] = newValue;
         } else {
        
             value = newValue;
@@ -227,7 +227,8 @@ PHP.VM.Variable = function( arg ) {
     
     this [ this.REF ] = function( variable ) {
         this[ this.REFERRING ] = variable;
-        console.log( variable );
+        this[ this.DEFINED ] = true;
+        
         variable[ this.IS_REF ] = true;
         
         return this;
@@ -296,7 +297,10 @@ PHP.VM.Variable = function( arg ) {
                 if ( $this[ this.CONSTANT ] === true ) {
                     this.ENV[ COMPILER.ERROR ]("Use of undefined constant " + $this[ this.DEFINED ] + " - assumed '" + $this[ this.DEFINED ] + "'", PHP.Constants.E_CORE_NOTICE, true );
                     $this[ this.TYPE ] = this.STRING;
-                    return $this[ this.DEFINED ];
+                    
+                    returning = $this[ this.DEFINED ];
+                    $this[ this.DEFINED ] = true;
+                    return returning;
                 } else {
                     this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_CORE_NOTICE, true );    
                 }
@@ -314,7 +318,7 @@ PHP.VM.Variable = function( arg ) {
                 var setPOST_MOD = POST_MOD;
                 POST_MOD = 0; // reset counter
                 $this[ COMPILER.VARIABLE_VALUE ] += setPOST_MOD - 0;
-           //     value = POST_MOD + (value - 0);
+            //     value = POST_MOD + (value - 0);
                
             }
             
@@ -386,6 +390,13 @@ PHP.VM.Variable = function( arg ) {
          
             return function( ctx, variable ) {
                 
+                var $this = this;
+                
+                if ( this[ this.REFERRING ] !== undefined ) {
+                    $this = this[this.REFERRING];
+                }
+                
+
                
                 
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
@@ -394,19 +405,50 @@ PHP.VM.Variable = function( arg ) {
                         var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
                         console.log( exists, value );
                         if ( exists === true ) { 
+
                             return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
                         } else {
+                            
                             return new PHP.VM.Variable();
                         }
                         
                     } else {
-                        console.log( this );
-                        this [ COMPILER.VARIABLE_VALUE ] = this.ENV.array([]);
+                        
+                        var notdefined = false;
+                        
+                        // cache DEFINED value
+                        if ( $this[ this.DEFINED ] !== true && $this[ COMPILER.SUPPRESS ] !== true ) {
+                            notdefined = $this[ this.DEFINED ];
+                        }
+                        
+                        $this[ COMPILER.VARIABLE_VALUE ] = this.ENV.array([]);
+                        if ( notdefined !== false ) {
+                            $this[ this.DEFINED ] = notdefined;
+                        }
                     }
                 } 
   
                 //  console.log(value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ));
-                return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+               
+                
+                var returning = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                
+                if (returning[ this.DEFINED ] !== true ) {
+                    
+                    var saveFunc = returning[ this.REGISTER_SETTER ],
+                    arrThis = this;
+                    
+                    
+                    returning[ this.REGISTER_SETTER ] = function( val ) {
+                      arrThis[ this.DEFINED ] = true;
+                      if (saveFunc !== undefined ) {
+                          saveFunc( val );
+                      }
+                    };
+                    returning[ this.DEFINED ] = this[ this.DEFINED ];
+                }
+                            
+                return  returning
                 
             };
         },  

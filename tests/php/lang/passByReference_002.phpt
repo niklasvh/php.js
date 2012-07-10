@@ -12,4 +12,4 @@ f(2);
 
 ?>
 --EXPECTF--
-Fatal error: Only variables can be passed by reference in %s on line 8
+Fatal error: Only variables can be passed by reference in %s on line %d

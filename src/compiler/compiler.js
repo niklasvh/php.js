@@ -57,6 +57,8 @@ PHP.Compiler.prototype.source = function( action ) {
     return this[ action.type ]( action );
 };
 
+PHP.Compiler.prototype.NAV = "$NaV"; // not a variable;
+
 PHP.Compiler.prototype.FILESYSTEM = "$FS";
 
 PHP.Compiler.prototype.RESOURCES = "\π";

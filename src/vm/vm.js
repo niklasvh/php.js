@@ -6,8 +6,11 @@ PHP.VM = function( src, opts ) {
   
     var $$ = function( arg ) {
         
+        var item = new PHP.VM.Variable( arg );
         
-        return new PHP.VM.Variable( arg );
+        item[ PHP.Compiler.prototype.NAV ] = true;
+        
+        return item;
     },
     ENV = this;
     

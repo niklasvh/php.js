@@ -22,8 +22,10 @@ PHP.Modules.prototype.var_dump = function() {
         if (argument[ VAR.IS_REF] !== undefined ) {
             str += "&";
         }*/
-       
-        if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
+        if( argument[ VAR.TYPE ] === VAR.NULL || (argument[ VAR.DEFINED ] !== true && !(argument instanceof PHP.VM.ClassPrototype)) ) {
+            
+            str += "NULL\n";  
+        } else if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
             str += "array(";
 
             var values = value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
@@ -52,9 +54,6 @@ PHP.Modules.prototype.var_dump = function() {
             }, this);
             
             str += $INDENT( indent ) + "}\n";
-        } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
-            
-            str += "NULL\n";  
         } else if( argument[ VAR.TYPE ] === VAR.BOOL ) {    
             str += "bool(" + value + ")\n";  
         } else if( argument[ VAR.TYPE ] === VAR.STRING ) {

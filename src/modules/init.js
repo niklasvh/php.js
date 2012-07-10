@@ -1,7 +1,7 @@
 /* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 29.6.2012 
-* @website http://hertzen.com
+ * @author Niklas von Hertzen <niklas at hertzen.com>
+ * @created 29.6.2012 
+ * @website http://hertzen.com
  */
 
 PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV ) {
@@ -26,11 +26,23 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
             
             // check that we aren't passing a constant for arg which is defined byRef
-            if ( argObject[ COMPILER.PARAM_BYREF ] === true && ( vals[ index ][ VARIABLE.CLASS_CONSTANT ] === true || vals[ index ][ VARIABLE.CONSTANT ] === true) ) {
+            if ( argObject[ COMPILER.PARAM_BYREF ] === true && 
+                ( 
+                    vals[ index ][ VARIABLE.CLASS_CONSTANT ] === true 
+                    || vals[ index ][ VARIABLE.CONSTANT ] === true
+                    || vals[ index ][ COMPILER.NAV ] === true
+                    
+                    )
+                ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );  
             }
             
             if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
+                if (vals[ index ][ VARIABLE.DEFINED ] !== true ) {
+                    // trigger setter
+                    vals[ index ][ COMPILER.VARIABLE_VALUE ] = null;
+                }
+                
                 arg[ VARIABLE.REF ]( vals[ index ] );
             } else {
                 arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
