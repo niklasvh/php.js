@@ -62,6 +62,16 @@ var files = {
         options: {
             ini_set: "js"
         },
+        output: {
+            ob_clean: "js",
+            ob_end_clean: "js",
+            ob_end_flush: "js",
+            ob_flush: "js",
+            ob_get_contents: "js",
+            ob_get_clean: "js",
+            ob_get_level: "js",
+            ob_start: "js"
+        },
         string: {
             echo: "js",
             implode: "js",

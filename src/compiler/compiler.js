@@ -69,6 +69,8 @@ PHP.Compiler.prototype.ENV = "ENV";
 
 PHP.Compiler.prototype.OUTPUT_BUFFER = "OUTPUT_BUFFER";
 
+PHP.Compiler.prototype.OUTPUT_BUFFERS = "OUTPUT_BUFFERS";
+
 PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
 
 PHP.Compiler.prototype.PARAM_NAME = "n";

@@ -11,11 +11,11 @@ PHP.Modules.prototype.echo = function() {
         
         if (arg instanceof PHP.VM.VariableProto) {
             if ( arg[ PHP.VM.Variable.prototype.TYPE ] !== PHP.VM.Variable.prototype.NULL ) {
-                this[ COMPILER.OUTPUT_BUFFER ] += arg[ COMPILER.VARIABLE_VALUE ];
+                this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg[ COMPILER.VARIABLE_VALUE ];
             }
             
         } else {
-            this[ COMPILER.OUTPUT_BUFFER ] += arg;
+            this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg;
         }
         
     }, this);

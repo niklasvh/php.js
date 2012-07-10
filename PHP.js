@@ -216,6 +216,8 @@ PHP.Compiler.prototype.ENV = "ENV";
 
 PHP.Compiler.prototype.OUTPUT_BUFFER = "OUTPUT_BUFFER";
 
+PHP.Compiler.prototype.OUTPUT_BUFFERS = "OUTPUT_BUFFERS";
+
 PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
 
 PHP.Compiler.prototype.PARAM_NAME = "n";
@@ -1035,8 +1037,8 @@ PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_InlineHTML = function( action ) {
-    var src = this.CTX + this.OUTPUT_BUFFER + ' += "' + action.value.replace(/[\\"]/g, '\\$&').replace(/\n/g,"\\n").replace(/\r/g,"") + '"';
-    
+    var src = this.CTX + this.OUTPUT_BUFFERS + '[' + this.CTX +this[ this.OUTPUT_BUFFERS ] + '.length - 1] += "' + action.value.replace(/[\\"]/g, '\\$&').replace(/\n/g,"\\n").replace(/\r/g,"") + '"';
+ 
     return src;
 };
 
@@ -2097,6 +2099,90 @@ PHP.Modules.prototype.ini_set = function( varname, newvalue ) {
 
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ob_clean = function() {
+    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
+    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ob_end_clean = function() {
+    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
+    
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ob_end_flush = function() {
+  var flush = this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
+  
+  this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][ this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 ] += flush;
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ob_flush = function() {};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ob_get_contents = function() {
+    return new PHP.VM.Variable( this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1] );
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ob_get_clean = function() {
+    return new PHP.VM.Variable( this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop() );
+    
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ob_get_level = function() {
+    return new PHP.VM.Variable( this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 );
+
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ob_start = function() {
+    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 24.6.2012 
 * @website http://hertzen.com
  */
@@ -2108,11 +2194,11 @@ PHP.Modules.prototype.echo = function() {
         
         if (arg instanceof PHP.VM.VariableProto) {
             if ( arg[ PHP.VM.Variable.prototype.TYPE ] !== PHP.VM.Variable.prototype.NULL ) {
-                this[ COMPILER.OUTPUT_BUFFER ] += arg[ COMPILER.VARIABLE_VALUE ];
+                this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg[ COMPILER.VARIABLE_VALUE ];
             }
             
         } else {
-            this[ COMPILER.OUTPUT_BUFFER ] += arg;
+            this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg;
         }
         
     }, this);
@@ -7729,17 +7815,18 @@ PHP.VM = function( src, opts ) {
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
      
+     this.OUTPUT_BUFFERS = [""];
       
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );
         exec.call(this, $$, $, ENV);
     } catch( e ) {
         console.log("Caught: ", e.message, e);
-        console.log("Buffer: ", this.OUTPUT_BUFFER);
+        console.log("Buffer: ", this.OUTPUT_BUFFERS.join(""));
     }
           
 
-   
+    this.OUTPUT_BUFFER = this.OUTPUT_BUFFERS.join("");
 };
 
 PHP.VM.prototype = new PHP.Modules();

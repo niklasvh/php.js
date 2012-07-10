@@ -274,8 +274,8 @@ PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_InlineHTML = function( action ) {
-    var src = this.CTX + this.OUTPUT_BUFFER + ' += "' + action.value.replace(/[\\"]/g, '\\$&').replace(/\n/g,"\\n").replace(/\r/g,"") + '"';
-    
+    var src = this.CTX + this.OUTPUT_BUFFERS + '[' + this.CTX +this[ this.OUTPUT_BUFFERS ] + '.length - 1] += "' + action.value.replace(/[\\"]/g, '\\$&').replace(/\n/g,"\\n").replace(/\r/g,"") + '"';
+ 
     return src;
 };
 
