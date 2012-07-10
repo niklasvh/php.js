@@ -12,6 +12,7 @@
     CONSTANTS = PHP.Constants,
     flags = [],
     types = [],
+    NO_BUFFER_MSG = "(): failed to delete buffer. No buffer to delete",
     handlers = [];
     
     function pop() {
@@ -46,17 +47,45 @@
     };
     
     MODULES.ob_end_clean = function() {
-        this[ OUTPUT_BUFFERS ].pop();
-        pop();
-        return new PHP.VM.Variable();
+        
+        var FUNCTION_NAME = "ob_end_clean";
+        
+        if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+            return new PHP.VM.Variable( null );
+        }
+    
+        if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+            this[ OUTPUT_BUFFERS ].pop();
+            pop();
+            return new PHP.VM.Variable( true );
+        } else {
+            this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + NO_BUFFER_MSG, PHP.Constants.E_CORE_NOTICE, true );
+            return new PHP.VM.Variable( false );
+        }
+        
+       
+        
     };
 
 
     MODULES.ob_end_flush = function() {
-        var flush = this[ OUTPUT_BUFFERS ].pop();
-        pop();
-        this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1 ] += flush;
-        return new PHP.VM.Variable();
+        
+        var FUNCTION_NAME = "ob_end_flush";
+        
+        if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+            return new PHP.VM.Variable( null );
+        }
+    
+        if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+            var flush = this[ OUTPUT_BUFFERS ].pop();
+            pop();
+            this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1 ] += flush;
+            return new PHP.VM.Variable( true );
+        } else {
+            this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to delete and flush buffer. No buffer to delete or flush", PHP.Constants.E_CORE_NOTICE, true );
+            return new PHP.VM.Variable( false );
+        }
+
     };
 
     MODULES.ob_get_flush = function() {
