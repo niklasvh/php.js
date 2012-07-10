@@ -63,6 +63,7 @@ var files = {
             ini_set: "js"
         },
         output: {
+            flush: "js",
             ob_clean: "js",
             ob_end_clean: "js",
             ob_end_flush: "js",

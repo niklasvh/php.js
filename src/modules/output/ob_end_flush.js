@@ -9,4 +9,5 @@ PHP.Modules.prototype.ob_end_flush = function() {
   var flush = this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
   
   this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][ this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 ] += flush;
+  return new PHP.VM.Variable();
 };

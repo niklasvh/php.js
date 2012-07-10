@@ -7,4 +7,5 @@
 
 PHP.Modules.prototype.ob_start = function() {
     this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
+    return new PHP.VM.Variable( true );
 };

@@ -5,6 +5,6 @@
  */
 
 
-PHP.Modules.prototype.ob_flush = function() {
+PHP.Modules.prototype.flush = function() {
     return new PHP.VM.Variable();
 };

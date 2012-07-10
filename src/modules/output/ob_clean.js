@@ -8,4 +8,5 @@
 PHP.Modules.prototype.ob_clean = function() {
     this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
     this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
+    return new PHP.VM.Variable();
 };
