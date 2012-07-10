@@ -6,6 +6,14 @@
 
 
 PHP.Modules.prototype.ob_get_level = function() {
-    return new PHP.VM.Variable( this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 );
+    
+    var FUNCTION_NAME = "ob_get_level",
+    COMPILER = PHP.Compiler.prototype;
+    
+    if ( !this[ COMPILER.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+        return new PHP.VM.Variable( null );
+    }
+    
+    return new PHP.VM.Variable( this[ COMPILER.OUTPUT_BUFFERS ].length - 1 );
 
 };

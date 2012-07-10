@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 228 out of 672 (33.9%)
+Passed 240 out of 672 (35.7%)
 
 Failed tests:
 
@@ -386,7 +386,6 @@ Failed tests:
  - tests/php/lang/type_hints_002.phpt
  - tests/php/lang/type_hints_003.phpt
  - tests/php/output/bug46897.phpt
- - tests/php/output/bug60322.phpt
  - tests/php/output/bug60768.phpt
  - tests/php/output/ob_010.phpt
  - tests/php/output/ob_011.phpt
@@ -394,17 +393,6 @@ Failed tests:
  - tests/php/output/ob_015.phpt
  - tests/php/output/ob_017.phpt
  - tests/php/output/ob_018.phpt
- - tests/php/output/ob_flush_basic_001.phpt
- - tests/php/output/ob_flush_error_001.phpt
- - tests/php/output/ob_get_clean_basic_001.phpt
- - tests/php/output/ob_get_clean_basic_002.phpt
- - tests/php/output/ob_get_clean_error_001.phpt
- - tests/php/output/ob_get_contents_basic_001.phpt
- - tests/php/output/ob_get_contents_error_001.phpt
- - tests/php/output/ob_get_length_basic_001.phpt
- - tests/php/output/ob_get_length_error_001.phpt
- - tests/php/output/ob_get_level_basic_001.phpt
- - tests/php/output/ob_get_level_error_001.phpt
  - tests/php/output/ob_implicit_flush_basic_001.phpt
  - tests/php/output/ob_implicit_flush_basic_002.phpt
  - tests/php/output/ob_implicit_flush_error_001.phpt

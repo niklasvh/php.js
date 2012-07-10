@@ -6,9 +6,22 @@
 
 
 PHP.Modules.prototype.ob_flush = function() {
-    var flush = this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
-    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][ this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 ] += flush;
-    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
-
-    return new PHP.VM.Variable();
+    
+    var FUNCTION_NAME = "ob_flush",
+    COMPILER = PHP.Compiler.prototype;
+    
+    if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+        return new PHP.VM.Variable( null );
+    }
+    
+    if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+        var flush = this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
+        this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][ this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 ] += flush;
+        this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
+        return new PHP.VM.Variable( true );
+    } else {
+        this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to flush buffer. No buffer to flush", PHP.Constants.E_CORE_NOTICE, true );
+        return new PHP.VM.Variable( false );
+    }
+    
 };

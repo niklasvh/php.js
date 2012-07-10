@@ -97,8 +97,20 @@
 
 
     MODULES.ob_get_clean = function() {
-        pop();
-        return new PHP.VM.Variable( this[ OUTPUT_BUFFERS ].pop() );
+        
+        var FUNCTION_NAME = "ob_get_clean";
+        
+        if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+            return new PHP.VM.Variable( null );
+        }
+        
+        if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+            pop();
+            return new PHP.VM.Variable( this[ OUTPUT_BUFFERS ].pop() );
+        } else {
+            return new PHP.VM.Variable( false );
+        }
+        
     };
 
     MODULES.ob_list_handlers = function() {

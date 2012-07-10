@@ -2208,8 +2208,20 @@ PHP.Modules.prototype.flush = function() {
 
 
     MODULES.ob_get_clean = function() {
-        pop();
-        return new PHP.VM.Variable( this[ OUTPUT_BUFFERS ].pop() );
+        
+        var FUNCTION_NAME = "ob_get_clean";
+        
+        if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+            return new PHP.VM.Variable( null );
+        }
+        
+        if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+            pop();
+            return new PHP.VM.Variable( this[ OUTPUT_BUFFERS ].pop() );
+        } else {
+            return new PHP.VM.Variable( false );
+        }
+        
     };
 
     MODULES.ob_list_handlers = function() {
@@ -2288,11 +2300,24 @@ PHP.Modules.prototype.ob_clean = function() {
 
 
 PHP.Modules.prototype.ob_flush = function() {
-    var flush = this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
-    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][ this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 ] += flush;
-    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
-
-    return new PHP.VM.Variable();
+    
+    var FUNCTION_NAME = "ob_flush",
+    COMPILER = PHP.Compiler.prototype;
+    
+    if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+        return new PHP.VM.Variable( null );
+    }
+    
+    if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+        var flush = this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
+        this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][ this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 ] += flush;
+        this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
+        return new PHP.VM.Variable( true );
+    } else {
+        this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to flush buffer. No buffer to flush", PHP.Constants.E_CORE_NOTICE, true );
+        return new PHP.VM.Variable( false );
+    }
+    
 };
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -2302,7 +2327,20 @@ PHP.Modules.prototype.ob_flush = function() {
 
 
 PHP.Modules.prototype.ob_get_contents = function() {
-    return new PHP.VM.Variable( this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1] );
+    var FUNCTION_NAME = "ob_get_contents",
+    COMPILER = PHP.Compiler.prototype;
+    
+    if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+        return new PHP.VM.Variable( null );
+    }
+    
+    if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+        return new PHP.VM.Variable( this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1] );
+    } else {
+        //   this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to flush buffer. No buffer to flush", PHP.Constants.E_CORE_NOTICE, true );
+        return new PHP.VM.Variable( false );
+    }
+
 };
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -2311,8 +2349,38 @@ PHP.Modules.prototype.ob_get_contents = function() {
  */
 
 
+PHP.Modules.prototype.ob_get_length = function() {
+    var FUNCTION_NAME = "ob_get_length",
+    COMPILER = PHP.Compiler.prototype;
+    
+    if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+        return new PHP.VM.Variable( null );
+    }
+    
+    if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+        return new PHP.VM.Variable( this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1].length );
+    } else {
+        //   this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to flush buffer. No buffer to flush", PHP.Constants.E_CORE_NOTICE, true );
+        return new PHP.VM.Variable( false );
+    }
+
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
 PHP.Modules.prototype.ob_get_level = function() {
-    return new PHP.VM.Variable( this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 );
+    
+    var FUNCTION_NAME = "ob_get_level",
+    COMPILER = PHP.Compiler.prototype;
+    
+    if ( !this[ COMPILER.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
+        return new PHP.VM.Variable( null );
+    }
+    
+    return new PHP.VM.Variable( this[ COMPILER.OUTPUT_BUFFERS ].length - 1 );
 
 };
 /* 
@@ -2389,6 +2457,13 @@ PHP.Modules.prototype.print = function( variable ) {
     return new PHP.VM.Variable(1);
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 3.7.2012 
 * @website http://hertzen.com
  */
@@ -2423,6 +2498,19 @@ PHP.Modules.prototype.strncmp = function( str1, str2, len ) {
    
     
     
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.strtolower = function( str ) {
+    var VARIABLE = PHP.VM.Variable.prototype,
+    COMPILER = PHP.Compiler.prototype;
+    
+    return new PHP.VM.Variable( str[ COMPILER.VARIABLE_VALUE ].toLowerCase() );
 };
 
 

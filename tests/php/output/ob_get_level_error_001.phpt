@@ -22,6 +22,6 @@ echo "Done";
 
 -- Testing ob_get_level() function with one argument --
 
-Warning: ob_get_level() expects exactly 0 parameters, 1 given in %s on line 13
+Warning: ob_get_level() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 Done

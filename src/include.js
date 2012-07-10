@@ -69,6 +69,7 @@ var files = {
             ob_clean: "js",
             ob_flush: "js",
             ob_get_contents: "js",
+            ob_get_length: "js",
             ob_get_level: "js"
             
         },
@@ -77,8 +78,10 @@ var files = {
             implode: "js",
             parse_str: "js",
             print: "js",
+            str_rot13: "js",
             strlen: "js",
-            strncmp: "js"
+            strncmp: "js",
+            strtolower: "js"
         },
         tokenizer: {
             constants: "js",
