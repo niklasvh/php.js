@@ -35,7 +35,7 @@ PHP.Modules.prototype.print_r = function() {
                 
             }, this);
             
-            str += $INDENT( indent ) + ")\n\n";
+            str += $INDENT( indent ) + ")\n";
         } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
             str += $INDENT( indent ) + "NULL\n";  
         } else if( argument[ VAR.TYPE ] === VAR.STRING ) {

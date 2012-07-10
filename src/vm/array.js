@@ -135,6 +135,13 @@ PHP.VM.Array = function( ENV ) {
  Convert JavaScript array/object into a PHP array 
  */
 
+    PHP.VM.Array.arrayItem = function( key, value ) {
+        var obj = {};
+        obj[ COMPILER.ARRAY_KEY ] = new PHP.VM.Variable( key );
+        obj[ COMPILER.ARRAY_VALUE ] = new PHP.VM.Variable( value );
+        return obj;
+    };
+
 
     PHP.VM.Array.fromObject = function( items ) {
 

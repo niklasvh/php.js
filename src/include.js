@@ -63,15 +63,14 @@ var files = {
             ini_set: "js"
         },
         output: {
+            constants: "js",
             flush: "js",
+            ob: "js",
             ob_clean: "js",
-            ob_end_clean: "js",
-            ob_end_flush: "js",
             ob_flush: "js",
             ob_get_contents: "js",
-            ob_get_clean: "js",
-            ob_get_level: "js",
-            ob_start: "js"
+            ob_get_level: "js"
+            
         },
         string: {
             echo: "js",
@@ -83,6 +82,7 @@ var files = {
         },
         tokenizer: {
             constants: "js",
+            internal: "js",
             token_get_all: "js",
             token_name: "js"
         },

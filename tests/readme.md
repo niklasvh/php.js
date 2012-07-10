@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 216 out of 672 (32.1%)
+Passed 218 out of 672 (32.4%)
 
 Failed tests:
 
@@ -231,6 +231,7 @@ Failed tests:
  - tests/php/lang/043.phpt
  - tests/php/lang/044.phpt
  - tests/php/lang/045.phpt
+ - tests/php/lang/array_shortcut_005.phpt
  - tests/php/lang/bison1.phpt
  - tests/php/lang/bug17115.phpt
  - tests/php/lang/bug18872.phpt
@@ -389,16 +390,13 @@ Failed tests:
  - tests/php/output/bug60321.phpt
  - tests/php/output/bug60322.phpt
  - tests/php/output/bug60768.phpt
- - tests/php/output/ob_009.phpt
  - tests/php/output/ob_010.phpt
  - tests/php/output/ob_011.phpt
- - tests/php/output/ob_012.phpt
  - tests/php/output/ob_013.phpt
  - tests/php/output/ob_014.phpt
  - tests/php/output/ob_015.phpt
  - tests/php/output/ob_017.phpt
  - tests/php/output/ob_018.phpt
- - tests/php/output/ob_020.phpt
  - tests/php/output/ob_clean_basic_001.phpt
  - tests/php/output/ob_clean_error_001.phpt
  - tests/php/output/ob_end_clean_basic_001.phpt
