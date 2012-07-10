@@ -237,7 +237,7 @@ PHP.Compiler.prototype.Node_Stmt_Static = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_StaticVar = function( action ) {
     // todo fix
-    var src = "." + this.FUNCTION_STATIC_SET + '("' + action.name + '", ' + this.source( action.def ) + ")";
+    var src = "." + this.FUNCTION_STATIC_SET + '("' + action.name + '", ' + (( action.def === null) ? "new PHP.VM.Variable()" : this.source( action.def )) + ")";
 
     console.log( action );
     return src;  

@@ -116,11 +116,12 @@ PHP.VM = function( src, opts ) {
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );
         exec.call(this, $$, $, ENV);
+        this.$obflush();  
     } catch( e ) {
         console.log("Caught: ", e.message, e);
         console.log("Buffer: ", this.OUTPUT_BUFFERS.join(""));
     }
-          
+        
 
     this.OUTPUT_BUFFER = this.OUTPUT_BUFFERS.join("");
 };

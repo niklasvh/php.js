@@ -11,7 +11,7 @@ PHP.Modules.prototype.print_r = function() {
     indent = 0,
     COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype;
-    
+    console.log('print_r');
     if (this[ COMPILER.DISPLAY_HANDLER ] === true) {
         this[ COMPILER.ERROR ]( "print_r(): Cannot use output buffering in output buffering display handlers", PHP.Constants.E_ERROR, true );  
     }

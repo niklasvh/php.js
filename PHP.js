@@ -1002,7 +1002,7 @@ PHP.Compiler.prototype.Node_Stmt_Static = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_StaticVar = function( action ) {
     // todo fix
-    var src = "." + this.FUNCTION_STATIC_SET + '("' + action.name + '", ' + this.source( action.def ) + ")";
+    var src = "." + this.FUNCTION_STATIC_SET + '("' + action.name + '", ' + (( action.def === null) ? "new PHP.VM.Variable()" : this.source( action.def )) + ")";
 
     console.log( action );
     return src;  
@@ -1425,6 +1425,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     };
     
     MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
+       
         var C = PHP.Constants,        
         _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
         lastError = {
@@ -1440,7 +1441,6 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             switch ( level ) {
                 case C.E_ERROR:
                     this[ COMPILER.DISPLAY_HANDLER ] = false;
-                    
                     this.$ob( "\nFatal error: " + msg + lineAppend + "\n");
                     throw new PHP.Halt( level );
                     return;
@@ -2160,6 +2160,7 @@ PHP.Modules.prototype.flush = function() {
         flags = [];
         types = [];
         handlers = [];
+        recurring = 0;
     };
     
     MODULES.$ob = function( str )  {
@@ -2168,29 +2169,54 @@ PHP.Modules.prototype.flush = function() {
       
 
       
+
+        this[ COMPILER.OUTPUT_BUFFERS ][ index ] += str;
+        
+        
+
+    };
+    
+    MODULES.$flush = function( str, minus ) {
+        minus = (minus === undefined) ? 1 : 0;
+        var index = (this[ COMPILER.OUTPUT_BUFFERS ].length - 1) - minus,
+        VARIABLE = PHP.VM.Variable.prototype;
         // trigger flush
-        if ( handlers[ index - 1 ] !== DEFAULT &&  handlers[ index - 1 ] !== undefined &&  this[ COMPILER.DISPLAY_HANDLER ] !== false) {
-            
+        console.log( str, handlers, index, handlers[0] );
+        if ( handlers[ index ] !== DEFAULT &&  handlers[ index  ] !== undefined &&  this[ COMPILER.DISPLAY_HANDLER ] !== false) {
             recurring++;
             // check that we aren't ending up in any endless error loop
             if ( recurring <= 10 ) {
                 this[ COMPILER.DISPLAY_HANDLER ] = true;
-                var result = this[ handlers[ index - 1 ] ]( new PHP.VM.Variable( str ), new PHP.VM.Variable( types[ index - 1 ] ) );
+                 
+                var result = this[ handlers[ index ] ]( new PHP.VM.Variable( str ), new PHP.VM.Variable( types[ index ] ) );
                 recurring = 0;
-                
-                if ( result[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
-                    this[ COMPILER.OUTPUT_BUFFERS ][ index ] += result[ COMPILER.VARIABLE_VALUE ];
-                }
-                
                 this[ COMPILER.DISPLAY_HANDLER ] = undefined;
+                if ( result[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
+                    return result[ COMPILER.VARIABLE_VALUE ];
+                } 
+                
+               
+                
+               
             }
-           
+            return "";
         } else {
-            this[ COMPILER.OUTPUT_BUFFERS ][ index ] += str;
+            return str;
         }
-        
-
     };
+    
+    MODULES.$obflush = function() {
+        var index = this[ COMPILER.OUTPUT_BUFFERS ].length - 1,
+        VARIABLE = PHP.VM.Variable.prototype;
+        
+        var content = this[ COMPILER.OUTPUT_BUFFERS ][ index ];
+        this[ COMPILER.OUTPUT_BUFFERS ][ index ] = "";
+        
+        var value = this.$flush( content );
+        
+        this[ COMPILER.OUTPUT_BUFFERS ][ index ] = value;
+        
+    }
     
     MODULES.ob_start = function( output_callback, chunk_size, erase ) {
         
@@ -2212,7 +2238,7 @@ PHP.Modules.prototype.flush = function() {
     };
     
     MODULES.ob_end_clean = function() {
-        
+
         var FUNCTION_NAME = "ob_end_clean";
         
         if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
@@ -2234,7 +2260,7 @@ PHP.Modules.prototype.flush = function() {
 
 
     MODULES.ob_end_flush = function() {
-        
+             
         var FUNCTION_NAME = "ob_end_flush";
         
         if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
@@ -2243,8 +2269,9 @@ PHP.Modules.prototype.flush = function() {
     
         if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
             var flush = this[ OUTPUT_BUFFERS ].pop();
+            this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1 ] += this.$flush( flush, 1 );
             pop();
-            this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1 ] += flush;
+
             return new PHP.VM.Variable( true );
         } else {
             this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to delete and flush buffer. No buffer to delete or flush", PHP.Constants.E_CORE_NOTICE, true );
@@ -2260,8 +2287,8 @@ PHP.Modules.prototype.flush = function() {
         }
         
         var flush = this[ OUTPUT_BUFFERS ].pop();
+        this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1 ] += this.$flush( flush, 1 );
         pop();
-        this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1 ] += flush;
         return new PHP.VM.Variable( flush );
     };
 
@@ -2373,11 +2400,12 @@ PHP.Modules.prototype.ob_flush = function() {
     if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
         return new PHP.VM.Variable( null );
     }
-    
+     
     if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
         var flush = this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
         this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ][ this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].length - 1 ] += flush;
         this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
+        this.$obflush();  
         return new PHP.VM.Variable( true );
     } else {
         this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to flush buffer. No buffer to flush", PHP.Constants.E_CORE_NOTICE, true );
@@ -3147,7 +3175,7 @@ PHP.Modules.prototype.print_r = function() {
     indent = 0,
     COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype;
-    
+    console.log('print_r');
     if (this[ COMPILER.DISPLAY_HANDLER ] === true) {
         this[ COMPILER.ERROR ]( "print_r(): Cannot use output buffering in output buffering display handlers", PHP.Constants.E_ERROR, true );  
     }
@@ -8130,11 +8158,12 @@ PHP.VM = function( src, opts ) {
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );
         exec.call(this, $$, $, ENV);
+        this.$obflush();  
     } catch( e ) {
         console.log("Caught: ", e.message, e);
         console.log("Buffer: ", this.OUTPUT_BUFFERS.join(""));
     }
-          
+        
 
     this.OUTPUT_BUFFER = this.OUTPUT_BUFFERS.join("");
 };

@@ -194,6 +194,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     };
     
     MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
+       
         var C = PHP.Constants,        
         _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
         lastError = {
@@ -209,7 +210,6 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             switch ( level ) {
                 case C.E_ERROR:
                     this[ COMPILER.DISPLAY_HANDLER ] = false;
-                    
                     this.$ob( "\nFatal error: " + msg + lineAppend + "\n");
                     throw new PHP.Halt( level );
                     return;
