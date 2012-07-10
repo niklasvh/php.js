@@ -20,6 +20,12 @@
         types.pop();
     }
     
+    MODULES.$ob = function() {
+        flags = [];
+        types = [];
+        handlers = [];
+    };
+    
     MODULES.ob_start = function( output_callback, chunk_size, erase ) {
         
         var handler = DEFAULT, type;

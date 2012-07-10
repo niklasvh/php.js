@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 222 out of 672 (33%)
+Passed 224 out of 672 (33.3%)
 
 Failed tests:
 
@@ -394,8 +394,6 @@ Failed tests:
  - tests/php/output/ob_015.phpt
  - tests/php/output/ob_017.phpt
  - tests/php/output/ob_018.phpt
- - tests/php/output/ob_clean_basic_001.phpt
- - tests/php/output/ob_clean_error_001.phpt
  - tests/php/output/ob_end_clean_basic_001.phpt
  - tests/php/output/ob_end_clean_error_001.phpt
  - tests/php/output/ob_end_flush_basic_001.phpt

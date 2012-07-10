@@ -78,7 +78,7 @@ PHP.VM = function( src, opts ) {
                 //      return Object.getPrototypeOf( state );  
                 } else if ( /parent/i.test( className ) ) {
                     return Object.getPrototypeOf( state.prototype  ); 
-                 //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
+                //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
                 }
                 
                 
@@ -110,7 +110,8 @@ PHP.VM = function( src, opts ) {
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
      
-     this.OUTPUT_BUFFERS = [""];
+    this.OUTPUT_BUFFERS = [""];
+    this.$ob();
       
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );

@@ -1323,7 +1323,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     
     if ( args.length !== len ) {
        
-        this[ COMPILER.ERROR ]( name + "() expects exactly " + len + " parameter, " + args.length + " given in " + 
+        this[ COMPILER.ERROR ]( name + "() expects exactly " + len + " parameter" + (( len !== 1 ) ? "s" : "") + ", " + args.length + " given in " + 
             _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
             " on line " + 0, PHP.Constants.E_CORE_WARNING );    
         return false;
@@ -2131,6 +2131,12 @@ PHP.Modules.prototype.flush = function() {
         types.pop();
     }
     
+    MODULES.$ob = function() {
+        flags = [];
+        types = [];
+        handlers = [];
+    };
+    
     MODULES.ob_start = function( output_callback, chunk_size, erase ) {
         
         var handler = DEFAULT, type;
@@ -2230,9 +2236,20 @@ PHP.Modules.prototype.flush = function() {
 
 
 PHP.Modules.prototype.ob_clean = function() {
-    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].pop();
-    this[ PHP.Compiler.prototype.OUTPUT_BUFFERS ].push("");
-    return new PHP.VM.Variable();
+    var COMPILER = PHP.Compiler.prototype;
+    
+    if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, "ob_clean", 0, [ ] ) ) {
+        return new PHP.VM.Variable( null );
+    }
+    
+    if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+        this[ COMPILER.OUTPUT_BUFFERS ].pop();
+        this[ COMPILER.OUTPUT_BUFFERS ].push("");
+        return new PHP.VM.Variable( true );
+    } else {
+         this.ENV[ COMPILER.ERROR ]("ob_clean(): failed to delete buffer. No buffer to delete", PHP.Constants.E_CORE_NOTICE, true );
+        return new PHP.VM.Variable( false );
+    }
 };
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -7875,7 +7892,7 @@ PHP.VM = function( src, opts ) {
                 //      return Object.getPrototypeOf( state );  
                 } else if ( /parent/i.test( className ) ) {
                     return Object.getPrototypeOf( state.prototype  ); 
-                 //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
+                //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
                 }
                 
                 
@@ -7907,7 +7924,8 @@ PHP.VM = function( src, opts ) {
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
      
-     this.OUTPUT_BUFFERS = [""];
+    this.OUTPUT_BUFFERS = [""];
+    this.$ob();
       
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );
