@@ -204,6 +204,8 @@ PHP.Compiler.prototype.source = function( action ) {
     return this[ action.type ]( action );
 };
 
+PHP.Compiler.prototype.FILE_PATH = "$FILE_PATH"; 
+
 PHP.Compiler.prototype.NAV = "$NaV"; // not a variable;
 
 PHP.Compiler.prototype.FILESYSTEM = "$FS";
@@ -636,6 +638,10 @@ PHP.Compiler.prototype.Node_Expr_Cast_String = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
     return  this.CTX + "include( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
+};
+
+PHP.Compiler.prototype.Node_Expr_RequireOnce = function( action ) {
+    return  this.CTX + "require_once( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
 };
 
 PHP.Compiler.prototype.Node_Expr_New = function( action ) {
@@ -1791,15 +1797,14 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
 * @website http://hertzen.com
  */
 
-PHP.Modules.prototype.include = function( $, file ) {
+PHP.Modules.prototype.$include = function( $, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
     _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ],
     filename = file[ COMPILER.VARIABLE_VALUE ];
     
     
-    
-    var path = PHP.Utils.Path( _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ]);
+    var path = this[ COMPILER.FILE_PATH ];
     
     var source = this[ COMPILER.FILESYSTEM ].readFileSync( path + "/" + filename );
     
@@ -1816,17 +1821,32 @@ PHP.Modules.prototype.include = function( $, file ) {
     // compile tree into JS
     var compiler = new PHP.Compiler( AST );
    
-       console.log( compiler.src );
+    console.log( compiler.src );
     // execture code in current context ($)
     var exec = new Function( "$$", "$", "ENV", compiler.src  );
+    
+    this[ COMPILER.FILE_PATH ] = PHP.Utils.Path( path + "/" + filename );
+    
     exec.call(this, function( arg ) {
         return new PHP.VM.Variable( arg );
     }, $, this);
-
- 
-    
+    /*
+     this needs to be fixed
+    console.log("changing back");
+    this[ COMPILER.FILE_PATH ] = path;
+    */
 };
-/* 
+
+
+PHP.Modules.prototype.include = function() {
+    this.$include.apply(this, arguments);
+};PHP.Modules.prototype.include_once = function() {
+    this.$include.apply(this, arguments);
+};PHP.Modules.prototype.require = function() {
+    this.$include.apply(this, arguments);
+};PHP.Modules.prototype.require_once = function() {
+    this.$include.apply(this, arguments);
+};/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 3.7.2012 
 * @website http://hertzen.com
@@ -3276,6 +3296,14 @@ PHP.Modules.prototype.var_dump = function() {
         re: /^include_once(?=[ "'(;])/i
     },
     {
+        value: PHP.Constants.T_REQUIRE,
+        re: /^require(?=[ "'(;])/i
+    },
+    {
+        value: PHP.Constants.T_REQUIRE_ONCE,
+        re: /^require_once(?=[ "'(;])/i
+    },
+    {
         value: PHP.Constants.T_NEW,
         re: /^new(?=[ ])/i
     },
@@ -3412,7 +3440,7 @@ PHP.Modules.prototype.var_dump = function() {
                             ]);
                         
                         result = result.substring( match[ 0 ].length ); 
-/*
+                    /*
                         match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
                         if ( match !== null ) {
                             console.log( match );
@@ -7616,6 +7644,7 @@ PHP.VM = function( src, opts ) {
  
     ENV[ PHP.Compiler.prototype.CONSTANTS ] = PHP.VM.Constants( PHP.Constants, ENV );
     
+ 
     ENV.$Class = (function() {
         var classRegistry = {},
         COMPILER = PHP.Compiler.prototype,
@@ -7697,8 +7726,12 @@ PHP.VM = function( src, opts ) {
         exec.call(this, $$, $, ENV);
 
        */
+        
+    ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
+     
+      
     try {
-        var exec = new Function( "$$", "$", "ENV", src  );
+        var exec = new Function( "$$", "$", "ENV",  src  );
         exec.call(this, $$, $, ENV);
     } catch( e ) {
         console.log("Caught: ", e.message, e);

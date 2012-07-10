@@ -338,6 +338,14 @@ PHP.Lexer = function( src ) {
         re: /^include_once(?=[ "'(;])/i
     },
     {
+        value: PHP.Constants.T_REQUIRE,
+        re: /^require(?=[ "'(;])/i
+    },
+    {
+        value: PHP.Constants.T_REQUIRE_ONCE,
+        re: /^require_once(?=[ "'(;])/i
+    },
+    {
         value: PHP.Constants.T_NEW,
         re: /^new(?=[ ])/i
     },
@@ -474,7 +482,7 @@ PHP.Lexer = function( src ) {
                             ]);
                         
                         result = result.substring( match[ 0 ].length ); 
-/*
+                    /*
                         match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
                         if ( match !== null ) {
                             console.log( match );

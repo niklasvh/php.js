@@ -29,7 +29,10 @@ var files = {
         },
         control_structures: {
             foreach: "js",
-            include: "js"
+            include: "js",
+            include_once: "js",
+            require: "js",
+            require_once: "js"
         },
         date: {
             mktime: "js",

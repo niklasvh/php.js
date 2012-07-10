@@ -4,15 +4,14 @@
 * @website http://hertzen.com
  */
 
-PHP.Modules.prototype.include = function( $, file ) {
+PHP.Modules.prototype.$include = function( $, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
     _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ],
     filename = file[ COMPILER.VARIABLE_VALUE ];
     
     
-    
-    var path = PHP.Utils.Path( _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ]);
+    var path = this[ COMPILER.FILE_PATH ];
     
     var source = this[ COMPILER.FILESYSTEM ].readFileSync( path + "/" + filename );
     
@@ -29,13 +28,23 @@ PHP.Modules.prototype.include = function( $, file ) {
     // compile tree into JS
     var compiler = new PHP.Compiler( AST );
    
-       console.log( compiler.src );
+    console.log( compiler.src );
     // execture code in current context ($)
     var exec = new Function( "$$", "$", "ENV", compiler.src  );
+    
+    this[ COMPILER.FILE_PATH ] = PHP.Utils.Path( path + "/" + filename );
+    
     exec.call(this, function( arg ) {
         return new PHP.VM.Variable( arg );
     }, $, this);
+    /*
+     this needs to be fixed
+    console.log("changing back");
+    this[ COMPILER.FILE_PATH ] = path;
+    */
+};
 
- 
-    
+
+PHP.Modules.prototype.include = function() {
+    this.$include.apply(this, arguments);
 };

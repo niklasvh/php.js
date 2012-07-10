@@ -258,6 +258,10 @@ PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
     return  this.CTX + "include( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
 };
 
+PHP.Compiler.prototype.Node_Expr_RequireOnce = function( action ) {
+    return  this.CTX + "require_once( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
+};
+
 PHP.Compiler.prototype.Node_Expr_New = function( action ) {
 
     var src = this.CREATE_VARIABLE + '(new (' + this.CTX + this.CLASS_GET + '("' + this.getName( action.Class ) + '"))( this';
