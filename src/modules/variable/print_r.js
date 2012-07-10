@@ -33,6 +33,10 @@ PHP.Modules.prototype.print_r = function() {
                 
                 str += $dump( values[ index ], indent + 8 );
                 
+                if ( values[ index ][ VAR.TYPE] === VAR.ARRAY ) {
+                     str += "\n";
+                }
+                
             }, this);
             
             str += $INDENT( indent ) + ")\n";
