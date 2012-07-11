@@ -1696,6 +1696,20 @@ PHP.Modules.prototype.get_class = function( object ) {
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 11.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.method_exists = function( object, method ) {
+    var COMPILER = PHP.Compiler.prototype;
+    
+    
+    return new PHP.VM.Variable( (object[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ]] ) !== undefined );
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 30.6.2012 
 * @website http://hertzen.com
  */
@@ -2265,10 +2279,32 @@ PHP.Modules.prototype.flush = function() {
             return new PHP.VM.Variable( null );
         }
         
-        if ( output_callback !== undefined && ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY ) ) {
-            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): no array or string given", PHP.Constants.E_WARNING, true ); 
-            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to create buffer", PHP.Constants.E_CORE_NOTICE, true );
-            return new PHP.VM.Variable( false ); 
+        if (output_callback !== undefined ) {
+            var fail = false;
+            if ( ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY ) ) {
+                this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): no array or string given", PHP.Constants.E_WARNING, true ); 
+                fail = true;
+
+            } else if (  output_callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+            
+                var classVar = output_callback[ COMPILER.DIM_FETCH ]( this, new PHP.VM.Variable(0)),
+                methodVar = output_callback[ COMPILER.DIM_FETCH ]( this, new PHP.VM.Variable(1));
+            
+                if ( this.count( output_callback )[ COMPILER.VARIABLE_VALUE] !== 2 ) {
+                    this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): array must have exactly two members", PHP.Constants.E_WARNING, true ); 
+                    fail = true;
+
+                } else if (this.method_exists( classVar, methodVar )[ COMPILER.VARIABLE_VALUE ] === false ) {
+                    this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): class '" + classVar[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] + "' does not have a method '" + methodVar[ COMPILER.VARIABLE_VALUE ]  + "'", PHP.Constants.E_WARNING, true ); 
+                    fail = true;
+                    
+                }
+            }
+            
+            if ( fail ) {
+                this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to create buffer", PHP.Constants.E_CORE_NOTICE, true );
+                return new PHP.VM.Variable( false ); 
+            }
         }
         
         var handler = DEFAULT, type;

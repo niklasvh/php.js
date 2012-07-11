@@ -25,7 +25,8 @@ var files = {
             
         },
         classes: {
-            get_class: "js"
+            get_class: "js",
+            method_exists: "js"
         },
         control_structures: {
             foreach: "js",

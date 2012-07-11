@@ -124,10 +124,32 @@
             return new PHP.VM.Variable( null );
         }
         
-        if ( output_callback !== undefined && ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY ) ) {
-            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): no array or string given", PHP.Constants.E_WARNING, true ); 
-            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to create buffer", PHP.Constants.E_CORE_NOTICE, true );
-            return new PHP.VM.Variable( false ); 
+        if (output_callback !== undefined ) {
+            var fail = false;
+            if ( ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY ) ) {
+                this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): no array or string given", PHP.Constants.E_WARNING, true ); 
+                fail = true;
+
+            } else if (  output_callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+            
+                var classVar = output_callback[ COMPILER.DIM_FETCH ]( this, new PHP.VM.Variable(0)),
+                methodVar = output_callback[ COMPILER.DIM_FETCH ]( this, new PHP.VM.Variable(1));
+            
+                if ( this.count( output_callback )[ COMPILER.VARIABLE_VALUE] !== 2 ) {
+                    this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): array must have exactly two members", PHP.Constants.E_WARNING, true ); 
+                    fail = true;
+
+                } else if (this.method_exists( classVar, methodVar )[ COMPILER.VARIABLE_VALUE ] === false ) {
+                    this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): class '" + classVar[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] + "' does not have a method '" + methodVar[ COMPILER.VARIABLE_VALUE ]  + "'", PHP.Constants.E_WARNING, true ); 
+                    fail = true;
+                    
+                }
+            }
+            
+            if ( fail ) {
+                this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to create buffer", PHP.Constants.E_CORE_NOTICE, true );
+                return new PHP.VM.Variable( false ); 
+            }
         }
         
         var handler = DEFAULT, type;

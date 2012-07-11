@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 251 out of 672 (37.4%)
+Passed 253 out of 672 (37.6%)
 
 Failed tests:
 
@@ -399,8 +399,6 @@ Failed tests:
  - tests/php/output/ob_start_basic_unerasable_005.phpt
  - tests/php/output/ob_start_callbacks.phpt
  - tests/php/output/ob_start_error_002.phpt
- - tests/php/output/ob_start_error_003.phpt
- - tests/php/output/ob_start_error_004.phpt
  - tests/php/output/ob_start_error_005.phpt
  - tests/php/run-test/test003.phpt
  - tests/php/run-test/test004.phpt
