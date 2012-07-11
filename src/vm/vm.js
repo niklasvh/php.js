@@ -71,6 +71,11 @@ PHP.VM = function( src, opts ) {
             Get: function( className, state ) {
                
                 if ( !/(self|parent)/i.test( className ) ) {
+                    
+                    if (classRegistry[ className.toLowerCase() ] === undefined ) {
+                         ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
+                    }
+                    
                     if (state !== undefined) {
                         return classRegistry[ className.toLowerCase() ].prototype;
                     } else {
@@ -82,6 +87,8 @@ PHP.VM = function( src, opts ) {
                 } else if ( /parent/i.test( className ) ) {
                     return Object.getPrototypeOf( state.prototype  ); 
                 //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
+                } else {
+                   
                 }
                 
                 

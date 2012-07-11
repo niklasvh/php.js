@@ -20,6 +20,7 @@ PHP.VM.VariableHandler = function( ENV ) {
             variables[ variableName ] = new PHP.VM.Variable();
             variables[ variableName ][ PHP.VM.Variable.prototype.DEFINED ] = variableName;
             variables[ variableName ].ENV = ENV;
+            variables[ variableName ][ PHP.VM.Variable.prototype.NAME ] = variableName;
            
         /*
             Object.defineProperty( variables, variableName, {
@@ -462,6 +463,8 @@ PHP.VM.Variable = function( arg ) {
 };
 
 PHP.VM.Variable.prototype = new PHP.VM.VariableProto();
+
+PHP.VM.Variable.prototype.NAME = "$Name";
 
 PHP.VM.Variable.prototype.DEFINED = "$Defined";
 

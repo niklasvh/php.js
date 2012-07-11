@@ -727,12 +727,28 @@ PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
-
+console.log( action );
     var src = "";
-    if (/^(parent|self)$/i.test( action.Class.parts )) {
-        src += "this." + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.func + '"';
+    
+    var classPart,
+    funcPart;
+    
+    if (action.Class.type === "Node_Name") {
+        classPart = '"' + this.source(action.Class) +'"';
     } else {
-        src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.func + '"';
+        classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
+    }
+    
+    if (typeof action.func === "string") {
+        funcPart = '"' + this.source(action.func) + '"';
+    } else {
+        funcPart = this.source(action.func) + "." + this.VARIABLE_VALUE;
+    }
+    
+    if (/^(parent|self)$/i.test( action.Class.parts )) {
+        src += "this." + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + funcPart;
+    } else {
+        src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + funcPart ;
     }
 
 
@@ -750,9 +766,9 @@ PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
 
     var src = "";
     if (/^(parent|self)$/i.test( action.Class.parts )) {
-        src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name.substring(1) + '"';
+        src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name + '"';
     } else {
-        src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name.substring(1) + '"';
+        src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name + '"';
     }
 
     src += ")";
@@ -1282,6 +1298,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
             }
             
             if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
+                console.log(vals[ index ][ VARIABLE.NAME ]);
                 if (vals[ index ][ VARIABLE.DEFINED ] !== true ) {
                     // trigger setter
                     vals[ index ][ COMPILER.VARIABLE_VALUE ] = null;
@@ -2050,6 +2067,18 @@ PHP.Modules.prototype.function_exists = function( function_name ) {
 };
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 11.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.register_shutdown_function = function( function_name ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 7.7.2012 
 * @website http://hertzen.com
  */
@@ -2173,6 +2202,23 @@ PHP.Modules.prototype.ini_set = function( varname, newvalue ) {
     
 };
 
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 11.7.2012 
+* @website http://hertzen.com
+ */
+
+( function( MODULES ){
+    MODULES.set_time_limit = function( varname, newvalue ) {
+        
+        var COMPILER = PHP.Compiler.prototype;
+    
+        setTimeout(function(){
+            console.log('sup');
+            this[ COMPILER.ERROR ]( "Maximum execution time of 1 second exceeded", PHP.Constants.E_CORE, true ); 
+        }.bind(this), 1000);
+    };
+})( PHP.Modules.prototype );
 /* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
 PHP.Constants.PHP_OUTPUT_HANDLER_START = 1;
 PHP.Constants.PHP_OUTPUT_HANDLER_WRITE = 0;
@@ -3557,19 +3603,19 @@ PHP.Modules.prototype.var_dump = function() {
     console.log( arguments );
     */
 };PHP.Lexer = function( src ) {
-    
-    
+
+
     var heredoc,
     lineBreaker = function( result ) {
         if (result.match(/\n/) !== null) {
             var quote = result.substring(0, 1);
             result = '[' + result.split(/\n/).join( quote + "," + quote ) + '].join("\\n")';
-                
+
         }
-        
+
         return result;
     },
-   
+
     tokens = [
     {
         value: PHP.Constants.T_ABSTRACT,
@@ -3766,15 +3812,15 @@ PHP.Modules.prototype.var_dump = function() {
     {
         value: PHP.Constants.T_INC,
         re: /^\+\+/
-    },  
+    },
     {
         value: PHP.Constants.T_DEC,
         re: /^\-\-/
-    },  
+    },
     {
         value: PHP.Constants.T_CONCAT_EQUAL,
         re: /^\.\=/
-    },  
+    },
     {
         value: PHP.Constants.T_DIV_EQUAL,
         re: /^\/\=/
@@ -3794,7 +3840,7 @@ PHP.Modules.prototype.var_dump = function() {
     {
         value: PHP.Constants.T_SL_EQUAL,
         re: /^<<=/
-    }, 
+    },
     {
         value: PHP.Constants.T_START_HEREDOC,
         re: /^<<<[A-Z_0-9]+\s/i,
@@ -3802,7 +3848,7 @@ PHP.Modules.prototype.var_dump = function() {
             heredoc = result.substring(3, result.length - 1);
             return result;
         }
-    },  
+    },
     {
         value: PHP.Constants.T_SL,
         re: /^<</
@@ -3814,7 +3860,7 @@ PHP.Modules.prototype.var_dump = function() {
     {
         value: PHP.Constants.T_SR_EQUAL,
         re: /^>>=/
-    }, 
+    },
     {
         value: PHP.Constants.T_SR,
         re: /^>>/
@@ -3838,7 +3884,7 @@ PHP.Modules.prototype.var_dump = function() {
     {
         value: PHP.Constants.T_OBJECT_OPERATOR,
         re: /^\-\>/i
-    }, 
+    },
     {
         value: PHP.Constants.T_CLASS,
         re: /^class(?=[\s\{])/i
@@ -3910,15 +3956,15 @@ PHP.Modules.prototype.var_dump = function() {
     {
         value: PHP.Constants.T_COMMENT,
         re: /^\/\*(.|\s)*?\*\//
-    }, 
+    },
     {
         value: PHP.Constants.T_COMMENT,
         re: /^\/\/.*(\s)?/
-    }, 
+    },
     {
         value: PHP.Constants.T_COMMENT,
         re: /^\#.*(\s)?/
-    },   
+    },
     {
         value: PHP.Constants.T_ELSEIF,
         re: /^elseif(?=[\s(])/i
@@ -3972,11 +4018,11 @@ PHP.Modules.prototype.var_dump = function() {
         re: /^[0-9]*\.[0-9]+([eE][-]?[0-9]*)?/
     /*,
         func: function( result ) {
-           
+
             // transform e to E - token_get_all_variation1.phpt
             return (result - 0).toString().toUpperCase();
         }*/
-        
+
     },
     {
         value: PHP.Constants.T_LNUMBER,
@@ -4004,85 +4050,85 @@ PHP.Modules.prototype.var_dump = function() {
         func: function( result, token ) {
 
             var curlyOpen = 0;
-          
+
             if (result.substring( 0,1 ) === "'") {
                 return result;
             }
-           
+
             var match = result.match( /(?:[^\\]|\\.)*[^\\]\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/g );
             if ( match !== null ) {
                 // string has a variable
-               
+
                 while( result.length > 0 ) {
 
                     match = result.match( /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\']/ );
-                    
+
                     if ( match !== null ) {
                         results.push( match[ 0 ] );
                         result = result.substring( 1 );
-                        
+
                         if ( curlyOpen > 0 && match[ 0 ] === "}") {
                             curlyOpen--;
                         }
-                        
+
                     }
-                    
+
                     match = result.match(/^\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*/);
-                    
-                   
-                    
+
+
+
                     if ( match !== null ) {
-                        
+
                         results.push([
-                            parseInt(PHP.Constants.T_VARIABLE, 10), 
+                            parseInt(PHP.Constants.T_VARIABLE, 10),
                             match[ 0 ],
                             line
                             ]);
-                        
-                        result = result.substring( match[ 0 ].length ); 
+
+                        result = result.substring( match[ 0 ].length );
                     /*
                         match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
                         if ( match !== null ) {
                             console.log( match );
                             results.push([
-                                parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10), 
+                                parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10),
                                 match[ 1 ],
                                 line
                                 ]);
                             results.push([
-                                parseInt(PHP.Constants.T_STRING, 10), 
+                                parseInt(PHP.Constants.T_STRING, 10),
                                 match[ 2 ],
                                 line
                                 ]);
-                            result = result.substring( match[ 0 ].length ); 
+                            result = result.substring( match[ 0 ].length );
                         } */
                     }
-                    
+
 
                     while(( match = result.match( /^([^\\\$"{}]|\\.)+/g )) !== null ) {
-                   
+
 
                         if (result.length === 1) {
                             throw new Error(match);
                         }
-                        
-                        
-                       
+
+
+
                         results.push([
-                            parseInt(( curlyOpen > 0 ) ? PHP.Constants.T_CONSTANT_ENCAPSED_STRING : PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10), 
+                            parseInt(( curlyOpen > 0 ) ? PHP.Constants.T_CONSTANT_ENCAPSED_STRING : PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10),
                             match[ 0 ].replace(/\n/g,"\\n").replace(/\r/g,""),
                             line
                             ]);
-                           
+
                         line += match[ 0 ].split('\n').length - 1;
-                   
-                        result = result.substring( match[ 0 ].length );           
-                            
-                    }         
-                
+
+                        result = result.substring( match[ 0 ].length );
+
+                    }
+
                     if( result.match(/^{\$/) !== null ) {
                         results.push([
-                            parseInt(PHP.Constants.T_CURLY_OPEN, 10), 
+                            parseInt(PHP.Constants.T_CURLY_OPEN, 10),
                             "{",
                             line
                             ]);
@@ -4090,19 +4136,19 @@ PHP.Modules.prototype.var_dump = function() {
                         curlyOpen++;
                     }
                 }
-                
+
                 return undefined;
             //   console.log( result );
             } else {
                 result = result.replace(/\n/g,"\\n").replace(/\r/g,"");
             }
-         
+
             /*
             if (result.match(/\r\n/) !== null) {
                 var quote = result.substring(0, 1);
-                
+
                 result = '[' + result.split(/\r\n/).join( quote + "," + quote ) + '].join("\\n")';
-                
+
             }
              */
             return result;
@@ -4117,147 +4163,147 @@ PHP.Modules.prototype.var_dump = function() {
         re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\'\$]/
     }];
 
-    
+
     var results = [],
     line = 1,
     insidePHP = false,
     cancel = true;
-    
+
     if ( src === null ) {
         return results;
     }
-    
+
     if ( typeof src !== "string" ) {
         src = src.toString();
     }
-    
 
-   
+
+
     while (src.length > 0 && cancel === true) {
 
         if ( insidePHP === true ) {
-        
+
             if ( heredoc !== undefined ) {
                 // we are in a heredoc
-                
+
                 var regexp = new RegExp('([\\S\\s]*)(\\r\\n|\\n|\\r)(' + heredoc + ')(;|\\r\\n|\\n)',"i");
-                
-                
-                
+
+
+
                 var result = src.match( regexp );
                 if ( result !== null ) {
                     // contents
 
                     var tmp = result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$");
-                    
-                    
+
+
                     results.push([
-                        parseInt(PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10), 
+                        parseInt(PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10),
                         result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$") + "\n",
                         line
                         ]);
-                        
-                        
-                    // note the no - 1 for length as regexp include one line as well   
+
+
+                    // note the no - 1 for length as regexp include one line as well
                     line += result[ 1 ].split('\n').length;
-                     
+
                     // heredoc end tag
                     results.push([
-                        parseInt(PHP.Constants.T_END_HEREDOC, 10), 
+                        parseInt(PHP.Constants.T_END_HEREDOC, 10),
                         result[ 3 ],
                         line
                         ]);
-                        
-                    src = src.substring( result[1].length + result[2].length + result[3].length );   
+
+                    src = src.substring( result[1].length + result[2].length + result[3].length );
                     heredoc = undefined;
                 }
-                
+
                 if (result === null) {
                     throw Error("sup");
                 }
-               
-                
+
+
             } else {
                 cancel =  tokens.some(function( token ){
-        
+
                     var result = src.match( token.re );
-        
+
                     if ( result !== null ) {
                         if ( token.value !== -1) {
                             var resultString = result[ 0 ];
-                        
-                        
-                        
+
+
+
                             if (token.func !== undefined ) {
                                 resultString = token.func( resultString, token );
                             }
                             if (resultString !== undefined ) {
-                                
+
                                 results.push([
-                                    parseInt(token.value, 10), 
+                                    parseInt(token.value, 10),
                                     resultString,
                                     line
                                     ]);
                                 line += resultString.split('\n').length - 1;
                             }
-                        
+
                         } else {
                             // character token
                             results.push( result[ 0 ] );
                         }
-                
+
                         src = src.substring(result[ 0 ].length);
                         //  console.log(result);
                         return true;
                     }
                     return false;
-        
-        
+
+
                 });
             }
-        
+
         } else {
-   
+
             var result = /(\<\?php\s|\<\?|\<%)/i.exec( src );
             //console.log('sup', result, result.index);
             if ( result !== null ) {
                 if ( result.index > 0 ) {
                     var resultString = src.substring(0, result.index);
                     results.push ([
-                        parseInt(PHP.Constants.T_INLINE_HTML, 10), 
+                        parseInt(PHP.Constants.T_INLINE_HTML, 10),
                         resultString,
                         line
                         ]);
-                     
+
                     line += resultString.split('\n').length - 1;
-                     
+
                     src = src.substring( result.index );
                 }
 
                 insidePHP = true;
             } else {
-                
+
                 results.push ([
-                    parseInt(PHP.Constants.T_INLINE_HTML, 10), 
+                    parseInt(PHP.Constants.T_INLINE_HTML, 10),
                     src,
                     line
                     ]);
                 return results;
             }
-            
+
         //    src = src.substring(result[ 0 ].length);
-        
+
         }
 
-        
-        
+
+
     }
-    
-    
-    
+
+
+
     return results;
-        
-    
+
+
 
 };
 
@@ -7937,7 +7983,7 @@ PHP.Parser.prototype.yyn339 = function () {
 PHP.Parser.prototype.yyn340 = function ( attributes ) {
     this.yyval =  {
         Class: this.yyastk[this.stackPos-(3-1)],
-        name: this.yyastk[this.stackPos-(3-3)],
+        name: this.yyastk[this.stackPos-(3-3)].substring(1),
         type: "Node_Expr_StaticPropertyFetch",
         attributes: attributes
     };
@@ -8290,6 +8336,11 @@ PHP.VM = function( src, opts ) {
             Get: function( className, state ) {
                
                 if ( !/(self|parent)/i.test( className ) ) {
+                    
+                    if (classRegistry[ className.toLowerCase() ] === undefined ) {
+                         ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
+                    }
+                    
                     if (state !== undefined) {
                         return classRegistry[ className.toLowerCase() ].prototype;
                     } else {
@@ -8301,6 +8352,8 @@ PHP.VM = function( src, opts ) {
                 } else if ( /parent/i.test( className ) ) {
                     return Object.getPrototypeOf( state.prototype  ); 
                 //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
+                } else {
+                   
                 }
                 
                 
@@ -9168,6 +9221,7 @@ PHP.VM.VariableHandler = function( ENV ) {
             variables[ variableName ] = new PHP.VM.Variable();
             variables[ variableName ][ PHP.VM.Variable.prototype.DEFINED ] = variableName;
             variables[ variableName ].ENV = ENV;
+            variables[ variableName ][ PHP.VM.Variable.prototype.NAME ] = variableName;
            
         /*
             Object.defineProperty( variables, variableName, {
@@ -9610,6 +9664,8 @@ PHP.VM.Variable = function( arg ) {
 };
 
 PHP.VM.Variable.prototype = new PHP.VM.VariableProto();
+
+PHP.VM.Variable.prototype.NAME = "$Name";
 
 PHP.VM.Variable.prototype.DEFINED = "$Defined";
 

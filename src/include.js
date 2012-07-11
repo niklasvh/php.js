@@ -51,7 +51,8 @@ var files = {
         },
         functions: {
             call_user_func: "js",
-            function_exists: "js"
+            function_exists: "js",
+            register_shutdown_function: "js"
         },
         misc: {
             define: "js",
@@ -63,7 +64,8 @@ var files = {
             zend_logo_guid: "js"
         },
         options: {
-            ini_set: "js"
+            ini_set: "js",
+            set_time_limit: "js"
         },
         output: {
             constants: "js",

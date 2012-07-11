@@ -38,6 +38,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
             }
             
             if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
+                console.log(vals[ index ][ VARIABLE.NAME ]);
                 if (vals[ index ][ VARIABLE.DEFINED ] !== true ) {
                     // trigger setter
                     vals[ index ][ COMPILER.VARIABLE_VALUE ] = null;

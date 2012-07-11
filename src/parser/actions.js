@@ -2417,7 +2417,7 @@ PHP.Parser.prototype.yyn339 = function () {
 PHP.Parser.prototype.yyn340 = function ( attributes ) {
     this.yyval =  {
         Class: this.yyastk[this.stackPos-(3-1)],
-        name: this.yyastk[this.stackPos-(3-3)],
+        name: this.yyastk[this.stackPos-(3-3)].substring(1),
         type: "Node_Expr_StaticPropertyFetch",
         attributes: attributes
     };
