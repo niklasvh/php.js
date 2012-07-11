@@ -46,6 +46,9 @@ PHP.VM = function( src, opts ) {
             New: function() {
                 return classHandler.apply( null, arguments );
             },
+            Exists: function( name ) {
+                return (classRegistry[ name.toLowerCase() ] !== undefined);  
+            },
             ConstantGet: function( className, state, constantName ) {
                 
                 if ( !/(self|parent)/i.test( className ) && classRegistry[ className.toLowerCase() ] === undefined ) {

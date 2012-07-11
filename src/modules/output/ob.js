@@ -1,7 +1,7 @@
 /* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 10.7.2012 
-* @website http://hertzen.com
+ * @author Niklas von Hertzen <niklas at hertzen.com>
+ * @created 10.7.2012 
+ * @website http://hertzen.com
  */
 
 (function( MODULES ) {
@@ -125,24 +125,46 @@
         }
         
         if (output_callback !== undefined ) {
-            var fail = false;
+            var fail = false,
+            splitClassVar;
             if ( ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY ) ) {
                 this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): no array or string given", PHP.Constants.E_WARNING, true ); 
                 fail = true;
 
-            } else if (  output_callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
-            
-                var classVar = output_callback[ COMPILER.DIM_FETCH ]( this, new PHP.VM.Variable(0)),
-                methodVar = output_callback[ COMPILER.DIM_FETCH ]( this, new PHP.VM.Variable(1));
-            
-                if ( this.count( output_callback )[ COMPILER.VARIABLE_VALUE] !== 2 ) {
-                    this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): array must have exactly two members", PHP.Constants.E_WARNING, true ); 
-                    fail = true;
-
-                } else if (this.method_exists( classVar, methodVar )[ COMPILER.VARIABLE_VALUE ] === false ) {
-                    this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): class '" + classVar[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] + "' does not have a method '" + methodVar[ COMPILER.VARIABLE_VALUE ]  + "'", PHP.Constants.E_WARNING, true ); 
-                    fail = true;
+            } else if (  output_callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY || ( output_callback[ VARIABLE.TYPE ] === VARIABLE.STRING && (splitClassVar = output_callback[ COMPILER.VARIABLE_VALUE].split("::")).length > 1))  {
+                // method call
+                var classVar,
+                methodVar;
                     
+                if ( output_callback[ VARIABLE.TYPE ] === VARIABLE.STRING ) {
+                    classVar = new PHP.VM.Variable( splitClassVar[ 0 ] );
+                    methodVar = new PHP.VM.Variable( splitClassVar[ 1 ] );
+                } else { 
+                    classVar = output_callback[ COMPILER.DIM_FETCH ]( this, new PHP.VM.Variable(0));
+                    methodVar = output_callback[ COMPILER.DIM_FETCH ]( this, new PHP.VM.Variable(1));
+                    
+                    if ( this.count( output_callback )[ COMPILER.VARIABLE_VALUE] !== 2 ) {
+                        this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): array must have exactly two members", PHP.Constants.E_WARNING, true ); 
+                        fail = true;
+                    } 
+                    
+                }
+                
+                if ( !fail ) {
+                    if ( classVar[ VARIABLE.TYPE ] === VARIABLE.STRING && this.class_exists( classVar )[ COMPILER.VARIABLE_VALUE] === false ) { 
+                        this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): class '" + PHP.Utils.ClassName( classVar ) + "' not found", PHP.Constants.E_WARNING, true ); 
+                        fail = true;
+                    } else if (this.method_exists( classVar, methodVar )[ COMPILER.VARIABLE_VALUE ] === false ) {
+                        this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): class '" + PHP.Utils.ClassName( classVar ) + "' does not have a method '" + methodVar[ COMPILER.VARIABLE_VALUE ]  + "'", PHP.Constants.E_WARNING, true ); 
+                        fail = true;
+                    
+                    }
+                }
+            } else if ( output_callback[ VARIABLE.TYPE ] === VARIABLE.STRING ) {
+                // function call
+                if (this.function_exists(output_callback)[ COMPILER.VARIABLE_VALUE ] === false ) {
+                    this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): function '" + output_callback[ COMPILER.VARIABLE_VALUE ] + "' not found or invalid function name", PHP.Constants.E_WARNING, true ); 
+                    fail = true;
                 }
             }
             

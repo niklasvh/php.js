@@ -25,6 +25,7 @@ var files = {
             
         },
         classes: {
+            class_exists: "js",
             get_class: "js",
             method_exists: "js"
         },
@@ -49,7 +50,8 @@ var files = {
             fopen: "js"
         },
         functions: {
-            call_user_func: "js"  
+            call_user_func: "js",
+            function_exists: "js"
         },
         misc: {
             define: "js",

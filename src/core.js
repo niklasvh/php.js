@@ -37,6 +37,19 @@ PHP.Utils.$A = function( arr) {
     return Array.prototype.slice.call( arr ); 
 };
 
+PHP.Utils.ClassName = function( classVar ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    if ( classVar instanceof PHP.VM.Variable ) {
+        if ( classVar[ VARIABLE.TYPE ] === VARIABLE.STRING ) {
+            return classVar[ COMPILER.VARIABLE_VALUE ]
+        } else {
+            return classVar[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ];
+        } 
+    }
+    
+};
+
 PHP.Utils.Merge = function(obj1, obj2) {
     
     Object.keys( obj2 ).forEach(function( key ){
