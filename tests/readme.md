@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 273 out of 672 (40.6%)
+Passed 275 out of 672 (40.9%)
 
 Failed tests:
 
@@ -179,7 +179,6 @@ Failed tests:
  - tests/php/classes/static_properties_undeclared_isset.phpt
  - tests/php/classes/static_properties_undeclared_read.phpt
  - tests/php/classes/static_this.phpt
- - tests/php/classes/this.phpt
  - tests/php/classes/tostring_001.phpt
  - tests/php/classes/tostring_002.phpt
  - tests/php/classes/tostring_003.phpt
@@ -244,7 +243,6 @@ Failed tests:
  - tests/php/lang/bug24403.phpt
  - tests/php/lang/bug24436.phpt
  - tests/php/lang/bug24499.phpt
- - tests/php/lang/bug24573.phpt
  - tests/php/lang/bug24640.phpt
  - tests/php/lang/bug24652.phpt
  - tests/php/lang/bug24658.phpt

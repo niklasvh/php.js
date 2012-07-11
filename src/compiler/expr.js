@@ -6,6 +6,12 @@ PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
+
+    if ( action.variable.type === "Node_Expr_Variable" && action.variable.name === "this") {
+        this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;  
+    }
+    
+    
     var src = this.source( action.variable ) + "." + this.ASSIGN + "(" + this.source( action.expr ) + ")";
     /*
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {

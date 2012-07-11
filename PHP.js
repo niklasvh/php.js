@@ -12,7 +12,8 @@ var PHP = function( tokens, opts ) {
   
     //console.log( this.AST );
     //console.log( opts );
-    this.compiler = new PHP.Compiler( this.AST );
+    
+    this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
     this.vm = new PHP.VM( this.compiler.src, opts );
     
@@ -159,15 +160,21 @@ PHP.Halt = function( level ) {
     
     
 };
-PHP.Compiler = function( AST ) {
+PHP.Compiler = function( AST, file ) {
     
-    
+    this.file = file;
     this.src = "";
     this.FOREACH_COUNT = 0;
     AST.forEach( function( action ){
+        if ( this.FATAL_ERROR !== undefined ) {
+            return;
+        }
         this.src += this[ action.type ]( action ) + ";\n";     
     }, this );
 
+    if ( this.FATAL_ERROR !== undefined ) {
+        this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", PHP.Constants.E_ERROR);';
+    }
     
     this.INSIDE_METHOD = false;
 
@@ -188,6 +195,9 @@ PHP.Compiler.prototype.stmts = function( stmts ) {
     var src = "";
     
     stmts.forEach(function( stmt ){
+        if ( this.FATAL_ERROR !== undefined ) {
+            return;
+        }
         src += this.source( stmt );
         if ( /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
             // trigger POST_MOD
@@ -405,6 +415,12 @@ PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
+
+    if ( action.variable.type === "Node_Expr_Variable" && action.variable.name === "this") {
+        this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;  
+    }
+    
+    
     var src = this.source( action.variable ) + "." + this.ASSIGN + "(" + this.source( action.expr ) + ")";
     /*
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
@@ -1314,7 +1330,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
             }
             
             if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
-                console.log(vals[ index ][ VARIABLE.NAME ]);
+                
                 if (vals[ index ][ VARIABLE.DEFINED ] !== true ) {
                     // trigger setter
                     vals[ index ][ COMPILER.VARIABLE_VALUE ] = null;

@@ -12,7 +12,8 @@ var PHP = function( tokens, opts ) {
   
     //console.log( this.AST );
     //console.log( opts );
-    this.compiler = new PHP.Compiler( this.AST );
+    
+    this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
     this.vm = new PHP.VM( this.compiler.src, opts );
     

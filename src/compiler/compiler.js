@@ -1,13 +1,19 @@
 
-PHP.Compiler = function( AST ) {
+PHP.Compiler = function( AST, file ) {
     
-    
+    this.file = file;
     this.src = "";
     this.FOREACH_COUNT = 0;
     AST.forEach( function( action ){
+        if ( this.FATAL_ERROR !== undefined ) {
+            return;
+        }
         this.src += this[ action.type ]( action ) + ";\n";     
     }, this );
 
+    if ( this.FATAL_ERROR !== undefined ) {
+        this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", PHP.Constants.E_ERROR);';
+    }
     
     this.INSIDE_METHOD = false;
 
@@ -28,6 +34,9 @@ PHP.Compiler.prototype.stmts = function( stmts ) {
     var src = "";
     
     stmts.forEach(function( stmt ){
+        if ( this.FATAL_ERROR !== undefined ) {
+            return;
+        }
         src += this.source( stmt );
         if ( /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
             // trigger POST_MOD
