@@ -1349,7 +1349,14 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     }
                     
                 } else {
-                    if ( type !== args[ paramIndex ][ VARIABLE.TYPE ] ) {
+                 
+                    if ( args[ paramIndex ] !== undefined && type !== args[ paramIndex ][ VARIABLE.TYPE ] && type !== null ) {
+                        
+                        if ( type === VARIABLE.INT && args[ paramIndex ][ VARIABLE.TYPE ] === VARIABLE.BOOL  ) {
+                            return;
+                        }
+                        
+                        
                         if ( type !== VARIABLE.STRING || ( typeof args[ paramIndex ][ VARIABLE.CAST_STRING ] !== "function" )  ) {
                             this[ COMPILER.ERROR ]( name + "() expects parameter " + ( paramIndex + 1 ) + " to be " + typeStrings[ type ] + ", " + typeStrings[ args[ paramIndex ][ VARIABLE.TYPE ] ] + " given in " + 
                                 _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
@@ -2188,7 +2195,6 @@ PHP.Modules.prototype.flush = function() {
         var index = (this[ COMPILER.OUTPUT_BUFFERS ].length - 1) - minus,
         VARIABLE = PHP.VM.Variable.prototype;
         // trigger flush
-        console.log("yo");
         if ( handlers[ index ] !== DEFAULT &&  handlers[ index  ] !== undefined &&  this[ COMPILER.DISPLAY_HANDLER ] !== false) {
             recurring++;
             // check that we aren't ending up in any endless error loop
@@ -2242,10 +2248,8 @@ PHP.Modules.prototype.flush = function() {
     MODULES.$obflush = function() {
         var index = this[ COMPILER.OUTPUT_BUFFERS ].length - 1,
         VARIABLE = PHP.VM.Variable.prototype;
-        console.log("hmmmmmm");
         var content = this[ COMPILER.OUTPUT_BUFFERS ][ index ];
         this[ COMPILER.OUTPUT_BUFFERS ][ index ] = "";
-        console.log("wut");
         var value = this.$flush.call( this, content );
        
         this[ COMPILER.OUTPUT_BUFFERS ][ index ] = value;
@@ -2253,6 +2257,19 @@ PHP.Modules.prototype.flush = function() {
     }
     
     MODULES.ob_start = function( output_callback, chunk_size, erase ) {
+        
+        var FUNCTION_NAME = "ob_start",
+        VARIABLE = PHP.VM.Variable.prototype;
+        
+        if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, -3, [null, VARIABLE.INT, VARIABLE.INT ] ) ) {
+            return new PHP.VM.Variable( null );
+        }
+        
+        if ( output_callback !== undefined && ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY ) ) {
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): no array or string given", PHP.Constants.E_WARNING, true ); 
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to create buffer", PHP.Constants.E_CORE_NOTICE, true );
+            return new PHP.VM.Variable( false ); 
+        }
         
         var handler = DEFAULT, type;
         
@@ -8222,8 +8239,6 @@ PHP.VM = function( src, opts ) {
         
         console.log("Caught: ", e.message, e);
         console.log("Buffer: ", this.OUTPUT_BUFFERS.join(""));
-        
-        console.log('heh');
         
     }
        

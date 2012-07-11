@@ -123,8 +123,6 @@ PHP.VM = function( src, opts ) {
         console.log("Caught: ", e.message, e);
         console.log("Buffer: ", this.OUTPUT_BUFFERS.join(""));
         
-        console.log('heh');
-        
     }
        
 

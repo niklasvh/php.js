@@ -117,6 +117,19 @@
     
     MODULES.ob_start = function( output_callback, chunk_size, erase ) {
         
+        var FUNCTION_NAME = "ob_start",
+        VARIABLE = PHP.VM.Variable.prototype;
+        
+        if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, -3, [null, VARIABLE.INT, VARIABLE.INT ] ) ) {
+            return new PHP.VM.Variable( null );
+        }
+        
+        if ( output_callback !== undefined && ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY ) ) {
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): no array or string given", PHP.Constants.E_WARNING, true ); 
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to create buffer", PHP.Constants.E_CORE_NOTICE, true );
+            return new PHP.VM.Variable( false ); 
+        }
+        
         var handler = DEFAULT, type;
         
         if ( output_callback !== undefined ) {
