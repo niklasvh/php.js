@@ -3779,7 +3779,7 @@ PHP.Modules.prototype.var_dump = function() {
     },
     {
         value: PHP.Constants.T_CLOSE_TAG,
-        re: /^(\?\>|\%\>)/,
+        re: /^(\?\>|\%\>)\s?/,
         func: function( result ) {
             insidePHP = false;
             return result;
@@ -4210,9 +4210,6 @@ PHP.Modules.prototype.var_dump = function() {
                 if ( result !== null ) {
                     // contents
 
-                    var tmp = result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$");
-
-
                     results.push([
                         parseInt(PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10),
                         result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$") + "\n",
@@ -4301,7 +4298,7 @@ PHP.Modules.prototype.var_dump = function() {
 
                 results.push ([
                     parseInt(PHP.Constants.T_INLINE_HTML, 10),
-                    src,
+                    src.replace(/^\n/, ""),
                     line
                     ]);
                 return results;

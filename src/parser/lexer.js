@@ -159,7 +159,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_CLOSE_TAG,
-        re: /^(\?\>|\%\>)/,
+        re: /^(\?\>|\%\>)\s?/,
         func: function( result ) {
             insidePHP = false;
             return result;
@@ -590,9 +590,6 @@ PHP.Lexer = function( src ) {
                 if ( result !== null ) {
                     // contents
 
-                    var tmp = result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$");
-
-
                     results.push([
                         parseInt(PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10),
                         result[ 1 ].replace(/^\n/g,"").replace(/\\\$/g,"$") + "\n",
@@ -681,7 +678,7 @@ PHP.Lexer = function( src ) {
 
                 results.push ([
                     parseInt(PHP.Constants.T_INLINE_HTML, 10),
-                    src,
+                    src.replace(/^\n/, ""),
                     line
                     ]);
                 return results;

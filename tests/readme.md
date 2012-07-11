@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 258 out of 672 (38.4%)
+Passed 268 out of 672 (39.9%)
 
 Failed tests:
 
@@ -126,7 +126,6 @@ Failed tests:
  - tests/php/classes/destructor_inheritance.phpt
  - tests/php/classes/destructor_visibility_001.phpt
  - tests/php/classes/destructor_visibility_002.phpt
- - tests/php/classes/destructor_visibility_003.phpt
  - tests/php/classes/factory_and_singleton_001.phpt
  - tests/php/classes/factory_and_singleton_002.phpt
  - tests/php/classes/factory_and_singleton_003.phpt
@@ -200,10 +199,7 @@ Failed tests:
  - tests/php/classes/type_hinting_005d.phpt
  - tests/php/classes/visibility_005.phpt
  - tests/php/classes/__call_003.phpt
- - tests/php/classes/__call_006.phpt
- - tests/php/classes/__call_007.phpt
  - tests/php/classes/__set_data_corrupt.phpt
- - tests/php/classes/__set__get_004.phpt
  - tests/php/classes/__set__get_005.phpt
  - tests/php/func/004.phpt
  - tests/php/func/005.phpt
@@ -225,7 +221,6 @@ Failed tests:
  - tests/php/lang/035.phpt
  - tests/php/lang/038.phpt
  - tests/php/lang/039.phpt
- - tests/php/lang/040.phpt
  - tests/php/lang/045.phpt
  - tests/php/lang/bison1.phpt
  - tests/php/lang/bug17115.phpt
@@ -295,7 +290,6 @@ Failed tests:
  - tests/php/lang/catchable_error_001.phpt
  - tests/php/lang/catchable_error_002.phpt
  - tests/php/lang/comments2.phpt
- - tests/php/lang/compare_objects_basic1.phpt
  - tests/php/lang/compare_objects_basic2.phpt
  - tests/php/lang/each_binary_safety.phpt
  - tests/php/lang/empty_variation.phpt
@@ -328,14 +322,12 @@ Failed tests:
  - tests/php/lang/foreachLoopIteratorAggregate.001.phpt
  - tests/php/lang/foreachLoopIteratorAggregate.002.phpt
  - tests/php/lang/foreachLoopIteratorAggregate.003.phpt
- - tests/php/lang/foreachLoopIteratorAggregate.004.phpt
  - tests/php/lang/foreachLoopObjects.001.phpt
  - tests/php/lang/foreachLoopObjects.002.phpt
  - tests/php/lang/foreachLoopObjects.003.phpt
  - tests/php/lang/foreachLoopObjects.004.phpt
  - tests/php/lang/foreachLoopObjects.005.phpt
  - tests/php/lang/foreachLoopObjects.006.phpt
- - tests/php/lang/foreach_with_object_001.phpt
  - tests/php/lang/foreach_with_references_001.phpt
  - tests/php/lang/func_get_arg.001.phpt
  - tests/php/lang/func_get_arg.002.phpt
@@ -368,7 +360,6 @@ Failed tests:
  - tests/php/lang/returnByReference.008.phpt
  - tests/php/lang/returnByReference.009.phpt
  - tests/php/lang/script_tag.phpt
- - tests/php/lang/short_tags.001.phpt
  - tests/php/lang/short_tags.002.phpt
  - tests/php/lang/short_tags.003.phpt
  - tests/php/lang/short_tags.004.phpt
@@ -391,7 +382,6 @@ Failed tests:
  - tests/php/output/ob_start_basic_004.phpt
  - tests/php/output/ob_start_basic_005.phpt
  - tests/php/output/ob_start_basic_006.phpt
- - tests/php/output/ob_start_basic_unerasable_001.phpt
  - tests/php/output/ob_start_basic_unerasable_005.phpt
  - tests/php/output/ob_start_callbacks.phpt
  - tests/php/output/ob_start_error_005.phpt
