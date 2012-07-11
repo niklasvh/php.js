@@ -15,4 +15,4 @@ echo $c->y;
 
 --> Access non-visible static prop like instance prop:
 
-Fatal error: Cannot access protected property C::$y in %s on line 8
+Fatal error: Cannot access protected property C::$y in %s on line %d
