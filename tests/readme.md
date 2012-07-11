@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 256 out of 672 (38.1%)
+Passed 258 out of 672 (38.4%)
 
 Failed tests:
 
@@ -226,8 +226,6 @@ Failed tests:
  - tests/php/lang/038.phpt
  - tests/php/lang/039.phpt
  - tests/php/lang/040.phpt
- - tests/php/lang/041.phpt
- - tests/php/lang/042.phpt
  - tests/php/lang/045.phpt
  - tests/php/lang/bison1.phpt
  - tests/php/lang/bug17115.phpt

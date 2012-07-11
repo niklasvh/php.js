@@ -55,6 +55,11 @@ PHP.VM = function( src, opts ) {
                     if ( undefinedConstants[ className + "::" + constantName] === undefined ) {
                         var variable = new PHP.VM.Variable();
                         variable[ VARIABLE.CLASS_CONSTANT ] = true;
+                        variable[ VARIABLE.REGISTER_GETTER ] = function() {
+                            if (classRegistry[ className.toLowerCase() ] === undefined ) {
+                                ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
+                            } 
+                        }
                         variable[ VARIABLE.DEFINED ] = className + "::$" + constantName;
                         undefinedConstants[ className + "::" + constantName] = variable;
                     
@@ -73,7 +78,7 @@ PHP.VM = function( src, opts ) {
                 if ( !/(self|parent)/i.test( className ) ) {
                     
                     if (classRegistry[ className.toLowerCase() ] === undefined ) {
-                         ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
+                        ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
                     }
                     
                     if (state !== undefined) {
@@ -89,7 +94,7 @@ PHP.VM = function( src, opts ) {
                 //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
                 } else {
                    
-                }
+            }
                 
                 
                 

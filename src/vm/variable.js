@@ -293,6 +293,10 @@ PHP.VM.Variable = function( arg ) {
                 $this = this[this.REFERRING];
             }
             
+            if ( typeof this[this.REGISTER_GETTER ] === "function" ) {
+                this[ this.REGISTER_GETTER ]();
+            }
+            
             if ( $this[ this.DEFINED ] !== true && $this[ COMPILER.SUPPRESS ] !== true ) {
                 
                 if ( $this[ this.CONSTANT ] === true ) {
@@ -323,7 +327,7 @@ PHP.VM.Variable = function( arg ) {
                
             }
             
-            
+
             return returning;
         },  
         set : setValue
@@ -441,10 +445,10 @@ PHP.VM.Variable = function( arg ) {
                     
                     
                     returning[ this.REGISTER_SETTER ] = function( val ) {
-                      arrThis[ this.DEFINED ] = true;
-                      if (saveFunc !== undefined ) {
-                          saveFunc( val );
-                      }
+                        arrThis[ this.DEFINED ] = true;
+                        if (saveFunc !== undefined ) {
+                            saveFunc( val );
+                        }
                     };
                     returning[ this.DEFINED ] = this[ this.DEFINED ];
                 }
@@ -495,3 +499,5 @@ PHP.VM.Variable.prototype.IS_REF = "$IsRef";
 PHP.VM.Variable.prototype.REFERRING = "$Referring";
 
 PHP.VM.Variable.prototype.REGISTER_SETTER = "$Setter";
+
+PHP.VM.Variable.prototype.REGISTER_GETTER = "$Getter";

@@ -512,7 +512,7 @@ PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
 
     action.assignList.forEach(function( item ){
         src += ", " + this.source(item) ;
-        }, this);
+    }, this);
 
     src += " )";
 
@@ -720,14 +720,22 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 
+    var classPart;
+    
+    if (action.Class.type === "Node_Name") {
+        classPart = '"' + this.source(action.Class) +'"';
+    } else {
+        classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
+    }
 
-    return this.CTX + this.CLASS_CONSTANT_GET + '("' + this.source( action.Class ) + '", this, "' + action.name  + '" )';
+
+    return this.CTX + this.CLASS_CONSTANT_GET + '(' + classPart + ', this, "' + action.name  + '" )';
 
 
 };
 
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
-console.log( action );
+
     var src = "";
     
     var classPart,
@@ -764,11 +772,19 @@ console.log( action );
 
 PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
 
-    var src = "";
-    if (/^(parent|self)$/i.test( action.Class.parts )) {
-        src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name + '"';
+    var src = "",
+    classPart;
+    
+    if (action.Class.type === "Node_Name") {
+        classPart = '"' + this.source(action.Class) +'"';
     } else {
-        src += this.CTX + this.CLASS_GET + '("' + this.source( action.Class ) + '", this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', "' + action.Class.parts +'", "' + action.name + '"';
+        classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
+    }
+    
+    if (/^(parent|self)$/i.test( action.Class.parts )) {
+        src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', "' + action.name + '"';
+    } else {
+        src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', "' + action.name + '"';
     }
 
     src += ")";
@@ -8320,6 +8336,11 @@ PHP.VM = function( src, opts ) {
                     if ( undefinedConstants[ className + "::" + constantName] === undefined ) {
                         var variable = new PHP.VM.Variable();
                         variable[ VARIABLE.CLASS_CONSTANT ] = true;
+                        variable[ VARIABLE.REGISTER_GETTER ] = function() {
+                            if (classRegistry[ className.toLowerCase() ] === undefined ) {
+                                ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
+                            } 
+                        }
                         variable[ VARIABLE.DEFINED ] = className + "::$" + constantName;
                         undefinedConstants[ className + "::" + constantName] = variable;
                     
@@ -8338,7 +8359,7 @@ PHP.VM = function( src, opts ) {
                 if ( !/(self|parent)/i.test( className ) ) {
                     
                     if (classRegistry[ className.toLowerCase() ] === undefined ) {
-                         ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
+                        ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
                     }
                     
                     if (state !== undefined) {
@@ -8354,7 +8375,7 @@ PHP.VM = function( src, opts ) {
                 //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
                 } else {
                    
-                }
+            }
                 
                 
                 
@@ -9494,6 +9515,10 @@ PHP.VM.Variable = function( arg ) {
                 $this = this[this.REFERRING];
             }
             
+            if ( typeof this[this.REGISTER_GETTER ] === "function" ) {
+                this[ this.REGISTER_GETTER ]();
+            }
+            
             if ( $this[ this.DEFINED ] !== true && $this[ COMPILER.SUPPRESS ] !== true ) {
                 
                 if ( $this[ this.CONSTANT ] === true ) {
@@ -9524,7 +9549,7 @@ PHP.VM.Variable = function( arg ) {
                
             }
             
-            
+
             return returning;
         },  
         set : setValue
@@ -9642,10 +9667,10 @@ PHP.VM.Variable = function( arg ) {
                     
                     
                     returning[ this.REGISTER_SETTER ] = function( val ) {
-                      arrThis[ this.DEFINED ] = true;
-                      if (saveFunc !== undefined ) {
-                          saveFunc( val );
-                      }
+                        arrThis[ this.DEFINED ] = true;
+                        if (saveFunc !== undefined ) {
+                            saveFunc( val );
+                        }
                     };
                     returning[ this.DEFINED ] = this[ this.DEFINED ];
                 }
@@ -9696,6 +9721,8 @@ PHP.VM.Variable.prototype.IS_REF = "$IsRef";
 PHP.VM.Variable.prototype.REFERRING = "$Referring";
 
 PHP.VM.Variable.prototype.REGISTER_SETTER = "$Setter";
+
+PHP.VM.Variable.prototype.REGISTER_GETTER = "$Getter";
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 27.6.2012 
