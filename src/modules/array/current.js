@@ -6,9 +6,9 @@
 
 
 PHP.Modules.prototype.current = function( array ) {
-      var COMPILER = PHP.Compiler.prototype,
+    var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
-        ARRAY = PHP.VM.Array.prototype;
+    ARRAY = PHP.VM.Array.prototype;
     
 
         
@@ -19,7 +19,7 @@ PHP.Modules.prototype.current = function( array ) {
         if ( pointer[ COMPILER.VARIABLE_VALUE ] >= values.length ) {
             return new PHP.VM.Variable( false );
         } else {
-            return new PHP.VM.Variable( pointer[ COMPILER.VARIABLE_VALUE ] );
+            return new PHP.VM.Variable( values [ pointer[ COMPILER.VARIABLE_VALUE ] ] );
         }
         
        

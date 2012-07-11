@@ -1627,9 +1627,9 @@ PHP.Modules.prototype.count = function( variable ) {
 
 
 PHP.Modules.prototype.current = function( array ) {
-      var COMPILER = PHP.Compiler.prototype,
+    var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
-        ARRAY = PHP.VM.Array.prototype;
+    ARRAY = PHP.VM.Array.prototype;
     
 
         
@@ -1640,7 +1640,7 @@ PHP.Modules.prototype.current = function( array ) {
         if ( pointer[ COMPILER.VARIABLE_VALUE ] >= values.length ) {
             return new PHP.VM.Variable( false );
         } else {
-            return new PHP.VM.Variable( pointer[ COMPILER.VARIABLE_VALUE ] );
+            return new PHP.VM.Variable( values [ pointer[ COMPILER.VARIABLE_VALUE ] ] );
         }
         
        
@@ -1658,17 +1658,24 @@ PHP.Modules.prototype.current = function( array ) {
 PHP.Modules.prototype.each = function( array ) {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
-    ARRAY = PHP.VM.Array.prototype;
-    
-
+    ARRAY = PHP.VM.Array.prototype,
+    item = PHP.VM.Array.arrayItem;
         
     if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
-        var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
+       
+       var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
         values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
         
-        pointer[ COMPILER.VARIABLE_VALUE ] = 0;
+        if ( pointer[ COMPILER.VARIABLE_VALUE ] >= values.length ) {
+            return new PHP.VM.Variable( false );
+        }
+       
+        var value = this.current( array ),
+        key = this.key( array );
         
-        return new PHP.VM.Variable(false);
+        this.next( array );
+        
+        return this.array( [ item( 0, key ), item( 1, value ) ] );
         
        
     } 
@@ -1692,6 +1699,35 @@ PHP.Modules.prototype.is_array = function( variable ) {
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 12.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.key = function( array ) {
+      var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+        ARRAY = PHP.VM.Array.prototype;
+    
+
+        
+    if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+        var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
+        keys = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ];
+        
+        if ( pointer[ COMPILER.VARIABLE_VALUE ] >= keys.length ) {
+            return new PHP.VM.Variable( false );
+        } else {
+            return new PHP.VM.Variable( keys[ pointer[ COMPILER.VARIABLE_VALUE ] ] );
+        }
+        
+       
+    } 
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
  */
@@ -1703,22 +1739,61 @@ PHP.Modules.prototype.list = function( array ) {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype;
+        
+    if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+        var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
+        values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
+       
+        Array.prototype.slice.call( arguments, 1 ).forEach(function( variable, index ){
+            variable[ COMPILER.VARIABLE_VALUE ] = values[ index ][ COMPILER.VARIABLE_VALUE ];
+        });
+        
+        
+        return array;
+        
+        
+       
+    } 
+    
+    // fill with null
+    Array.prototype.slice.call( arguments, 1 ).forEach(function( variable ){
+        variable[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+    });
+    
+    return new PHP.VM.Variable(false);
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 12.7.2012 
+* @website http://hertzen.com
+ */
+
+PHP.Modules.prototype.next = function( array ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    ARRAY = PHP.VM.Array.prototype;
     
 
         
     if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
         var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
         values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
+        pointer[ COMPILER.VARIABLE_VALUE ]++; // advance pointer
         
-        pointer[ COMPILER.VARIABLE_VALUE ] = 0;
-        
-        return new PHP.VM.Variable(false);
+        if ( pointer[ COMPILER.VARIABLE_VALUE ] >= values.length ) {
+            return new PHP.VM.Variable( false );
+        } else {
+
+            return new PHP.VM.Variable( values [ pointer[ COMPILER.VARIABLE_VALUE ] ] );
+        }
         
        
     } 
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
@@ -1816,7 +1891,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
             }
             
             iterator[ COMPILER.METHOD_CALL ]( this, "rewind" );
-            console.log("hey");
+
             return {
                 expr: expr,  
                 Class:iterator
@@ -9178,10 +9253,24 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     Object.defineProperties( obj, props );
                           
                 } else {
-                    var variable = new PHP.VM.Variable();
-                    variable[ VARIABLE.PROPERTY ] = true;
-                    variable[ VARIABLE.DEFINED ] = className + "::$" + propertyName;
-                    return variable;
+                    
+                    if ( this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] === undefined ) {
+                        var variable = new PHP.VM.Variable();
+                        variable[ VARIABLE.PROPERTY ] = true;
+                        variable[ VARIABLE.DEFINED ] = className + "::$" + propertyName;
+                    
+                        this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] = variable;
+                    
+                        variable[ VARIABLE.REGISTER_SETTER ] = function() {
+                            this[ propertyPrefix + propertyName ] = variable;
+                        }
+                    
+                    
+                    
+                        return variable;
+                    } else {
+                        return this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ];
+                    }
                     
                 }
                 return obj;
@@ -9200,7 +9289,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
                     }
                 }
-                
                 
                 return this[ propertyPrefix + propertyName ];
             }
@@ -9249,6 +9337,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 PHP.VM.ClassPrototype = function() {};
 
 PHP.VM.Class.METHOD = "_";
+
+PHP.VM.Class.CLASS_UNDEFINED_PROPERTY = "_£$";
 
 PHP.VM.Class.CLASS_PROPERTY = "_£";
 
@@ -9912,8 +10002,9 @@ PHP.VM.Array = function( ENV ) {
 
     PHP.VM.Array.arrayItem = function( key, value ) {
         var obj = {};
-        obj[ COMPILER.ARRAY_KEY ] = new PHP.VM.Variable( key );
-        obj[ COMPILER.ARRAY_VALUE ] = new PHP.VM.Variable( value );
+        
+        obj[ COMPILER.ARRAY_KEY ] = ( key instanceof PHP.VM.Variable ) ? key : new PHP.VM.Variable( key );
+        obj[ COMPILER.ARRAY_VALUE ] = ( value instanceof PHP.VM.Variable ) ? value : new PHP.VM.Variable( value );
         return obj;
     };
 

@@ -20,7 +20,9 @@ var files = {
             current: "js",
             each: "js",
             is_array: "js",
+            key: "js",
             list: "js",
+            next: "js",
             reset: "js"
             
         },

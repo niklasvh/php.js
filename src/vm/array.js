@@ -137,8 +137,9 @@ PHP.VM.Array = function( ENV ) {
 
     PHP.VM.Array.arrayItem = function( key, value ) {
         var obj = {};
-        obj[ COMPILER.ARRAY_KEY ] = new PHP.VM.Variable( key );
-        obj[ COMPILER.ARRAY_VALUE ] = new PHP.VM.Variable( value );
+        
+        obj[ COMPILER.ARRAY_KEY ] = ( key instanceof PHP.VM.Variable ) ? key : new PHP.VM.Variable( key );
+        obj[ COMPILER.ARRAY_VALUE ] = ( value instanceof PHP.VM.Variable ) ? value : new PHP.VM.Variable( value );
         return obj;
     };
 

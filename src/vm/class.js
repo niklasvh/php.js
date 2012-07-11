@@ -703,10 +703,24 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     Object.defineProperties( obj, props );
                           
                 } else {
-                    var variable = new PHP.VM.Variable();
-                    variable[ VARIABLE.PROPERTY ] = true;
-                    variable[ VARIABLE.DEFINED ] = className + "::$" + propertyName;
-                    return variable;
+                    
+                    if ( this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] === undefined ) {
+                        var variable = new PHP.VM.Variable();
+                        variable[ VARIABLE.PROPERTY ] = true;
+                        variable[ VARIABLE.DEFINED ] = className + "::$" + propertyName;
+                    
+                        this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] = variable;
+                    
+                        variable[ VARIABLE.REGISTER_SETTER ] = function() {
+                            this[ propertyPrefix + propertyName ] = variable;
+                        }
+                    
+                    
+                    
+                        return variable;
+                    } else {
+                        return this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ];
+                    }
                     
                 }
                 return obj;
@@ -725,7 +739,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
                     }
                 }
-                
                 
                 return this[ propertyPrefix + propertyName ];
             }
@@ -774,6 +787,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 PHP.VM.ClassPrototype = function() {};
 
 PHP.VM.Class.METHOD = "_";
+
+PHP.VM.Class.CLASS_UNDEFINED_PROPERTY = "_£$";
 
 PHP.VM.Class.CLASS_PROPERTY = "_£";
 
