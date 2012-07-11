@@ -11,7 +11,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     handler,
     staticVars = {}; // static variable storage
     
-    
+   
     // initializer
     args.push( function( args, values ) {
         handler = PHP.VM.VariableHandler( ENV );
@@ -48,7 +48,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
                 arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
             }
         });
-        
+         
         return handler;
     } );
     
@@ -71,7 +71,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     
     args.push( staticHandler );
     
-    
+   
     return args;
     
 };
@@ -204,7 +204,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             file: _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ]
         };
         lineAppend = ( lineAppend === true ) ? " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1" : ""; 
-       
+
         if ( suppress === false ) {
             
             switch ( level ) {

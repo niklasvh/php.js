@@ -52,9 +52,9 @@ function runTest ( file, complete ) {
         if (err) throw err;
         var test = parsePHPT( data );
         
-         var content = fs.readFileSync( 'PHP.js', 'utf8') ;
+        var content = fs.readFileSync( 'PHP.js', 'utf8') ;
 
-            eval( content );
+        eval( content + "GLOBAL.PHP = PHP; " );
         
         var engine = {},
         opts = {

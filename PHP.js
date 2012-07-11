@@ -1039,7 +1039,7 @@ PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_InlineHTML = function( action ) {
-    var src = this.CTX + this.OUTPUT_BUFFERS + '[' + this.CTX +this[ this.OUTPUT_BUFFERS ] + '.length - 1] += "' + action.value.replace(/[\\"]/g, '\\$&').replace(/\n/g,"\\n").replace(/\r/g,"") + '"';
+    var src = this.CTX + '$ob("' + action.value.replace(/[\\"]/g, '\\$&').replace(/\n/g,"\\n").replace(/\r/g,"") + '")';
  
     return src;
 };
@@ -1242,7 +1242,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     handler,
     staticVars = {}; // static variable storage
     
-    
+   
     // initializer
     args.push( function( args, values ) {
         handler = PHP.VM.VariableHandler( ENV );
@@ -1279,7 +1279,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
                 arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
             }
         });
-        
+         
         return handler;
     } );
     
@@ -1302,7 +1302,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     
     args.push( staticHandler );
     
-    
+   
     return args;
     
 };
@@ -1435,7 +1435,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             file: _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ]
         };
         lineAppend = ( lineAppend === true ) ? " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1" : ""; 
-       
+
         if ( suppress === false ) {
             
             switch ( level ) {
@@ -2146,6 +2146,7 @@ PHP.Modules.prototype.flush = function() {
     CONSTANTS = PHP.Constants,
     flags = [],
     types = [],
+    erasable = [],
     recurring = 0,
     NO_BUFFER_MSG = "(): failed to delete buffer. No buffer to delete",
     handlers = [];
@@ -2154,12 +2155,18 @@ PHP.Modules.prototype.flush = function() {
         handlers.pop();
         flags.pop();
         types.pop();
+        erasable.pop();
     }
+    
+    MODULES.ob_gzhandler = function( str ) {
+        return str; 
+    };
     
     MODULES.$obreset = function() {
         flags = [];
         types = [];
         handlers = [];
+        erasable = [];
         recurring = 0;
     };
     
@@ -2181,14 +2188,16 @@ PHP.Modules.prototype.flush = function() {
         var index = (this[ COMPILER.OUTPUT_BUFFERS ].length - 1) - minus,
         VARIABLE = PHP.VM.Variable.prototype;
         // trigger flush
-        console.log( str, handlers, index, handlers[0] );
+        console.log("yo");
         if ( handlers[ index ] !== DEFAULT &&  handlers[ index  ] !== undefined &&  this[ COMPILER.DISPLAY_HANDLER ] !== false) {
             recurring++;
             // check that we aren't ending up in any endless error loop
+       
             if ( recurring <= 10 ) {
                 this[ COMPILER.DISPLAY_HANDLER ] = true;
-                 
-                var result = this[ handlers[ index ] ]( new PHP.VM.Variable( str ), new PHP.VM.Variable( types[ index ] ) );
+
+                var result = this[ handlers[ index ] ].call( this, new PHP.VM.Variable( str ), new PHP.VM.Variable( types[ index ] ) );
+                         
                 recurring = 0;
                 this[ COMPILER.DISPLAY_HANDLER ] = undefined;
                 if ( result[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
@@ -2205,15 +2214,40 @@ PHP.Modules.prototype.flush = function() {
         }
     };
     
+    MODULES.ob_clean = function() {
+
+    
+        if ( !this[ COMPILER.SIGNATURE ]( arguments, "ob_clean", 0, [ ] ) ) {
+            return new PHP.VM.Variable( null );
+        }
+    
+        var index = erasable.length - 1;
+
+        if ( erasable[ index ] === false ) {
+            this[ COMPILER.ERROR ]("ob_clean(): failed to delete buffer of "  + handlers[ index ] + " (0)", PHP.Constants.E_CORE_NOTICE, true );
+            return new PHP.VM.Variable( false ); 
+        }
+    
+        if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
+            this[ COMPILER.OUTPUT_BUFFERS ].pop();
+            this[ COMPILER.OUTPUT_BUFFERS ].push("");
+            return new PHP.VM.Variable( true );
+        } else {
+            this[ COMPILER.ERROR ]("ob_clean(): failed to delete buffer. No buffer to delete", PHP.Constants.E_CORE_NOTICE, true );
+            return new PHP.VM.Variable( false );
+        }
+    };
+
+    
     MODULES.$obflush = function() {
         var index = this[ COMPILER.OUTPUT_BUFFERS ].length - 1,
         VARIABLE = PHP.VM.Variable.prototype;
-        
+        console.log("hmmmmmm");
         var content = this[ COMPILER.OUTPUT_BUFFERS ][ index ];
         this[ COMPILER.OUTPUT_BUFFERS ][ index ] = "";
-        
-        var value = this.$flush( content );
-        
+        console.log("wut");
+        var value = this.$flush.call( this, content );
+       
         this[ COMPILER.OUTPUT_BUFFERS ][ index ] = value;
         
     }
@@ -2234,6 +2268,12 @@ PHP.Modules.prototype.flush = function() {
         flags.push( CONSTANTS.PHP_OUTPUT_HANDLER_STDFLAGS | type );
         handlers.push( handler );
         
+        if ( erase === undefined || erase[ COMPILER.VARIABLE_VALUE ] === true ) {
+            erasable.push( true );
+        } else {
+            erasable.push( false );
+        }
+        
         return new PHP.VM.Variable( true );
     };
     
@@ -2244,13 +2284,19 @@ PHP.Modules.prototype.flush = function() {
         if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
             return new PHP.VM.Variable( null );
         }
+        
+        var index = erasable.length - 1;
+        if ( erasable[ index ] === false ) {
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to discard buffer of "  + handlers[ index ] + " (0)", PHP.Constants.E_CORE_NOTICE, true );
+            return new PHP.VM.Variable( false ); 
+        }
     
         if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
             this[ OUTPUT_BUFFERS ].pop();
             pop();
             return new PHP.VM.Variable( true );
         } else {
-            this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + NO_BUFFER_MSG, PHP.Constants.E_CORE_NOTICE, true );
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + NO_BUFFER_MSG, PHP.Constants.E_CORE_NOTICE, true );
             return new PHP.VM.Variable( false );
         }
         
@@ -2266,6 +2312,12 @@ PHP.Modules.prototype.flush = function() {
         if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, FUNCTION_NAME, 0, [ ] ) ) {
             return new PHP.VM.Variable( null );
         }
+        
+        var index = erasable.length - 1;
+        if ( erasable[ index ] === false ) {
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to send buffer of "  + handlers[ index ] + " (0)", PHP.Constants.E_CORE_NOTICE, true );
+            return new PHP.VM.Variable( false ); 
+        }
     
         if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
             var flush = this[ OUTPUT_BUFFERS ].pop();
@@ -2274,21 +2326,36 @@ PHP.Modules.prototype.flush = function() {
 
             return new PHP.VM.Variable( true );
         } else {
-            this.ENV[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to delete and flush buffer. No buffer to delete or flush", PHP.Constants.E_CORE_NOTICE, true );
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to delete and flush buffer. No buffer to delete or flush", PHP.Constants.E_CORE_NOTICE, true );
             return new PHP.VM.Variable( false );
         }
 
     };
 
     MODULES.ob_get_flush = function() {
+        var FUNCTION_NAME = "ob_get_flush";
         
         if (this[ COMPILER.DISPLAY_HANDLER ] === true) {
             this[ COMPILER.ERROR ]( "ob_get_flush(): Cannot use output buffering in output buffering display handlers", PHP.Constants.E_ERROR, true );  
         }
         
-        var flush = this[ OUTPUT_BUFFERS ].pop();
-        this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1 ] += this.$flush( flush, 1 );
-        pop();
+        //  var flush = this[ OUTPUT_BUFFERS ].pop();
+        var index = erasable.length - 1;
+        var flush =  this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1];
+            
+        if ( erasable[ index ] === false ) {
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to send buffer of "  + handlers[ index ] + " (0)", PHP.Constants.E_CORE_NOTICE, true );
+                
+            this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to delete buffer of "  + handlers[ index ] + " (0)", PHP.Constants.E_CORE_NOTICE, true );
+        } else {
+            this[ OUTPUT_BUFFERS ].pop();
+            this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1 ] += this.$flush( flush, 1 );
+            
+            pop();
+        }
+        
+        
+
         return new PHP.VM.Variable( flush );
     };
 
@@ -2301,9 +2368,23 @@ PHP.Modules.prototype.flush = function() {
             return new PHP.VM.Variable( null );
         }
         
-        if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
-            pop();
-            return new PHP.VM.Variable( this[ OUTPUT_BUFFERS ].pop() );
+                
+        var index = erasable.length - 1;
+
+       
+        if ( this[ OUTPUT_BUFFERS ].length > 1 ) {
+            
+            var flush =  this[ OUTPUT_BUFFERS ][ this[ OUTPUT_BUFFERS ].length - 1];
+            
+            if ( erasable[ index ] === false ) {
+                this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to discard buffer of "  + handlers[ index ] + " (0)", PHP.Constants.E_CORE_NOTICE, true );
+                
+                this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to delete buffer of "  + handlers[ index ] + " (0)", PHP.Constants.E_CORE_NOTICE, true );
+            } else {
+                this[ OUTPUT_BUFFERS ].pop();
+                pop();
+            }
+            return new PHP.VM.Variable( flush );
         } else {
             return new PHP.VM.Variable( false );
         }
@@ -2362,29 +2443,6 @@ PHP.Modules.prototype.flush = function() {
     };
     
 })( PHP.Modules.prototype );
-/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 10.7.2012 
-* @website http://hertzen.com
- */
-
-
-PHP.Modules.prototype.ob_clean = function() {
-    var COMPILER = PHP.Compiler.prototype;
-    
-    if ( !this[ PHP.Compiler.prototype.SIGNATURE ]( arguments, "ob_clean", 0, [ ] ) ) {
-        return new PHP.VM.Variable( null );
-    }
-    
-    if ( this[ COMPILER.OUTPUT_BUFFERS ].length > 1 ) {
-        this[ COMPILER.OUTPUT_BUFFERS ].pop();
-        this[ COMPILER.OUTPUT_BUFFERS ].push("");
-        return new PHP.VM.Variable( true );
-    } else {
-         this.ENV[ COMPILER.ERROR ]("ob_clean(): failed to delete buffer. No buffer to delete", PHP.Constants.E_CORE_NOTICE, true );
-        return new PHP.VM.Variable( false );
-    }
-};
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
@@ -8158,12 +8216,17 @@ PHP.VM = function( src, opts ) {
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );
         exec.call(this, $$, $, ENV);
-        this.$obflush();  
+        this.$obflush.call( ENV );  
+        
     } catch( e ) {
+        
         console.log("Caught: ", e.message, e);
         console.log("Buffer: ", this.OUTPUT_BUFFERS.join(""));
-    }
         
+        console.log('heh');
+        
+    }
+       
 
     this.OUTPUT_BUFFER = this.OUTPUT_BUFFERS.join("");
 };

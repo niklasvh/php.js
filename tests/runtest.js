@@ -87,18 +87,17 @@ function runTest ( file ) {
         var content = fs.readFileSync( 'PHP.js', 'utf8') ;
 
 
-    //    var php = require('F:/Websites/php.js/PHP.js');
-   //     engine = new php.PHP( php.PHP.Lexer(test.FILE), opts );
-   eval(content);
-     engine = new PHP( PHP.Lexer(test.FILE), opts );
-   //     var exec = new Function( "test", "opts", content + "return new PHP( PHP.Lexer(test.FILE), opts );" );
-    //    engine = exec.call({}, test, opts);
+        //    var php = require('F:/Websites/php.js/PHP.js');
+        //     engine = new php.PHP( php.PHP.Lexer(test.FILE), opts );
+        eval(content + "GLOBAL.PHP = PHP; ");
+        engine = new PHP( PHP.Lexer(test.FILE), opts );
+        //     var exec = new Function( "test", "opts", content + "return new PHP( PHP.Lexer(test.FILE), opts );" );
+        //    engine = exec.call({}, test, opts);
             
            
      
         
 
-        
               
         var expect = ((test.EXPECT === undefined) ? test.EXPECTF : test.EXPECT ).trim(),
         output = engine.vm.OUTPUT_BUFFER.replace(/\n/g, "\r\n").trim(),
@@ -115,7 +114,7 @@ function runTest ( file ) {
             expectResult = re.test( output );
                         
         } else {
-         //   diff( expect, output );
+            //   diff( expect, output );
             console.log( output );
             expectResult = (expect === output);
         }
@@ -145,4 +144,4 @@ function runTest ( file ) {
 
 
 
-runTest("tests/php/lang/foreachLoopIterator.002.phpt");
+runTest("tests/php/output/ob_start_basic_unerasable_003.phpt");

@@ -66,7 +66,6 @@ var files = {
             constants: "js",
             flush: "js",
             ob: "js",
-            ob_clean: "js",
             ob_flush: "js",
             ob_get_contents: "js",
             ob_get_length: "js",
