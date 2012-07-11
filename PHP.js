@@ -457,7 +457,7 @@ PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
 
-
+    var src = this.source( action.variable ) + "." + PHP.VM.Variable.prototype.REF + "(" + this.source( action.refVar ) + ")";
     console.log( action );
     return src;
 };

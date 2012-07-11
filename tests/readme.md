@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 268 out of 672 (39.9%)
+Passed 269 out of 672 (40%)
 
 Failed tests:
 
@@ -122,7 +122,6 @@ Failed tests:
  - tests/php/classes/destructor_and_echo.phpt
  - tests/php/classes/destructor_and_exceptions.phpt
  - tests/php/classes/destructor_and_globals.phpt
- - tests/php/classes/destructor_and_references.phpt
  - tests/php/classes/destructor_inheritance.phpt
  - tests/php/classes/destructor_visibility_001.phpt
  - tests/php/classes/destructor_visibility_002.phpt
