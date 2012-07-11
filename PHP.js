@@ -1821,6 +1821,28 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
                 expr: expr,  
                 Class:iterator
             };
+        } else {
+            // public members in object
+            
+            var classProperty = PHP.VM.Class.PROPERTY;
+            
+            return {
+                expr: expr,
+                pointer: 0,
+                keys:  (function( keys ) {
+                    var items = [];
+                    
+                    keys.forEach( function( key ){
+                        if ( key.substring(0, classProperty.length ) === classProperty) {
+                            items.push( key.substring( classProperty.length ) );
+                        } 
+                    });
+                    
+                    return items;
+                })(Object.keys ( objectValue ))
+                
+            };
+            
         }
     }
    
@@ -1902,6 +1924,17 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
 
             return result;
         
+        } else {
+            // loop through public members
+            
+            value[ COMPILER.VARIABLE_VALUE ] = objectValue[ PHP.VM.Class.PROPERTY + iterator.keys[ iterator.pointer ]];
+            
+            if ( key instanceof PHP.VM.Variable ) {
+                key[ COMPILER.VARIABLE_VALUE ] =  iterator.keys[ iterator.pointer ];
+            }
+            
+            return ( iterator.pointer++ < iterator.keys.length);
+           
         }
         
        
