@@ -204,11 +204,11 @@ PHP.Compiler.prototype.Node_Expr_SmallerOrEqual = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_PreInc = function( action ) {
-    return this.source( action.variable ) + "." + this.PRE_INC;
+    return this.source( action.variable ) + "." + this.PRE_INC + "()";
 };
 
 PHP.Compiler.prototype.Node_Expr_PreDec = function( action ) {
-    return this.source( action.variable ) + "." + this.PRE_DEC;
+    return this.source( action.variable ) + "." + this.PRE_DEC + "()";
 };
 
 PHP.Compiler.prototype.Node_Expr_PostInc = function( action ) {
@@ -216,7 +216,7 @@ PHP.Compiler.prototype.Node_Expr_PostInc = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
-    return this.source( action.variable ) + "." + this.POST_DEC;
+    return this.source( action.variable ) + "." + this.POST_DEC + "()";
 };
 
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {

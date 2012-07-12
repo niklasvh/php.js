@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 311 out of 672 (46.3%)
+Passed 313 out of 672 (46.6%)
 
 Failed tests:
 
@@ -112,8 +112,6 @@ Failed tests:
  - tests/php/classes/final_ctor1.phpt
  - tests/php/classes/final_ctor2.phpt
  - tests/php/classes/implicit_instantiation_001.phpt
- - tests/php/classes/incdec_property_003.phpt
- - tests/php/classes/incdec_property_004.phpt
  - tests/php/classes/inheritance_003.phpt
  - tests/php/classes/inheritance_004.phpt
  - tests/php/classes/inheritance_006.phpt

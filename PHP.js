@@ -618,11 +618,11 @@ PHP.Compiler.prototype.Node_Expr_SmallerOrEqual = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_PreInc = function( action ) {
-    return this.source( action.variable ) + "." + this.PRE_INC;
+    return this.source( action.variable ) + "." + this.PRE_INC + "()";
 };
 
 PHP.Compiler.prototype.Node_Expr_PreDec = function( action ) {
-    return this.source( action.variable ) + "." + this.PRE_DEC;
+    return this.source( action.variable ) + "." + this.PRE_DEC + "()";
 };
 
 PHP.Compiler.prototype.Node_Expr_PostInc = function( action ) {
@@ -630,7 +630,7 @@ PHP.Compiler.prototype.Node_Expr_PostInc = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
-    return this.source( action.variable ) + "." + this.POST_DEC;
+    return this.source( action.variable ) + "." + this.POST_DEC + "()";
 };
 
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
@@ -9460,7 +9460,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 obj [ VARIABLE.DEFINED ] = true;
                 
                 obj [ COMPILER.POST_INC ] = function() {
-                    console.log( "getting ");
+                 
                     if ( this[ methodPrefix + __get ] !== undefined ) {
                      
                         var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
@@ -9471,7 +9471,26 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                             
                             callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? ++value[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
                         }
-                        console.log( value );
+                     
+                        return value;
+                
+                    }
+                }.bind( this );
+                
+                
+                obj [ COMPILER.PRE_INC ] = function() {
+                   
+                    if ( this[ methodPrefix + __get ] !== undefined ) {
+                     
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
+                        
+                        
+                        // setting ++
+                        if ( this[ methodPrefix + __set ] !== undefined ) {
+                            
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? ++value[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+                        }
+                        
                         return value;
                 
                     }
@@ -9852,21 +9871,15 @@ PHP.VM.Variable = function( arg ) {
         return this;
     };
     
-    Object.defineProperty( this, COMPILER.PRE_INC,
-    {
-        get : function(){
-            this[ COMPILER.VARIABLE_VALUE ]++;
-            return this;
-        }
-    });
+    this[ COMPILER.PRE_INC ] = function() {
+        this[ COMPILER.VARIABLE_VALUE ]++;
+        return this;
+    };
     
-    Object.defineProperty( this, COMPILER.PRE_DEC,
-    {
-        get : function(){
-            this[ COMPILER.VARIABLE_VALUE ]--;
-            return this;
-        }
-    });
+    this[ COMPILER.PRE_DEC ] = function() {
+        this[ COMPILER.VARIABLE_VALUE ]--;
+        return this;
+    };
 
     this[ COMPILER.POST_INC ] = function() {
         var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
@@ -9877,17 +9890,13 @@ PHP.VM.Variable = function( arg ) {
     };
 
 
-    
-    Object.defineProperty( this, COMPILER.POST_DEC,
-    {
-        get : function(){
-            var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
-            
-            POST_MOD--;
-            this.POST_MOD = POST_MOD;
-            return this;
-        }
-    });
+    this[ COMPILER.POST_DEC ] = function() {
+        var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+        POST_MOD--;
+        this.POST_MOD = POST_MOD;
+        return this;
+    };
+
     
 
    

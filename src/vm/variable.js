@@ -240,21 +240,15 @@ PHP.VM.Variable = function( arg ) {
         return this;
     };
     
-    Object.defineProperty( this, COMPILER.PRE_INC,
-    {
-        get : function(){
-            this[ COMPILER.VARIABLE_VALUE ]++;
-            return this;
-        }
-    });
+    this[ COMPILER.PRE_INC ] = function() {
+        this[ COMPILER.VARIABLE_VALUE ]++;
+        return this;
+    };
     
-    Object.defineProperty( this, COMPILER.PRE_DEC,
-    {
-        get : function(){
-            this[ COMPILER.VARIABLE_VALUE ]--;
-            return this;
-        }
-    });
+    this[ COMPILER.PRE_DEC ] = function() {
+        this[ COMPILER.VARIABLE_VALUE ]--;
+        return this;
+    };
 
     this[ COMPILER.POST_INC ] = function() {
         var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
@@ -265,17 +259,13 @@ PHP.VM.Variable = function( arg ) {
     };
 
 
-    
-    Object.defineProperty( this, COMPILER.POST_DEC,
-    {
-        get : function(){
-            var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
-            
-            POST_MOD--;
-            this.POST_MOD = POST_MOD;
-            return this;
-        }
-    });
+    this[ COMPILER.POST_DEC ] = function() {
+        var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+        POST_MOD--;
+        this.POST_MOD = POST_MOD;
+        return this;
+    };
+
     
 
    
