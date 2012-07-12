@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 322 out of 672 (47.9%)
+Passed 323 out of 672 (48.1%)
 
 Failed tests:
 
@@ -62,7 +62,6 @@ Failed tests:
  - tests/php/classes/assign_op_property_001.phpt
  - tests/php/classes/autoload_009.phpt
  - tests/php/classes/autoload_012.phpt
- - tests/php/classes/autoload_014.phpt
  - tests/php/classes/autoload_015.phpt
  - tests/php/classes/autoload_016.phpt
  - tests/php/classes/autoload_017.phpt

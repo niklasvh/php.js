@@ -1,0 +1,42 @@
+<?php
+
+class ReflectionMethod  {
+    /* Constants */
+
+    const IS_IMPLICIT_ABSTRACT = 16;
+    const IS_EXPLICIT_ABSTRACT = 32;
+    const IS_FINAL = 64;
+
+    /* Properties */
+
+    public $name;
+    public $class;
+    
+
+    function __construct( $class, $name=null ) {
+      
+     //   if ( !is_string($name)) {
+            
+            $parts = explode("::",$class);
+            $class = $parts[ 0 ];
+            
+            $name = $parts[ 1 ];
+            
+            if (!class_exists( $class ) ) {
+                throw new ReflectionException( "Class " . $class . " does not exist " );
+            }
+            
+     //   }
+    }
+
+    public static function export($argument, $return = false) {
+        
+    }
+    
+    public function __toString() {
+        
+    }
+
+}
+
+?>

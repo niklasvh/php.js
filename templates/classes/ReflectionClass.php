@@ -16,7 +16,9 @@ class ReflectionClass  {
     function __construct( $argument ) {
         if ( is_string($argument)) {
             if (!class_exists( $argument ) ) {
-                echo "Class " . $argument . " does not exist ";
+                throw new ReflectionException( "Class " . $argument . " does not exist " );
+            } else {
+                $this->name = $argument;
             }
             
         }

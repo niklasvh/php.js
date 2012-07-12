@@ -86,6 +86,7 @@ var files = {
         },
         string: {
             echo: "js",
+            explode: "js",
             implode: "js",
             parse_str: "js",
             print: "js",
@@ -131,6 +132,7 @@ var files = {
             Exception: "js",
             ReflectionClass: "js",
             ReflectionException: "js",
+            ReflectionMethod: "js",
             stdClass: "js"
         },
         interfaces: {

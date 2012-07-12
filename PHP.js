@@ -3070,6 +3070,31 @@ PHP.Modules.prototype.echo = function() {
  */
 
 
+PHP.Modules.prototype.explode = function( delim, string ) {
+    var VARIABLE = PHP.VM.Variable.prototype,
+    COMPILER = PHP.Compiler.prototype,
+    item = PHP.VM.Array.arrayItem;
+    
+    if ( string[ VARIABLE.TYPE ] === VARIABLE.STRING ) {
+        // Defaults to an empty string
+        var items = string[ COMPILER.VARIABLE_VALUE ].split( delim[ COMPILER.VARIABLE_VALUE ] ),
+        arr = [];
+        
+        
+        items.forEach(function( val, index ){
+            arr.push( item( index, val ) )
+        });
+       
+        return this.array( arr );
+    }
+
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 27.6.2012 
+* @website http://hertzen.com
+ */
+
+
 PHP.Modules.prototype.implode = function( glue, pieces ) {
     var VARIABLE = PHP.VM.Variable.prototype,
     COMPILER = PHP.Compiler.prototype;
@@ -10551,11 +10576,13 @@ ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $ ){
 .Method( "__construct", 1, [{"name":"argument"}], function( $, ctx ) {
 if ( ((ENV.is_string($("argument")))).$Bool.$) {
 if ( ((ENV.class_exists($("argument"))).$Not()).$Bool.$) {
-ENV.echo( $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) );
+throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) ));
+} else {
+this.$Prop( ctx, "name" )._($("argument"));
 };
 };
 })
-.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":25,"endLine":1}},"attributes":{"startLine":25,"endLine":1}}}], function( $, ctx ) {
+.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":27,"endLine":1}},"attributes":{"startLine":27,"endLine":1}}}], function( $, ctx ) {
 })
 .Method( "__toString", 1, [], function( $, ctx ) {
 })
@@ -10565,6 +10592,28 @@ ENV.echo( $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) );
 PHP.VM.Class.Predefined.ReflectionException = function( ENV, $$ ) {
 ENV.$Class.New( "ReflectionException", 0, {Extends: "Exception"}, function( M, $ ){
  M.Create()});
+
+};/* automatically built from ReflectionMethod.php*/
+PHP.VM.Class.Predefined.ReflectionMethod = function( ENV, $$ ) {
+ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $ ){
+ M.Constant("IS_IMPLICIT_ABSTRACT", $$(16))
+.Constant("IS_EXPLICIT_ABSTRACT", $$(32))
+.Constant("IS_FINAL", $$(64))
+.Variable( "name", 1 )
+.Variable( "class", 1 )
+.Method( "__construct", 1, [{"name":"class"},{"name":"name","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"null","type":"Node_Name","attributes":{"startLine":16,"endLine":1}},"attributes":{"startLine":16,"endLine":1}}}], function( $, ctx ) {
+$("parts")._((ENV.explode($$("::"), $("class"))));
+$("class")._($("parts").$Dim( this, $$(0) ));
+$("name")._($("parts").$Dim( this, $$(1) ));
+if ( ((ENV.class_exists($("class"))).$Not()).$Bool.$) {
+throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
+};
+})
+.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":32,"endLine":1}},"attributes":{"startLine":32,"endLine":1}}}], function( $, ctx ) {
+})
+.Method( "__toString", 1, [], function( $, ctx ) {
+})
+.Create()});
 
 };/* automatically built from stdClass.php*/
 PHP.VM.Class.Predefined.stdClass = function( ENV, $$ ) {
