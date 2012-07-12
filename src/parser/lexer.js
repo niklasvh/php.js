@@ -366,6 +366,10 @@ PHP.Lexer = function( src ) {
         re: /^elseif(?=[\s(])/i
     },
     {
+        value: PHP.Constants.T_GOTO,
+        re: /^goto(?=[\s(])/i
+    },
+    {
         value: PHP.Constants.T_ELSE,
         re: /^else(?=[\s{])/i
     },

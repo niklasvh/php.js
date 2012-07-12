@@ -1,7 +1,7 @@
 /* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 15.6.2012 
-* @website http://hertzen.com
+ * @author Niklas von Hertzen <niklas at hertzen.com>
+ * @created 15.6.2012 
+ * @website http://hertzen.com
  */
 
 
@@ -9,10 +9,14 @@ var PHP = function( tokens, opts ) {
     
     //console.log( tokens );
     this.tokens = tokens;
-    this.AST = new PHP.Parser( this.tokens );
-  
-    //console.log( this.AST );
-    //console.log( opts );
+    try {
+        this.AST = new PHP.Parser( this.tokens );
+    } catch( e ) {
+        this.vm = {};
+        this.vm.OUTPUT_BUFFER = "Parse error: " + e.message + " in " + opts.SERVER.SCRIPT_FILENAME + " on line " + e.line;
+        return this;
+    }
+
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);

@@ -71,3 +71,8 @@ PHP.Compiler.prototype.Node_Scalar_LineConst = function( action ) {
 //    return this.CTX + PHP.Compiler.prototype.MAGIC_CONSTANTS + '("LINE")';
     
 };
+
+PHP.Compiler.prototype.Node_Scalar_DirConst = function( action ) {
+    return this.VARIABLE + '("$__DIR__")';  
+  
+};

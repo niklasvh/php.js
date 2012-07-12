@@ -173,10 +173,9 @@ PHP.Parser = function ( tokens, eval ) {
                 attributeStack[ this.stackPos ] = this.startAttributes;
             } else {
                 /* error */
-
-                console.log(this.yyastk);
                 console.log( tokens );
                 if (eval !== true) {
+                    throw new PHP.ParseError("syntax error, unexpected " + terminals[ tokenId ] + ", expecting identifier", this.startAttributes['startLine']);
                     throw new Error('Unexpected token ' + terminals[ tokenId ] + ", tokenId " + tokenId + " line " + this.startAttributes['startLine']);
                 } else {
                     return this.startAttributes['startLine'];
@@ -191,6 +190,11 @@ PHP.Parser = function ( tokens, eval ) {
         }
     }
     console.log(tokens);
+};
+
+PHP.ParseError = function( msg, line ) {
+    this.message = msg;
+    this.line = line;
 };
 
 PHP.Parser.prototype.MODIFIER_PUBLIC    =  1;

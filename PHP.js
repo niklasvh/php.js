@@ -1,7 +1,7 @@
 /* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 15.6.2012 
-* @website http://hertzen.com
+ * @author Niklas von Hertzen <niklas at hertzen.com>
+ * @created 15.6.2012 
+ * @website http://hertzen.com
  */
 
 
@@ -9,10 +9,14 @@ var PHP = function( tokens, opts ) {
     
     //console.log( tokens );
     this.tokens = tokens;
-    this.AST = new PHP.Parser( this.tokens );
-  
-    //console.log( this.AST );
-    //console.log( opts );
+    try {
+        this.AST = new PHP.Parser( this.tokens );
+    } catch( e ) {
+        this.vm = {};
+        this.vm.OUTPUT_BUFFER = "Parse error: " + e.message + " in " + opts.SERVER.SCRIPT_FILENAME + " on line " + e.line;
+        return this;
+    }
+
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
@@ -1303,6 +1307,11 @@ PHP.Compiler.prototype.Node_Scalar_LineConst = function( action ) {
     return this.VARIABLE + '("$__LINE__")';  
 //    return this.CTX + PHP.Compiler.prototype.MAGIC_CONSTANTS + '("LINE")';
     
+};
+
+PHP.Compiler.prototype.Node_Scalar_DirConst = function( action ) {
+    return this.VARIABLE + '("$__DIR__")';  
+  
 };/* 
  * @author Niklas von Hertzen <niklas at hertzen.com>
  * @created 29.6.2012 
@@ -4195,6 +4204,10 @@ PHP.Modules.prototype.var_dump = function() {
         re: /^elseif(?=[\s(])/i
     },
     {
+        value: PHP.Constants.T_GOTO,
+        re: /^goto(?=[\s(])/i
+    },
+    {
         value: PHP.Constants.T_ELSE,
         re: /^else(?=[\s{])/i
     },
@@ -4725,10 +4738,9 @@ PHP.Parser = function ( tokens, eval ) {
                 attributeStack[ this.stackPos ] = this.startAttributes;
             } else {
                 /* error */
-
-                console.log(this.yyastk);
                 console.log( tokens );
                 if (eval !== true) {
+                    throw new PHP.ParseError("syntax error, unexpected " + terminals[ tokenId ] + ", expecting identifier", this.startAttributes['startLine']);
                     throw new Error('Unexpected token ' + terminals[ tokenId ] + ", tokenId " + tokenId + " line " + this.startAttributes['startLine']);
                 } else {
                     return this.startAttributes['startLine'];
@@ -4743,6 +4755,11 @@ PHP.Parser = function ( tokens, eval ) {
         }
     }
     console.log(tokens);
+};
+
+PHP.ParseError = function( msg, line ) {
+    this.message = msg;
+    this.line = line;
 };
 
 PHP.Parser.prototype.MODIFIER_PUBLIC    =  1;
