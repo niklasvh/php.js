@@ -30,6 +30,8 @@ var files = {
             class_exists: "js",
             get_class: "js",
             get_class_methods: "js",
+            get_parent_class: "js",
+            is_subclass_of: "js",
             method_exists: "js"
         },
         control_structures: {
