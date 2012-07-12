@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 291 out of 672 (43.3%)
+Passed 292 out of 672 (43.5%)
 
 Failed tests:
 
@@ -70,7 +70,6 @@ Failed tests:
  - tests/php/classes/array_access_012.phpt
  - tests/php/classes/array_access_013.phpt
  - tests/php/classes/assign_op_property_001.phpt
- - tests/php/classes/autoload_004.phpt
  - tests/php/classes/autoload_006.phpt
  - tests/php/classes/autoload_007.phpt
  - tests/php/classes/autoload_008.phpt

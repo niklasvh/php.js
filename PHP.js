@@ -8521,6 +8521,7 @@ PHP.VM = function( src, opts ) {
         magicConstants = {},
         initiatedClasses = [],
         undefinedConstants = {},
+        autoloadedClasses = [],
         classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants );
         
         ENV[ COMPILER.MAGIC_CONSTANTS ] = function( constantName ) {
@@ -8530,10 +8531,11 @@ PHP.VM = function( src, opts ) {
         var methods =  {
             __autoload: function( name ) {
                 
-                if ( typeof ENV.__autoload === "function" ) {
+                if ( typeof ENV.__autoload === "function" && autoloadedClasses.indexOf( name ) === -1) {
+                    autoloadedClasses.push( name )
                     ENV.__autoload( new PHP.VM.Variable( name ) );
                 }
-                console.log('loaded');
+                
                 return methods.Exists( name );
             },
             INew: function( name, exts, func ) {
