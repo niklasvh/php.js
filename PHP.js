@@ -1510,6 +1510,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     func();
                 }
             }
+            return methods;
             
         };
        
@@ -6420,6 +6421,11 @@ PHP.Parser.prototype.yyn55 = function ( attributes ) {
 
 PHP.Parser.prototype.yyn58 = function () {
     this.yyval = [ this.yyastk[this.stackPos-(1-1)] ];
+};
+
+PHP.Parser.prototype.yyn59 = function () {
+    this.yyastk[this.stackPos-(2-1)].push( this.yyastk[this.stackPos-(2-2)] );
+    this.yyval = this.yyastk[this.stackPos-(2-1)];
 };
 
 PHP.Parser.prototype.yyn60 = function ( attributes ) {

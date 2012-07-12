@@ -190,6 +190,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     func();
                 }
             }
+            return methods;
             
         };
        

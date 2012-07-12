@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 315 out of 672 (46.9%)
+Passed 317 out of 672 (47.2%)
 
 Failed tests:
 
@@ -60,7 +60,6 @@ Failed tests:
  - tests/php/classes/array_access_012.phpt
  - tests/php/classes/array_access_013.phpt
  - tests/php/classes/assign_op_property_001.phpt
- - tests/php/classes/autoload_008.phpt
  - tests/php/classes/autoload_009.phpt
  - tests/php/classes/autoload_010.phpt
  - tests/php/classes/autoload_012.phpt
@@ -92,7 +91,6 @@ Failed tests:
  - tests/php/classes/ctor_visibility.phpt
  - tests/php/classes/dereferencing_001.phpt
  - tests/php/classes/destructor_and_echo.phpt
- - tests/php/classes/destructor_and_exceptions.phpt
  - tests/php/classes/destructor_and_globals.phpt
  - tests/php/classes/destructor_inheritance.phpt
  - tests/php/classes/destructor_visibility_001.phpt
