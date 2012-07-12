@@ -339,7 +339,7 @@ PHP.Compiler.prototype.Node_Stmt_TryCatch = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Catch = function( action ) {
-    var src = "." + this.CATCH + '( "' + action.variable + '", "' + action.Type.parts + '", function() {\n';
+    var src = "." + this.CATCH + '( "' + action.variable + '", "' + action.Type.parts + '", ' + this.VARIABLE + ', function() {\n';
     src += this.stmts( action.stmts );
     src += "})"
     return src;

@@ -175,11 +175,12 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         var methods =  {},
         VARIABLE = PHP.VM.Variable.prototype;
         
-        methods[ COMPILER.CATCH ] = function( name, type, func ) {
+        methods[ COMPILER.CATCH ] = function( name, type, $, func ) {
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
                 
                 if ( variable[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] === type ) {
-                    // TODO pass variable to func
+                    $( name, variable );
+                    
                     func();
                 }
             }

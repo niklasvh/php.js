@@ -117,17 +117,20 @@ PHP.VM = function( src, opts ) {
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className ]( ENV );
     });
-    /*
-    var exec = new Function( "$$", "$", "ENV", src  );
-        exec.call(this, $$, $, ENV);
+   
 
-       */
+
+      
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
      
     this.OUTPUT_BUFFERS = [""];
     this.$obreset();
-      
+      /*
+        var exec = new Function( "$$", "$", "ENV", src  );
+        exec.call(this, $$, $, ENV);
+    
+      */
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );
         exec.call(this, $$, $, ENV);

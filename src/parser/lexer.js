@@ -91,11 +91,11 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_TRY,
-        re: /^try(?=\s{)/i
+        re: /^try(?=\s*{)/i
     },
     {
         value: PHP.Constants.T_CATCH,
-        re: /^catch(?=\s\()/i
+        re: /^catch(?=\s*\()/i
     },
     {
         value: PHP.Constants.T_INSTANCEOF,

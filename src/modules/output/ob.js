@@ -37,13 +37,11 @@
     };
     
     MODULES.$ob = function( str )  {
-        var index = this[ COMPILER.OUTPUT_BUFFERS ].length - 1,
+
+        var index = this[ OUTPUT_BUFFERS ].length - 1,
         VARIABLE = PHP.VM.Variable.prototype;
       
-
-      
-
-        this[ COMPILER.OUTPUT_BUFFERS ][ index ] += str;
+        this[ OUTPUT_BUFFERS ][ index ] += str;
         
         
 

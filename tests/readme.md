@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 278 out of 672 (41.4%)
+Passed 281 out of 672 (41.8%)
 
 Failed tests:
 
@@ -111,7 +111,6 @@ Failed tests:
  - tests/php/classes/constants_scope_001.phpt
  - tests/php/classes/ctor_dtor.phpt
  - tests/php/classes/ctor_dtor_inheritance.phpt
- - tests/php/classes/ctor_failure.phpt
  - tests/php/classes/ctor_in_interface_01.phpt
  - tests/php/classes/ctor_in_interface_02.phpt
  - tests/php/classes/ctor_in_interface_03.phpt
@@ -155,7 +154,6 @@ Failed tests:
  - tests/php/classes/interface_method_private.phpt
  - tests/php/classes/interface_optional_arg_002.phpt
  - tests/php/classes/interface_optional_arg_003.phpt
- - tests/php/classes/iterators_007.phpt
  - tests/php/classes/iterators_008.phpt
  - tests/php/classes/method_call_variation_001.phpt
  - tests/php/classes/method_override_optional_arg_001.phpt
@@ -210,7 +208,6 @@ Failed tests:
  - tests/php/lang/031.phpt
  - tests/php/lang/033.phpt
  - tests/php/lang/034.phpt
- - tests/php/lang/035.phpt
  - tests/php/lang/038.phpt
  - tests/php/lang/039.phpt
  - tests/php/lang/045.phpt

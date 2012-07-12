@@ -1165,7 +1165,7 @@ PHP.Compiler.prototype.Node_Stmt_TryCatch = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Catch = function( action ) {
-    var src = "." + this.CATCH + '( "' + action.variable + '", "' + action.Type.parts + '", function() {\n';
+    var src = "." + this.CATCH + '( "' + action.variable + '", "' + action.Type.parts + '", ' + this.VARIABLE + ', function() {\n';
     src += this.stmts( action.stmts );
     src += "})"
     return src;
@@ -1467,11 +1467,12 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         var methods =  {},
         VARIABLE = PHP.VM.Variable.prototype;
         
-        methods[ COMPILER.CATCH ] = function( name, type, func ) {
+        methods[ COMPILER.CATCH ] = function( name, type, $, func ) {
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
                 
                 if ( variable[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] === type ) {
-                    // TODO pass variable to func
+                    $( name, variable );
+                    
                     func();
                 }
             }
@@ -1889,7 +1890,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
             if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1 ) {
                 iterator = objectValue[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
             }
-            
+  
             iterator[ COMPILER.METHOD_CALL ]( this, "rewind" );
 
             return {
@@ -1940,12 +1941,12 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,
     expr;
-   
+     console.log('yoss');
     if ( iterator === undefined  || iterator.expr === undefined ) {
         return false;
     }
     expr = iterator.expr;
-    
+  
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
         var values = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
         keys =  expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
@@ -1972,13 +1973,14 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     } else if ( expr[ VAR.TYPE ] === VAR.OBJECT ) {
         var objectValue = expr[ COMPILER.VARIABLE_VALUE ]
         
-        
+         console.log('supssss');
         // iteratorAggregate implemented objects
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
-            
+             console.log('supssss2');
             if ( byRef === true ) {
                 this.ENV[ PHP.Compiler.prototype.ERROR ]( "An iterator cannot be used with foreach by reference", PHP.Constants.E_ERROR, true );
             }
+           
             
             if ( iterator.first === undefined ) {
                 iterator.first = true;
@@ -2422,13 +2424,11 @@ PHP.Modules.prototype.flush = function() {
     };
     
     MODULES.$ob = function( str )  {
-        var index = this[ COMPILER.OUTPUT_BUFFERS ].length - 1,
+
+        var index = this[ OUTPUT_BUFFERS ].length - 1,
         VARIABLE = PHP.VM.Variable.prototype;
       
-
-      
-
-        this[ COMPILER.OUTPUT_BUFFERS ][ index ] += str;
+        this[ OUTPUT_BUFFERS ][ index ] += str;
         
         
 
@@ -3835,11 +3835,11 @@ PHP.Modules.prototype.var_dump = function() {
     },
     {
         value: PHP.Constants.T_TRY,
-        re: /^try(?=\s{)/i
+        re: /^try(?=\s*{)/i
     },
     {
         value: PHP.Constants.T_CATCH,
-        re: /^catch(?=\s\()/i
+        re: /^catch(?=\s*\()/i
     },
     {
         value: PHP.Constants.T_INSTANCEOF,
@@ -8519,17 +8519,20 @@ PHP.VM = function( src, opts ) {
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className ]( ENV );
     });
-    /*
-    var exec = new Function( "$$", "$", "ENV", src  );
-        exec.call(this, $$, $, ENV);
+   
 
-       */
+
+      
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
      
     this.OUTPUT_BUFFERS = [""];
     this.$obreset();
-      
+      /*
+        var exec = new Function( "$$", "$", "ENV", src  );
+        exec.call(this, $$, $, ENV);
+    
+      */
     try {
         var exec = new Function( "$$", "$", "ENV",  src  );
         exec.call(this, $$, $, ENV);
@@ -8628,11 +8631,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         props = {},
         
         callMethod = function( methodName, args ) {
-
+            
+            console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             
             var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
            
-            console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
+          
             //magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
             
             return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
@@ -10147,23 +10151,37 @@ PHP.VM.Constants = function(  predefined, ENV ) {
     
     return methods;
     
-};/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 4.7.2012 
-* @website http://hertzen.com
- */
+};/* automatically built from Exception.php*/
+PHP.VM.Class.Predefined.Exception = function( ENV ) {
+ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
+ M.Variable( "message", 2 )
+.Variable( "code", 2 )
+.Variable( "file", 2 )
+.Variable( "line", 2 )
+.Method( "__construct", 1, [{"name":"message","def":{"type":"Node_Scalar_String","value":"\"\"","attributes":{"startLine":10,"endLine":1}}},{"name":"code","def":{"type":"Node_Scalar_LNumber","value":"0","attributes":{"startLine":10,"endLine":1}}},{"name":"previous","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"NULL","type":"Node_Name","attributes":{"startLine":10,"endLine":1}},"attributes":{"startLine":10,"endLine":1}}}], function( $, ctx ) {
+this.$Prop( ctx, "message" )._($("message"));
+})
+.Method( "getMessage", 33, [], function( $, ctx ) {
+return this.$Prop( ctx, "message" );
+})
+.Method( "getPrevious", 33, [], function( $, ctx ) {
+})
+.Method( "getCode", 33, [], function( $, ctx ) {
+})
+.Method( "getFile", 33, [], function( $, ctx ) {
+})
+.Method( "getLine", 33, [], function( $, ctx ) {
+})
+.Method( "getTrace", 33, [], function( $, ctx ) {
+})
+.Method( "getTraceAsString", 33, [], function( $, ctx ) {
+})
+.Method( "__toString", 1, [], function( $, ctx ) {
+})
+.Method( "__clone", 36, [], function( $, ctx ) {
+})
+.Create()});
 
-
-PHP.VM.Class.Predefined.Exception = function( ENV) {
-    
-    // var COMPILER = PHP.Compiler.prototype,
-    //  $this = this;
-    
-    ENV.$Class.New( "Exception", 0, {}, function( M ) {
-        M.Create();
-    });
-    
-    
 };/* automatically built from stdClass.php*/
 PHP.VM.Class.Predefined.stdClass = function( ENV ) {
 ENV.$Class.New( "stdClass", 0, {}, function( M, $ ){
