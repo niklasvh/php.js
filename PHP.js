@@ -2189,9 +2189,14 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
     if ( callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
 
         var Class = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 )[ COMPILER.VARIABLE_VALUE ],
-        methodName = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 1 )[ COMPILER.VARIABLE_VALUE ];
+        methodName = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 1 )[ COMPILER.VARIABLE_VALUE ],
+        methodParts = methodName.split("::");
+        if ( methodParts.length === 1 ) {
         
-        return Class[ COMPILER.METHOD_CALL ]( this, methodName, Array.prototype.slice.call( arguments, 1 ) );
+            return Class[ COMPILER.METHOD_CALL ]( this, methodName, Array.prototype.slice.call( arguments, 1 ) );
+        } else {
+            return Class[ COMPILER.STATIC_CALL ]( this, methodParts[ 0 ], methodParts[ 1 ], Array.prototype.slice.call( arguments, 1 ) );
+        }
         
     } else {
         return this[ callback[ COMPILER.VARIABLE_VALUE ]]( Array.prototype.slice.call( arguments, 1 ) );
@@ -9137,10 +9142,21 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             var methodToCall,
             methodCTX,
             $;
-            
+            var proto;
             if ( /^parent$/i.test( methodClass ) ) {
-                var proto = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
+                proto = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
                 
+
+            } else if ( methodClass !== className ){
+              
+                proto = Object.getPrototypeOf( this );
+                while ( proto[ COMPILER.CLASS_NAME ] !== methodClass ) {
+                    proto = Object.getPrototypeOf( proto );
+                }
+
+            }
+            
+            if ( proto !== undefined ) {
                 methodToCall = proto[ methodPrefix + methodName ];
                 methodCTX = proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
                 
@@ -9158,7 +9174,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
    
                 return methodToCall.call( this, $, methodCTX );
-            } 
+            }
             
             
            

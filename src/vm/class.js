@@ -570,10 +570,21 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             var methodToCall,
             methodCTX,
             $;
-            
+            var proto;
             if ( /^parent$/i.test( methodClass ) ) {
-                var proto = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
+                proto = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
                 
+
+            } else if ( methodClass !== className ){
+              
+                proto = Object.getPrototypeOf( this );
+                while ( proto[ COMPILER.CLASS_NAME ] !== methodClass ) {
+                    proto = Object.getPrototypeOf( proto );
+                }
+
+            }
+            
+            if ( proto !== undefined ) {
                 methodToCall = proto[ methodPrefix + methodName ];
                 methodCTX = proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
                 
@@ -591,7 +602,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
    
                 return methodToCall.call( this, $, methodCTX );
-            } 
+            }
             
             
            
