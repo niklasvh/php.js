@@ -4274,7 +4274,8 @@ PHP.Modules.prototype.var_dump = function() {
         re: /^("(?:[^"\\]|\\[\s\S])*"|'(?:[^'\\]|\\[\s\S])*')/,
         func: function( result, token ) {
 
-            var curlyOpen = 0;
+            var curlyOpen = 0,
+            bracketOpen = 0;
 
             if (result.substring( 0,1 ) === "'") {
                 return result;
@@ -4294,6 +4295,14 @@ PHP.Modules.prototype.var_dump = function() {
 
                         if ( curlyOpen > 0 && match[ 0 ] === "}") {
                             curlyOpen--;
+                        }
+                        
+                        if ( match[ 0 ] === "[" ) {
+                            bracketOpen++;
+                        }
+                        
+                        if ( match[ 0 ] === "]" ) {
+                            bracketOpen--;
                         }
 
                     }
@@ -4328,10 +4337,21 @@ PHP.Modules.prototype.var_dump = function() {
                                 ]);
                             result = result.substring( match[ 0 ].length );
                         } 
+                        
+                        
+                        if ( result.match( /^\[/g ) !== null ) {
+                            continue;
+                        }
+                    }
+                    
+                    var re;
+                    if ( bracketOpen > 0) {
+                        re = /^([^\\\$"{}\]]|\\.)+/g;
+                    } else {
+                        re = /^([^\\\$"{}]|\\.)+/g;
                     }
 
-
-                    while(( match = result.match( /^([^\\\$"{}]|\\.)+/g )) !== null ) {
+                    while(( match = result.match( re )) !== null ) {
 
 
                         if (result.length === 1) {
