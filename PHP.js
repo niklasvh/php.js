@@ -494,8 +494,10 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
     var src = "",
     args = [];
-    if ( action.func.type === "Node_Expr_Variable") {
-        src += "(" + this.CTX + "[ " + this.source( action.func ) + "." + this.VARIABLE_VALUE + " ](";
+    
+
+    if ( action.func.type !== "Node_Name") {
+        src += "(" + this.ENV + "[ " + this.source( action.func ) + "." + this.VARIABLE_VALUE + " ](";
     } else {
         src += "(" + this.CTX + this.getName( action.func ) + "(";
 
@@ -707,11 +709,21 @@ PHP.Compiler.prototype.Node_Expr_ConstFetch = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
-    var src = this.source( action.variable ) + "." + this.METHOD_CALL + '( ';
+    var classPart, src = "";
+
+    
+    if (action.name.type === undefined) {
+        classPart = '"' + action.name +'"';
+    } else {
+        classPart = this.source(action.name) + "." + this.VARIABLE_VALUE;
+    }
+
+
+    src += this.source( action.variable ) + "." + this.METHOD_CALL + '( ';
 
     src += ( action.variable.name === "this") ? "ctx" : "this";
 
-    src += ', "' + action.name + '"';
+    src += ', ' + classPart;
 
     action.args.forEach(function( arg ) {
         src += ", " + this.source( arg.value );
