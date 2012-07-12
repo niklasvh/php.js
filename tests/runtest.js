@@ -62,7 +62,7 @@ function runTest ( file ) {
             POST: ( test.POST !== undefined ) ? PHP.Utils.QueryString( test.POST ) : {},
             GET: ( test.GET !== undefined ) ? PHP.Utils.QueryString( test.GET ) : {},
             SERVER: {
-                SCRIPT_FILENAME: file.substring(0, file.length - 1)
+                SCRIPT_FILENAME: __dirname.replace(/\\/g,"/") + "/" + file.substring(6, file.length - 1)
             }
         };
                     
@@ -144,4 +144,4 @@ function runTest ( file ) {
 
 
 
-runTest("tests/php/output/ob_start_basic_unerasable_003.phpt");
+runTest("tests/php/classes/this.phpt");

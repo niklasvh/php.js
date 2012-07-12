@@ -4,7 +4,7 @@
  * @website http://hertzen.com
  */
 
-PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV ) {
+PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV, functionName ) {
     var args = [ null ], // undefined context for bind
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
@@ -49,7 +49,13 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
                 arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
             }
         });
-         
+        var _SERVER = ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
+        // magic constants
+        handler( "$__FILE__" )[ COMPILER.VARIABLE_VALUE ] = _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ];
+        
+        handler( "$__FUNCTION__" )[ COMPILER.VARIABLE_VALUE ] = functionName;
+        
+        
         return handler;
     } );
     

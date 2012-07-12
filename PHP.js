@@ -1057,7 +1057,7 @@ PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
     
     
     
-    src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ")( this ))";
+    src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ')( this, "' + action.name + '"  ))';
 
     
     return src;  
@@ -1309,7 +1309,7 @@ PHP.Compiler.prototype.Node_Scalar_LineConst = function( action ) {
  * @website http://hertzen.com
  */
 
-PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV ) {
+PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV, functionName ) {
     var args = [ null ], // undefined context for bind
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
@@ -1354,7 +1354,13 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
                 arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
             }
         });
-         
+        var _SERVER = ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
+        // magic constants
+        handler( "$__FILE__" )[ COMPILER.VARIABLE_VALUE ] = _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ];
+        
+        handler( "$__FUNCTION__" )[ COMPILER.VARIABLE_VALUE ] = functionName;
+        
+        
         return handler;
     } );
     
@@ -1842,12 +1848,17 @@ PHP.Modules.prototype.reset = function( array ) {
  */
 
 
-PHP.Modules.prototype.class_exists = function( class_name ) {
+PHP.Modules.prototype.class_exists = function( class_name, autoload ) {
     var COMPILER = PHP.Compiler.prototype;
+    
+    if ( (autoload === undefined || autoload[ COMPILER.VARIABLE_VALUE ] === true) && !this.$Class.Exists( class_name[ COMPILER.VARIABLE_VALUE ] ) ) {
+        return new PHP.VM.Variable( this.$Class.__autoload( class_name[ COMPILER.VARIABLE_VALUE ] ) );
+    }
     
     return new PHP.VM.Variable( this.$Class.Exists( class_name[ COMPILER.VARIABLE_VALUE ] )  );
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 9.7.2012 
 * @website http://hertzen.com
@@ -2051,7 +2062,11 @@ PHP.Modules.prototype.$include = function( $, file ) {
     
     var path = this[ COMPILER.FILE_PATH ];
     
-    var source = this[ COMPILER.FILESYSTEM ].readFileSync( path + "/" + filename );
+    
+    var loaded_file = (/^(.:|\/)/.test( filename ) ) ? filename : path + "/" + filename;
+    
+    
+    var source = this[ COMPILER.FILESYSTEM ].readFileSync( loaded_file );
     
         
     var COMPILER = PHP.Compiler.prototype;
@@ -2070,7 +2085,7 @@ PHP.Modules.prototype.$include = function( $, file ) {
     // execture code in current context ($)
     var exec = new Function( "$$", "$", "ENV", compiler.src  );
     
-    this[ COMPILER.FILE_PATH ] = PHP.Utils.Path( path + "/" + filename );
+    this[ COMPILER.FILE_PATH ] = PHP.Utils.Path( loaded_file );
     
     exec.call(this, function( arg ) {
         return new PHP.VM.Variable( arg );
@@ -2158,6 +2173,19 @@ PHP.Modules.prototype.error_reporting = function( level ) {
 PHP.Modules.prototype.trigger_error = function( msg, level ) {
     throw new Error( "Fatal error: " + msg.$ );
     
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 12.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.dirname = function( path ) {
+    var COMPILER = PHP.Compiler.prototype,
+    dir = PHP.Utils.Path( path[ COMPILER.VARIABLE_VALUE ] )
+    console.log( dir, path );
+    return new PHP.VM.Variable( dir );
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 30.6.2012 
@@ -8463,6 +8491,14 @@ PHP.VM = function( src, opts ) {
         };
         
         var methods =  {
+            __autoload: function( name ) {
+                
+                if ( typeof ENV.__autoload === "function" ) {
+                    ENV.__autoload( new PHP.VM.Variable( name ) );
+                }
+                
+                return methods.Exists( name );
+            },
             INew: function( name, exts, func ) {
                 return classHandler( name, PHP.VM.Class.INTERFACE, exts, func );
             },

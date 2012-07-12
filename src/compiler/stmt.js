@@ -218,7 +218,7 @@ PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
     
     
     
-    src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ")( this ))";
+    src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ')( this, "' + action.name + '"  ))';
 
     
     return src;  

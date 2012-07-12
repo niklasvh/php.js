@@ -48,6 +48,7 @@ var files = {
             trigger_error: "js"
         },
         filesystem: {
+            dirname: "js",
             fclose: "js",
             fopen: "js"
         },

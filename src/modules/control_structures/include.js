@@ -13,7 +13,11 @@ PHP.Modules.prototype.$include = function( $, file ) {
     
     var path = this[ COMPILER.FILE_PATH ];
     
-    var source = this[ COMPILER.FILESYSTEM ].readFileSync( path + "/" + filename );
+    
+    var loaded_file = (/^(.:|\/)/.test( filename ) ) ? filename : path + "/" + filename;
+    
+    
+    var source = this[ COMPILER.FILESYSTEM ].readFileSync( loaded_file );
     
         
     var COMPILER = PHP.Compiler.prototype;
@@ -32,7 +36,7 @@ PHP.Modules.prototype.$include = function( $, file ) {
     // execture code in current context ($)
     var exec = new Function( "$$", "$", "ENV", compiler.src  );
     
-    this[ COMPILER.FILE_PATH ] = PHP.Utils.Path( path + "/" + filename );
+    this[ COMPILER.FILE_PATH ] = PHP.Utils.Path( loaded_file );
     
     exec.call(this, function( arg ) {
         return new PHP.VM.Variable( arg );

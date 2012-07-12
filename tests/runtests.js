@@ -61,7 +61,7 @@ function runTest ( file, complete ) {
             POST: ( test.POST !== undefined ) ? PHP.Utils.QueryString( test.POST ) : {},
             GET: ( test.GET !== undefined ) ? PHP.Utils.QueryString( test.GET ) : {},
             SERVER: {
-                SCRIPT_FILENAME: file.substring(0, file.length - 1)
+                SCRIPT_FILENAME: __dirname.replace(/\\/g,"/") + "/" + file.substring(5, file.length - 1)
             }
         };
                     

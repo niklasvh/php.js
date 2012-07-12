@@ -40,6 +40,14 @@ PHP.VM = function( src, opts ) {
         };
         
         var methods =  {
+            __autoload: function( name ) {
+                
+                if ( typeof ENV.__autoload === "function" ) {
+                    ENV.__autoload( new PHP.VM.Variable( name ) );
+                }
+                
+                return methods.Exists( name );
+            },
             INew: function( name, exts, func ) {
                 return classHandler( name, PHP.VM.Class.INTERFACE, exts, func );
             },
