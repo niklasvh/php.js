@@ -1827,9 +1827,11 @@ PHP.Modules.prototype.reset = function( array ) {
         
         pointer[ COMPILER.VARIABLE_VALUE ] = 0;
         
-  
-        
-       
+        if ( values.length === 0 ) {
+            return new PHP.VM.Variable( false );
+        } else {
+            return values[ 0 ];
+        }
     } 
     
     
