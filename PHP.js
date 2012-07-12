@@ -8698,8 +8698,8 @@ PHP.VM = function( src, opts ) {
         var methods =  {
             __autoload: function( name ) {
                 
-                if ( typeof ENV.__autoload === "function" && autoloadedClasses.indexOf( name ) === -1) {
-                    autoloadedClasses.push( name )
+                if ( typeof ENV.__autoload === "function" && autoloadedClasses.indexOf( name.toLowerCase() ) === -1) {
+                    autoloadedClasses.push( name.toLowerCase() )
                     ENV.__autoload( new PHP.VM.Variable( name ) );
                 }
                 
