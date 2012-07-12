@@ -73,17 +73,17 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     
 };
 
-PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.INSTANCEOF ] = function( instanceObject ) {
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.INSTANCEOF ] = function( instanceName ) {
     
     var COMPILER = PHP.Compiler.prototype;
     
     
-    var instanceName = instanceObject.prototype[ COMPILER.CLASS_NAME ],
-    className,
+    var className,
     classObj = this[ COMPILER.VARIABLE_VALUE ];
     
     // search interfaces
     if ( classObj[ PHP.VM.Class.INTERFACES ].indexOf( instanceName ) !== -1 ) {
+     
          return new PHP.VM.Variable( true );
     }
   

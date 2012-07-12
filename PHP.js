@@ -560,7 +560,7 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Instanceof = function( action ) {
-    return this.source( action.left ) + "." + this.INSTANCEOF + "(" + this.CTX + this.CLASS_GET + '("' + this.source( action.right ) + '"))';
+    return this.source( action.left ) + "." + this.INSTANCEOF + '("'  + this.source( action.right ) + '")';
 };
 
 PHP.Compiler.prototype.Node_Expr_UnaryPlus = function( action ) {
@@ -9727,17 +9727,17 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     
 };
 
-PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.INSTANCEOF ] = function( instanceObject ) {
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.INSTANCEOF ] = function( instanceName ) {
     
     var COMPILER = PHP.Compiler.prototype;
     
     
-    var instanceName = instanceObject.prototype[ COMPILER.CLASS_NAME ],
-    className,
+    var className,
     classObj = this[ COMPILER.VARIABLE_VALUE ];
     
     // search interfaces
     if ( classObj[ PHP.VM.Class.INTERFACES ].indexOf( instanceName ) !== -1 ) {
+     
          return new PHP.VM.Variable( true );
     }
   
