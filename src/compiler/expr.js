@@ -143,6 +143,10 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
     return src;
 };
 
+PHP.Compiler.prototype.Node_Expr_Instanceof = function( action ) {
+    return this.source( action.left ) + "." + this.INSTANCEOF + "(" + this.CTX + this.CLASS_GET + '("' + this.source( action.right ) + '"))';
+};
+
 PHP.Compiler.prototype.Node_Expr_UnaryPlus = function( action ) {
     return this.source( action.expr );
 };

@@ -206,6 +206,8 @@ PHP.Compiler.prototype.SIGNATURE  = "$SIGNATURE";
 
 PHP.Compiler.prototype.DISPLAY_HANDLER  = "$DisplayHandler";
 
+PHP.Compiler.prototype.INSTANCEOF  = "$InstanceOf";
+
 PHP.Compiler.prototype.fixString =  function( result ) {
     
     

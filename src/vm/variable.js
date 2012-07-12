@@ -73,6 +73,35 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     
 };
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.INSTANCEOF ] = function( instanceObject ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    
+    
+    var instanceName = instanceObject.prototype[ COMPILER.CLASS_NAME ],
+    className,
+    classObj = this[ COMPILER.VARIABLE_VALUE ];
+    
+    // search interfaces
+    if ( classObj[ PHP.VM.Class.INTERFACES ].indexOf( instanceName ) !== -1 ) {
+         return new PHP.VM.Variable( true );
+    }
+  
+    // search parents
+    do {
+        
+        className = classObj[ COMPILER.CLASS_NAME ];
+        if (className === instanceName) {
+            return new PHP.VM.Variable( true );
+        }
+        
+        classObj = Object.getPrototypeOf( classObj );
+    }
+    while( className !== undefined );
+    return new PHP.VM.Variable( false );
+    
+};
+
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( combinedVariable ) {
     
     var COMPILER = PHP.Compiler.prototype,

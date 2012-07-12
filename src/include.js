@@ -31,6 +31,7 @@ var files = {
             get_class: "js",
             get_class_methods: "js",
             get_parent_class: "js",
+            interface_exists: "js",
             is_subclass_of: "js",
             method_exists: "js"
         },
