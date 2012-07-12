@@ -317,7 +317,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 
-    if ( action.variable.name !== "this" ) {
+if ( action.variable.name !== "this" ) {
         return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     } else {
         return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';

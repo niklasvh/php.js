@@ -8,7 +8,8 @@
 var PHP = function( tokens, opts ) {
     
     //console.log( tokens );
-    this.AST = new PHP.Parser( tokens );
+    this.tokens = tokens;
+    this.AST = new PHP.Parser( this.tokens );
   
     //console.log( this.AST );
     //console.log( opts );

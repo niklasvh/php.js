@@ -8,7 +8,8 @@
 var PHP = function( tokens, opts ) {
     
     //console.log( tokens );
-    this.AST = new PHP.Parser( tokens );
+    this.tokens = tokens;
+    this.AST = new PHP.Parser( this.tokens );
   
     //console.log( this.AST );
     //console.log( opts );
@@ -726,7 +727,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 
-    if ( action.variable.name !== "this" ) {
+if ( action.variable.name !== "this" ) {
         return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     } else {
         return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
@@ -1941,7 +1942,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,
     expr;
-     console.log('yoss');
+  
     if ( iterator === undefined  || iterator.expr === undefined ) {
         return false;
     }
@@ -1973,10 +1974,10 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     } else if ( expr[ VAR.TYPE ] === VAR.OBJECT ) {
         var objectValue = expr[ COMPILER.VARIABLE_VALUE ]
         
-         console.log('supssss');
+
         // iteratorAggregate implemented objects
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
-             console.log('supssss2');
+
             if ( byRef === true ) {
                 this.ENV[ PHP.Compiler.prototype.ERROR ]( "An iterator cannot be used with foreach by reference", PHP.Constants.E_ERROR, true );
             }
@@ -4226,10 +4227,11 @@ PHP.Modules.prototype.var_dump = function() {
                             ]);
 
                         result = result.substring( match[ 0 ].length );
-                    /*
+                    
                         match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
+                        
                         if ( match !== null ) {
-                            console.log( match );
+                            
                             results.push([
                                 parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10),
                                 match[ 1 ],
@@ -4241,7 +4243,7 @@ PHP.Modules.prototype.var_dump = function() {
                                 line
                                 ]);
                             result = result.substring( match[ 0 ].length );
-                        } */
+                        } 
                     }
 
 
@@ -8334,7 +8336,7 @@ PHP.Parser.prototype.yyn371 = function ( attributes ) {
 
 PHP.Parser.prototype.yyn372 = function ( attributes ) {
     this.yyval =  {
-        Class: {
+        variable: {
             name: this.yyastk[this.stackPos-(3-1)].substring(1),
             type: "Node_Expr_Variable",
             attributes: attributes

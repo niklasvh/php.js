@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 281 out of 672 (41.8%)
+Passed 282 out of 672 (42%)
 
 Failed tests:
 
@@ -154,7 +154,6 @@ Failed tests:
  - tests/php/classes/interface_method_private.phpt
  - tests/php/classes/interface_optional_arg_002.phpt
  - tests/php/classes/interface_optional_arg_003.phpt
- - tests/php/classes/iterators_008.phpt
  - tests/php/classes/method_call_variation_001.phpt
  - tests/php/classes/method_override_optional_arg_001.phpt
  - tests/php/classes/method_override_optional_arg_002.phpt

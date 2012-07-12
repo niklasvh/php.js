@@ -81,7 +81,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,
     expr;
-     console.log('yoss');
+  
     if ( iterator === undefined  || iterator.expr === undefined ) {
         return false;
     }
@@ -113,10 +113,10 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     } else if ( expr[ VAR.TYPE ] === VAR.OBJECT ) {
         var objectValue = expr[ COMPILER.VARIABLE_VALUE ]
         
-         console.log('supssss');
+
         // iteratorAggregate implemented objects
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
-             console.log('supssss2');
+
             if ( byRef === true ) {
                 this.ENV[ PHP.Compiler.prototype.ERROR ]( "An iterator cannot be used with foreach by reference", PHP.Constants.E_ERROR, true );
             }

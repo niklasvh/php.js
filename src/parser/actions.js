@@ -2631,7 +2631,7 @@ PHP.Parser.prototype.yyn371 = function ( attributes ) {
 
 PHP.Parser.prototype.yyn372 = function ( attributes ) {
     this.yyval =  {
-        Class: {
+        variable: {
             name: this.yyastk[this.stackPos-(3-1)].substring(1),
             type: "Node_Expr_Variable",
             attributes: attributes

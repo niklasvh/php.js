@@ -482,10 +482,11 @@ PHP.Lexer = function( src ) {
                             ]);
 
                         result = result.substring( match[ 0 ].length );
-                    /*
+                    
                         match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
+                        
                         if ( match !== null ) {
-                            console.log( match );
+                            
                             results.push([
                                 parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10),
                                 match[ 1 ],
@@ -497,7 +498,7 @@ PHP.Lexer = function( src ) {
                                 line
                                 ]);
                             result = result.substring( match[ 0 ].length );
-                        } */
+                        } 
                     }
 
 
