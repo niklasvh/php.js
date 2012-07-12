@@ -103,6 +103,7 @@ var files = {
         variable: {
             empty: "js",
             is_callable: "js",
+            is_string: "js",
             isset: "js",
             print_r: "js",
             unset: "js",
@@ -128,13 +129,16 @@ var files = {
     predefined: {
         classes: {
             Exception: "js",
+            ReflectionClass: "js",
+            ReflectionException: "js",
             stdClass: "js"
         },
         interfaces: {
             Traversable: "js",
             ArrayAccess: "js",
             Iterator: "js",
-            IteratorAggregate: "js"
+            IteratorAggregate: "js",
+            Reflector: "js"
             
         }
     }

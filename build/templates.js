@@ -32,7 +32,7 @@ function template( type ) {
 
                 var src = "/* automatically built from " + file + "*/\n";
                 
-                src += "PHP.VM.Class.Predefined." + file.replace(".php","") + " = function( ENV ) {\n" + compiler.src + "\n};";
+                src += "PHP.VM.Class.Predefined." + file.replace(".php","") + " = function( ENV, $$ ) {\n" + compiler.src + "\n};";
             
 
                 fs.writeFile('src/predefined/' + type +'/' + file.replace(".php",".js") , src, function (err) {

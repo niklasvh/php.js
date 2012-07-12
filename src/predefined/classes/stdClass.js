@@ -1,5 +1,5 @@
 /* automatically built from stdClass.php*/
-PHP.VM.Class.Predefined.stdClass = function( ENV ) {
+PHP.VM.Class.Predefined.stdClass = function( ENV, $$ ) {
 ENV.$Class.New( "stdClass", 0, {}, function( M, $ ){
  M.Create()});
 

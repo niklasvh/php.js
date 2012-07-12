@@ -304,6 +304,10 @@ PHP.Compiler.prototype.UNSET = "$Unset";
 
 PHP.Compiler.prototype.NOT_IDENTICAL = "$NIdentical";
 
+PHP.Compiler.prototype.IDENTICAL = "$Identical";
+
+PHP.Compiler.prototype.BOOLEAN_NOT = "$Not";
+
 PHP.Compiler.prototype.EQUAL = "$Equal";
 
 PHP.Compiler.prototype.SMALLER = "$Smaller";
@@ -607,6 +611,15 @@ PHP.Compiler.prototype.Node_Expr_NotIdentical = function( action ) {
     return this.source( action.left ) + "." + this.NOT_IDENTICAL + "(" + this.source( action.right ) + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_Identical = function( action ) {
+    return this.source( action.left ) + "." + this.IDENTICAL + "(" + this.source( action.right ) + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_BooleanNot = function( action ) {
+    console.log( action );
+    return this.source( action.expr ) + "." + this.BOOLEAN_NOT + "()";
+};
+
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {
     return this.source( action.left ) + "." + this.SMALLER+ "(" + this.source( action.right ) + ")";
 };
@@ -692,7 +705,17 @@ PHP.Compiler.prototype.Node_Expr_RequireOnce = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_New = function( action ) {
 
-    var src = this.CREATE_VARIABLE + '(new (' + this.CTX + this.CLASS_GET + '("' + this.getName( action.Class ) + '"))( this';
+
+    var classPart,
+    src = "";
+    
+    if (action.Class.type === "Node_Name") {
+        classPart = '"' + this.source(action.Class) +'"';
+    } else {
+        classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
+    }
+
+    src += this.CREATE_VARIABLE + '(new (' + this.CTX + this.CLASS_GET + '(' + classPart + '))( this';
 
     action.args.forEach(function( arg ) {
 
@@ -3678,6 +3701,22 @@ PHP.Modules.prototype.is_callable = function( callback ) {
     } else {
            console.log( callback );
     }
+    
+ 
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 13.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.is_string = function( variable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    return new PHP.VM.Variable( variable[ VARIABLE.TYPE ] === VARIABLE.STRING );
     
  
     
@@ -8779,20 +8818,19 @@ PHP.VM = function( src, opts ) {
 
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, opts.SERVER ).$;
     
-    
-    Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
-        PHP.VM.Class.Predefined[ className ]( ENV );
-    });
-   
-
-
-      
+     
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
      
     this.OUTPUT_BUFFERS = [""];
     this.$obreset();
-      /*
+    
+    Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
+        PHP.VM.Class.Predefined[ className ]( ENV, $$ );
+    });
+    
+    
+    /*
         var exec = new Function( "$$", "$", "ENV", src  );
         exec.call(this, $$, $, ENV);
     
@@ -9808,6 +9846,12 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.METHOD_CALL ] = function(
     return this[ COMPILER.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ].apply( this[ COMPILER.VARIABLE_VALUE ], arguments );
 };
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_NOT ] = function() {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( !(this[ COMPILER.VARIABLE_VALUE ]) );
+};
+
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.NOT_IDENTICAL ] = function( compareTo ) {
     
     var COMPILER = PHP.Compiler.prototype;
@@ -10466,7 +10510,7 @@ PHP.VM.Constants = function(  predefined, ENV ) {
     return methods;
     
 };/* automatically built from Exception.php*/
-PHP.VM.Class.Predefined.Exception = function( ENV ) {
+PHP.VM.Class.Predefined.Exception = function( ENV, $$ ) {
 ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
  M.Variable( "message", 2 )
 .Variable( "code", 2 )
@@ -10496,18 +10540,44 @@ return this.$Prop( ctx, "message" );
 })
 .Create()});
 
+};/* automatically built from ReflectionClass.php*/
+PHP.VM.Class.Predefined.ReflectionClass = function( ENV, $$ ) {
+ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $ ){
+ M.Constant("IS_IMPLICIT_ABSTRACT", $$(16))
+.Constant("IS_EXPLICIT_ABSTRACT", $$(32))
+.Constant("IS_FINAL", $$(64))
+.Variable( "name", 1 )
+.Variable( "class", 4 )
+.Method( "__construct", 1, [{"name":"argument"}], function( $, ctx ) {
+if ( ((ENV.is_string($("argument")))).$Bool.$) {
+if ( ((ENV.class_exists($("argument"))).$Not()).$Bool.$) {
+ENV.echo( $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) );
+};
+};
+})
+.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":25,"endLine":1}},"attributes":{"startLine":25,"endLine":1}}}], function( $, ctx ) {
+})
+.Method( "__toString", 1, [], function( $, ctx ) {
+})
+.Create()});
+
+};/* automatically built from ReflectionException.php*/
+PHP.VM.Class.Predefined.ReflectionException = function( ENV, $$ ) {
+ENV.$Class.New( "ReflectionException", 0, {Extends: "Exception"}, function( M, $ ){
+ M.Create()});
+
 };/* automatically built from stdClass.php*/
-PHP.VM.Class.Predefined.stdClass = function( ENV ) {
+PHP.VM.Class.Predefined.stdClass = function( ENV, $$ ) {
 ENV.$Class.New( "stdClass", 0, {}, function( M, $ ){
  M.Create()});
 
 };/* automatically built from Traversable.php*/
-PHP.VM.Class.Predefined.Traversable = function( ENV ) {
+PHP.VM.Class.Predefined.Traversable = function( ENV, $$ ) {
 ENV.$Class.INew( "Traversable", [], function( M, $ ){
  M.Create()});
 
 };/* automatically built from ArrayAccess.php*/
-PHP.VM.Class.Predefined.ArrayAccess = function( ENV ) {
+PHP.VM.Class.Predefined.ArrayAccess = function( ENV, $$ ) {
 ENV.$Class.INew( "ArrayAccess", [], function( M, $ ){
  M.Method( "offsetExists", 1, [{"name":"offset"}], function( $, ctx ) {
 })
@@ -10520,7 +10590,7 @@ ENV.$Class.INew( "ArrayAccess", [], function( M, $ ){
 .Create()});
 
 };/* automatically built from Iterator.php*/
-PHP.VM.Class.Predefined.Iterator = function( ENV ) {
+PHP.VM.Class.Predefined.Iterator = function( ENV, $$ ) {
 ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $ ){
  M.Method( "current", 1, [], function( $, ctx ) {
 })
@@ -10535,9 +10605,18 @@ ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $ ){
 .Create()});
 
 };/* automatically built from IteratorAggregate.php*/
-PHP.VM.Class.Predefined.IteratorAggregate = function( ENV ) {
+PHP.VM.Class.Predefined.IteratorAggregate = function( ENV, $$ ) {
 ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $ ){
  M.Method( "getIterator", 17, [], function( $, ctx ) {
+})
+.Create()});
+
+};/* automatically built from Reflector.php*/
+PHP.VM.Class.Predefined.Reflector = function( ENV, $$ ) {
+ENV.$Class.INew( "Reflector", [], function( M, $ ){
+ M.Method( "export", 25, [], function( $, ctx ) {
+})
+.Method( "__toString", 17, [], function( $, ctx ) {
 })
 .Create()});
 

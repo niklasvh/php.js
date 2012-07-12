@@ -138,6 +138,10 @@ PHP.Compiler.prototype.UNSET = "$Unset";
 
 PHP.Compiler.prototype.NOT_IDENTICAL = "$NIdentical";
 
+PHP.Compiler.prototype.IDENTICAL = "$Identical";
+
+PHP.Compiler.prototype.BOOLEAN_NOT = "$Not";
+
 PHP.Compiler.prototype.EQUAL = "$Equal";
 
 PHP.Compiler.prototype.SMALLER = "$Smaller";

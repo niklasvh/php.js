@@ -191,6 +191,15 @@ PHP.Compiler.prototype.Node_Expr_NotIdentical = function( action ) {
     return this.source( action.left ) + "." + this.NOT_IDENTICAL + "(" + this.source( action.right ) + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_Identical = function( action ) {
+    return this.source( action.left ) + "." + this.IDENTICAL + "(" + this.source( action.right ) + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_BooleanNot = function( action ) {
+    console.log( action );
+    return this.source( action.expr ) + "." + this.BOOLEAN_NOT + "()";
+};
+
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {
     return this.source( action.left ) + "." + this.SMALLER+ "(" + this.source( action.right ) + ")";
 };
@@ -276,7 +285,17 @@ PHP.Compiler.prototype.Node_Expr_RequireOnce = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_New = function( action ) {
 
-    var src = this.CREATE_VARIABLE + '(new (' + this.CTX + this.CLASS_GET + '("' + this.getName( action.Class ) + '"))( this';
+
+    var classPart,
+    src = "";
+    
+    if (action.Class.type === "Node_Name") {
+        classPart = '"' + this.source(action.Class) +'"';
+    } else {
+        classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
+    }
+
+    src += this.CREATE_VARIABLE + '(new (' + this.CTX + this.CLASS_GET + '(' + classPart + '))( this';
 
     action.args.forEach(function( arg ) {
 

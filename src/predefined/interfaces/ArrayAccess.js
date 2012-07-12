@@ -1,5 +1,5 @@
 /* automatically built from ArrayAccess.php*/
-PHP.VM.Class.Predefined.ArrayAccess = function( ENV ) {
+PHP.VM.Class.Predefined.ArrayAccess = function( ENV, $$ ) {
 ENV.$Class.INew( "ArrayAccess", [], function( M, $ ){
  M.Method( "offsetExists", 1, [{"name":"offset"}], function( $, ctx ) {
 })
