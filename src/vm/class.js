@@ -446,7 +446,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
             (( classType === PHP.VM.Class.INTERFACE) ? opts : opts.Implements).forEach(function( interfaceName ){
                 
-                var Implements = ENV.$Class.Get( interfaceName ); 
+                var Implements = ENV.$Class.Get( interfaceName, undefined, true ); 
                 
                 if ( Implements.prototype[ COMPILER.CLASS_TYPE ] !== PHP.VM.Class.INTERFACE ) {
                     // can't implement non-interface

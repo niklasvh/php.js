@@ -8738,13 +8738,13 @@ PHP.VM = function( src, opts ) {
                 }
                 
             },
-            Get: function( className, state ) {
+            Get: function( className, state, isInterface ) {
                
                 if ( !/(self|parent)/i.test( className ) ) {
                     
                     if (classRegistry[ className.toLowerCase() ] === undefined && methods.__autoload( className ) === false ) {
                         
-                        ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
+                        ENV[ COMPILER.ERROR ]( (( isInterface === true) ? "Interface" :  "Class") + " '" + className + "' not found", PHP.Constants.E_ERROR, true );
                     }
                     
                     if (state !== undefined) {
@@ -9263,7 +9263,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
             (( classType === PHP.VM.Class.INTERFACE) ? opts : opts.Implements).forEach(function( interfaceName ){
                 
-                var Implements = ENV.$Class.Get( interfaceName ); 
+                var Implements = ENV.$Class.Get( interfaceName, undefined, true ); 
                 
                 if ( Implements.prototype[ COMPILER.CLASS_TYPE ] !== PHP.VM.Class.INTERFACE ) {
                     // can't implement non-interface
