@@ -412,7 +412,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         if (opts.Extends  !== undefined) {
             
-            var Extends = classRegistry[ opts.Extends.toLowerCase() ];
+            var Extends = ENV.$Class.Get( opts.Extends );
             
             if ( Extends.prototype[ COMPILER.CLASS_TYPE ] === PHP.VM.Class.INTERFACE ) {
                 // can't extend interface

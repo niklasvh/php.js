@@ -45,7 +45,7 @@ PHP.VM = function( src, opts ) {
                 if ( typeof ENV.__autoload === "function" ) {
                     ENV.__autoload( new PHP.VM.Variable( name ) );
                 }
-                
+                console.log('loaded');
                 return methods.Exists( name );
             },
             INew: function( name, exts, func ) {

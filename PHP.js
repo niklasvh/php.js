@@ -8533,7 +8533,7 @@ PHP.VM = function( src, opts ) {
                 if ( typeof ENV.__autoload === "function" ) {
                     ENV.__autoload( new PHP.VM.Variable( name ) );
                 }
-                
+                console.log('loaded');
                 return methods.Exists( name );
             },
             INew: function( name, exts, func ) {
@@ -9060,7 +9060,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         if (opts.Extends  !== undefined) {
             
-            var Extends = classRegistry[ opts.Extends.toLowerCase() ];
+            var Extends = ENV.$Class.Get( opts.Extends );
             
             if ( Extends.prototype[ COMPILER.CLASS_TYPE ] === PHP.VM.Class.INTERFACE ) {
                 // can't extend interface
