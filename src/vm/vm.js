@@ -85,7 +85,8 @@ PHP.VM = function( src, opts ) {
                
                 if ( !/(self|parent)/i.test( className ) ) {
                     
-                    if (classRegistry[ className.toLowerCase() ] === undefined ) {
+                    if (classRegistry[ className.toLowerCase() ] === undefined && methods.__autoload( className ) === false ) {
+                        
                         ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
                     }
                     

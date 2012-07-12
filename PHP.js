@@ -1872,6 +1872,43 @@ PHP.Modules.prototype.get_class = function( object ) {
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 12.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+
+PHP.Modules.prototype.get_class_methods = function( object ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    var prefix = PHP.VM.Class.METHOD,
+    items = [],
+    classObj,
+    index = 0;
+    
+    if ( object[ VARIABLE.TYPE ] === VARIABLE.STRING ) {
+        classObj = this.$Class.Get( object[ COMPILER.VARIABLE_VALUE ]).prototype;
+    } else if ( object[ VARIABLE.TYPE ] === VARIABLE.OBJECT ) {
+        classObj =  object[ COMPILER.VARIABLE_VALUE ];
+    }
+     var item = PHP.VM.Array.arrayItem;
+       
+    
+
+    
+    Object.keys( classObj ).forEach( function( key ) {
+        if ( key.substring(0, prefix.length ) === prefix ) {
+            items.push( item( index++, key.substring( prefix.length )) );
+        }
+    });
+
+    return this.array( items );
+    
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 11.7.2012 
 * @website http://hertzen.com
  */
@@ -8536,7 +8573,8 @@ PHP.VM = function( src, opts ) {
                
                 if ( !/(self|parent)/i.test( className ) ) {
                     
-                    if (classRegistry[ className.toLowerCase() ] === undefined ) {
+                    if (classRegistry[ className.toLowerCase() ] === undefined && methods.__autoload( className ) === false ) {
+                        
                         ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
                     }
                     

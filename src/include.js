@@ -29,6 +29,7 @@ var files = {
         classes: {
             class_exists: "js",
             get_class: "js",
+            get_class_methods: "js",
             method_exists: "js"
         },
         control_structures: {
