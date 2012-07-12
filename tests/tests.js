@@ -65,7 +65,7 @@ PHP_Tests.prototype.runTest = function( li ) {
         if (test.EXPECT === undefined ) {
             var shouldBef = expect.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
             shouldBef = shouldBef.replace(/\%d/g,"\\d+");
-            shouldBef = shouldBef.replace(/\%s/g,"\\S+");
+            shouldBef = shouldBef.replace(/\%s/g,".+");
             shouldBef = shouldBef.replace(/\%S/g,".*?");
                         
             var re = new RegExp("^" + shouldBef + "$", "i");

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 302 out of 672 (44.9%)
+Passed 305 out of 672 (45.4%)
 
 Failed tests:
 
@@ -87,9 +87,6 @@ Failed tests:
  - tests/php/classes/clone_004.phpt
  - tests/php/classes/clone_006.phpt
  - tests/php/classes/constants_error_004.phpt
- - tests/php/classes/constants_error_005.phpt
- - tests/php/classes/constants_error_006.phpt
- - tests/php/classes/constants_error_007.phpt
  - tests/php/classes/constants_scope_001.phpt
  - tests/php/classes/ctor_dtor.phpt
  - tests/php/classes/ctor_dtor_inheritance.phpt
