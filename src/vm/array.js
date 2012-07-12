@@ -151,7 +151,8 @@ PHP.VM.Array = function( ENV ) {
    
         addItem = function( value, key ) {
             obj = {};
-            obj[ PHP.Compiler.prototype.ARRAY_KEY ] = key;
+            
+            obj[ PHP.Compiler.prototype.ARRAY_KEY ] = ( /^\d+$/.test( key )) ? key - 0 : key; // use int for int
         
             if ( value instanceof PHP.VM.Variable ) {
                 obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = value;
