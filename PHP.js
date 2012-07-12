@@ -3659,12 +3659,55 @@ PHP.Modules.prototype.print_r = function() {
                 str += $dump( values[ index ], indent + 8 );
                 
                 if ( values[ index ][ VAR.TYPE] === VAR.ARRAY ) {
-                     str += "\n";
+                    str += "\n";
                 }
                 
             }, this);
             
             str += $INDENT( indent ) + ")\n";
+        } else if( argument[ VAR.TYPE ] === VAR.OBJECT ) { 
+            var classObj = argument[ COMPILER.VARIABLE_VALUE ];
+            str += classObj[ COMPILER.CLASS_NAME ] + " Object\n";
+            str += $INDENT( indent ) + "(";
+      
+      
+                  
+            var props = [];
+            
+            // search whole prototype chain
+            for ( var item in classObj ) {
+                if (item.substring(0, PHP.VM.Class.PROPERTY.length) === PHP.VM.Class.PROPERTY) {
+                    props.push( item );
+                }
+            }
+         
+ 
+            props.forEach(function( prop ){
+                str += "\n" + $INDENT( indent + 4 ) + '[' + prop.substring( PHP.VM.Class.PROPERTY.length ) + '] => ';
+                str += $dump( classObj[ prop ], indent + 8 );
+            });
+            
+      
+       
+            str += "\n";
+            /*
+            keys.forEach(function( key, index ){
+                str += $INDENT( indent + 4 ) + "[";
+
+                str += key;
+                
+                str += "] => ";
+                
+                str += $dump( values[ index ], indent + 8 );
+                
+                if ( values[ index ][ VAR.TYPE] === VAR.ARRAY ) {
+                    str += "\n";
+                }
+                
+            }, this);
+            */
+            str += $INDENT( indent ) + ")\n";
+            
         } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
             str += $INDENT( indent ) + "NULL\n";  
         } else if( argument[ VAR.TYPE ] === VAR.STRING ) {
