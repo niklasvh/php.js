@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 327 out of 672 (48.7%)
+Passed 330 out of 672 (49.1%)
 
 Failed tests:
 
@@ -108,7 +108,6 @@ Failed tests:
  - tests/php/classes/interface_constant_inheritance_001.phpt
  - tests/php/classes/interface_constant_inheritance_002.phpt
  - tests/php/classes/interface_constant_inheritance_003.phpt
- - tests/php/classes/interface_constant_inheritance_004.phpt
  - tests/php/classes/interface_doubled.phpt
  - tests/php/classes/interface_implemented.phpt
  - tests/php/classes/interface_method.phpt
@@ -138,8 +137,6 @@ Failed tests:
  - tests/php/classes/tostring_002.phpt
  - tests/php/classes/tostring_003.phpt
  - tests/php/classes/tostring_004.phpt
- - tests/php/classes/type_hinting_001.phpt
- - tests/php/classes/type_hinting_002.phpt
  - tests/php/classes/type_hinting_003.phpt
  - tests/php/classes/type_hinting_004.phpt
  - tests/php/classes/type_hinting_005a.phpt

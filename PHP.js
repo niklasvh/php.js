@@ -354,6 +354,8 @@ PHP.Compiler.prototype.CLASS_CONSTANT = "Constant";
 
 PHP.Compiler.prototype.CLASS_CONSTANT_FETCH = "$Constant";
 
+PHP.Compiler.prototype.PROPERTY_TYPE = "p";
+
 PHP.Compiler.prototype.CLASS_PROPERTY = "Variable";
 
 PHP.Compiler.prototype.CLASS_DECLARE = "Create";
@@ -908,12 +910,12 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
     if ( action.Extends !== null ) {
         src += 'Extends: "' + this.source(action.Extends) + '"';
     }
-    
+  
     if ( action.Implements.length > 0 ) {
         if ( action.Extends !== null ) {
             src += ", "
         }
-        src += 'Implements: [' + action.Implements.map(function( item ){
+        src += 'Implements: [' + (Array.isArray(action.Implements[ 0 ]) ? action.Implements[ 0 ] : action.Implements ).map(function( item ){
             return '"' + item.parts + '"';
         }).join(", ") + "]";
     }
@@ -1220,6 +1222,8 @@ PHP.Compiler.prototype.Node_Stmt_Catch = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
 
+  
+
     this.INSIDE_METHOD = true;
     var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', ';
     var props = [];
@@ -1234,6 +1238,10 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         
         if (prop.def !== null) {
             obj.def = prop.def;
+        }
+        
+        if (prop.Type !== null ) {
+            obj[ this.PROPERTY_TYPE ] = this.source( prop.Type );
         }
         
         props.push( obj );
@@ -1571,6 +1579,12 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                 case C.E_ERROR:
                     this[ COMPILER.DISPLAY_HANDLER ] = false;
                     this.$ob( "\nFatal error: " + msg + lineAppend + "\n");
+                    throw new PHP.Halt( level );
+                    return;
+                    break;
+                case C.E_RECOVERABLE_ERROR:
+                    this[ COMPILER.DISPLAY_HANDLER ] = false;
+                    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
                     throw new PHP.Halt( level );
                     return;
                     break;
@@ -8926,8 +8940,51 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         if ( Array.isArray(argumentObj) ) {
             argumentObj.forEach( function( arg, index ) {
+                
+                
+                var classObj,
+                typeInterface = false;
+               
+                // perform type hint check
+            
+                if ( arg[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
+                   
+                    if ( args[ index ] instanceof PHP.VM.VariableProto) {
+                        classObj = args[ index ][ COMPILER.VARIABLE_VALUE ];
+                    } else {
+                        classObj = args[ index ];
+                    }
+                    
+                    var argPassedTo = "Argument " + (index + 1) + " passed to " + className + "::" + methodName + "() must ",
+                    calledIn = ", called in " + ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined",
+                    argGiven = ", instance of " + classObj[ COMPILER.CLASS_NAME ] + " given";
+                    
+                    // check if we are looking for implement or instance
+                    // do a check if it exists before getting, so we don't trigger an __autoload
+                    if ( ENV.$Class.Exists( arg[ COMPILER.PROPERTY_TYPE ] ) &&  checkType(ENV.$Class.Get( arg[ COMPILER.PROPERTY_TYPE ] ).prototype[ COMPILER.CLASS_TYPE ], INTERFACE)) {
+                        typeInterface = true;
+                    } 
+                     
+                    // we are looking for an instance
+                    if ( !typeInterface && classObj[ COMPILER.CLASS_NAME ] !== arg[ COMPILER.PROPERTY_TYPE ] ) {
+                        // not of same class type
+                        ENV[ COMPILER.ERROR ]( argPassedTo + "be an instance of " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn, PHP.Constants.E_RECOVERABLE_ERROR, true );      
+                    }
+                     
+                    // we are looking for an implementation of interface
+                    else if ( typeInterface && classObj[ PHP.VM.Class.INTERFACES ].indexOf( arg[ COMPILER.PROPERTY_TYPE ] ) === -1) {
+                        ENV[ COMPILER.ERROR ]( argPassedTo + "implement interface " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn, PHP.Constants.E_RECOVERABLE_ERROR, true );      
+ 
+                    }
+                     
+                }   
+                
+                
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
+                    
+                    
+                    
                     if ( args[ index ] instanceof PHP.VM.VariableProto) {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
                     } else {

@@ -7,7 +7,7 @@ class Exception {
     protected $file;
     protected $line;
 
-    public function __construct($message = "", $code = 0, Exception $previous = NULL) {
+    public function __construct($message = "", $code = 0, $previous = NULL) {
         $this->message = $message;
     }
 

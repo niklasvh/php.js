@@ -30,7 +30,7 @@ class ReflectionClass {
         }
     }
     
-    public function implementsInterface( string $interface ) {
+    public function implementsInterface( $interface ) {
         if ( !interface_exists( $interface ) ) {
             throw new ReflectionException("Interface " . $interface . " does not exist ");
         }

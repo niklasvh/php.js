@@ -36,12 +36,12 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
     if ( action.Extends !== null ) {
         src += 'Extends: "' + this.source(action.Extends) + '"';
     }
-    
+  
     if ( action.Implements.length > 0 ) {
         if ( action.Extends !== null ) {
             src += ", "
         }
-        src += 'Implements: [' + action.Implements.map(function( item ){
+        src += 'Implements: [' + (Array.isArray(action.Implements[ 0 ]) ? action.Implements[ 0 ] : action.Implements ).map(function( item ){
             return '"' + item.parts + '"';
         }).join(", ") + "]";
     }
@@ -348,6 +348,8 @@ PHP.Compiler.prototype.Node_Stmt_Catch = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
 
+  
+
     this.INSIDE_METHOD = true;
     var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', ';
     var props = [];
@@ -362,6 +364,10 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         
         if (prop.def !== null) {
             obj.def = prop.def;
+        }
+        
+        if (prop.Type !== null ) {
+            obj[ this.PROPERTY_TYPE ] = this.source( prop.Type );
         }
         
         props.push( obj );

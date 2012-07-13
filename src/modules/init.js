@@ -231,6 +231,12 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     throw new PHP.Halt( level );
                     return;
                     break;
+                case C.E_RECOVERABLE_ERROR:
+                    this[ COMPILER.DISPLAY_HANDLER ] = false;
+                    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
+                    throw new PHP.Halt( level );
+                    return;
+                    break;
             
                 case C.E_WARNING:
                 case C.E_CORE_WARNING:
