@@ -328,6 +328,10 @@ PHP.Compiler.prototype.VARIABLE_VALUE = "$";
 
 PHP.Compiler.prototype.CREATE_VARIABLE = "$$";
 
+PHP.Compiler.prototype.ARRAY_CLONE = "$AClone";
+
+PHP.Compiler.prototype.VARIABLE_CLONE = "$VClone";
+
 PHP.Compiler.prototype.ARRAY_GET = "offsetGet";
 
 PHP.Compiler.prototype.METHOD_CALL = "$Call";
@@ -1227,30 +1231,34 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
   
 
     this.INSIDE_METHOD = true;
-    var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', ';
+    var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', [';
     var props = [];
     
     
     
     ((Array.isArray(action.params[ 0 ])) ? action.params[ 0 ] : action.params).forEach(function( prop ){
         
-        var obj = {
-            name: prop.name
-        };
+        
+        var obj = '{name:"' + prop.name +'"';
+       
+        
+        
         
         if (prop.def !== null) {
-            obj[ this.PROPERTY_DEFAULT ] = this.source( prop.def );
+            obj += ", " + this.PROPERTY_DEFAULT  + ": " + this.source( prop.def )
         }
         
         if (prop.Type !== null ) {
-            obj[ this.PROPERTY_TYPE ] = this.source( prop.Type );
+            obj += ", " +  this.PROPERTY_TYPE + ': "' + this.source( prop.Type ) + '"'
         }
+        
+        obj += "}";
         
         props.push( obj );
         
     }, this)   
         
-    src += JSON.stringify( props ) + ', function( ' + this.VARIABLE + ', ctx ) {\n';
+    src +=  props.join(", ")  + '], function( ' + this.VARIABLE + ', ctx ) {\n';
     
     if (action.stmts !== null ) {
         src += this.stmts( action.stmts );
@@ -8943,8 +8951,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         if ( Array.isArray(argumentObj) ) {
             argumentObj.forEach( function( arg, index ) {
                 
-                
-                                
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
                     
@@ -8957,7 +8963,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 } else {
                     // no argument passed for the specified index
+                    
                     if ( arg[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
+                        console.log('setting default', arg[ COMPILER.PROPERTY_DEFAULT ]);
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = arg[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
                     } else {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
@@ -8971,7 +8979,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 // perform type hint check
             
                 if ( arg[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
-                   
                     /*
                     if ( args[ index ] instanceof PHP.VM.VariableProto) {
                         classObj = args[ index ][ COMPILER.VARIABLE_VALUE ];
@@ -8986,25 +8993,56 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     
                         var argPassedTo = "Argument " + (index + 1) + " passed to " + className + "::" + methodName + "() must ",
                         calledIn = ", called in " + ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined",
-                        argGiven = ", instance of " + classObj[ COMPILER.CLASS_NAME ] + " given";
+                        argGiven,
+                        variableType = $( arg.name )[ VARIABLE.TYPE ],
+                        errorMsg;
+                    
+                        switch ( variableType  ) {
+                            
+                            case VARIABLE.OBJECT:
+                                argGiven = ", instance of " + classObj[ COMPILER.CLASS_NAME ] + " given";
+                                break;
+                            
+                            case VARIABLE.INT:
+                                argGiven = ", integer given";
+                                break;
+                            
+                        }
                     
                         // check if we are looking for implement or instance
                         // do a check if it exists before getting, so we don't trigger an __autoload
                         if ( ENV.$Class.Exists( arg[ COMPILER.PROPERTY_TYPE ] ) &&  checkType(ENV.$Class.Get( arg[ COMPILER.PROPERTY_TYPE ] ).prototype[ COMPILER.CLASS_TYPE ], INTERFACE)) {
                             typeInterface = true;
                         } 
+                        
+                        
+                        switch( arg[ COMPILER.PROPERTY_TYPE ].toLowerCase() ) {
+                            
+                            case "array":
+                                if ( VARIABLE.ARRAY !== variableType) {
+                                    errorMsg = argPassedTo + "be of the type array" + argGiven + calledIn;
+                                }
+                                break;
+                            
+                            default:
+                                // we are looking for an instance
+                                if ( !typeInterface && classObj[ COMPILER.CLASS_NAME ] !== arg[ COMPILER.PROPERTY_TYPE ] ) {
+                                    // not of same class type
+                                    errorMsg = argPassedTo + "be an instance of " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn;
+                            
+                                }
                      
-                        // we are looking for an instance
-                        if ( !typeInterface && classObj[ COMPILER.CLASS_NAME ] !== arg[ COMPILER.PROPERTY_TYPE ] ) {
-                            // not of same class type
-                            ENV[ COMPILER.ERROR ]( argPassedTo + "be an instance of " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn, PHP.Constants.E_RECOVERABLE_ERROR, true );      
+                                // we are looking for an implementation of interface
+                                else if ( typeInterface && classObj[ PHP.VM.Class.INTERFACES ].indexOf( arg[ COMPILER.PROPERTY_TYPE ] ) === -1) {
+                                    errorMsg = argPassedTo + "implement interface " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn;
+                                }
                         }
-                     
-                        // we are looking for an implementation of interface
-                        else if ( typeInterface && classObj[ PHP.VM.Class.INTERFACES ].indexOf( arg[ COMPILER.PROPERTY_TYPE ] ) === -1) {
-                            ENV[ COMPILER.ERROR ]( argPassedTo + "implement interface " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn, PHP.Constants.E_RECOVERABLE_ERROR, true );      
- 
+                      
+                        
+                        if ( errorMsg !== undefined ) {
+                            ENV[ COMPILER.ERROR ]( errorMsg , PHP.Constants.E_RECOVERABLE_ERROR, true );   
                         }
+                        
                     }
                 }   
                 
@@ -9998,7 +10036,7 @@ PHP.VM.Variable = function( arg ) {
     
     setValue = function( newValue ) {
              
-        this[ this.DEFINED ] = true;
+       
 
         if ( newValue === undefined ) {
             newValue = null;
@@ -10028,8 +10066,12 @@ PHP.VM.Variable = function( arg ) {
         } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
             if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
                 this[ this.TYPE ] = this.ARRAY;
-                // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
-                console.log( newValue);
+                
+                if ( newValue[ this.DEFINED ] === true ) {
+                    // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
+                    value = newValue[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
+                }
+                
             } else {
 
                 this[ this.TYPE ] = this.OBJECT;
@@ -10039,7 +10081,8 @@ PHP.VM.Variable = function( arg ) {
         } else {
          
         }
-        
+        this[ this.DEFINED ] = true;
+         
         // is variable a reference
         if ( this[ this.REFERRING ] !== undefined ) {
             
@@ -10063,6 +10106,28 @@ PHP.VM.Variable = function( arg ) {
     
     setValue.call( this, arg );
     
+    this[ COMPILER.VARIABLE_CLONE ] = function() {
+        switch( this[ this.TYPE ] ) {
+            case this.NULL:
+            case this.BOOL:
+            case this.INT:
+            case this.FLOAT:
+            case this.STRING:
+                return new PHP.VM.Variable( value );               
+                break;
+            case this.OBJECT:
+            case this.RESOURCE:
+                return this;
+            case this.ARRAY:
+                return new PHP.VM.Variable( value[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  ) )
+                break;
+            default:
+                console.log("Unknown variable type cloned");
+                return this;
+        }
+        
+    };
+    
     this [ this.REF ] = function( variable ) {
         this[ this.REFERRING ] = variable;
         this[ this.DEFINED ] = true;
@@ -10072,7 +10137,7 @@ PHP.VM.Variable = function( arg ) {
         return this;
     };
     
-    this[ PHP.Compiler.prototype.NEG ] = function() {
+    this[ COMPILER.NEG ] = function() {
         this[ COMPILER.VARIABLE_VALUE ] = -this[ COMPILER.VARIABLE_VALUE ];
         return this;
     };
@@ -10408,8 +10473,34 @@ PHP.VM.Array = function( ENV ) {
        
         
         } )
-    
-    
+        /*
+     * Custom $clone method, shouldn't be triggerable by php manually
+     */
+        [ COMPILER.CLASS_METHOD ]( COMPILER.ARRAY_CLONE, PHP.VM.Class.PUBLIC, [{
+            "name":"index"
+        }], function( $ ) {
+            var newArr = new (ENV.$Class.Get("ArrayObject"))( ENV );
+            console.log( " array clone triggered ");
+            
+            // copy keys, can do direct copy ( probably? ) 
+            var keys = newArr[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
+            this[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ].forEach( function( key ){
+                keys.push( key );
+            });
+            
+            // copy values, need to do deep clone
+            var values = newArr[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
+            this[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ].forEach( function( valueObj ) {
+                
+                values.push( valueObj[ COMPILER.VARIABLE_CLONE ]() );
+                
+            });
+            
+            
+            return newArr;
+            
+        
+        })
         /*
      * offsetGet method
      */ 
@@ -10620,7 +10711,7 @@ ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
 .Variable( "code", 2 )
 .Variable( "file", 2 )
 .Variable( "line", 2 )
-.Method( "__construct", 1, [{"name":"message","d":"$$(\"\")"},{"name":"code","d":"$$(0)"},{"name":"previous","d":"$$(null)"}], function( $, ctx ) {
+.Method( "__construct", 1, [{name:"message", d: $$("")}, {name:"code", d: $$(0)}, {name:"previous", d: $$(null)}], function( $, ctx ) {
 this.$Prop( ctx, "message" )._($("message"));
 })
 .Method( "getMessage", 33, [], function( $, ctx ) {
@@ -10652,7 +10743,7 @@ ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $ ){
 .Constant("IS_FINAL", $$(64))
 .Variable( "name", 1 )
 .Variable( "class", 4 )
-.Method( "__construct", 1, [{"name":"argument"}], function( $, ctx ) {
+.Method( "__construct", 1, [{name:"argument"}], function( $, ctx ) {
 if ( ((ENV.is_string($("argument")))).$Bool.$) {
 if ( ((ENV.class_exists($("argument"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) ));
@@ -10661,18 +10752,18 @@ this.$Prop( ctx, "name" )._($("argument"));
 };
 };
 })
-.Method( "getProperty", 1, [{"name":"name"}], function( $, ctx ) {
+.Method( "getProperty", 1, [{name:"name"}], function( $, ctx ) {
 $("parts")._((ENV.explode($$("::"), $("name"))));
 if ( ((ENV.count($("parts"))).$Greater($$(1))).$Bool.$) {
 $$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parts").$Dim( this, $$(0) ), $("parts").$Dim( this, $$(1) ) ));
 };
 })
-.Method( "implementsInterface", 1, [{"name":"interface"}], function( $, ctx ) {
+.Method( "implementsInterface", 1, [{name:"interface"}], function( $, ctx ) {
 if ( ((ENV.interface_exists($("interface"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Concat($("interface")).$Concat($$(" does not exist ")) ));
 };
 })
-.Method( "export", 9, [{"name":"argument"},{"name":"return","d":"$$(false)"}], function( $, ctx ) {
+.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx ) {
 })
 .Method( "__toString", 1, [], function( $, ctx ) {
 })
@@ -10691,7 +10782,7 @@ ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $ ){
 .Constant("IS_FINAL", $$(64))
 .Variable( "name", 1 )
 .Variable( "class", 1 )
-.Method( "__construct", 1, [{"name":"class"},{"name":"name","d":"$$(null)"}], function( $, ctx ) {
+.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx ) {
 $("parts")._((ENV.explode($$("::"), $("class"))));
 $("class")._($("parts").$Dim( this, $$(0) ));
 $("name")._($("parts").$Dim( this, $$(1) ));
@@ -10699,7 +10790,7 @@ if ( ((ENV.class_exists($("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })
-.Method( "export", 9, [{"name":"argument"},{"name":"return","d":"$$(false)"}], function( $, ctx ) {
+.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx ) {
 })
 .Method( "__toString", 1, [], function( $, ctx ) {
 })
@@ -10714,12 +10805,12 @@ ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $ ){
 .Constant("IS_PRIVATE", $$(1024))
 .Variable( "name", 1 )
 .Variable( "class", 1 )
-.Method( "__construct", 1, [{"name":"class"},{"name":"name","d":"$$(null)"}], function( $, ctx ) {
+.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx ) {
 if ( ((ENV.class_exists($("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })
-.Method( "export", 9, [{"name":"argument"},{"name":"return","d":"$$(false)"}], function( $, ctx ) {
+.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx ) {
 })
 .Method( "__toString", 1, [], function( $, ctx ) {
 })
@@ -10738,13 +10829,13 @@ ENV.$Class.INew( "Traversable", [], function( M, $ ){
 };/* automatically built from ArrayAccess.php*/
 PHP.VM.Class.Predefined.ArrayAccess = function( ENV, $$ ) {
 ENV.$Class.INew( "ArrayAccess", [], function( M, $ ){
- M.Method( "offsetExists", 1, [{"name":"offset"}], function( $, ctx ) {
+ M.Method( "offsetExists", 1, [{name:"offset"}], function( $, ctx ) {
 })
-.Method( "offsetGet", 1, [{"name":"offset"}], function( $, ctx ) {
+.Method( "offsetGet", 1, [{name:"offset"}], function( $, ctx ) {
 })
-.Method( "offsetSet", 1, [{"name":"offset"},{"name":"value"}], function( $, ctx ) {
+.Method( "offsetSet", 1, [{name:"offset"}, {name:"value"}], function( $, ctx ) {
 })
-.Method( "offsetUnset", 1, [{"name":"offset"}], function( $, ctx ) {
+.Method( "offsetUnset", 1, [{name:"offset"}], function( $, ctx ) {
 })
 .Create()});
 

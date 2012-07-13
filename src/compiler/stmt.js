@@ -351,30 +351,34 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
   
 
     this.INSIDE_METHOD = true;
-    var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', ';
+    var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', [';
     var props = [];
     
     
     
     ((Array.isArray(action.params[ 0 ])) ? action.params[ 0 ] : action.params).forEach(function( prop ){
         
-        var obj = {
-            name: prop.name
-        };
+        
+        var obj = '{name:"' + prop.name +'"';
+       
+        
+        
         
         if (prop.def !== null) {
-            obj[ this.PROPERTY_DEFAULT ] = this.source( prop.def );
+            obj += ", " + this.PROPERTY_DEFAULT  + ": " + this.source( prop.def )
         }
         
         if (prop.Type !== null ) {
-            obj[ this.PROPERTY_TYPE ] = this.source( prop.Type );
+            obj += ", " +  this.PROPERTY_TYPE + ': "' + this.source( prop.Type ) + '"'
         }
+        
+        obj += "}";
         
         props.push( obj );
         
     }, this)   
         
-    src += JSON.stringify( props ) + ', function( ' + this.VARIABLE + ', ctx ) {\n';
+    src +=  props.join(", ")  + '], function( ' + this.VARIABLE + ', ctx ) {\n';
     
     if (action.stmts !== null ) {
         src += this.stmts( action.stmts );

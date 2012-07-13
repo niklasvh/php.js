@@ -78,8 +78,34 @@ PHP.VM.Array = function( ENV ) {
        
         
         } )
-    
-    
+        /*
+     * Custom $clone method, shouldn't be triggerable by php manually
+     */
+        [ COMPILER.CLASS_METHOD ]( COMPILER.ARRAY_CLONE, PHP.VM.Class.PUBLIC, [{
+            "name":"index"
+        }], function( $ ) {
+            var newArr = new (ENV.$Class.Get("ArrayObject"))( ENV );
+            console.log( " array clone triggered ");
+            
+            // copy keys, can do direct copy ( probably? ) 
+            var keys = newArr[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
+            this[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ].forEach( function( key ){
+                keys.push( key );
+            });
+            
+            // copy values, need to do deep clone
+            var values = newArr[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
+            this[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ].forEach( function( valueObj ) {
+                
+                values.push( valueObj[ COMPILER.VARIABLE_CLONE ]() );
+                
+            });
+            
+            
+            return newArr;
+            
+        
+        })
         /*
      * offsetGet method
      */ 

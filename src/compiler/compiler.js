@@ -162,6 +162,10 @@ PHP.Compiler.prototype.VARIABLE_VALUE = "$";
 
 PHP.Compiler.prototype.CREATE_VARIABLE = "$$";
 
+PHP.Compiler.prototype.ARRAY_CLONE = "$AClone";
+
+PHP.Compiler.prototype.VARIABLE_CLONE = "$VClone";
+
 PHP.Compiler.prototype.ARRAY_GET = "offsetGet";
 
 PHP.Compiler.prototype.METHOD_CALL = "$Call";

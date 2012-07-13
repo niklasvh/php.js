@@ -202,7 +202,7 @@ PHP.VM.Variable = function( arg ) {
     
     setValue = function( newValue ) {
              
-        this[ this.DEFINED ] = true;
+       
 
         if ( newValue === undefined ) {
             newValue = null;
@@ -232,8 +232,12 @@ PHP.VM.Variable = function( arg ) {
         } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
             if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
                 this[ this.TYPE ] = this.ARRAY;
-                // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
-                console.log( newValue);
+                
+                if ( newValue[ this.DEFINED ] === true ) {
+                    // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
+                    value = newValue[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
+                }
+                
             } else {
 
                 this[ this.TYPE ] = this.OBJECT;
@@ -243,7 +247,8 @@ PHP.VM.Variable = function( arg ) {
         } else {
          
         }
-        
+        this[ this.DEFINED ] = true;
+         
         // is variable a reference
         if ( this[ this.REFERRING ] !== undefined ) {
             
@@ -267,6 +272,28 @@ PHP.VM.Variable = function( arg ) {
     
     setValue.call( this, arg );
     
+    this[ COMPILER.VARIABLE_CLONE ] = function() {
+        switch( this[ this.TYPE ] ) {
+            case this.NULL:
+            case this.BOOL:
+            case this.INT:
+            case this.FLOAT:
+            case this.STRING:
+                return new PHP.VM.Variable( value );               
+                break;
+            case this.OBJECT:
+            case this.RESOURCE:
+                return this;
+            case this.ARRAY:
+                return new PHP.VM.Variable( value[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  ) )
+                break;
+            default:
+                console.log("Unknown variable type cloned");
+                return this;
+        }
+        
+    };
+    
     this [ this.REF ] = function( variable ) {
         this[ this.REFERRING ] = variable;
         this[ this.DEFINED ] = true;
@@ -276,7 +303,7 @@ PHP.VM.Variable = function( arg ) {
         return this;
     };
     
-    this[ PHP.Compiler.prototype.NEG ] = function() {
+    this[ COMPILER.NEG ] = function() {
         this[ COMPILER.VARIABLE_VALUE ] = -this[ COMPILER.VARIABLE_VALUE ];
         return this;
     };

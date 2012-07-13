@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 330 out of 672 (49.1%)
+Passed 334 out of 672 (49.7%)
 
 Failed tests:
 
@@ -112,8 +112,6 @@ Failed tests:
  - tests/php/classes/interface_implemented.phpt
  - tests/php/classes/interface_method.phpt
  - tests/php/classes/interface_method_private.phpt
- - tests/php/classes/interface_optional_arg_002.phpt
- - tests/php/classes/interface_optional_arg_003.phpt
  - tests/php/classes/method_override_optional_arg_001.phpt
  - tests/php/classes/method_override_optional_arg_002.phpt
  - tests/php/classes/new_001.phpt
@@ -137,7 +135,6 @@ Failed tests:
  - tests/php/classes/tostring_002.phpt
  - tests/php/classes/tostring_003.phpt
  - tests/php/classes/tostring_004.phpt
- - tests/php/classes/type_hinting_003.phpt
  - tests/php/classes/type_hinting_004.phpt
  - tests/php/classes/type_hinting_005a.phpt
  - tests/php/classes/type_hinting_005b.phpt
@@ -176,7 +173,6 @@ Failed tests:
  - tests/php/lang/bug21094.phpt
  - tests/php/lang/bug21600.phpt
  - tests/php/lang/bug21820.phpt
- - tests/php/lang/bug21849.phpt
  - tests/php/lang/bug21961.phpt
  - tests/php/lang/bug22231.phpt
  - tests/php/lang/bug22510.phpt

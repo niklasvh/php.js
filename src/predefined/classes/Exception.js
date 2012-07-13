@@ -5,7 +5,7 @@ ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
 .Variable( "code", 2 )
 .Variable( "file", 2 )
 .Variable( "line", 2 )
-.Method( "__construct", 1, [{"name":"message","d":"$$(\"\")"},{"name":"code","d":"$$(0)"},{"name":"previous","d":"$$(null)"}], function( $, ctx ) {
+.Method( "__construct", 1, [{name:"message", d: $$("")}, {name:"code", d: $$(0)}, {name:"previous", d: $$(null)}], function( $, ctx ) {
 this.$Prop( ctx, "message" )._($("message"));
 })
 .Method( "getMessage", 33, [], function( $, ctx ) {
