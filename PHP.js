@@ -1571,6 +1571,13 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
   
     };
     
+        MODULES.set_error_handler = function( error_handler, error_types )  {
+        var item = PHP.VM.Array.arrayItem;
+       
+   
+  
+    };
+    
     MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
        
         var C = PHP.Constants,        
@@ -2394,14 +2401,28 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
     
     if ( callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
 
-        var Class = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 )[ COMPILER.VARIABLE_VALUE ],
+        var ClassVar = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 ),
         methodName = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 1 )[ COMPILER.VARIABLE_VALUE ],
-        methodParts = methodName.split("::");
-        if ( methodParts.length === 1 ) {
+        methodParts = methodName.split("::"),
+        args,
+        Class;
         
-            return Class[ COMPILER.METHOD_CALL ]( this, methodName, Array.prototype.slice.call( arguments, 1 ) );
+      
+        
+        if ( ClassVar[ VARIABLE.TYPE] === VARIABLE.STRING ) {
+            Class = this.$Class.Get(ClassVar[ COMPILER.VARIABLE_VALUE ]).prototype;
+        } else if ( ClassVar[ VARIABLE.TYPE] === VARIABLE.OBJECT ) {
+            Class = ClassVar[ COMPILER.VARIABLE_VALUE ];
+        }
+        
+        if ( methodParts.length === 1 ) {
+         
+            args = [ this, methodName].concat( Array.prototype.slice.call( arguments, 1 ) );
+            
+            return Class[ COMPILER.METHOD_CALL ].apply( Class, args );
         } else {
-            return Class[ COMPILER.STATIC_CALL ]( this, methodParts[ 0 ], methodParts[ 1 ], Array.prototype.slice.call( arguments, 1 ) );
+            args = [ this, methodParts[ 0 ], methodParts[ 1 ] ].concat( Array.prototype.slice.call( arguments, 1 ) );
+            return Class[ COMPILER.STATIC_CALL ].apply( Class, args );
         }
         
     } else {
@@ -8985,7 +9006,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     } else {
                         classObj = args[ index ];
                     }
-                    */
+                     */
                    
                     classObj = $( arg.name )[ COMPILER.VARIABLE_VALUE ];
                    
@@ -8996,7 +9017,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         argGiven,
                         variableType = $( arg.name )[ VARIABLE.TYPE ],
                         errorMsg;
-                    
+                   
                         switch ( variableType  ) {
                             
                             case VARIABLE.OBJECT:
@@ -9005,6 +9026,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                             
                             case VARIABLE.INT:
                                 argGiven = ", integer given";
+                                break;
+                                
+                            case VARIABLE.NULL:
+                                argGiven = ", NULL given";
                                 break;
                             
                         }
@@ -9085,9 +9110,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             Object.keys( props ).forEach(function( propertyName ){
                 
                 if ( checkType(this[propertyTypePrefix + propertyName], STATIC)) {
-                // static, so refer to the one and only same value defined in actual prototype
+                    // static, so refer to the one and only same value defined in actual prototype
 
-                //  this[ propertyPrefix + propertyName ] = this[ propertyPrefix + propertyName ];
+                    //  this[ propertyPrefix + propertyName ] = this[ propertyPrefix + propertyName ];
                     
                 } else {
                     if ( Array.isArray( props[ propertyName ] ) ) {

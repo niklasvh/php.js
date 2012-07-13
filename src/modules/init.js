@@ -210,6 +210,13 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
   
     };
     
+        MODULES.set_error_handler = function( error_handler, error_types )  {
+        var item = PHP.VM.Array.arrayItem;
+       
+   
+  
+    };
+    
     MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
        
         var C = PHP.Constants,        

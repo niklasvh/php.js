@@ -80,7 +80,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     } else {
                         classObj = args[ index ];
                     }
-                    */
+                     */
                    
                     classObj = $( arg.name )[ COMPILER.VARIABLE_VALUE ];
                    
@@ -91,7 +91,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         argGiven,
                         variableType = $( arg.name )[ VARIABLE.TYPE ],
                         errorMsg;
-                    
+                   
                         switch ( variableType  ) {
                             
                             case VARIABLE.OBJECT:
@@ -100,6 +100,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                             
                             case VARIABLE.INT:
                                 argGiven = ", integer given";
+                                break;
+                                
+                            case VARIABLE.NULL:
+                                argGiven = ", NULL given";
                                 break;
                             
                         }
@@ -180,9 +184,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             Object.keys( props ).forEach(function( propertyName ){
                 
                 if ( checkType(this[propertyTypePrefix + propertyName], STATIC)) {
-                // static, so refer to the one and only same value defined in actual prototype
+                    // static, so refer to the one and only same value defined in actual prototype
 
-                //  this[ propertyPrefix + propertyName ] = this[ propertyPrefix + propertyName ];
+                    //  this[ propertyPrefix + propertyName ] = this[ propertyPrefix + propertyName ];
                     
                 } else {
                     if ( Array.isArray( props[ propertyName ] ) ) {
