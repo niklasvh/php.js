@@ -1396,6 +1396,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
         // magic constants
         handler( "$__FILE__" )[ COMPILER.VARIABLE_VALUE ] = _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ];
         
+        handler( "$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = functionName;
         handler( "$__FUNCTION__" )[ COMPILER.VARIABLE_VALUE ] = functionName;
         
         
@@ -1980,11 +1981,11 @@ PHP.Modules.prototype.get_parent_class = function( object ) {
 
 PHP.Modules.prototype.interface_exists = function( class_name, autoload ) {
     var COMPILER = PHP.Compiler.prototype;
-    
+     
     if ( (autoload === undefined || autoload[ COMPILER.VARIABLE_VALUE ] === true) && !this.$Class.Exists( class_name[ COMPILER.VARIABLE_VALUE ] ) ) {
         return new PHP.VM.Variable( this.$Class.__autoload( class_name[ COMPILER.VARIABLE_VALUE ] ) );
     }
-    
+
     return new PHP.VM.Variable( this.$Class.Exists( class_name[ COMPILER.VARIABLE_VALUE ] )  );
     
 };
@@ -10582,7 +10583,18 @@ this.$Prop( ctx, "name" )._($("argument"));
 };
 };
 })
-.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":27,"endLine":1}},"attributes":{"startLine":27,"endLine":1}}}], function( $, ctx ) {
+.Method( "getProperty", 1, [{"name":"name"}], function( $, ctx ) {
+$("parts")._((ENV.explode($$("::"), $("name"))));
+if ( ((ENV.count($("parts"))).$Greater($$(1))).$Bool.$) {
+$$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parts").$Dim( this, $$(0) ), $("parts").$Dim( this, $$(1) ) ));
+};
+})
+.Method( "implementsInterface", 1, [{"name":"interface"}], function( $, ctx ) {
+if ( ((ENV.interface_exists($("interface"))).$Not()).$Bool.$) {
+throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Concat($("interface")).$Concat($$(" does not exist ")) ));
+};
+})
+.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":41,"endLine":1}},"attributes":{"startLine":41,"endLine":1}}}], function( $, ctx ) {
 })
 .Method( "__toString", 1, [], function( $, ctx ) {
 })
@@ -10610,6 +10622,26 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat
 };
 })
 .Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":32,"endLine":1}},"attributes":{"startLine":32,"endLine":1}}}], function( $, ctx ) {
+})
+.Method( "__toString", 1, [], function( $, ctx ) {
+})
+.Create()});
+
+};/* automatically built from ReflectionProperty.php*/
+PHP.VM.Class.Predefined.ReflectionProperty = function( ENV, $$ ) {
+ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $ ){
+ M.Constant("IS_STATIC", $$(1))
+.Constant("IS_PUBLIC", $$(256))
+.Constant("IS_PROTECTED", $$(512))
+.Constant("IS_PRIVATE", $$(1024))
+.Variable( "name", 1 )
+.Variable( "class", 1 )
+.Method( "__construct", 1, [{"name":"class"},{"name":"name","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"null","type":"Node_Name","attributes":{"startLine":16,"endLine":1}},"attributes":{"startLine":16,"endLine":1}}}], function( $, ctx ) {
+if ( ((ENV.class_exists($("class"))).$Not()).$Bool.$) {
+throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
+};
+})
+.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":26,"endLine":1}},"attributes":{"startLine":26,"endLine":1}}}], function( $, ctx ) {
 })
 .Method( "__toString", 1, [], function( $, ctx ) {
 })

@@ -53,6 +53,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
         // magic constants
         handler( "$__FILE__" )[ COMPILER.VARIABLE_VALUE ] = _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ];
         
+        handler( "$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = functionName;
         handler( "$__FUNCTION__" )[ COMPILER.VARIABLE_VALUE ] = functionName;
         
         

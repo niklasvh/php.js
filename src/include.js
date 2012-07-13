@@ -133,6 +133,7 @@ var files = {
             ReflectionClass: "js",
             ReflectionException: "js",
             ReflectionMethod: "js",
+            ReflectionProperty: "js",
             stdClass: "js"
         },
         interfaces: {

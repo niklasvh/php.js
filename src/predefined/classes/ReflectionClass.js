@@ -15,7 +15,18 @@ this.$Prop( ctx, "name" )._($("argument"));
 };
 };
 })
-.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":27,"endLine":1}},"attributes":{"startLine":27,"endLine":1}}}], function( $, ctx ) {
+.Method( "getProperty", 1, [{"name":"name"}], function( $, ctx ) {
+$("parts")._((ENV.explode($$("::"), $("name"))));
+if ( ((ENV.count($("parts"))).$Greater($$(1))).$Bool.$) {
+$$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parts").$Dim( this, $$(0) ), $("parts").$Dim( this, $$(1) ) ));
+};
+})
+.Method( "implementsInterface", 1, [{"name":"interface"}], function( $, ctx ) {
+if ( ((ENV.interface_exists($("interface"))).$Not()).$Bool.$) {
+throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Concat($("interface")).$Concat($$(" does not exist ")) ));
+};
+})
+.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":41,"endLine":1}},"attributes":{"startLine":41,"endLine":1}}}], function( $, ctx ) {
 })
 .Method( "__toString", 1, [], function( $, ctx ) {
 })
