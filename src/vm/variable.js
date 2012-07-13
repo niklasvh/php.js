@@ -67,6 +67,10 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
 
+    if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+        // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
+        console.log(combinedVariable, combinedVariable[ COMPILER.VARIABLE_VALUE ]);
+    }
     this[ COMPILER.VARIABLE_VALUE ] = combinedVariable[ COMPILER.VARIABLE_VALUE ];
     
     return this;
@@ -84,7 +88,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.INSTANCEOF ] = function( 
     // search interfaces
     if ( classObj[ PHP.VM.Class.INTERFACES ].indexOf( instanceName ) !== -1 ) {
      
-         return new PHP.VM.Variable( true );
+        return new PHP.VM.Variable( true );
     }
   
     // search parents
@@ -197,7 +201,7 @@ PHP.VM.Variable = function( arg ) {
     COMPILER = PHP.Compiler.prototype,
     
     setValue = function( newValue ) {
-         
+             
         this[ this.DEFINED ] = true;
 
         if ( newValue === undefined ) {
@@ -228,6 +232,8 @@ PHP.VM.Variable = function( arg ) {
         } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
             if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
                 this[ this.TYPE ] = this.ARRAY;
+                // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
+                console.log( newValue);
             } else {
 
                 this[ this.TYPE ] = this.OBJECT;

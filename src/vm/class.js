@@ -47,44 +47,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             argumentObj.forEach( function( arg, index ) {
                 
                 
-                var classObj,
-                typeInterface = false;
-               
-                // perform type hint check
-            
-                if ( arg[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
-                   
-                    if ( args[ index ] instanceof PHP.VM.VariableProto) {
-                        classObj = args[ index ][ COMPILER.VARIABLE_VALUE ];
-                    } else {
-                        classObj = args[ index ];
-                    }
-                    
-                    var argPassedTo = "Argument " + (index + 1) + " passed to " + className + "::" + methodName + "() must ",
-                    calledIn = ", called in " + ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined",
-                    argGiven = ", instance of " + classObj[ COMPILER.CLASS_NAME ] + " given";
-                    
-                    // check if we are looking for implement or instance
-                    // do a check if it exists before getting, so we don't trigger an __autoload
-                    if ( ENV.$Class.Exists( arg[ COMPILER.PROPERTY_TYPE ] ) &&  checkType(ENV.$Class.Get( arg[ COMPILER.PROPERTY_TYPE ] ).prototype[ COMPILER.CLASS_TYPE ], INTERFACE)) {
-                        typeInterface = true;
-                    } 
-                     
-                    // we are looking for an instance
-                    if ( !typeInterface && classObj[ COMPILER.CLASS_NAME ] !== arg[ COMPILER.PROPERTY_TYPE ] ) {
-                        // not of same class type
-                        ENV[ COMPILER.ERROR ]( argPassedTo + "be an instance of " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn, PHP.Constants.E_RECOVERABLE_ERROR, true );      
-                    }
-                     
-                    // we are looking for an implementation of interface
-                    else if ( typeInterface && classObj[ PHP.VM.Class.INTERFACES ].indexOf( arg[ COMPILER.PROPERTY_TYPE ] ) === -1) {
-                        ENV[ COMPILER.ERROR ]( argPassedTo + "implement interface " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn, PHP.Constants.E_RECOVERABLE_ERROR, true );      
- 
-                    }
-                     
-                }   
-                
-                
+                                
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
                     
@@ -97,8 +60,58 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 } else {
                     // no argument passed for the specified index
-                    $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+                    if ( arg[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
+                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = arg[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
+                    } else {
+                        $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+                    }
                 }
+                
+                
+                var classObj,
+                typeInterface = false;
+               
+                // perform type hint check
+            
+                if ( arg[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
+                   
+                    /*
+                    if ( args[ index ] instanceof PHP.VM.VariableProto) {
+                        classObj = args[ index ][ COMPILER.VARIABLE_VALUE ];
+                    } else {
+                        classObj = args[ index ];
+                    }
+                    */
+                   
+                    classObj = $( arg.name )[ COMPILER.VARIABLE_VALUE ];
+                   
+                    if ( arg[ COMPILER.PROPERTY_DEFAULT ] === undefined || (arg[ COMPILER.PROPERTY_DEFAULT ][ VARIABLE.TYPE ] !==  VARIABLE.NULL && $( arg.name )[ VARIABLE.TYPE ] !== VARIABLE.NULL ) ) {
+                    
+                        var argPassedTo = "Argument " + (index + 1) + " passed to " + className + "::" + methodName + "() must ",
+                        calledIn = ", called in " + ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined",
+                        argGiven = ", instance of " + classObj[ COMPILER.CLASS_NAME ] + " given";
+                    
+                        // check if we are looking for implement or instance
+                        // do a check if it exists before getting, so we don't trigger an __autoload
+                        if ( ENV.$Class.Exists( arg[ COMPILER.PROPERTY_TYPE ] ) &&  checkType(ENV.$Class.Get( arg[ COMPILER.PROPERTY_TYPE ] ).prototype[ COMPILER.CLASS_TYPE ], INTERFACE)) {
+                            typeInterface = true;
+                        } 
+                     
+                        // we are looking for an instance
+                        if ( !typeInterface && classObj[ COMPILER.CLASS_NAME ] !== arg[ COMPILER.PROPERTY_TYPE ] ) {
+                            // not of same class type
+                            ENV[ COMPILER.ERROR ]( argPassedTo + "be an instance of " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn, PHP.Constants.E_RECOVERABLE_ERROR, true );      
+                        }
+                     
+                        // we are looking for an implementation of interface
+                        else if ( typeInterface && classObj[ PHP.VM.Class.INTERFACES ].indexOf( arg[ COMPILER.PROPERTY_TYPE ] ) === -1) {
+                            ENV[ COMPILER.ERROR ]( argPassedTo + "implement interface " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven + calledIn, PHP.Constants.E_RECOVERABLE_ERROR, true );      
+ 
+                        }
+                    }
+                }   
+                
+
                 
 
             });

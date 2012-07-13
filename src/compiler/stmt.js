@@ -363,7 +363,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         };
         
         if (prop.def !== null) {
-            obj.def = prop.def;
+            obj[ this.PROPERTY_DEFAULT ] = this.source( prop.def );
         }
         
         if (prop.Type !== null ) {

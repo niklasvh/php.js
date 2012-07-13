@@ -26,7 +26,7 @@ if ( ((ENV.interface_exists($("interface"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Concat($("interface")).$Concat($$(" does not exist ")) ));
 };
 })
-.Method( "export", 9, [{"name":"argument"},{"name":"return","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"false","type":"Node_Name","attributes":{"startLine":41,"endLine":1}},"attributes":{"startLine":41,"endLine":1}}}], function( $, ctx ) {
+.Method( "export", 9, [{"name":"argument"},{"name":"return","d":"$$(false)"}], function( $, ctx ) {
 })
 .Method( "__toString", 1, [], function( $, ctx ) {
 })

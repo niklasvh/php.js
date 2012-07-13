@@ -190,6 +190,8 @@ PHP.Compiler.prototype.CLASS_CONSTANT_FETCH = "$Constant";
 
 PHP.Compiler.prototype.PROPERTY_TYPE = "p";
 
+PHP.Compiler.prototype.PROPERTY_DEFAULT = "d";
+
 PHP.Compiler.prototype.CLASS_PROPERTY = "Variable";
 
 PHP.Compiler.prototype.CLASS_DECLARE = "Create";

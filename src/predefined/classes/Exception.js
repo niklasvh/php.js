@@ -5,7 +5,7 @@ ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
 .Variable( "code", 2 )
 .Variable( "file", 2 )
 .Variable( "line", 2 )
-.Method( "__construct", 1, [{"name":"message","def":{"type":"Node_Scalar_String","value":"\"\"","attributes":{"startLine":10,"endLine":1}}},{"name":"code","def":{"type":"Node_Scalar_LNumber","value":"0","attributes":{"startLine":10,"endLine":1}}},{"name":"previous","def":{"type":"Node_Expr_ConstFetch","name":{"parts":"NULL","type":"Node_Name","attributes":{"startLine":10,"endLine":1}},"attributes":{"startLine":10,"endLine":1}}}], function( $, ctx ) {
+.Method( "__construct", 1, [{"name":"message","d":"$$(\"\")"},{"name":"code","d":"$$(0)"},{"name":"previous","d":"$$(null)"}], function( $, ctx ) {
 this.$Prop( ctx, "message" )._($("message"));
 })
 .Method( "getMessage", 33, [], function( $, ctx ) {
