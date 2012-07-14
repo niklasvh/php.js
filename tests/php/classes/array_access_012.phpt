@@ -31,6 +31,6 @@ $data['element'] = &$test;
 <?php exit(0); ?>
 --EXPECTF--
 
-Notice: Indirect modification of overloaded element of ArrayAccessImpl has no effect in %sarray_access_012.php on line 24
+Notice: Indirect modification of overloaded element of ArrayAccessImpl has no effect in %sarray_access_012.php on line %d
 
-Fatal error: Cannot assign by reference to overloaded object in %sarray_access_012.php on line 24
+Fatal error: Cannot assign by reference to overloaded object in %sarray_access_012.php on line %d

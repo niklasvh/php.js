@@ -554,6 +554,11 @@ PHP.VM.Variable = function( arg ) {
                         };
                         
                         dimHandler[ this.REGISTER_SETTER ] = function( val ) {
+                            
+                            if ( val === null ) {
+                                this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + value[ COMPILER.CLASS_NAME ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
+                            }
+                            
                             var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_SET, variable, val );
                         
                             if ( val[ this.DEFINED ] !== true ) {
@@ -565,8 +570,12 @@ PHP.VM.Variable = function( arg ) {
                         
                         dimHandler[ COMPILER.POST_INC ] = function() {
                             var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ); // trigger get
-                            this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of object has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
+                            this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + value[ COMPILER.CLASS_NAME ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
                             return val;
+                        };
+                        
+                        dimHandler[ this.REF ] = function() {
+                            this.ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot assign by reference to overloaded object", PHP.Constants.E_ERROR, true ); 
                         };
                         
                         return dimHandler;

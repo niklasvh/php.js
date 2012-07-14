@@ -11,9 +11,10 @@ PHP.Modules.prototype.echo = function() {
     Array.prototype.slice.call( arguments ).forEach(function( arg ){
         
         if (arg instanceof PHP.VM.VariableProto) {
+            var triggerGet = arg[ COMPILER.VARIABLE_VALUE ];
             if ( arg[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
               //  this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg[ COMPILER.VARIABLE_VALUE ];
-                this.$ob( arg[ COMPILER.VARIABLE_VALUE ] );
+                this.$ob( triggerGet );
             }
             
         } else {
