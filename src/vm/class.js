@@ -42,7 +42,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         var $ = PHP.VM.VariableHandler(),
         argumentObj = this[ methodArgumentPrefix + methodName ];
-        
+
         if ( Array.isArray(argumentObj) ) {
             argumentObj.forEach( function( arg, index ) {
                 
@@ -65,82 +65,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 }
                 
-                
-                var classObj,
-                typeInterface = false;
-               
+
                 // perform type hint check
             
                 if ( arg[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
-                    
-                    
                     ENV[ COMPILER.TYPE_CHECK ]( $( arg.name ), arg[ COMPILER.PROPERTY_TYPE ], arg[ COMPILER.PROPERTY_DEFAULT ], index, className + "::" + methodName );
-                /*
-                
-                    
-                   
-                    classObj = $( arg.name )[ COMPILER.VARIABLE_VALUE ];
-                    if ( arg[ COMPILER.PROPERTY_DEFAULT ] === undefined || (arg[ COMPILER.PROPERTY_DEFAULT ][ VARIABLE.TYPE ] !==  VARIABLE.NULL || $( arg.name )[ VARIABLE.TYPE ] !== VARIABLE.NULL ) ) {
-                   
-                        var argPassedTo = "Argument " + (index + 1) + " passed to " + className + "::" + methodName + "() must ",
-                        argGiven,
-                        variableType = $( arg.name )[ VARIABLE.TYPE ],
-                        errorMsg;
-                   
-                        switch ( variableType  ) {
-                            
-                            case VARIABLE.OBJECT:
-                                argGiven = ", instance of " + classObj[ COMPILER.CLASS_NAME ] + " given";
-                                break;
-                            
-                            case VARIABLE.INT:
-                                argGiven = ", integer given";
-                                break;
-                                
-                            case VARIABLE.NULL:
-                                argGiven = ", NULL given";
-                                break;
-                            
-                        }
-                    
-                        // check if we are looking for implement or instance
-                        // do a check if it exists before getting, so we don't trigger an __autoload
-                        if ( ENV.$Class.Exists( arg[ COMPILER.PROPERTY_TYPE ] ) &&  checkType(ENV.$Class.Get( arg[ COMPILER.PROPERTY_TYPE ] ).prototype[ COMPILER.CLASS_TYPE ], INTERFACE)) {
-                            typeInterface = true;
-                        } 
-                        
-                        
-                        switch( arg[ COMPILER.PROPERTY_TYPE ].toLowerCase() ) {
-                            
-                            case "array":
-                                if ( VARIABLE.ARRAY !== variableType) {
-                                    errorMsg = argPassedTo + "be of the type array" + argGiven;
-                                }
-                                break;
-                            
-                            default:
-                                // we are looking for an instance
-                                if ( !typeInterface && classObj[ COMPILER.CLASS_NAME ] !== arg[ COMPILER.PROPERTY_TYPE ] ) {
-                                    // not of same class type
-                                    errorMsg = argPassedTo + "be an instance of " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven;
-                            
-                                }
-                     
-                                // we are looking for an implementation of interface
-                                else if ( typeInterface && classObj[ PHP.VM.Class.INTERFACES ].indexOf( arg[ COMPILER.PROPERTY_TYPE ] ) === -1) {
-                                    errorMsg = argPassedTo + "implement interface " + arg[ COMPILER.PROPERTY_TYPE ] + argGiven;
-                                }
-                        }
-                      
-                        
-                        if ( errorMsg !== undefined ) {
-                            ENV[ COMPILER.ERROR ]( errorMsg , PHP.Constants.E_RECOVERABLE_ERROR, false );   
-                        }
-                        
-                    }
-                    
-                    
-                      */
                 }   
                 
 

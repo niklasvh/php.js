@@ -98,7 +98,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 };
 
 PHP.Modules.prototype[ PHP.Compiler.prototype.TYPE_CHECK ] = function( variable, propertyType, propertyDefault, index, name ) {
-    
+  
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     classObj,
@@ -106,7 +106,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.TYPE_CHECK ] = function( variable,
 
     classObj = variable[ COMPILER.VARIABLE_VALUE ];
     if ( propertyDefault === undefined || (propertyDefault[ VARIABLE.TYPE ] !==  VARIABLE.NULL || variable[ VARIABLE.TYPE ] !== VARIABLE.NULL ) ) {
-
+  
         var argPassedTo = "Argument " + (index + 1) + " passed to " + name + "() must ",
         argGiven,
         variableType = variable[ VARIABLE.TYPE ],
@@ -123,7 +123,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.TYPE_CHECK ] = function( variable,
                 break;
 
             case VARIABLE.NULL:
-                argGiven = ", NULL given";
+                argGiven = ", none given";
                 break;
 
         }
@@ -145,7 +145,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.TYPE_CHECK ] = function( variable,
 
             default:
                 // we are looking for an instance
-                if ( !typeInterface && classObj[ COMPILER.CLASS_NAME ] !== propertyType ) {
+                if ( classObj === null) {
+                    errorMsg = argPassedTo + "be an instance of " + propertyType + argGiven;
+                }
+                
+                else if ( !typeInterface && classObj[ COMPILER.CLASS_NAME ] !== propertyType ) {
                     // not of same class type
                     errorMsg = argPassedTo + "be an instance of " + propertyType + argGiven;
 
@@ -155,6 +159,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.TYPE_CHECK ] = function( variable,
                 else if ( typeInterface && classObj[ PHP.VM.Class.INTERFACES ].indexOf( propertyType ) === -1) {
                     errorMsg = argPassedTo + "implement interface " + propertyType + argGiven;
                 }
+                    
         }
 
 
