@@ -2524,15 +2524,17 @@ PHP.Modules.prototype.fopen = function( filename ) {
 
 PHP.Modules.prototype.call_user_func = function( callback ) {
     var COMPILER = PHP.Compiler.prototype,
-    VARIABLE = PHP.VM.Variable.prototype;
+    VARIABLE = PHP.VM.Variable.prototype,
+    Class,
+    methodParts;
  
     if ( callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
 
         var ClassVar = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 ),
         methodName = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 1 )[ COMPILER.VARIABLE_VALUE ],
-        methodParts = methodName.split("::"),
-        args,
-        Class;
+        args;
+        
+        methodParts = methodName.split("::");
         
       
         
@@ -2552,10 +2554,28 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
         }
         
     } else {
-        // function call
-        args = Array.prototype.slice.call( arguments, 1 );
+        methodParts = callback[ COMPILER.VARIABLE_VALUE ].split("::");
+        
+        if ( methodParts.length === 1 ) {
+            // function call
+            args = Array.prototype.slice.call( arguments, 1 );
         
             return this[ callback[ COMPILER.VARIABLE_VALUE ]].apply( this, args  );
+        } else {
+            // static call
+            
+            if ( this.$Class.__autoload(methodParts[ 0 ]) ) {
+                Class = this.$Class.Get(methodParts[ 0 ]).prototype;
+            
+                args = [ this, methodParts[ 0 ], methodParts[ 1 ] ].concat( Array.prototype.slice.call( arguments, 1 ) );
+            
+                return Class[ COMPILER.STATIC_CALL ].apply( Class, args );
+            } else {
+                this[ PHP.Compiler.prototype.ERROR ]( "call_user_func() expects parameter 1 to be a valid callback, class '" + methodParts[ 0 ] + "' not found", PHP.Constants.E_CORE_WARNING, true );
+            }
+            
+
+        }
        
        
     }
@@ -9101,7 +9121,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         var $ = PHP.VM.VariableHandler(),
         argumentObj = this[ methodArgumentPrefix + methodName ];
-        console.log( args, argumentObj );
+
         if ( Array.isArray(argumentObj) ) {
             argumentObj.forEach( function( arg, index ) {
                 
@@ -9128,10 +9148,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 // perform type hint check
             
                 if ( arg[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
-                    console.log("do check");
-                    
                     ENV[ COMPILER.TYPE_CHECK ]( $( arg.name ), arg[ COMPILER.PROPERTY_TYPE ], arg[ COMPILER.PROPERTY_DEFAULT ], index, className + "::" + methodName );
-               
                 }   
                 
 
