@@ -92,6 +92,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         opts = arguments[ 2 ],
         classDefinition = arguments[ 3 ],
         DECLARED = false,
+        staticVars = {},
         props = {},
         
         callMethod = function( methodName, args ) {
@@ -100,10 +101,43 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
            
-          
-            //magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
+            if (staticVars[ methodName ] === undefined) {
+                staticVars[ methodName ] = {};
+            } 
+           
+            Object.keys( staticVars[ methodName ] ).forEach(function( key ){
+                
+                $( key, staticVars[ methodName ][ key ] );
+            });
             
-            return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
+            // static handler
+            var staticHandler = {};
+            staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
+                
+                if ( staticVars[ methodName ][ name ] !== undefined ) {
+                    // already defined
+                    return staticHandler;
+                }
+                // store it to storage for this method
+                staticVars[ methodName ][ name ] = def;
+
+                // assign it to current running context as well
+                $( name, def );
+                
+                // chain
+                return staticHandler;
+            };
+
+            // global handler
+            staticHandler[ COMPILER.FUNCTION_GLOBAL ] = function( vars ) {
+                vars.forEach(function( varName ){
+      
+                    $( varName, ENV[ COMPILER.GLOBAL ]( varName ) )
+                });
+            };
+            
+            
+            return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], staticHandler );
         };
 
         var Class = function( ctx ) {
@@ -146,7 +180,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                  
                 // register new class initiated into registry (for destructors at shutdown) 
                 if ( className !== "ArrayObject") {
-                     initiatedClasses.push ( this ); 
+                    initiatedClasses.push ( this ); 
                    
                     this[ PHP.VM.Class.CLASS_INDEX ] = initiatedClasses.length;
                 }

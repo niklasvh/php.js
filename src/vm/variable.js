@@ -563,6 +563,12 @@ PHP.VM.Variable = function( arg ) {
                             return val;
                         };
                         
+                        dimHandler[ COMPILER.POST_INC ] = function() {
+                            var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ); // trigger get
+                            this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of object has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
+                            return val;
+                        };
+                        
                         return dimHandler;
                        
                         

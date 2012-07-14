@@ -53,7 +53,7 @@ object::offsetGet(2)
 int(1)
 object::offsetGet(2)
 
-Notice: Indirect modification of overloaded element of object has no effect in %sarray_access_003.php on line 39
+Notice: Indirect modification of overloaded element of object has no effect in %sarray_access_003.php on line %d
 object::offsetGet(2)
 int(1)
 ===DONE===

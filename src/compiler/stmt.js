@@ -410,7 +410,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         
     }, this)   
         
-    src +=  props.join(", ")  + '], function( ' + this.VARIABLE + ', ctx ) {\n';
+    src +=  props.join(", ")  + '], function( ' + this.VARIABLE + ', ctx, $Static ) {\n';
     
     if (action.stmts !== null ) {
         src += this.stmts( action.stmts );

@@ -1348,7 +1348,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         
     }, this)   
         
-    src +=  props.join(", ")  + '], function( ' + this.VARIABLE + ', ctx ) {\n';
+    src +=  props.join(", ")  + '], function( ' + this.VARIABLE + ', ctx, $Static ) {\n';
     
     if (action.stmts !== null ) {
         src += this.stmts( action.stmts );
@@ -9394,6 +9394,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         opts = arguments[ 2 ],
         classDefinition = arguments[ 3 ],
         DECLARED = false,
+        staticVars = {},
         props = {},
         
         callMethod = function( methodName, args ) {
@@ -9402,10 +9403,43 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
            
-          
-            //magicConstants.METHOD = this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName;
+            if (staticVars[ methodName ] === undefined) {
+                staticVars[ methodName ] = {};
+            } 
+           
+            Object.keys( staticVars[ methodName ] ).forEach(function( key ){
+                
+                $( key, staticVars[ methodName ][ key ] );
+            });
             
-            return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] );
+            // static handler
+            var staticHandler = {};
+            staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
+                
+                if ( staticVars[ methodName ][ name ] !== undefined ) {
+                    // already defined
+                    return staticHandler;
+                }
+                // store it to storage for this method
+                staticVars[ methodName ][ name ] = def;
+
+                // assign it to current running context as well
+                $( name, def );
+                
+                // chain
+                return staticHandler;
+            };
+
+            // global handler
+            staticHandler[ COMPILER.FUNCTION_GLOBAL ] = function( vars ) {
+                vars.forEach(function( varName ){
+      
+                    $( varName, ENV[ COMPILER.GLOBAL ]( varName ) )
+                });
+            };
+            
+            
+            return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], staticHandler );
         };
 
         var Class = function( ctx ) {
@@ -9448,7 +9482,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                  
                 // register new class initiated into registry (for destructors at shutdown) 
                 if ( className !== "ArrayObject") {
-                     initiatedClasses.push ( this ); 
+                    initiatedClasses.push ( this ); 
                    
                     this[ PHP.VM.Class.CLASS_INDEX ] = initiatedClasses.length;
                 }
@@ -10752,6 +10786,12 @@ PHP.VM.Variable = function( arg ) {
                             return val;
                         };
                         
+                        dimHandler[ COMPILER.POST_INC ] = function() {
+                            var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ); // trigger get
+                            this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of object has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
+                            return val;
+                        };
+                        
                         return dimHandler;
                        
                         
@@ -11215,27 +11255,27 @@ ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
 .Variable( "code", 2 )
 .Variable( "file", 2 )
 .Variable( "line", 2 )
-.Method( "__construct", 1, [{name:"message", d: $$("")}, {name:"code", d: $$(0)}, {name:"previous", d: $$(null)}], function( $, ctx ) {
+.Method( "__construct", 1, [{name:"message", d: $$("")}, {name:"code", d: $$(0)}, {name:"previous", d: $$(null)}], function( $, ctx, $Static ) {
 this.$Prop( ctx, "message" )._($("message"));
 })
-.Method( "getMessage", 33, [], function( $, ctx ) {
+.Method( "getMessage", 33, [], function( $, ctx, $Static ) {
 return this.$Prop( ctx, "message" );
 })
-.Method( "getPrevious", 33, [], function( $, ctx ) {
+.Method( "getPrevious", 33, [], function( $, ctx, $Static ) {
 })
-.Method( "getCode", 33, [], function( $, ctx ) {
+.Method( "getCode", 33, [], function( $, ctx, $Static ) {
 })
-.Method( "getFile", 33, [], function( $, ctx ) {
+.Method( "getFile", 33, [], function( $, ctx, $Static ) {
 })
-.Method( "getLine", 33, [], function( $, ctx ) {
+.Method( "getLine", 33, [], function( $, ctx, $Static ) {
 })
-.Method( "getTrace", 33, [], function( $, ctx ) {
+.Method( "getTrace", 33, [], function( $, ctx, $Static ) {
 })
-.Method( "getTraceAsString", 33, [], function( $, ctx ) {
+.Method( "getTraceAsString", 33, [], function( $, ctx, $Static ) {
 })
-.Method( "__toString", 1, [], function( $, ctx ) {
+.Method( "__toString", 1, [], function( $, ctx, $Static ) {
 })
-.Method( "__clone", 36, [], function( $, ctx ) {
+.Method( "__clone", 36, [], function( $, ctx, $Static ) {
 })
 .Create()});
 ENV.$ob("");
@@ -11248,7 +11288,7 @@ ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $ ){
 .Constant("IS_FINAL", $$(64))
 .Variable( "name", 1 )
 .Variable( "class", 4 )
-.Method( "__construct", 1, [{name:"argument"}], function( $, ctx ) {
+.Method( "__construct", 1, [{name:"argument"}], function( $, ctx, $Static ) {
 if ( ((ENV.$F("is_string", arguments, $("argument")))).$Bool.$) {
 if ( ((ENV.$F("class_exists", arguments, $("argument"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) ));
@@ -11257,20 +11297,20 @@ this.$Prop( ctx, "name" )._($("argument"));
 };
 };
 })
-.Method( "getProperty", 1, [{name:"name"}], function( $, ctx ) {
+.Method( "getProperty", 1, [{name:"name"}], function( $, ctx, $Static ) {
 $("parts")._((ENV.$F("explode", arguments, $$("::"), $("name"))));
 if ( ((ENV.$F("count", arguments, $("parts"))).$Greater($$(1))).$Bool.$) {
 $$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parts").$Dim( this, $$(0) ), $("parts").$Dim( this, $$(1) ) ));
 };
 })
-.Method( "implementsInterface", 1, [{name:"interface"}], function( $, ctx ) {
+.Method( "implementsInterface", 1, [{name:"interface"}], function( $, ctx, $Static ) {
 if ( ((ENV.$F("interface_exists", arguments, $("interface"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Concat($("interface")).$Concat($$(" does not exist ")) ));
 };
 })
-.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx ) {
+.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx, $Static ) {
 })
-.Method( "__toString", 1, [], function( $, ctx ) {
+.Method( "__toString", 1, [], function( $, ctx, $Static ) {
 })
 .Create()});
 
@@ -11287,7 +11327,7 @@ ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $ ){
 .Constant("IS_FINAL", $$(64))
 .Variable( "name", 1 )
 .Variable( "class", 1 )
-.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx ) {
+.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx, $Static ) {
 $("parts")._((ENV.$F("explode", arguments, $$("::"), $("class"))));
 if ( ((ENV.$F("count", arguments, $("parts"))).$Greater($$(1))).$Bool.$) {
 $("class")._($("parts").$Dim( this, $$(0) ));
@@ -11297,9 +11337,9 @@ if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })
-.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx ) {
+.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx, $Static ) {
 })
-.Method( "__toString", 1, [], function( $, ctx ) {
+.Method( "__toString", 1, [], function( $, ctx, $Static ) {
 })
 .Create()});
 
@@ -11312,14 +11352,14 @@ ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $ ){
 .Constant("IS_PRIVATE", $$(1024))
 .Variable( "name", 1 )
 .Variable( "class", 1 )
-.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx ) {
+.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx, $Static ) {
 if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })
-.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx ) {
+.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx, $Static ) {
 })
-.Method( "__toString", 1, [], function( $, ctx ) {
+.Method( "__toString", 1, [], function( $, ctx, $Static ) {
 })
 .Create()});
 
@@ -11336,44 +11376,44 @@ ENV.$Class.INew( "Traversable", [], function( M, $ ){
 };/* automatically built from ArrayAccess.php*/
 PHP.VM.Class.Predefined.ArrayAccess = function( ENV, $$ ) {
 ENV.$Class.INew( "ArrayAccess", [], function( M, $ ){
- M.Method( "offsetExists", 1, [{name:"offset"}], function( $, ctx ) {
+ M.Method( "offsetExists", 1, [{name:"offset"}], function( $, ctx, $Static ) {
 })
-.Method( "offsetGet", 1, [{name:"offset"}], function( $, ctx ) {
+.Method( "offsetGet", 1, [{name:"offset"}], function( $, ctx, $Static ) {
 })
-.Method( "offsetSet", 1, [{name:"offset"}, {name:"value"}], function( $, ctx ) {
+.Method( "offsetSet", 1, [{name:"offset"}, {name:"value"}], function( $, ctx, $Static ) {
 })
-.Method( "offsetUnset", 1, [{name:"offset"}], function( $, ctx ) {
+.Method( "offsetUnset", 1, [{name:"offset"}], function( $, ctx, $Static ) {
 })
 .Create()});
 
 };/* automatically built from Iterator.php*/
 PHP.VM.Class.Predefined.Iterator = function( ENV, $$ ) {
 ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $ ){
- M.Method( "current", 1, [], function( $, ctx ) {
+ M.Method( "current", 1, [], function( $, ctx, $Static ) {
 })
-.Method( "key", 1, [], function( $, ctx ) {
+.Method( "key", 1, [], function( $, ctx, $Static ) {
 })
-.Method( "next", 1, [], function( $, ctx ) {
+.Method( "next", 1, [], function( $, ctx, $Static ) {
 })
-.Method( "rewind", 1, [], function( $, ctx ) {
+.Method( "rewind", 1, [], function( $, ctx, $Static ) {
 })
-.Method( "valid", 1, [], function( $, ctx ) {
+.Method( "valid", 1, [], function( $, ctx, $Static ) {
 })
 .Create()});
 
 };/* automatically built from IteratorAggregate.php*/
 PHP.VM.Class.Predefined.IteratorAggregate = function( ENV, $$ ) {
 ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $ ){
- M.Method( "getIterator", 17, [], function( $, ctx ) {
+ M.Method( "getIterator", 17, [], function( $, ctx, $Static ) {
 })
 .Create()});
 
 };/* automatically built from Reflector.php*/
 PHP.VM.Class.Predefined.Reflector = function( ENV, $$ ) {
 ENV.$Class.INew( "Reflector", [], function( M, $ ){
- M.Method( "export", 25, [], function( $, ctx ) {
+ M.Method( "export", 25, [], function( $, ctx, $Static ) {
 })
-.Method( "__toString", 17, [], function( $, ctx ) {
+.Method( "__toString", 17, [], function( $, ctx, $Static ) {
 })
 .Create()});
 
