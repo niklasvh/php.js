@@ -799,7 +799,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
               
                 
             } else {
-
+               
+                
                 if ( checkType( this[ propertyTypePrefix + propertyName ], PROTECTED ) && !(ctx instanceof PHP.VM.ClassPrototype) ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access protected property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
                 }
@@ -811,7 +812,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
                     }
                 }
-                
+               
                 return this[ propertyPrefix + propertyName ];
             }
             

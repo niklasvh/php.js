@@ -10077,7 +10077,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
               
                 
             } else {
-
+               
+                
                 if ( checkType( this[ propertyTypePrefix + propertyName ], PROTECTED ) && !(ctx instanceof PHP.VM.ClassPrototype) ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access protected property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
                 }
@@ -10089,7 +10090,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
                     }
                 }
-                
+               
                 return this[ propertyPrefix + propertyName ];
             }
             
@@ -10366,7 +10367,6 @@ PHP.VM.Variable = function( arg ) {
     
     setValue = function( newValue ) {
              
-       
 
         if ( newValue === undefined ) {
             newValue = null;
@@ -10675,14 +10675,18 @@ PHP.VM.Variable = function( arg ) {
                 }
                 
 
-               
+                console.log('getttingggg', ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1));
                 
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
                     if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
-                       
-                        //      var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
-          
-                        return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                        console.log( "getting", variable[ COMPILER.VARIABLE_VALUE ]); 
+                        var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                        console.log( val[ this.DEFINED ], val );
+                        if ( val[ this.DEFINED ] !== true ) {
+                            this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );    
+                            return new PHP.VM.Variable();
+                        }
+                        return val;
                       
                         
                     } else {
@@ -10718,7 +10722,12 @@ PHP.VM.Variable = function( arg ) {
                             saveFunc( val );
                         }
                     };
-                    returning[ this.DEFINED ] = this[ this.DEFINED ];
+                    
+                    if ( this[ this.DEFINED ] !== true ) {
+                        returning[ this.DEFINED ] = this[ this.DEFINED ];
+                    }
+                    
+                //  
                 }
                             
                 return  returning
@@ -10939,15 +10948,14 @@ PHP.VM.Array = function( ENV ) {
                 // no such key found in array, let's create one
                 //    
                 var variable = new PHP.VM.Variable();
-                //    
-                variable[ VARIABLE.DEFINED  ] = false;
+                
                 variable[ VARIABLE.REGISTER_SETTER ] = function() {
                     // the value was actually defined, let's register item into array
                     this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( ($('index')[ COMPILER.VARIABLE_VALUE ] !== null) ? $('index')[ COMPILER.VARIABLE_VALUE ] : ++this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] );
                     this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( variable );
                     delete variable[ VARIABLE.REGISTER_SETTER ];
                 }.bind(this);
-            
+            variable[ VARIABLE.DEFINED  ] = false;
                 return variable;
             
             }
@@ -11192,8 +11200,10 @@ ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $ ){
 .Variable( "class", 1 )
 .Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx ) {
 $("parts")._((ENV.$F("explode", arguments, $$("::"), $("class"))));
+if ( ((ENV.$F("count", arguments, $("parts"))).$Greater($$(1))).$Bool.$) {
 $("class")._($("parts").$Dim( this, $$(0) ));
 $("name")._($("parts").$Dim( this, $$(1) ));
+};
 if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };

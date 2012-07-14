@@ -202,7 +202,6 @@ PHP.VM.Variable = function( arg ) {
     
     setValue = function( newValue ) {
              
-       
 
         if ( newValue === undefined ) {
             newValue = null;
@@ -511,14 +510,18 @@ PHP.VM.Variable = function( arg ) {
                 }
                 
 
-               
+                console.log('getttingggg', ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1));
                 
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
                     if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
-                       
-                        //      var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
-          
-                        return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                        console.log( "getting", variable[ COMPILER.VARIABLE_VALUE ]); 
+                        var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                        console.log( val[ this.DEFINED ], val );
+                        if ( val[ this.DEFINED ] !== true ) {
+                            this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );    
+                            return new PHP.VM.Variable();
+                        }
+                        return val;
                       
                         
                     } else {
@@ -554,7 +557,12 @@ PHP.VM.Variable = function( arg ) {
                             saveFunc( val );
                         }
                     };
-                    returning[ this.DEFINED ] = this[ this.DEFINED ];
+                    
+                    if ( this[ this.DEFINED ] !== true ) {
+                        returning[ this.DEFINED ] = this[ this.DEFINED ];
+                    }
+                    
+                //  
                 }
                             
                 return  returning

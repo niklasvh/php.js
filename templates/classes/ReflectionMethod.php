@@ -1,6 +1,6 @@
 <?php
 
-class ReflectionMethod  {
+class ReflectionMethod {
     /* Constants */
 
     const IS_IMPLICIT_ABSTRACT = 16;
@@ -11,28 +11,28 @@ class ReflectionMethod  {
 
     public $name;
     public $class;
-    
 
-    function __construct( $class, $name=null ) {
-      
-     //   if ( !is_string($name)) {
-            
-            $parts = explode("::",$class);
-            $class = $parts[ 0 ];
-            
-            $name = $parts[ 1 ];
-            
-            if (!class_exists( $class ) ) {
-                throw new ReflectionException( "Class " . $class . " does not exist " );
-            }
-            
-     //   }
+    function __construct($class, $name = null) {
+
+        //   if ( !is_string($name)) {
+
+        $parts = explode("::", $class);
+        if (count($parts) > 1) {
+            $class = $parts[0];
+            $name = $parts[1];
+        }
+
+        if (!class_exists($class)) {
+            throw new ReflectionException("Class " . $class . " does not exist ");
+        }
+
+        //   }
     }
 
     public static function export($argument, $return = false) {
         
     }
-    
+
     public function __toString() {
         
     }
