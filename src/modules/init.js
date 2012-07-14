@@ -21,10 +21,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
         Object.keys( staticVars ).forEach( function( key ){
             handler( key, staticVars[ key ] );
         });
-        
+      
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
-            
+              
             // check that we aren't passing a constant for arg which is defined byRef
             if ( argObject[ COMPILER.PARAM_BYREF ] === true && 
                 ( 
@@ -46,7 +46,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
                 
                 arg[ VARIABLE.REF ]( vals[ index ] );
             } else {
-                arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
+                if ( vals[ index ] !== undefined ) {
+                    arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
+                } else {
+                    
+            }
             }
         });
         var _SERVER = ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
@@ -160,7 +164,14 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     
     var COMPILER = PHP.Compiler.prototype,
     lastError,
+    errorHandler,
     suppress = false;
+    
+    MODULES.$ErrorReset = function() {
+      lastError = undefined;
+      errorHandler = undefined;
+      suppress = false;
+    };
     
     MODULES[ COMPILER.SUPPRESS ] = function( expr ) {
         suppress = true;
@@ -210,11 +221,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
   
     };
     
-        MODULES.set_error_handler = function( error_handler, error_types )  {
-        var item = PHP.VM.Array.arrayItem;
-       
-   
-  
+    MODULES.set_error_handler = function( error_handler, error_types )  {
+        errorHandler = error_handler;
     };
     
     MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
@@ -227,44 +235,63 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             type: level,
             file: _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ]
         };
-        lineAppend = ( lineAppend === true ) ? " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1" : ""; 
+        
+        if ( lineAppend === false ) {
+            lineAppend = ", called in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1";
+        } else if ( lineAppend === true ) {
+            lineAppend = " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1";
+        } else {
+            lineAppend = "";
+        }
+        
+
+
 
         if ( suppress === false ) {
+            if ( errorHandler !== undefined ) {
+                this.call_user_func( 
+                    errorHandler, 
+                    new PHP.VM.Variable( level ), 
+                    new PHP.VM.Variable( msg ), 
+                    new PHP.VM.Variable( _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] ), 
+                    new PHP.VM.Variable( 1 )
+                    );
+            } else {
+                switch ( level ) {
+                    case C.E_ERROR:
+                        this[ COMPILER.DISPLAY_HANDLER ] = false;
+                        this.$ob( "\nFatal error: " + msg + lineAppend + "\n");
+                        throw new PHP.Halt( level );
+                        return;
+                        break;
+                    case C.E_RECOVERABLE_ERROR:
+                        this[ COMPILER.DISPLAY_HANDLER ] = false;
+                        this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
+                        throw new PHP.Halt( level );
+                        return;
+                        break;
             
-            switch ( level ) {
-                case C.E_ERROR:
-                    this[ COMPILER.DISPLAY_HANDLER ] = false;
-                    this.$ob( "\nFatal error: " + msg + lineAppend + "\n");
-                    throw new PHP.Halt( level );
-                    return;
-                    break;
-                case C.E_RECOVERABLE_ERROR:
-                    this[ COMPILER.DISPLAY_HANDLER ] = false;
-                    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
-                    throw new PHP.Halt( level );
-                    return;
-                    break;
-            
-                case C.E_WARNING:
-                case C.E_CORE_WARNING:
-                case C.E_COMPILE_WARNING:
-                case C.E_USER_WARNING:
-                    this.echo( new PHP.VM.Variable("\nWarning: " + msg + lineAppend + "\n"));
-                    return;
-                    break;
-                case C.E_PARSE:
-                    this.echo( new PHP.VM.Variable("\nParse error: " + msg + lineAppend + "\n"));
-                    return;
-                    break;
-                case C.E_CORE_NOTICE:
-                    this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
-                    return;
-                    break;
-                default:
-                    this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + lineAppend + "\n"));
-                    return;
+                    case C.E_WARNING:
+                    case C.E_CORE_WARNING:
+                    case C.E_COMPILE_WARNING:
+                    case C.E_USER_WARNING:
+                        this.echo( new PHP.VM.Variable("\nWarning: " + msg + lineAppend + "\n"));
+                        return;
+                        break;
+                    case C.E_PARSE:
+                        this.echo( new PHP.VM.Variable("\nParse error: " + msg + lineAppend + "\n"));
+                        return;
+                        break;
+                    case C.E_CORE_NOTICE:
+                        this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
+                        return;
+                        break;
+                    default:
+                        this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + lineAppend + "\n"));
+                        return;
             
             
+                }
             }
         }
         

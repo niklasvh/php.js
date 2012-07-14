@@ -130,6 +130,7 @@ PHP.VM = function( src, opts ) {
      
     this.OUTPUT_BUFFERS = [""];
     this.$obreset();
+    this.$ErrorReset();
     
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );

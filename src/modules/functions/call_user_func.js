@@ -7,7 +7,7 @@
 PHP.Modules.prototype.call_user_func = function( callback ) {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
-    
+    console.log('start', callback );
     if ( callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
 
         var ClassVar = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 ),
@@ -25,9 +25,7 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
         }
         
         if ( methodParts.length === 1 ) {
-         
             args = [ this, methodName].concat( Array.prototype.slice.call( arguments, 1 ) );
-            
             return Class[ COMPILER.METHOD_CALL ].apply( Class, args );
         } else {
             args = [ this, methodParts[ 0 ], methodParts[ 1 ] ].concat( Array.prototype.slice.call( arguments, 1 ) );
@@ -35,7 +33,13 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
         }
         
     } else {
-        return this[ callback[ COMPILER.VARIABLE_VALUE ]]( Array.prototype.slice.call( arguments, 1 ) );
+        args = Array.prototype.slice.call( arguments, 1 );
+        if (args.length > 0 ) {
+            return this[ callback[ COMPILER.VARIABLE_VALUE ]].apply( this, args  );
+        } else {
+            return this[ callback[ COMPILER.VARIABLE_VALUE ]]();
+        }
+       
     }
     
    
