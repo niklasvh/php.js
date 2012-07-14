@@ -6,11 +6,12 @@
 
 
 PHP.Modules.prototype.echo = function() {
-    var COMPILER = PHP.Compiler.prototype;
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
     Array.prototype.slice.call( arguments ).forEach(function( arg ){
         
         if (arg instanceof PHP.VM.VariableProto) {
-            if ( arg[ PHP.VM.Variable.prototype.TYPE ] !== PHP.VM.Variable.prototype.NULL ) {
+            if ( arg[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
               //  this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg[ COMPILER.VARIABLE_VALUE ];
                 this.$ob( arg[ COMPILER.VARIABLE_VALUE ] );
             }

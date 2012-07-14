@@ -6,7 +6,9 @@ PHP.Compiler.prototype.Node_Scalar_String = function( action ) {
 
 PHP.Compiler.prototype.Node_Scalar_Encapsed = function( action ) {
 
-    var parts = []
+    var parts = [],
+    VARIABLE = PHP.VM.Variable.prototype;
+    
     action.parts.forEach(function( part ){
         if ( typeof part === "string" ) {
             parts.push( this.fixString( part ) )
@@ -14,7 +16,7 @@ PHP.Compiler.prototype.Node_Scalar_Encapsed = function( action ) {
             
             
             
-            parts.push( this.source( (part[ 0 ] === undefined) ? part : part[ 0 ] ) + "." + this.VARIABLE_VALUE );
+            parts.push( this.source( (part[ 0 ] === undefined) ? part : part[ 0 ] ) + "." + VARIABLE.CAST_STRING + "." + this.VARIABLE_VALUE );
         }
     }, this);
     

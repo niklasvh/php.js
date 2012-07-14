@@ -65,7 +65,6 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
 
 
 PHP.Compiler.prototype.Node_Stmt_Echo = function( action ) {
-    
     var src = this.CTX + 'echo( ',
     args = [];
     if ( Array.isArray(action.exprs) ) {
@@ -193,7 +192,7 @@ PHP.Compiler.prototype.Node_Stmt_Break = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
    
-    var src = this.CTX +  action.name + " = Function.prototype.bind.apply( function( " + this.VARIABLE + ", " + this.FUNCTION_STATIC + "  ) {\n";
+    var src = this.CTX +  action.name + " = Function.prototype.bind.apply( function( " + this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.FUNCTION_GLOBAL + "  ) {\n";
     
     src += this.VARIABLE + " = " + this.VARIABLE + "(["
     var params = [];
@@ -240,6 +239,21 @@ PHP.Compiler.prototype.Node_Stmt_Static = function( action ) {
         src += this.source( variable );
     }, this);
 
+    console.log( action );
+    return src;  
+};
+
+
+PHP.Compiler.prototype.Node_Stmt_Global = function( action ) {
+    // todo fix
+    var src = this.FUNCTION_STATIC + "." + this.FUNCTION_GLOBAL + "([",
+    vars = [];
+    
+    action.vars.forEach( function( variable ){
+        vars.push( '"' + variable.name + '"' );
+    
+    }, this);
+    src += vars.join(", ") + "])";
     console.log( action );
     return src;  
 };

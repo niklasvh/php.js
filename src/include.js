@@ -50,7 +50,6 @@ var files = {
         },
         error: {
             constants: "js",
-            error_reporting: "js",
             trigger_error: "js"
         },
         filesystem: {

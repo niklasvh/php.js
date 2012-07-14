@@ -120,6 +120,8 @@ PHP.Compiler.prototype.FUNCTION_HANDLER = "$FHandler";
 
 PHP.Compiler.prototype.FUNCTION_STATIC = "$Static";
 
+PHP.Compiler.prototype.FUNCTION_GLOBAL = "$Global";
+
 PHP.Compiler.prototype.FUNCTION_STATIC_SET = "$Set";
 
 PHP.Compiler.prototype.BOOLEAN_OR = "$Or";

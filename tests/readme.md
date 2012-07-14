@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 360 out of 672 (53.6%)
+Passed 362 out of 672 (53.9%)
 
 Failed tests:
 
@@ -143,7 +143,6 @@ Failed tests:
  - tests/php/func/009.phpt
  - tests/php/func/010.phpt
  - tests/php/func/ini_alter.phpt
- - tests/php/lang/007.phpt
  - tests/php/lang/023.phpt
  - tests/php/lang/024.phpt
  - tests/php/lang/026.phpt
@@ -249,7 +248,6 @@ Failed tests:
  - tests/php/lang/foreachLoopObjects.004.phpt
  - tests/php/lang/foreachLoopObjects.005.phpt
  - tests/php/lang/foreachLoopObjects.006.phpt
- - tests/php/lang/func_get_arg.005.phpt
  - tests/php/lang/func_get_args.003.phpt
  - tests/php/lang/func_get_arg_variation.phpt
  - tests/php/lang/passByReference_004.phpt
