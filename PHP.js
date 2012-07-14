@@ -342,6 +342,10 @@ PHP.Compiler.prototype.METHOD_CALL = "$Call";
 
 PHP.Compiler.prototype.DIM_FETCH = "$Dim";
 
+PHP.Compiler.prototype.DIM_ISSET = "$DimIsset";
+
+PHP.Compiler.prototype.DIM_EMPTY = "$DimEmpty";
+
 PHP.Compiler.prototype.STATIC_CALL = "$StaticCall";
 
 PHP.Compiler.prototype.CLASS_NAME = "$Name";
@@ -526,7 +530,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
         if (this.getName( action.func ) === "eval") {
             src += ", $"
-           // args.push("$");
+        // args.push("$");
         }
 
     }
@@ -564,15 +568,40 @@ PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 
-    var src = this.CTX + "isset( ";
+    var src = this.CTX + "$isset( ";
 
     var args = [];
     action.variables.forEach(function( arg ){
 
-        args.push( this.source( arg) );
+        switch (arg.type) {
+            
+            case "Node_Expr_ArrayDimFetch":
+                args.push( this.source( arg.variable ) + "."  + this.DIM_ISSET + '( this, ' + this.source( arg.dim ) + " )" );
+                break;
+            default:
+                args.push( this.source( arg) );
+        }
+
+        
     }, this);
 
     src += args.join(", ") + " )";
+
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Expr_Empty = function( action ) {
+
+    var src = this.CTX + "$empty( ";
+    console.log(action);
+    switch (action.variable.type) {
+        case "Node_Expr_ArrayDimFetch":
+            src += this.source( action.variable.variable ) + "."  + this.DIM_EMPTY + '( this, ' + this.source( action.variable.dim ) + " )";
+            break;
+        default:
+            src += this.source( action.variable ) ;
+    }
+    src += " )";
 
     return src;
 };
@@ -796,7 +825,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 
-if ( action.variable.name !== "this" ) {
+    if ( action.variable.name !== "this" ) {
         return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     } else {
         return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
@@ -4040,25 +4069,26 @@ PHP.Modules.prototype.token_name = function( token ) {
  */
 
 
-PHP.Modules.prototype.empty = function() {
+PHP.Modules.prototype.$empty = function( arg) {
 
     var len = arguments.length, i = -1, arg,
     VARIABLE = PHP.VM.Variable.prototype;
 
-    while( ++i < len ) {
-        arg = arguments[ i ];
-          console.log(arg); 
-        // http://www.php.net/manual/en/types.comparisons.php
+
+    // http://www.php.net/manual/en/types.comparisons.php
+        
+    if ( arg instanceof PHP.VM.Variable ) {
         if ( arg[ VARIABLE.TYPE ] === VARIABLE.NULL ) {
           
             return new PHP.VM.Variable( true );
+        } else {
+                return new PHP.VM.Variable( false );
         }
-
-      
-        
+    } else {
+        return new PHP.VM.Variable( arg );
     }
+        
 
-    return new PHP.VM.Variable( false );
 
 };
 /* 
@@ -4101,7 +4131,7 @@ PHP.Modules.prototype.is_string = function( variable ) {
     
  
     
-};PHP.Modules.prototype.isset = function() {
+};PHP.Modules.prototype.$isset = function() {
 
     var len = arguments.length, i = -1, arg,
     VARIABLE = PHP.VM.Variable.prototype;
@@ -4110,9 +4140,15 @@ PHP.Modules.prototype.is_string = function( variable ) {
         arg = arguments[ i ];
         
         // http://www.php.net/manual/en/types.comparisons.php
-        if ( arg[ VARIABLE.TYPE ] === VARIABLE.NULL ) {
+        
+        if ( arg instanceof PHP.VM.Variable ) {
+            if ( arg[ VARIABLE.TYPE ] === VARIABLE.NULL ) {
+                return new PHP.VM.Variable( false );
+            }
+        } else if ( arg === false) {
             return new PHP.VM.Variable( false );
         }
+
 
         
     }
@@ -4683,6 +4719,10 @@ PHP.Modules.prototype.var_dump = function() {
     {
         value: PHP.Constants.T_ARRAY,
         re: /^array(?=\s*?\()/i
+    },
+    {
+        value: PHP.Constants.T_EMPTY,
+        re: /^empty(?=[ \(])/i
     },
     {
         value: PHP.Constants.T_ISSET,
@@ -10570,7 +10610,58 @@ PHP.VM.Variable = function( arg ) {
         }
     }
     );
+        
+    this[ COMPILER.DIM_ISSET ] = function( ctx, variable  ) {
+        if ( this[ this.TYPE ] !== this.ARRAY ) {
+            if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
+                       
+                var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+                return exists;
+      
+                        
+            } else {
+                        
+                return false;
+            }
+        } 
+        
+        var returning = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                
+        return (returning[ this.DEFINED ] === true );
 
+    };
+    
+    this[ COMPILER.DIM_EMPTY ] = function( ctx, variable  ) {
+        
+        if ( this[ this.TYPE ] !== this.ARRAY ) {
+           
+            if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
+                       
+                var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+                
+             
+                if ( exists === true ) {
+                    var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ); // trigger offsetGet
+                    var tmp = val[ COMPILER.VARIABLE_VALUE ]; 
+                } else {
+                    return true;
+                }
+           
+                 
+                return (val[ this.TYPE ] === this.NULL);
+                                        
+            } else {
+                // looking in a non-existant array, so obviously its empty        
+                return true;
+            }
+        } else {
+            return this[ COMPILER.DIM_FETCH ]( ctx, variable);
+        }
+        
+
+
+    };
+    
     Object.defineProperty( this, COMPILER.DIM_FETCH,
     {
         get : function(){
@@ -10589,15 +10680,10 @@ PHP.VM.Variable = function( arg ) {
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
                     if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
                        
-                        var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
-                        console.log( exists, value );
-                        if ( exists === true ) { 
-
-                            return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
-                        } else {
-                            
-                            return new PHP.VM.Variable();
-                        }
+                        //      var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+          
+                        return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                      
                         
                     } else {
                         

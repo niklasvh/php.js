@@ -446,7 +446,58 @@ PHP.VM.Variable = function( arg ) {
         }
     }
     );
+        
+    this[ COMPILER.DIM_ISSET ] = function( ctx, variable  ) {
+        if ( this[ this.TYPE ] !== this.ARRAY ) {
+            if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
+                       
+                var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+                return exists;
+      
+                        
+            } else {
+                        
+                return false;
+            }
+        } 
+        
+        var returning = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                
+        return (returning[ this.DEFINED ] === true );
 
+    };
+    
+    this[ COMPILER.DIM_EMPTY ] = function( ctx, variable  ) {
+        
+        if ( this[ this.TYPE ] !== this.ARRAY ) {
+           
+            if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
+                       
+                var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+                
+             
+                if ( exists === true ) {
+                    var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ); // trigger offsetGet
+                    var tmp = val[ COMPILER.VARIABLE_VALUE ]; 
+                } else {
+                    return true;
+                }
+           
+                 
+                return (val[ this.TYPE ] === this.NULL);
+                                        
+            } else {
+                // looking in a non-existant array, so obviously its empty        
+                return true;
+            }
+        } else {
+            return this[ COMPILER.DIM_FETCH ]( ctx, variable);
+        }
+        
+
+
+    };
+    
     Object.defineProperty( this, COMPILER.DIM_FETCH,
     {
         get : function(){
@@ -465,15 +516,10 @@ PHP.VM.Variable = function( arg ) {
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
                     if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
                        
-                        var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
-                        console.log( exists, value );
-                        if ( exists === true ) { 
-
-                            return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
-                        } else {
-                            
-                            return new PHP.VM.Variable();
-                        }
+                        //      var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+          
+                        return  value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                      
                         
                     } else {
                         

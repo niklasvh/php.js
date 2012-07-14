@@ -302,6 +302,10 @@ PHP.Lexer = function( src ) {
         re: /^array(?=\s*?\()/i
     },
     {
+        value: PHP.Constants.T_EMPTY,
+        re: /^empty(?=[ \(])/i
+    },
+    {
         value: PHP.Constants.T_ISSET,
         re: /^isset(?=[ \(])/i
     },

@@ -176,6 +176,10 @@ PHP.Compiler.prototype.METHOD_CALL = "$Call";
 
 PHP.Compiler.prototype.DIM_FETCH = "$Dim";
 
+PHP.Compiler.prototype.DIM_ISSET = "$DimIsset";
+
+PHP.Compiler.prototype.DIM_EMPTY = "$DimEmpty";
+
 PHP.Compiler.prototype.STATIC_CALL = "$StaticCall";
 
 PHP.Compiler.prototype.CLASS_NAME = "$Name";

@@ -92,7 +92,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
         if (this.getName( action.func ) === "eval") {
             src += ", $"
-           // args.push("$");
+        // args.push("$");
         }
 
     }
@@ -130,15 +130,40 @@ PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 
-    var src = this.CTX + "isset( ";
+    var src = this.CTX + "$isset( ";
 
     var args = [];
     action.variables.forEach(function( arg ){
 
-        args.push( this.source( arg) );
+        switch (arg.type) {
+            
+            case "Node_Expr_ArrayDimFetch":
+                args.push( this.source( arg.variable ) + "."  + this.DIM_ISSET + '( this, ' + this.source( arg.dim ) + " )" );
+                break;
+            default:
+                args.push( this.source( arg) );
+        }
+
+        
     }, this);
 
     src += args.join(", ") + " )";
+
+    return src;
+};
+
+PHP.Compiler.prototype.Node_Expr_Empty = function( action ) {
+
+    var src = this.CTX + "$empty( ";
+    console.log(action);
+    switch (action.variable.type) {
+        case "Node_Expr_ArrayDimFetch":
+            src += this.source( action.variable.variable ) + "."  + this.DIM_EMPTY + '( this, ' + this.source( action.variable.dim ) + " )";
+            break;
+        default:
+            src += this.source( action.variable ) ;
+    }
+    src += " )";
 
     return src;
 };
@@ -362,7 +387,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 
-if ( action.variable.name !== "this" ) {
+    if ( action.variable.name !== "this" ) {
         return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     } else {
         return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
