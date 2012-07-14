@@ -49,8 +49,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
                     
-                    
-                    
+                 
                     if ( args[ index ] instanceof PHP.VM.VariableProto) {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
                     } else {
@@ -60,7 +59,6 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     // no argument passed for the specified index
                     
                     if ( arg[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
-                        console.log('setting default', arg[ COMPILER.PROPERTY_DEFAULT ]);
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = arg[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
                     } else {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
@@ -74,18 +72,16 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 // perform type hint check
             
                 if ( arg[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
-                    /*
-                    if ( args[ index ] instanceof PHP.VM.VariableProto) {
-                        classObj = args[ index ][ COMPILER.VARIABLE_VALUE ];
-                    } else {
-                        classObj = args[ index ];
-                    }
-                     */
+                    
+                    
+                    ENV[ COMPILER.TYPE_CHECK ]( $( arg.name ), arg[ COMPILER.PROPERTY_TYPE ], arg[ COMPILER.PROPERTY_DEFAULT ], index, className + "::" + methodName );
+                /*
+                
+                    
                    
                     classObj = $( arg.name )[ COMPILER.VARIABLE_VALUE ];
+                    if ( arg[ COMPILER.PROPERTY_DEFAULT ] === undefined || (arg[ COMPILER.PROPERTY_DEFAULT ][ VARIABLE.TYPE ] !==  VARIABLE.NULL || $( arg.name )[ VARIABLE.TYPE ] !== VARIABLE.NULL ) ) {
                    
-                    if ( arg[ COMPILER.PROPERTY_DEFAULT ] === undefined || (arg[ COMPILER.PROPERTY_DEFAULT ][ VARIABLE.TYPE ] !==  VARIABLE.NULL && $( arg.name )[ VARIABLE.TYPE ] !== VARIABLE.NULL ) ) {
-                    
                         var argPassedTo = "Argument " + (index + 1) + " passed to " + className + "::" + methodName + "() must ",
                         argGiven,
                         variableType = $( arg.name )[ VARIABLE.TYPE ],
@@ -142,6 +138,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         }
                         
                     }
+                    
+                    
+                      */
                 }   
                 
 
@@ -183,9 +182,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             Object.keys( props ).forEach(function( propertyName ){
                 
                 if ( checkType(this[propertyTypePrefix + propertyName], STATIC)) {
-                    // static, so refer to the one and only same value defined in actual prototype
+                // static, so refer to the one and only same value defined in actual prototype
 
-                    //  this[ propertyPrefix + propertyName ] = this[ propertyPrefix + propertyName ];
+                //  this[ propertyPrefix + propertyName ] = this[ propertyPrefix + propertyName ];
                     
                 } else {
                     if ( Array.isArray( props[ propertyName ] ) ) {

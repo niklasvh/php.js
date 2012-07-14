@@ -205,6 +205,15 @@ PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
             if ( param.byRef === true ) {
                 item += "," + this.PARAM_BYREF + ':true'
             }
+            
+            if (param.def !== null) {
+                item += ", " + this.PROPERTY_DEFAULT  + ": " + this.source( param.def )
+            }
+        
+            if (param.Type !== null ) {
+                item += ", " +  this.PROPERTY_TYPE + ': "' + this.source( param.Type ) + '"'
+            }
+        
            
             item += '}'
             params.push( item );
@@ -333,8 +342,8 @@ PHP.Compiler.prototype.Node_Stmt_TryCatch = function( action ) {
     
     src += ";\n }"
 
-        console.log( action );
-             this.source( action.expr ); 
+    console.log( action );
+    this.source( action.expr ); 
     return src;
 };
 
@@ -394,7 +403,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassConst = function( action ) {
    
     ((Array.isArray( action.consts[ 0 ] )) ?  action.consts[ 0 ] : action.consts ).forEach(function( constant ){
         src += "." + this.CLASS_CONSTANT + '("' + constant.name + '", ' + this.source( constant.value ) + ")\n"
-     }, this);
+    }, this);
     return src;
 
 };

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 335 out of 672 (49.9%)
+Passed 338 out of 672 (50.3%)
 
 Failed tests:
 
@@ -60,7 +60,6 @@ Failed tests:
  - tests/php/classes/array_access_012.phpt
  - tests/php/classes/array_access_013.phpt
  - tests/php/classes/assign_op_property_001.phpt
- - tests/php/classes/autoload_009.phpt
  - tests/php/classes/autoload_012.phpt
  - tests/php/classes/autoload_020.phpt
  - tests/php/classes/bug26737.phpt
@@ -165,7 +164,6 @@ Failed tests:
  - tests/php/lang/045.phpt
  - tests/php/lang/bison1.phpt
  - tests/php/lang/bug17115.phpt
- - tests/php/lang/bug18872.phpt
  - tests/php/lang/bug19566.phpt
  - tests/php/lang/bug19943.phpt
  - tests/php/lang/bug20175.phpt
@@ -180,7 +178,6 @@ Failed tests:
  - tests/php/lang/bug23279.phpt
  - tests/php/lang/bug23384.phpt
  - tests/php/lang/bug23489.phpt
- - tests/php/lang/bug23524.phpt
  - tests/php/lang/bug23584.phpt
  - tests/php/lang/bug24054.phpt
  - tests/php/lang/bug24396.phpt
