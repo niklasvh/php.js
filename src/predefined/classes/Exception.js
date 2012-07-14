@@ -28,5 +28,6 @@ return this.$Prop( ctx, "message" );
 .Method( "__clone", 36, [], function( $, ctx ) {
 })
 .Create()});
+ENV.$ob("");
 
 };
