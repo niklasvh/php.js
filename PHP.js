@@ -338,6 +338,8 @@ PHP.Compiler.prototype.VARIABLE_CLONE = "$VClone";
 
 PHP.Compiler.prototype.ARRAY_GET = "offsetGet";
 
+PHP.Compiler.prototype.ARRAY_SET = "offsetSet";
+
 PHP.Compiler.prototype.METHOD_CALL = "$Call";
 
 PHP.Compiler.prototype.DIM_FETCH = "$Dim";
@@ -449,8 +451,16 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
         this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;  
     }
     
+    console.log( action );
     
-    var src = this.source( action.variable ) + "." + this.ASSIGN + "(" + this.source( action.expr ) + ")";
+    
+    var src = this.source( action.variable ) + "." + this.ASSIGN;
+    if ( action.expr.type !== "Node_Expr_Assign") {    
+        src += "(" + this.source( action.expr ) + ")";
+    } else {
+        src += "(" + this.source( action.expr.variable ) + ", " + this.source( action.expr.expr ) + ")";
+    }
+    
     /*
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
@@ -10232,11 +10242,16 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
 
-    if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
-        // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
-        console.log(combinedVariable, combinedVariable[ COMPILER.VARIABLE_VALUE ]);
+    if ( arguments.length > 1 ) {
+         this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
+    } else {
+        if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+            // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
+            console.log(combinedVariable, combinedVariable[ COMPILER.VARIABLE_VALUE ]);
+        }
+        this[ COMPILER.VARIABLE_VALUE ] = combinedVariable[ COMPILER.VARIABLE_VALUE ];
+    
     }
-    this[ COMPILER.VARIABLE_VALUE ] = combinedVariable[ COMPILER.VARIABLE_VALUE ];
     
     return this;
     
@@ -10426,6 +10441,7 @@ PHP.VM.Variable = function( arg ) {
             
         }
         
+   
         
         if ( typeof this[this.REGISTER_SETTER ] === "function" ) {
             this[ this.REGISTER_SETTER ]( value );
@@ -10516,7 +10532,13 @@ PHP.VM.Variable = function( arg ) {
             }
             
             if ( typeof this[this.REGISTER_GETTER ] === "function" ) {
-                this[ this.REGISTER_GETTER ]();
+                var returned = this[ this.REGISTER_GETTER ]();
+                if ( returned instanceof PHP.VM.Variable ) {
+                    this[ this.TYPE ] = returned[ this.TYPE ];
+                    this[ this.DEFINED ] = returned[ this.DEFINED ];
+                    return returned[ COMPILER.VARIABLE_VALUE ];
+                }
+                    
             }
             
             if ( $this[ this.DEFINED ] !== true && $this[ COMPILER.SUPPRESS ] !== true ) {
@@ -10675,18 +10697,34 @@ PHP.VM.Variable = function( arg ) {
                 }
                 
 
-                console.log('getttingggg', ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1));
-                
+          
                 if ( this[ this.TYPE ] !== this.ARRAY ) {
                     if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
-                        console.log( "getting", variable[ COMPILER.VARIABLE_VALUE ]); 
-                        var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
-                        console.log( val[ this.DEFINED ], val );
-                        if ( val[ this.DEFINED ] !== true ) {
-                            this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );    
-                            return new PHP.VM.Variable();
-                        }
-                        return val;
+                       
+                        var dimHandler = new PHP.VM.Variable();
+                        dimHandler[ this.REGISTER_GETTER ] = function() {
+                            var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                        
+                            if ( val[ this.DEFINED ] !== true ) {
+                                this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );    
+                                return new PHP.VM.Variable();
+                            }
+                            return val;
+                        };
+                        
+                        dimHandler[ this.REGISTER_SETTER ] = function( val ) {
+                            var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_SET, variable, val );
+                        
+                            if ( val[ this.DEFINED ] !== true ) {
+                                this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );    
+                                return new PHP.VM.Variable();
+                            }
+                            return val;
+                        };
+                        
+                        return dimHandler;
+                       
+                        
                       
                         
                     } else {

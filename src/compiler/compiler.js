@@ -172,6 +172,8 @@ PHP.Compiler.prototype.VARIABLE_CLONE = "$VClone";
 
 PHP.Compiler.prototype.ARRAY_GET = "offsetGet";
 
+PHP.Compiler.prototype.ARRAY_SET = "offsetSet";
+
 PHP.Compiler.prototype.METHOD_CALL = "$Call";
 
 PHP.Compiler.prototype.DIM_FETCH = "$Dim";
