@@ -288,7 +288,16 @@ PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
     vars = [];
 
     action.variables.forEach(function( variable ){
-        vars.push( this.source( variable ) );
+        switch (variable.type) {
+            
+            case "Node_Expr_ArrayDimFetch":
+                vars.push( this.source( variable.variable ) + "."  + this.DIM_UNSET + '( this, ' + this.source( variable.dim ) + " )" );
+                break;
+            default:
+                vars.push( this.source( variable ) );
+        }
+        
+     
     }, this);
     
     src += vars.join(", ") + " )";

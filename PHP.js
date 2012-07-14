@@ -185,8 +185,9 @@ PHP.Compiler = function( AST, file ) {
 
 };
 
+var COMPILER = PHP.Compiler.prototype;
 
-PHP.Compiler.prototype.getName = function( item ) {
+COMPILER.getName = function( item ) {
     var parts = item.parts;
     if (Array.isArray( parts )) {
         return parts[ 0 ];
@@ -196,7 +197,7 @@ PHP.Compiler.prototype.getName = function( item ) {
 
 };
 
-PHP.Compiler.prototype.stmts = function( stmts ) {
+COMPILER.stmts = function( stmts ) {
     var src = "";
     
     stmts.forEach(function( stmt ){
@@ -215,7 +216,7 @@ PHP.Compiler.prototype.stmts = function( stmts ) {
     return src;
 };
 
-PHP.Compiler.prototype.source = function( action ) {
+COMPILER.source = function( action ) {
     if ( action === null ) {
         return "undefined";
     }
@@ -232,173 +233,175 @@ PHP.Compiler.prototype.source = function( action ) {
     return this[ action.type ]( action );
 };
 
-PHP.Compiler.prototype.FILE_PATH = "$FILE_PATH"; 
+COMPILER.FILE_PATH = "$FILE_PATH"; 
 
-PHP.Compiler.prototype.NAV = "$NaV"; // not a variable;
+COMPILER.NAV = "$NaV"; // not a variable;
 
-PHP.Compiler.prototype.FILESYSTEM = "$FS";
+COMPILER.FILESYSTEM = "$FS";
 
-PHP.Compiler.prototype.RESOURCES = "\π";
+COMPILER.RESOURCES = "\π";
 
-PHP.Compiler.prototype.ENV = "ENV";
+COMPILER.ENV = "ENV";
 
-PHP.Compiler.prototype.OUTPUT_BUFFER = "OUTPUT_BUFFER";
+COMPILER.OUTPUT_BUFFER = "OUTPUT_BUFFER";
 
-PHP.Compiler.prototype.OUTPUT_BUFFERS = "OUTPUT_BUFFERS";
+COMPILER.OUTPUT_BUFFERS = "OUTPUT_BUFFERS";
 
-PHP.Compiler.prototype.CTX = PHP.Compiler.prototype.ENV + ".";
+COMPILER.CTX = COMPILER.ENV + ".";
 
-PHP.Compiler.prototype.PARAM_NAME = "n";
+COMPILER.PARAM_NAME = "n";
 
-PHP.Compiler.prototype.PARAM_BYREF = "r";
+COMPILER.PARAM_BYREF = "r";
 
-PHP.Compiler.prototype.CATCH = "$Catch";
+COMPILER.CATCH = "$Catch";
 
-PHP.Compiler.prototype.EXCEPTION = "$Exception";
+COMPILER.EXCEPTION = "$Exception";
 
-PHP.Compiler.prototype.SUPPRESS = "$Suppress";
+COMPILER.SUPPRESS = "$Suppress";
 
-PHP.Compiler.prototype.CONSTANTS = "$Constants";
+COMPILER.CONSTANTS = "$Constants";
 
-PHP.Compiler.prototype.CONSTANT_GET = "get";
+COMPILER.CONSTANT_GET = "get";
 
-PHP.Compiler.prototype.CLASS_CONSTANT_GET = "$Class.ConstantGet";
+COMPILER.CLASS_CONSTANT_GET = "$Class.ConstantGet";
 
-PHP.Compiler.prototype.CONSTANT_SET = "set";
+COMPILER.CONSTANT_SET = "set";
 
-PHP.Compiler.prototype.MAGIC_CONSTANTS = "$MConstants";
+COMPILER.MAGIC_CONSTANTS = "$MConstants";
 
-PHP.Compiler.prototype.ASSIGN = "_";
+COMPILER.ASSIGN = "_";
 
-PHP.Compiler.prototype.NEG = "$Neg";
+COMPILER.NEG = "$Neg";
 
-PHP.Compiler.prototype.ADD = "$Add";
+COMPILER.ADD = "$Add";
 
-PHP.Compiler.prototype.MUL = "$Mul";
+COMPILER.MUL = "$Mul";
 
-PHP.Compiler.prototype.MOD = "$Mod";
+COMPILER.MOD = "$Mod";
 
-PHP.Compiler.prototype.DIV = "$Div";
+COMPILER.DIV = "$Div";
 
-PHP.Compiler.prototype.FUNCTION = "$F";
+COMPILER.FUNCTION = "$F";
 
-PHP.Compiler.prototype.FUNCTION_HANDLER = "$FHandler";
+COMPILER.FUNCTION_HANDLER = "$FHandler";
 
-PHP.Compiler.prototype.FUNCTION_STATIC = "$Static";
+COMPILER.FUNCTION_STATIC = "$Static";
 
-PHP.Compiler.prototype.FUNCTION_GLOBAL = "$Global";
+COMPILER.FUNCTION_GLOBAL = "$Global";
 
-PHP.Compiler.prototype.FUNCTION_STATIC_SET = "$Set";
+COMPILER.FUNCTION_STATIC_SET = "$Set";
 
-PHP.Compiler.prototype.BOOLEAN_OR = "$Or";
+COMPILER.BOOLEAN_OR = "$Or";
 
-PHP.Compiler.prototype.PRE_INC = "$PreInc";
+COMPILER.PRE_INC = "$PreInc";
 
-PHP.Compiler.prototype.PRE_DEC = "$PreDec";
+COMPILER.PRE_DEC = "$PreDec";
 
-PHP.Compiler.prototype.POST_INC = "$PostInc";
+COMPILER.POST_INC = "$PostInc";
 
-PHP.Compiler.prototype.POST_DEC = "$PostDec";
+COMPILER.POST_DEC = "$PostDec";
 
-PHP.Compiler.prototype.MINUS = "$Minus";
+COMPILER.MINUS = "$Minus";
 
-PHP.Compiler.prototype.CONCAT = "$Concat";
+COMPILER.CONCAT = "$Concat";
 
-PHP.Compiler.prototype.UNSET = "$Unset";
+COMPILER.UNSET = "$Unset";
 
-PHP.Compiler.prototype.NOT_IDENTICAL = "$NIdentical";
+COMPILER.NOT_IDENTICAL = "$NIdentical";
 
-PHP.Compiler.prototype.IDENTICAL = "$Identical";
+COMPILER.IDENTICAL = "$Identical";
 
-PHP.Compiler.prototype.BOOLEAN_NOT = "$Not";
+COMPILER.BOOLEAN_NOT = "$Not";
 
-PHP.Compiler.prototype.EQUAL = "$Equal";
+COMPILER.EQUAL = "$Equal";
 
-PHP.Compiler.prototype.SMALLER = "$Smaller";
+COMPILER.SMALLER = "$Smaller";
 
-PHP.Compiler.prototype.SMALLER_OR_EQUAL = "$S_Equal";
+COMPILER.SMALLER_OR_EQUAL = "$S_Equal";
 
-PHP.Compiler.prototype.GREATER = "$Greater";
+COMPILER.GREATER = "$Greater";
 
-PHP.Compiler.prototype.GREATER_OR_EQUAL = "$G_Equal";
+COMPILER.GREATER_OR_EQUAL = "$G_Equal";
 
-PHP.Compiler.prototype.LABEL = "LABEL";
+COMPILER.LABEL = "LABEL";
 
-PHP.Compiler.prototype.LABEL_COUNT = 0;
+COMPILER.LABEL_COUNT = 0;
 
-PHP.Compiler.prototype.VARIABLE = "$";
+COMPILER.VARIABLE = "$";
 
-PHP.Compiler.prototype.VARIABLE_VALUE = "$";
+COMPILER.VARIABLE_VALUE = "$";
 
-PHP.Compiler.prototype.CREATE_VARIABLE = "$$";
+COMPILER.CREATE_VARIABLE = "$$";
 
-PHP.Compiler.prototype.ARRAY_CLONE = "$AClone";
+COMPILER.ARRAY_CLONE = "$AClone";
 
-PHP.Compiler.prototype.VARIABLE_CLONE = "$VClone";
+COMPILER.VARIABLE_CLONE = "$VClone";
 
-PHP.Compiler.prototype.ARRAY_GET = "offsetGet";
+COMPILER.ARRAY_GET = "offsetGet";
 
-PHP.Compiler.prototype.ARRAY_SET = "offsetSet";
+COMPILER.ARRAY_SET = "offsetSet";
 
-PHP.Compiler.prototype.METHOD_CALL = "$Call";
+COMPILER.METHOD_CALL = "$Call";
 
-PHP.Compiler.prototype.DIM_FETCH = "$Dim";
+COMPILER.DIM_FETCH = "$Dim";
 
-PHP.Compiler.prototype.DIM_ISSET = "$DimIsset";
+COMPILER.DIM_ISSET = "$DimIsset";
 
-PHP.Compiler.prototype.DIM_EMPTY = "$DimEmpty";
+COMPILER.DIM_UNSET = "$DimUnset";
 
-PHP.Compiler.prototype.STATIC_CALL = "$StaticCall";
+COMPILER.DIM_EMPTY = "$DimEmpty";
 
-PHP.Compiler.prototype.CLASS_NAME = "$Name";
+COMPILER.STATIC_CALL = "$StaticCall";
 
-PHP.Compiler.prototype.INTERFACE_NEW = "$Class.INew";
+COMPILER.CLASS_NAME = "$Name";
 
-PHP.Compiler.prototype.CLASS_NEW = "$Class.New";
+COMPILER.INTERFACE_NEW = "$Class.INew";
 
-PHP.Compiler.prototype.CLASS_GET = "$Class.Get";
+COMPILER.CLASS_NEW = "$Class.New";
 
-PHP.Compiler.prototype.CLASS_PROPERTY_GET = "$Prop";
+COMPILER.CLASS_GET = "$Class.Get";
 
-PHP.Compiler.prototype.STATIC_PROPERTY_GET = "$SProp";
+COMPILER.CLASS_PROPERTY_GET = "$Prop";
 
-PHP.Compiler.prototype.CLASS_METHOD = "Method";
+COMPILER.STATIC_PROPERTY_GET = "$SProp";
 
-PHP.Compiler.prototype.CLASS_CONSTANT = "Constant";
+COMPILER.CLASS_METHOD = "Method";
 
-PHP.Compiler.prototype.CLASS_CONSTANT_FETCH = "$Constant";
+COMPILER.CLASS_CONSTANT = "Constant";
 
-PHP.Compiler.prototype.PROPERTY_TYPE = "p";
+COMPILER.CLASS_CONSTANT_FETCH = "$Constant";
 
-PHP.Compiler.prototype.PROPERTY_DEFAULT = "d";
+COMPILER.PROPERTY_TYPE = "p";
 
-PHP.Compiler.prototype.CLASS_PROPERTY = "Variable";
+COMPILER.PROPERTY_DEFAULT = "d";
 
-PHP.Compiler.prototype.CLASS_DECLARE = "Create";
+COMPILER.CLASS_PROPERTY = "Variable";
 
-PHP.Compiler.prototype.CLASS_NAMES = "$CLASSNAMES";
+COMPILER.CLASS_DECLARE = "Create";
 
-PHP.Compiler.prototype.CLASS_DESTRUCT = "$Destruct";
+COMPILER.CLASS_NAMES = "$CLASSNAMES";
 
-PHP.Compiler.prototype.CLASS_TYPE = "$CType";
+COMPILER.CLASS_DESTRUCT = "$Destruct";
 
-PHP.Compiler.prototype.ARRAY_VALUE = "v";
+COMPILER.CLASS_TYPE = "$CType";
 
-PHP.Compiler.prototype.ARRAY_KEY = "k";
+COMPILER.ARRAY_VALUE = "v";
 
-PHP.Compiler.prototype.ERROR  = "$ERROR";
+COMPILER.ARRAY_KEY = "k";
 
-PHP.Compiler.prototype.GLOBAL  = "$Global";
+COMPILER.ERROR  = "$ERROR";
 
-PHP.Compiler.prototype.SIGNATURE  = "$SIGNATURE";
+COMPILER.GLOBAL  = "$Global";
 
-PHP.Compiler.prototype.DISPLAY_HANDLER  = "$DisplayHandler";
+COMPILER.SIGNATURE  = "$SIGNATURE";
 
-PHP.Compiler.prototype.TYPE_CHECK  = "$TypeCheck";
+COMPILER.DISPLAY_HANDLER  = "$DisplayHandler";
 
-PHP.Compiler.prototype.INSTANCEOF  = "$InstanceOf";
+COMPILER.TYPE_CHECK  = "$TypeCheck";
 
-PHP.Compiler.prototype.fixString =  function( result ) {
+COMPILER.INSTANCEOF  = "$InstanceOf";
+
+COMPILER.fixString =  function( result ) {
     
     
 
@@ -1223,7 +1226,16 @@ PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
     vars = [];
 
     action.variables.forEach(function( variable ){
-        vars.push( this.source( variable ) );
+        switch (variable.type) {
+            
+            case "Node_Expr_ArrayDimFetch":
+                vars.push( this.source( variable.variable ) + "."  + this.DIM_UNSET + '( this, ' + this.source( variable.dim ) + " )" );
+                break;
+            default:
+                vars.push( this.source( variable ) );
+        }
+        
+     
     }, this);
     
     src += vars.join(", ") + " )";
@@ -4304,9 +4316,11 @@ PHP.Modules.prototype.print_r = function() {
 
 PHP.Modules.prototype.unset = function() {
     
-  PHP.Utils.$A( arguments ).forEach(function( arg ){
-      arg[ PHP.Compiler.prototype.UNSET ]();
-  }, this );  
+    PHP.Utils.$A( arguments ).forEach(function( arg ){
+        if ( arg  !== undefined ) {
+            arg[ PHP.Compiler.prototype.UNSET ]();
+        }
+    }, this );  
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -10243,7 +10257,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     VARIABLE = PHP.VM.Variable.prototype;
 
     if ( arguments.length > 1 ) {
-         this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
+        this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
     } else {
         if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
             // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
@@ -10632,7 +10646,23 @@ PHP.VM.Variable = function( arg ) {
         }
     }
     );
+    
+    this[ COMPILER.DIM_UNSET ] = function( ctx, variable  ) {
         
+        if ( this[ this.TYPE ] !== this.ARRAY ) {
+            if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
+                       
+                value[ COMPILER.METHOD_CALL ]( ctx, "offsetUnset", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetUnset          
+            } 
+        } else {
+        
+            value[ COMPILER.METHOD_CALL ]( ctx, "offsetUnset", variable );
+        }
+                
+    
+
+    };
+
     this[ COMPILER.DIM_ISSET ] = function( ctx, variable  ) {
         if ( this[ this.TYPE ] !== this.ARRAY ) {
             if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
@@ -10955,6 +10985,27 @@ PHP.VM.Array = function( ENV ) {
             
         
         })
+        
+        /*
+     * offsetUnset method
+     */ 
+        [ COMPILER.CLASS_METHOD ]( "offsetUnset", PHP.VM.Class.PUBLIC, [{
+            "name":"index"
+        }], function( $ ) {
+        
+            var value = $('index')[ COMPILER.VARIABLE_VALUE ];
+            var keys = this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ],
+            removeIndex = keys.indexOf( value );
+            
+            if ( removeIndex !== -1 ) {
+                keys.splice( removeIndex, 1);
+                this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].splice( removeIndex, 1);
+            }
+            
+            
+        })
+         
+        
         /*
      * offsetGet method
      */ 
@@ -10993,7 +11044,7 @@ PHP.VM.Array = function( ENV ) {
                     this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( variable );
                     delete variable[ VARIABLE.REGISTER_SETTER ];
                 }.bind(this);
-            variable[ VARIABLE.DEFINED  ] = false;
+                variable[ VARIABLE.DEFINED  ] = false;
                 return variable;
             
             }

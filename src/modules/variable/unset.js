@@ -7,8 +7,10 @@
 
 PHP.Modules.prototype.unset = function() {
     
-  PHP.Utils.$A( arguments ).forEach(function( arg ){
-      arg[ PHP.Compiler.prototype.UNSET ]();
-  }, this );  
+    PHP.Utils.$A( arguments ).forEach(function( arg ){
+        if ( arg  !== undefined ) {
+            arg[ PHP.Compiler.prototype.UNSET ]();
+        }
+    }, this );  
     
 };

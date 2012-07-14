@@ -68,7 +68,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     VARIABLE = PHP.VM.Variable.prototype;
 
     if ( arguments.length > 1 ) {
-         this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
+        this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
     } else {
         if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
             // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
@@ -457,7 +457,23 @@ PHP.VM.Variable = function( arg ) {
         }
     }
     );
+    
+    this[ COMPILER.DIM_UNSET ] = function( ctx, variable  ) {
         
+        if ( this[ this.TYPE ] !== this.ARRAY ) {
+            if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
+                       
+                value[ COMPILER.METHOD_CALL ]( ctx, "offsetUnset", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetUnset          
+            } 
+        } else {
+        
+            value[ COMPILER.METHOD_CALL ]( ctx, "offsetUnset", variable );
+        }
+                
+    
+
+    };
+
     this[ COMPILER.DIM_ISSET ] = function( ctx, variable  ) {
         if ( this[ this.TYPE ] !== this.ARRAY ) {
             if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {

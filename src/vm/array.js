@@ -137,6 +137,27 @@ PHP.VM.Array = function( ENV ) {
             
         
         })
+        
+        /*
+     * offsetUnset method
+     */ 
+        [ COMPILER.CLASS_METHOD ]( "offsetUnset", PHP.VM.Class.PUBLIC, [{
+            "name":"index"
+        }], function( $ ) {
+        
+            var value = $('index')[ COMPILER.VARIABLE_VALUE ];
+            var keys = this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ],
+            removeIndex = keys.indexOf( value );
+            
+            if ( removeIndex !== -1 ) {
+                keys.splice( removeIndex, 1);
+                this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].splice( removeIndex, 1);
+            }
+            
+            
+        })
+         
+        
         /*
      * offsetGet method
      */ 
@@ -175,7 +196,7 @@ PHP.VM.Array = function( ENV ) {
                     this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( variable );
                     delete variable[ VARIABLE.REGISTER_SETTER ];
                 }.bind(this);
-            variable[ VARIABLE.DEFINED  ] = false;
+                variable[ VARIABLE.DEFINED  ] = false;
                 return variable;
             
             }
