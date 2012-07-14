@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 350 out of 672 (52.1%)
+Passed 356 out of 672 (53%)
 
 Failed tests:
 
@@ -252,13 +252,7 @@ Failed tests:
  - tests/php/lang/foreachLoopObjects.005.phpt
  - tests/php/lang/foreachLoopObjects.006.phpt
  - tests/php/lang/foreach_with_references_001.phpt
- - tests/php/lang/func_get_arg.001.phpt
- - tests/php/lang/func_get_arg.002.phpt
- - tests/php/lang/func_get_arg.003.phpt
- - tests/php/lang/func_get_arg.004.phpt
  - tests/php/lang/func_get_arg.005.phpt
- - tests/php/lang/func_get_args.001.phpt
- - tests/php/lang/func_get_args.002.phpt
  - tests/php/lang/func_get_args.003.phpt
  - tests/php/lang/func_get_args.004.phpt
  - tests/php/lang/func_get_arg_variation.phpt

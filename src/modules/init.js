@@ -98,17 +98,51 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 };
 
 PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionName, args ) {
-    var func_num_args = "func_num_args";
+    var COMPILER = PHP.Compiler.prototype,
+    func_num_args = "func_num_args",
+    message = "():  Called from the global scope - no function context",
+    func_get_arg = "func_get_arg",
+    func_get_args = "func_get_args",
+    item = PHP.VM.Array.arrayItem;
     
-    if ( functionName === func_num_args ) {
-        if ( args.length === 3 ) {
-            this[ PHP.Compiler.prototype.ERROR ]( func_num_args + "():  Called from the global scope - no function context", PHP.Constants.E_CORE_WARNING, true );
-            return new PHP.VM.Variable( -1 );
+    if ( /^func_(get_args?|num_args)$/.test( functionName )) {
+        if ( args[ 2 ] instanceof PHP.VM ) {
+            this[ PHP.Compiler.prototype.ERROR ]( functionName + message, PHP.Constants.E_CORE_WARNING, true );
+            if ( functionName === func_num_args ) {
+                return new PHP.VM.Variable( -1 );
+            } else {
+                return new PHP.VM.Variable( false );
+            }
         }
-        return new PHP.VM.Variable( args.length - 2 );
+        
     }
     
-    else if ( this[ functionName ] === undefined ) {
+    
+    if ( functionName === func_num_args ) {
+
+
+        return new PHP.VM.Variable( args.length - 2 );
+        
+    } else if ( functionName === func_get_arg ) {
+
+        if ( args[ arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] + 2 ] === undefined ) {
+            this[ PHP.Compiler.prototype.ERROR ]( func_get_arg + "():  Argument " + arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] + " not passed to function", PHP.Constants.E_CORE_WARNING, true );
+            return new PHP.VM.Variable( false );
+        } else {
+            return args[ arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] + 2 ];
+        }
+        
+    } else if ( functionName === func_get_args ) {  
+        var props = [];
+         
+         Array.prototype.slice.call( args, 2 ).forEach(function( val, index ){
+            
+             props.push(item( index, val  ));
+         });
+        
+        return this.array( props );
+        
+    } else if ( this[ functionName ] === undefined ) {
         this[ PHP.Compiler.prototype.ERROR ]( "Call to undefined function " + functionName + "()", PHP.Constants.E_ERROR, true ); 
     }
     return this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) );
