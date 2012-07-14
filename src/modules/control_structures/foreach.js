@@ -14,6 +14,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
         pointer[ COMPILER.VARIABLE_VALUE ] = 0;
       
         return {
+            len: expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].length,
             expr: expr
         };
       
@@ -24,7 +25,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
         // iteratorAggregate implemented objects
         
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
-            console.log(objectValue[ COMPILER.CLASS_NAME ]);
+      
             var iterator = objectValue;
             
             if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1 ) {
@@ -90,14 +91,17 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
         var values = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
         keys =  expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
-        len = values.length,
+        len = ( byRef ) ? values.length : iterator.len,
         pointer = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
-        
+      
         var result = ( pointer[ COMPILER.VARIABLE_VALUE ] < len );
         
         if ( result === true ) {
-            value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
-            
+            if (byRef === true ) {
+                value[ VAR.REF ]( values[ pointer[ COMPILER.VARIABLE_VALUE ] ] );
+            } else {
+                value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
+            }
             if ( key instanceof PHP.VM.Variable ) {
                 key[ COMPILER.VARIABLE_VALUE ] = keys[ pointer[ COMPILER.VARIABLE_VALUE ] ];
             }

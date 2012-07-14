@@ -1895,6 +1895,40 @@ PHP.Modules.prototype.array_key_exists = function( key, search ) {
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 14.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.array_pop = function( array ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    ARRAY = PHP.VM.Array.prototype,
+    CLASS_PROPERTY = PHP.VM.Class.PROPERTY;
+    
+
+    var value = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].pop(),
+    key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].pop(),
+    pointer = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] = 0;
+        
+    return value;
+
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 14.7.2012 
+* @website http://hertzen.com
+ */
+
+PHP.Modules.prototype.array_push = function( array ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    array[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, "append", arguments[ 1 ] )
+};
+
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 29.6.2012 
 * @website http://hertzen.com
  */
@@ -2289,6 +2323,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
         pointer[ COMPILER.VARIABLE_VALUE ] = 0;
       
         return {
+            len: expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].length,
             expr: expr
         };
       
@@ -2299,7 +2334,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
         // iteratorAggregate implemented objects
         
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
-            console.log(objectValue[ COMPILER.CLASS_NAME ]);
+      
             var iterator = objectValue;
             
             if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1 ) {
@@ -2365,14 +2400,17 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
         var values = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
         keys =  expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
-        len = values.length,
+        len = ( byRef ) ? values.length : iterator.len,
         pointer = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
-        
+      
         var result = ( pointer[ COMPILER.VARIABLE_VALUE ] < len );
         
         if ( result === true ) {
-            value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
-            
+            if (byRef === true ) {
+                value[ VAR.REF ]( values[ pointer[ COMPILER.VARIABLE_VALUE ] ] );
+            } else {
+                value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
+            }
             if ( key instanceof PHP.VM.Variable ) {
                 key[ COMPILER.VARIABLE_VALUE ] = keys[ pointer[ COMPILER.VARIABLE_VALUE ] ];
             }
@@ -10689,6 +10727,38 @@ PHP.VM.Array = function( ENV ) {
        
         
         } )
+        /*
+     * append
+     */
+        [ COMPILER.CLASS_METHOD ]( "append", PHP.VM.Class.PUBLIC, [{
+            "name":"value"
+        }], function( $ ) {
+
+            
+            var append = function( item ) {
+      
+                if (item[ VARIABLE.CLASS_CONSTANT ] !== true && item[ VARIABLE.CONSTANT ] !== true) {
+                    this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( new PHP.VM.Variable( item[ COMPILER.VARIABLE_VALUE ] ) );
+                } else {
+                    this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( item[ COMPILER.ARRAY_VALUE ] );
+                }
+            
+           
+                this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( ++this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] );
+            
+            }.bind( this );
+            
+            var value = $("value");
+            
+            if ( value[ VARIABLE.TYPE ] === VARIABLE.STRING ) {
+                append( $("value") );
+            }
+        
+
+            
+        
+        })
+        
         /*
      * Custom $clone method, shouldn't be triggerable by php manually
      */

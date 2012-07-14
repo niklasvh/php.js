@@ -13,7 +13,8 @@ eval( content );
 // compile interfaces
 console.log("building interfaces from templates");
 
-
+var log = console.log;
+console.log = function() {};
 
 function template( type ) {
     var path = "templates/" + type;
@@ -24,8 +25,8 @@ function template( type ) {
         files.forEach(function( file ){
             fs.readFile(path + "/" + file, "utf8", function (err, data) {
                 if (err) throw err;
-                console.log("- building " + file);
-            
+                log("- building " + file);
+                
                 var AST = new PHP.Parser( PHP.Lexer( data ) );
   
                 var compiler = new PHP.Compiler( AST );
@@ -37,7 +38,7 @@ function template( type ) {
 
                 fs.writeFile('src/predefined/' + type +'/' + file.replace(".php",".js") , src, function (err) {
                     if (err) throw err;
-                    console.log('It\'s saved!');
+                    log(file.replace(".php",".js") + " compiled");
                 });
           
 

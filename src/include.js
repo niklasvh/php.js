@@ -16,6 +16,8 @@ var files = {
         array: {
             array: "js",
             array_key_exists: "js",
+            array_pop: "js",
+            array_push: "js",
             count: "js",
             current: "js",
             each: "js",

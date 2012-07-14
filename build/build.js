@@ -17,7 +17,7 @@ function includeFiles( path, obj ) {
     Object.keys( obj ).forEach(function( file ) {
         if ( obj[ file ] === "js" ) {
             
-         content += fs.readFileSync( path + file + '.js', 'utf8') ;
+            content += fs.readFileSync( path + file + '.js', 'utf8') ;
         
            
         } else {
@@ -31,7 +31,23 @@ includeFiles("src/", files.files );
 
 
 fs.writeFile('PHP.js', content, function (err) {
-  if (err) throw err;
-  console.log('php.js compiled');
+    if (err) throw err;
+    console.log('PHP.js compiled');
+  
+    var compressor = require('node-minify');
+
+    // Using Google Closure
+    new compressor.minify({
+        type: 'gcc',
+        fileIn: 'PHP.js',
+        fileOut: 'PHP-min.js',
+        callback: function(err){
+            console.log("PHP-min.js compiled");
+            console.log(err);
+        }
+    });
+    
+    
+  
 });
  

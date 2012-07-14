@@ -78,6 +78,38 @@ PHP.VM.Array = function( ENV ) {
         
         } )
         /*
+     * append
+     */
+        [ COMPILER.CLASS_METHOD ]( "append", PHP.VM.Class.PUBLIC, [{
+            "name":"value"
+        }], function( $ ) {
+
+            
+            var append = function( item ) {
+      
+                if (item[ VARIABLE.CLASS_CONSTANT ] !== true && item[ VARIABLE.CONSTANT ] !== true) {
+                    this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( new PHP.VM.Variable( item[ COMPILER.VARIABLE_VALUE ] ) );
+                } else {
+                    this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( item[ COMPILER.ARRAY_VALUE ] );
+                }
+            
+           
+                this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( ++this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] );
+            
+            }.bind( this );
+            
+            var value = $("value");
+            
+            if ( value[ VARIABLE.TYPE ] === VARIABLE.STRING ) {
+                append( $("value") );
+            }
+        
+
+            
+        
+        })
+        
+        /*
      * Custom $clone method, shouldn't be triggerable by php manually
      */
         [ COMPILER.CLASS_METHOD ]( COMPILER.ARRAY_CLONE, PHP.VM.Class.PUBLIC, [{
