@@ -1738,6 +1738,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                         this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
                         return;
                         break;
+                    case C.E_STRICT:
+                        this.$strict += "Strict Standards: " + msg + lineAppend + "\n";
+                        return;
+                        break;
                     default:
                         this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + lineAppend + "\n"));
                         return;
@@ -2533,6 +2537,7 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
             Class = ClassVar[ COMPILER.VARIABLE_VALUE ];
         }
         
+        // method call
         if ( methodParts.length === 1 ) {
             args = [ this, methodName].concat( Array.prototype.slice.call( arguments, 1 ) );
             return Class[ COMPILER.METHOD_CALL ].apply( Class, args );
@@ -2542,6 +2547,7 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
         }
         
     } else {
+        // function call
         args = Array.prototype.slice.call( arguments, 1 );
         
             return this[ callback[ COMPILER.VARIABLE_VALUE ]].apply( this, args  );
@@ -9016,6 +9022,7 @@ PHP.VM = function( src, opts ) {
     this.OUTPUT_BUFFERS = [""];
     this.$obreset();
     this.$ErrorReset();
+    this.$strict = "";
     
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
@@ -9035,12 +9042,12 @@ PHP.VM = function( src, opts ) {
     } catch( e ) {
         
         console.log("Caught: ", e.message, e);
-        console.log("Buffer: ", this.OUTPUT_BUFFERS.join(""));
+        console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
         
     }
        
 
-    this.OUTPUT_BUFFER = this.OUTPUT_BUFFERS.join("");
+    this.OUTPUT_BUFFER = this.$strict + this.OUTPUT_BUFFERS.join("");
 };
 
 PHP.VM.prototype = new PHP.Modules();
@@ -9385,8 +9392,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
             }
             
-           
-            
+
+                    
             if ( checkType( propertyType, STATIC )) {
                 Object.defineProperty( Class.prototype,  propertyPrefix + propertyName, {
                     value: propertyDefault
@@ -9473,6 +9480,26 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + methodName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
                 }
             }
+            
+            
+            // strict standards checks
+           
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined ) {
+                
+                // method has been defined in an inherited class
+                var propName;
+                if ( !Class.prototype[ methodArgumentPrefix + methodName ].every(function( item, index ){
+                    propName = item;
+                    
+                    return (( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) && methodProps[ index ] !== undefined && item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]) || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined);
+                //                                                                                                ^^ ^^^^^^ rechecking it on purpose
+                }) ||  Class.prototype[ methodArgumentPrefix + methodName ].length < methodProps.length ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + methodName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + ")", PHP.Constants.E_STRICT, true );
+                }
+                
+      
+            }
+            
             
             // end signature checks
             

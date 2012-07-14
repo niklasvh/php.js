@@ -338,8 +338,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
             }
             
-           
-            
+
+                    
             if ( checkType( propertyType, STATIC )) {
                 Object.defineProperty( Class.prototype,  propertyPrefix + propertyName, {
                     value: propertyDefault
@@ -426,6 +426,26 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + methodName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
                 }
             }
+            
+            
+            // strict standards checks
+           
+            if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined ) {
+                
+                // method has been defined in an inherited class
+                var propName;
+                if ( !Class.prototype[ methodArgumentPrefix + methodName ].every(function( item, index ){
+                    propName = item;
+                    
+                    return (( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) && methodProps[ index ] !== undefined && item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]) || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined);
+                //                                                                                                ^^ ^^^^^^ rechecking it on purpose
+                }) ||  Class.prototype[ methodArgumentPrefix + methodName ].length < methodProps.length ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + methodName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + ")", PHP.Constants.E_STRICT, true );
+                }
+                
+      
+            }
+            
             
             // end signature checks
             

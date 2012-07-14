@@ -366,6 +366,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                         this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
                         return;
                         break;
+                    case C.E_STRICT:
+                        this.$strict += "Strict Standards: " + msg + lineAppend + "\n";
+                        return;
+                        break;
                     default:
                         this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + lineAppend + "\n"));
                         return;

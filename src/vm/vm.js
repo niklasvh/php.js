@@ -131,6 +131,7 @@ PHP.VM = function( src, opts ) {
     this.OUTPUT_BUFFERS = [""];
     this.$obreset();
     this.$ErrorReset();
+    this.$strict = "";
     
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
@@ -150,12 +151,12 @@ PHP.VM = function( src, opts ) {
     } catch( e ) {
         
         console.log("Caught: ", e.message, e);
-        console.log("Buffer: ", this.OUTPUT_BUFFERS.join(""));
+        console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
         
     }
        
 
-    this.OUTPUT_BUFFER = this.OUTPUT_BUFFERS.join("");
+    this.OUTPUT_BUFFER = this.$strict + this.OUTPUT_BUFFERS.join("");
 };
 
 PHP.VM.prototype = new PHP.Modules();

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 338 out of 672 (50.3%)
+Passed 344 out of 672 (51.2%)
 
 Failed tests:
 
@@ -99,8 +99,6 @@ Failed tests:
  - tests/php/classes/final_ctor1.phpt
  - tests/php/classes/final_ctor2.phpt
  - tests/php/classes/implicit_instantiation_001.phpt
- - tests/php/classes/inheritance_003.phpt
- - tests/php/classes/inheritance_004.phpt
  - tests/php/classes/inheritance_006.phpt
  - tests/php/classes/inheritance_007.phpt
  - tests/php/classes/interfaces_003.phpt
@@ -135,10 +133,6 @@ Failed tests:
  - tests/php/classes/tostring_003.phpt
  - tests/php/classes/tostring_004.phpt
  - tests/php/classes/type_hinting_004.phpt
- - tests/php/classes/type_hinting_005a.phpt
- - tests/php/classes/type_hinting_005b.phpt
- - tests/php/classes/type_hinting_005c.phpt
- - tests/php/classes/type_hinting_005d.phpt
  - tests/php/classes/visibility_005.phpt
  - tests/php/classes/__call_003.phpt
  - tests/php/classes/__set_data_corrupt.phpt
