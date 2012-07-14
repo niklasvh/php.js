@@ -145,8 +145,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
                  
                 // register new class initiated into registry (for destructors at shutdown) 
-                initiatedClasses.push ( this ); 
-                 
+                if ( className !== "ArrayObject") {
+                     initiatedClasses.push ( this ); 
+                   
+                    this[ PHP.VM.Class.CLASS_INDEX ] = initiatedClasses.length;
+                }
+                
                 // PHP 5 style constructor in current class
                 
                 if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
@@ -867,6 +871,8 @@ PHP.VM.Class.METHOD_PROTOTYPE = "$MP";
 PHP.VM.Class.CONSTANT = "€";
 
 PHP.VM.Class.PROPERTY = "$$";
+
+PHP.VM.Class.CLASS_INDEX = "$CIndex";
 
 PHP.VM.Class.Predefined = {};
 

@@ -17,8 +17,8 @@ $o->f(new P);
 $o->f();
 $o->f(NULL);
 ?>
---EXPECT--
-object(P)#2 (0) {
+--EXPECTF--
+object(P)#%d (0) {
 }
 -
 NULL
