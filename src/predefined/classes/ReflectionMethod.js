@@ -7,10 +7,10 @@ ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $ ){
 .Variable( "name", 1 )
 .Variable( "class", 1 )
 .Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx ) {
-$("parts")._((ENV.explode($$("::"), $("class"))));
+$("parts")._((ENV.$F("explode", arguments, $$("::"), $("class"))));
 $("class")._($("parts").$Dim( this, $$(0) ));
 $("name")._($("parts").$Dim( this, $$(1) ));
-if ( ((ENV.class_exists($("class"))).$Not()).$Bool.$) {
+if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })

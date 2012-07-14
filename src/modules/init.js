@@ -97,6 +97,24 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
 };
 
+PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionName, args ) {
+    var func_num_args = "func_num_args";
+    
+    if ( functionName === func_num_args ) {
+        if ( args.length === 3 ) {
+            this[ PHP.Compiler.prototype.ERROR ]( func_num_args + "():  Called from the global scope - no function context", PHP.Constants.E_CORE_WARNING, true );
+            return new PHP.VM.Variable( -1 );
+        }
+        return new PHP.VM.Variable( args.length - 2 );
+    }
+    
+    else if ( this[ functionName ] === undefined ) {
+        this[ PHP.Compiler.prototype.ERROR ]( "Call to undefined function " + functionName + "()", PHP.Constants.E_ERROR, true ); 
+    }
+    return this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) );
+    
+};
+
 PHP.Modules.prototype[ PHP.Compiler.prototype.TYPE_CHECK ] = function( variable, propertyType, propertyDefault, index, name ) {
   
     var COMPILER = PHP.Compiler.prototype,

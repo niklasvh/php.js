@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 346 out of 672 (51.5%)
+Passed 350 out of 672 (52.1%)
 
 Failed tests:
 
@@ -262,10 +262,6 @@ Failed tests:
  - tests/php/lang/func_get_args.003.phpt
  - tests/php/lang/func_get_args.004.phpt
  - tests/php/lang/func_get_arg_variation.phpt
- - tests/php/lang/func_num_args.001.phpt
- - tests/php/lang/func_num_args.002.phpt
- - tests/php/lang/func_num_args.003.phpt
- - tests/php/lang/func_num_args.004.phpt
  - tests/php/lang/passByReference_004.phpt
  - tests/php/lang/passByReference_005.phpt
  - tests/php/lang/passByReference_006.phpt

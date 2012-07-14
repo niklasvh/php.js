@@ -71,6 +71,7 @@ var files = {
             zend_logo_guid: "js"
         },
         options: {
+            assert: "js",
             ini_set: "js",
             set_time_limit: "js"
         },

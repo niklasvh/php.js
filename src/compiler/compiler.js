@@ -114,6 +114,8 @@ PHP.Compiler.prototype.MOD = "$Mod";
 
 PHP.Compiler.prototype.DIV = "$Div";
 
+PHP.Compiler.prototype.FUNCTION = "$F";
+
 PHP.Compiler.prototype.FUNCTION_HANDLER = "$FHandler";
 
 PHP.Compiler.prototype.FUNCTION_STATIC = "$Static";

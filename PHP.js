@@ -280,6 +280,8 @@ PHP.Compiler.prototype.MOD = "$Mod";
 
 PHP.Compiler.prototype.DIV = "$Div";
 
+PHP.Compiler.prototype.FUNCTION = "$F";
+
 PHP.Compiler.prototype.FUNCTION_HANDLER = "$FHandler";
 
 PHP.Compiler.prototype.FUNCTION_STATIC = "$Static";
@@ -512,27 +514,27 @@ PHP.Compiler.prototype.Node_Expr_ErrorSuppress = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
-    var src = "",
-    args = [];
+    var src = "(" + this.CTX + this.FUNCTION + '(';
     
 
     if ( action.func.type !== "Node_Name") {
-        src += "(" + this.ENV + "[ " + this.source( action.func ) + "." + this.VARIABLE_VALUE + " ](";
+        src +=  this.source( action.func ) + "." + this.VARIABLE_VALUE + ", arguments";
     } else {
-        src += "(" + this.CTX + this.getName( action.func ) + "(";
+        src += '"' + this.getName( action.func ) + '", arguments';
 
         if (this.getName( action.func ) === "eval") {
-            args.push("$");
+            src += ", $"
+           // args.push("$");
         }
 
     }
 
     action.args.forEach(function( arg ){
-
-        args.push( this.source( arg.value ) );
+        src += ", " + this.source( arg.value );
+    //    args.push( this.source( arg.value ) );
     }, this);
 
-    src += args.join(", ") + "))";
+    src += "))";
 
     return src;
 };
@@ -1477,6 +1479,24 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
     return args;
 
+};
+
+PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionName, args ) {
+    var func_num_args = "func_num_args";
+    
+    if ( functionName === func_num_args ) {
+        if ( args.length === 3 ) {
+            this[ PHP.Compiler.prototype.ERROR ]( func_num_args + "():  Called from the global scope - no function context", PHP.Constants.E_CORE_WARNING, true );
+            return new PHP.VM.Variable( -1 );
+        }
+        return new PHP.VM.Variable( args.length - 2 );
+    }
+    
+    else if ( this[ functionName ] === undefined ) {
+        this[ PHP.Compiler.prototype.ERROR ]( "Call to undefined function " + functionName + "()", PHP.Constants.E_ERROR, true ); 
+    }
+    return this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) );
+    
 };
 
 PHP.Modules.prototype[ PHP.Compiler.prototype.TYPE_CHECK ] = function( variable, propertyType, propertyDefault, index, name ) {
@@ -2745,6 +2765,19 @@ PHP.Modules.prototype.zend_logo_guid = function(  ) {
     
     return new PHP.VM.Variable("PHPE9568F35-D428-11d2-A769-00AA001ACF42");
 };/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 14.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.assert = function( assertion ) {
+    // todo add  
+    var COMPILER = PHP.Compiler.prototype;
+    return (new PHP.VM.Variable( assertion[ COMPILER.VARIABLE_VALUE] ));
+    
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 5.7.2012 
 * @website http://hertzen.com
@@ -10884,8 +10917,8 @@ ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $ ){
 .Variable( "name", 1 )
 .Variable( "class", 4 )
 .Method( "__construct", 1, [{name:"argument"}], function( $, ctx ) {
-if ( ((ENV.is_string($("argument")))).$Bool.$) {
-if ( ((ENV.class_exists($("argument"))).$Not()).$Bool.$) {
+if ( ((ENV.$F("is_string", arguments, $("argument")))).$Bool.$) {
+if ( ((ENV.$F("class_exists", arguments, $("argument"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) ));
 } else {
 this.$Prop( ctx, "name" )._($("argument"));
@@ -10893,13 +10926,13 @@ this.$Prop( ctx, "name" )._($("argument"));
 };
 })
 .Method( "getProperty", 1, [{name:"name"}], function( $, ctx ) {
-$("parts")._((ENV.explode($$("::"), $("name"))));
-if ( ((ENV.count($("parts"))).$Greater($$(1))).$Bool.$) {
+$("parts")._((ENV.$F("explode", arguments, $$("::"), $("name"))));
+if ( ((ENV.$F("count", arguments, $("parts"))).$Greater($$(1))).$Bool.$) {
 $$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parts").$Dim( this, $$(0) ), $("parts").$Dim( this, $$(1) ) ));
 };
 })
 .Method( "implementsInterface", 1, [{name:"interface"}], function( $, ctx ) {
-if ( ((ENV.interface_exists($("interface"))).$Not()).$Bool.$) {
+if ( ((ENV.$F("interface_exists", arguments, $("interface"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Concat($("interface")).$Concat($$(" does not exist ")) ));
 };
 })
@@ -10923,10 +10956,10 @@ ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $ ){
 .Variable( "name", 1 )
 .Variable( "class", 1 )
 .Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx ) {
-$("parts")._((ENV.explode($$("::"), $("class"))));
+$("parts")._((ENV.$F("explode", arguments, $$("::"), $("class"))));
 $("class")._($("parts").$Dim( this, $$(0) ));
 $("name")._($("parts").$Dim( this, $$(1) ));
-if ( ((ENV.class_exists($("class"))).$Not()).$Bool.$) {
+if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })
@@ -10946,7 +10979,7 @@ ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $ ){
 .Variable( "name", 1 )
 .Variable( "class", 1 )
 .Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx ) {
-if ( ((ENV.class_exists($("class"))).$Not()).$Bool.$) {
+if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })

@@ -82,27 +82,27 @@ PHP.Compiler.prototype.Node_Expr_ErrorSuppress = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
-    var src = "",
-    args = [];
+    var src = "(" + this.CTX + this.FUNCTION + '(';
     
 
     if ( action.func.type !== "Node_Name") {
-        src += "(" + this.ENV + "[ " + this.source( action.func ) + "." + this.VARIABLE_VALUE + " ](";
+        src +=  this.source( action.func ) + "." + this.VARIABLE_VALUE + ", arguments";
     } else {
-        src += "(" + this.CTX + this.getName( action.func ) + "(";
+        src += '"' + this.getName( action.func ) + '", arguments';
 
         if (this.getName( action.func ) === "eval") {
-            args.push("$");
+            src += ", $"
+           // args.push("$");
         }
 
     }
 
     action.args.forEach(function( arg ){
-
-        args.push( this.source( arg.value ) );
+        src += ", " + this.source( arg.value );
+    //    args.push( this.source( arg.value ) );
     }, this);
 
-    src += args.join(", ") + "))";
+    src += "))";
 
     return src;
 };

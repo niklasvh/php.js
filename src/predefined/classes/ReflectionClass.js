@@ -7,8 +7,8 @@ ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $ ){
 .Variable( "name", 1 )
 .Variable( "class", 4 )
 .Method( "__construct", 1, [{name:"argument"}], function( $, ctx ) {
-if ( ((ENV.is_string($("argument")))).$Bool.$) {
-if ( ((ENV.class_exists($("argument"))).$Not()).$Bool.$) {
+if ( ((ENV.$F("is_string", arguments, $("argument")))).$Bool.$) {
+if ( ((ENV.$F("class_exists", arguments, $("argument"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) ));
 } else {
 this.$Prop( ctx, "name" )._($("argument"));
@@ -16,13 +16,13 @@ this.$Prop( ctx, "name" )._($("argument"));
 };
 })
 .Method( "getProperty", 1, [{name:"name"}], function( $, ctx ) {
-$("parts")._((ENV.explode($$("::"), $("name"))));
-if ( ((ENV.count($("parts"))).$Greater($$(1))).$Bool.$) {
+$("parts")._((ENV.$F("explode", arguments, $$("::"), $("name"))));
+if ( ((ENV.$F("count", arguments, $("parts"))).$Greater($$(1))).$Bool.$) {
 $$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parts").$Dim( this, $$(0) ), $("parts").$Dim( this, $$(1) ) ));
 };
 })
 .Method( "implementsInterface", 1, [{name:"interface"}], function( $, ctx ) {
-if ( ((ENV.interface_exists($("interface"))).$Not()).$Bool.$) {
+if ( ((ENV.$F("interface_exists", arguments, $("interface"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Concat($("interface")).$Concat($$(" does not exist ")) ));
 };
 })
