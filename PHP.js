@@ -574,7 +574,17 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Instanceof = function( action ) {
-    return this.source( action.left ) + "." + this.INSTANCEOF + '("'  + this.source( action.right ) + '")';
+    
+    
+    var classPart;
+
+    if (action.right.type === "Node_Name") {
+        classPart = '"' + this.source(action.right) +'"';
+    } else {
+        classPart = this.source(action.right) + "." + this.VARIABLE_VALUE;
+    }
+    
+    return this.source( action.left ) + "." + this.INSTANCEOF + '('  + classPart + ')';
 };
 
 PHP.Compiler.prototype.Node_Expr_UnaryPlus = function( action ) {
@@ -2065,8 +2075,13 @@ PHP.Modules.prototype.class_exists = function( class_name, autoload ) {
 
 PHP.Modules.prototype.get_class = function( object ) {
     var COMPILER = PHP.Compiler.prototype;
-    
-    return new PHP.VM.Variable( object[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] );
+ 
+    if (object instanceof PHP.VM.Variable ) {
+           return new PHP.VM.Variable( object[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] );
+    } else {
+           return new PHP.VM.Variable( object[ COMPILER.CLASS_NAME ] );
+    }
+ 
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>

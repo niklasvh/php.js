@@ -144,7 +144,17 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Instanceof = function( action ) {
-    return this.source( action.left ) + "." + this.INSTANCEOF + '("'  + this.source( action.right ) + '")';
+    
+    
+    var classPart;
+
+    if (action.right.type === "Node_Name") {
+        classPart = '"' + this.source(action.right) +'"';
+    } else {
+        classPart = this.source(action.right) + "." + this.VARIABLE_VALUE;
+    }
+    
+    return this.source( action.left ) + "." + this.INSTANCEOF + '('  + classPart + ')';
 };
 
 PHP.Compiler.prototype.Node_Expr_UnaryPlus = function( action ) {
