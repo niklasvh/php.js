@@ -46,7 +46,7 @@ fs.writeFile('PHP.js', content, function (err) {
             new compressor.minify({
                 type: 'gcc',
                 fileIn: 'build/tmp.js',
-                fileOut: 'PHP-min.js',
+                fileOut: 'PHP.min.js',
                 callback: function(err){
             
                     if (err) throw err;
