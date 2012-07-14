@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 356 out of 672 (53%)
+Passed 357 out of 672 (53.1%)
 
 Failed tests:
 
@@ -254,7 +254,6 @@ Failed tests:
  - tests/php/lang/foreach_with_references_001.phpt
  - tests/php/lang/func_get_arg.005.phpt
  - tests/php/lang/func_get_args.003.phpt
- - tests/php/lang/func_get_args.004.phpt
  - tests/php/lang/func_get_arg_variation.phpt
  - tests/php/lang/passByReference_004.phpt
  - tests/php/lang/passByReference_005.phpt

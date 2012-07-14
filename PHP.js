@@ -1399,6 +1399,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     // initializer
     args.push( function( args, values ) {
         handler = PHP.VM.VariableHandler( ENV );
+       
         var vals = Array.prototype.slice.call( values, 2 );
 
 
@@ -1408,6 +1409,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
+
+
 
             // check that we aren't passing a constant for arg which is defined byRef
             if ( argObject[ COMPILER.PARAM_BYREF ] === true &&
@@ -1430,7 +1433,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
                 arg[ VARIABLE.REF ]( vals[ index ] );
             } else {
-                if ( vals[ index ] !== undefined ) {
+                if ( vals[ index ] !== undefined ) {                  
                     arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
                 } else {
                     if ( argObject[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
@@ -1439,6 +1442,13 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
                         arg[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
                     }
                 }
+            }
+            
+            // redefine item in arguments object, to be used by func_get_arg(s)
+            if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
+                values[ index + 2 ] = arg;
+            } else {
+                values[ index + 2 ] = new PHP.VM.Variable( arg[ COMPILER.VARIABLE_VALUE ] );
             }
             
             if ( argObject[ COMPILER.PROPERTY_TYPE ] !== undefined ) {  
@@ -1519,10 +1529,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
     } else if ( functionName === func_get_args ) {  
         var props = [];
          
-         Array.prototype.slice.call( args, 2 ).forEach(function( val, index ){
+        Array.prototype.slice.call( args, 2 ).forEach(function( val, index ){
             
-             props.push(item( index, val  ));
-         });
+            props.push(item( index, val  ));
+        });
         
         return this.array( props );
         
