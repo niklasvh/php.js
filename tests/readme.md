@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 362 out of 672 (53.9%)
+Passed 363 out of 672 (54%)
 
 Failed tests:
 
@@ -276,7 +276,6 @@ Failed tests:
  - tests/php/lang/static_variation_002.phpt
  - tests/php/lang/string_decimals_001.phpt
  - tests/php/lang/this_assignment.phpt
- - tests/php/lang/type_hints_001.phpt
  - tests/php/lang/type_hints_002.phpt
  - tests/php/lang/type_hints_003.phpt
  - tests/php/output/bug46897.phpt
