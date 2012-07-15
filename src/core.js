@@ -5,10 +5,10 @@
  */
 
 
-var PHP = function( tokens, opts ) {
+var PHP = function( code, opts ) {
     
-    //console.log( tokens );
-    this.tokens = tokens;
+    
+    this.tokens = PHP.Lexer( code );
     try {
         this.AST = new PHP.Parser( this.tokens );
     } catch( e ) {

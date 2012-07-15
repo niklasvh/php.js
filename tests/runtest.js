@@ -90,7 +90,7 @@ function runTest ( file ) {
         //    var php = require('F:/Websites/php.js/PHP.js');
         //     engine = new php.PHP( php.PHP.Lexer(test.FILE), opts );
         eval(content + "GLOBAL.PHP = PHP; ");
-        engine = new PHP( PHP.Lexer(test.FILE), opts );
+        engine = new PHP( test.FILE, opts );
         //     var exec = new Function( "test", "opts", content + "return new PHP( PHP.Lexer(test.FILE), opts );" );
         //    engine = exec.call({}, test, opts);
             
