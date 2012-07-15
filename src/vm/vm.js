@@ -45,7 +45,7 @@ PHP.VM = function( src, opts ) {
             Shutdown: function() {
                 
                 initiatedClasses.forEach( function( classObj ) {
-                        classObj[  COMPILER.CLASS_DESTRUCT ]( ENV );
+                        classObj[  COMPILER.CLASS_DESTRUCT ]( ENV, true );
                 });
                 
             },

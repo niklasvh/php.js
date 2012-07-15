@@ -9435,7 +9435,7 @@ PHP.VM = function( src, opts ) {
             Shutdown: function() {
                 
                 initiatedClasses.forEach( function( classObj ) {
-                        classObj[  COMPILER.CLASS_DESTRUCT ]( ENV );
+                        classObj[  COMPILER.CLASS_DESTRUCT ]( ENV, true );
                 });
                 
             },
@@ -9766,7 +9766,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
                 
                 // PHP 5 style constructor in current class
-               var ret; 
+                var ret; 
                 if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
                     this[ PHP.VM.Class.KILLED ] = true;
                     ret = callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) ); 
@@ -9800,7 +9800,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     while ( ( proto = Object.getPrototypeOf( proto ) ) instanceof PHP.VM.ClassPrototype ) {
                         
                         if ( proto.hasOwnProperty( methodPrefix + proto[ COMPILER.CLASS_NAME  ].toLowerCase() ) ) {
-                           this[ PHP.VM.Class.KILLED ] = true;
+                            this[ PHP.VM.Class.KILLED ] = true;
                             ret = callMethod.call( proto, proto[ COMPILER.CLASS_NAME  ].toLowerCase(), Array.prototype.slice.call( arguments, 1 ) ); 
                             this[ PHP.VM.Class.KILLED ] = undefined;
                             return ret;
@@ -10490,12 +10490,32 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         };
         
         
-        Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx ) {
+        Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx, shutdown ) {
             // check if this class has been destructed already
+            
+            console.log( ctx );
             
             if ( this[ PHP.VM.Class.KILLED ] === true ) { 
                 return;
             }
+            
+            if ( checkType( this[ methodTypePrefix + __destruct ], PRIVATE ) && ( !(ctx instanceof PHP.VM.ClassPrototype) || this[ PHP.VM.Class.METHOD_PROTOTYPE + __destruct ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ]  )) {
+                   
+                // targeted function is private and inaccessible from current context, 
+                // but let's make sure current context doesn't have it's own private method that has been overwritten
+                if ( !(ctx instanceof PHP.VM.ClassPrototype) || 
+                    ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __destruct ] === undefined ||
+                    ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __destruct ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                    
+                    if ( shutdown === true ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 1", PHP.Constants.E_WARNING );
+                        return;
+                    } else {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
+                    }
+                }
+                    
+            } 
                                 
             this[ PHP.VM.Class.KILLED ] = true;
             console.log('destruct');

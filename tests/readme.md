@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 397 out of 672 (59.1%)
+Passed 400 out of 672 (59.5%)
 
 Failed tests:
 
@@ -70,14 +70,11 @@ Failed tests:
  - tests/php/classes/ctor_in_interface_04.phpt
  - tests/php/classes/ctor_visibility.phpt
  - tests/php/classes/destructor_and_globals.phpt
- - tests/php/classes/destructor_visibility_001.phpt
- - tests/php/classes/destructor_visibility_002.phpt
  - tests/php/classes/factory_and_singleton_001.phpt
  - tests/php/classes/factory_and_singleton_002.phpt
  - tests/php/classes/factory_and_singleton_003.phpt
  - tests/php/classes/factory_and_singleton_004.phpt
  - tests/php/classes/factory_and_singleton_005.phpt
- - tests/php/classes/factory_and_singleton_006.phpt
  - tests/php/classes/factory_and_singleton_007.phpt
  - tests/php/classes/factory_and_singleton_008.phpt
  - tests/php/classes/factory_and_singleton_009.phpt
