@@ -163,6 +163,12 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_NOT ] = function(
     return new PHP.VM.Variable( !(this[ COMPILER.VARIABLE_VALUE ]) );
 };
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.IDENTICAL ] = function( compareTo ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) === ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+};
+
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.NOT_IDENTICAL ] = function( compareTo ) {
     
     var COMPILER = PHP.Compiler.prototype;

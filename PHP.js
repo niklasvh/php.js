@@ -2838,6 +2838,20 @@ PHP.Modules.prototype.function_exists = function( function_name ) {
 };
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 15.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.dechex = function( variable ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    var num = variable[ COMPILER.VARIABLE_VALUE ];
+    
+    return new PHP.VM.Variable( parseInt( num, 10 ).toString( 16 ) );
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 7.7.2012 
 * @website http://hertzen.com
  */
@@ -4526,6 +4540,37 @@ PHP.Modules.prototype.var_dump = function() {
     console.log( arguments[0] instanceof PHP.VM.VariableProto);
     console.log( arguments );
     */
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 15.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+
+PHP.Modules.prototype.var_export = function( variable, ret ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    var val = "";
+   
+    switch (variable[ VARIABLE.TYPE ] ) {
+        case VARIABLE.STRING:
+            val += "'" + variable[ COMPILER.VARIABLE_VALUE ] + "'";
+            break;
+    }
+    
+    val = new PHP.VM.Variable( val );
+
+    if ( ret === undefined || ret[ COMPILER.VARIABLE_VALUE ] === false) { 
+        this.echo( val );
+    } else {
+        return val;
+    }
+    
+    return new PHP.VM.Variable();
+
 };PHP.Lexer = function( src ) {
 
 
@@ -10526,6 +10571,12 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_NOT ] = function(
     
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( !(this[ COMPILER.VARIABLE_VALUE ]) );
+};
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.IDENTICAL ] = function( compareTo ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) === ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.NOT_IDENTICAL ] = function( compareTo ) {

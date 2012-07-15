@@ -61,6 +61,9 @@ var files = {
             call_user_func: "js",
             function_exists: "js"
         },
+        math: {
+          dechex: "js"  
+        },
         misc: {
             define: "js",
             defined: "js",
@@ -110,7 +113,8 @@ var files = {
             isset: "js",
             print_r: "js",
             unset: "js",
-            var_dump: "js"
+            var_dump: "js",
+            var_export: "js"
         }
             
     },
