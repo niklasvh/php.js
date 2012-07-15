@@ -368,6 +368,29 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true );
             }
             
+            // can't override final php4 ctor extending php5 ctor
+            if ( methodName === className.toLowerCase() && Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + __construct ] !== undefined && checkType( Class.prototype[ methodTypePrefix + __construct ], FINAL ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + __construct ][ COMPILER.CLASS_NAME ] + "::" + __construct + "() with " + className + "::" + realName + "()", PHP.Constants.E_ERROR, true );
+            }
+            
+            var ctorProto = ( function( proto ){
+                 
+                   
+                while ( ( proto = Object.getPrototypeOf( proto ) ) instanceof PHP.VM.ClassPrototype ) {
+                       
+                    if ( proto.hasOwnProperty( methodPrefix + proto[ COMPILER.CLASS_NAME  ].toLowerCase() ) ) {
+                        return proto;
+                    }
+                                    
+                }
+                
+            })( Class.prototype );
+         
+             // can't override final php5 ctor extending php4 ctor
+            if ( methodName === __construct && ctorProto !== undefined && checkType( ctorProto[ methodTypePrefix + ctorProto[ COMPILER.CLASS_NAME ].toLowerCase() ], FINAL ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final " + ctorProto[ COMPILER.CLASS_NAME ] + "::" + ctorProto[ COMPILER.CLASS_NAME ] + "() with " + className + "::" + realName + "()", PHP.Constants.E_ERROR, true );
+            }
+            
             // can't make static non-static
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], STATIC ) && !checkType( methodType, STATIC ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() non static in class " + className, PHP.Constants.E_ERROR, true );
