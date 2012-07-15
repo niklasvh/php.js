@@ -4385,9 +4385,11 @@ PHP.Modules.prototype.print_r = function() {
             // search whole prototype chain
             for ( var item in classObj ) {
                 if (item.substring(0, PHP.VM.Class.PROPERTY.length) === PHP.VM.Class.PROPERTY) {
-                    
+                    if ( added === false ) {
+                        str += "\n";
+                    }
                     added = true;
-                    str += "\n" + $INDENT( indent + 4 ) + '[' + item.substring( PHP.VM.Class.PROPERTY.length ) + '] => ';
+                    str += $INDENT( indent + 4 ) + '[' + item.substring( PHP.VM.Class.PROPERTY.length ) + '] => ';
                     str += $dump( classObj[ item ], indent + 8 );
                     
                     //  props.push( item );
