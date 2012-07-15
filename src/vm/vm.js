@@ -147,6 +147,7 @@ PHP.VM = function( src, opts ) {
         var exec = new Function( "$$", "$", "ENV",  src  );
         exec.call(this, $$, $, ENV);
         this.$obflush.call( ENV );  
+        this.$shutdown.call( ENV );
         
     } catch( e ) {
         

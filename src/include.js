@@ -59,8 +59,7 @@ var files = {
         },
         functions: {
             call_user_func: "js",
-            function_exists: "js",
-            register_shutdown_function: "js"
+            function_exists: "js"
         },
         misc: {
             define: "js",

@@ -1791,14 +1791,33 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     lastError,
     errorHandler,
     reportingLevel,
+    shutdownFunc,
+    shutdownParams,
     suppress = false;
 
     MODULES.$ErrorReset = function() {
         lastError = undefined;
         errorHandler = undefined;
+        shutdownFunc = undefined;
+        shutdownParams = undefined;
         suppress = false;
         reportingLevel = undefined;
     };
+
+    MODULES.register_shutdown_function = function( func ) {
+        console.log("registering shutdown");
+        shutdownFunc = func;
+        shutdownParams = Array.prototype.slice.call( arguments, 1 );
+    };
+    
+    MODULES.$shutdown = function() {
+        console.log("shutting down");
+             if ( shutdownFunc !== undefined ) {
+                 console.log("yes");
+                    this.call_user_func.apply( this, [ shutdownFunc ].concat( arguments ) );
+             }
+    };
+
 
     MODULES[ COMPILER.SUPPRESS ] = function( expr ) {
         suppress = true;
@@ -2818,18 +2837,6 @@ PHP.Modules.prototype.function_exists = function( function_name ) {
     
 };
 /* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 11.7.2012 
-* @website http://hertzen.com
- */
-
-
-PHP.Modules.prototype.register_shutdown_function = function( function_name ) {
-    var COMPILER = PHP.Compiler.prototype,
-    VARIABLE = PHP.VM.Variable.prototype;
-    
-    
-};/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 7.7.2012 
 * @website http://hertzen.com
@@ -9364,6 +9371,7 @@ PHP.VM = function( src, opts ) {
         var exec = new Function( "$$", "$", "ENV",  src  );
         exec.call(this, $$, $, ENV);
         this.$obflush.call( ENV );  
+        this.$shutdown.call( ENV );
         
     } catch( e ) {
         

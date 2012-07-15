@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 384 out of 672 (57.1%)
+Passed 385 out of 672 (57.3%)
 
 Failed tests:
 
@@ -116,7 +116,6 @@ Failed tests:
  - tests/php/classes/__set_data_corrupt.phpt
  - tests/php/classes/__set__get_005.phpt
  - tests/php/func/004.phpt
- - tests/php/func/005.phpt
  - tests/php/func/005a.phpt
  - tests/php/func/007.phpt
  - tests/php/func/008.phpt
