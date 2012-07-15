@@ -230,6 +230,10 @@ PHP.Compiler.prototype.Node_Expr_Equal = function( action ) {
     return this.source( action.left ) + "." + this.EQUAL + "(" + this.source( action.right ) + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_NotEqual = function( action ) {
+    return this.source( action.left ) + "." + this.NOT_EQUAL + "(" + this.source( action.right ) + ")";
+};
+
 PHP.Compiler.prototype.Node_Expr_NotIdentical = function( action ) {
     return this.source( action.left ) + "." + this.NOT_IDENTICAL + "(" + this.source( action.right ) + ")";
 };
@@ -238,8 +242,11 @@ PHP.Compiler.prototype.Node_Expr_Identical = function( action ) {
     return this.source( action.left ) + "." + this.IDENTICAL + "(" + this.source( action.right ) + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_BooleanAnd = function( action ) {
+    return this.source( action.left ) + "." + this.BOOLEAN_AND + "(" + this.source( action.right ) + ")";
+};
+
 PHP.Compiler.prototype.Node_Expr_BooleanNot = function( action ) {
-    console.log( action );
     return this.source( action.expr ) + "." + this.BOOLEAN_NOT + "()";
 };
 

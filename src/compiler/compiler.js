@@ -147,7 +147,11 @@ COMPILER.IDENTICAL = "$Identical";
 
 COMPILER.BOOLEAN_NOT = "$Not";
 
+COMPILER.BOOLEAN_AND = "$And";
+
 COMPILER.EQUAL = "$Equal";
+
+COMPILER.NOT_EQUAL = "$Equal";
 
 COMPILER.SMALLER = "$Smaller";
 

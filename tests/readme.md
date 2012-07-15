@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 371 out of 672 (55.2%)
+Passed 374 out of 672 (55.7%)
 
 Failed tests:
 
@@ -106,9 +106,6 @@ Failed tests:
  - tests/php/classes/private_members.phpt
  - tests/php/classes/property_recreate_private.phpt
  - tests/php/classes/property_recreate_protected.phpt
- - tests/php/classes/protected_001.phpt
- - tests/php/classes/protected_001b.phpt
- - tests/php/classes/protected_002.phpt
  - tests/php/classes/serialize_001.phpt
  - tests/php/classes/static_properties_003.phpt
  - tests/php/classes/static_properties_004.phpt

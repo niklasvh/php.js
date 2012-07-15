@@ -38,6 +38,21 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
     }
     
+    // check if obj inherits className
+    function inherits( obj, name ) {
+     
+        do {
+            if ( obj[ COMPILER.CLASS_NAME ] === name) {
+                return true;
+            }
+
+            obj = Object.getPrototypeOf( obj );
+        }
+        
+        while( obj !== undefined && obj instanceof PHP.VM.ClassPrototype );
+        return false;
+    }
+    
     var buildVariableContext = function( methodName, args, className ) {
         
         var $ = PHP.VM.VariableHandler(),
@@ -581,6 +596,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                     }
                     
+                } else if ( checkType( this[ methodTypePrefix + methodName ], PROTECTED ) ) {
+                    // we are calling a protected method, let's see if we are inside it 
+                    if ( !( ctx instanceof PHP.VM.ClassPrototype) ) { // todo check actually parents as well 
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                    }
                 }
                 
               
@@ -636,6 +656,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                
                 if ( checkType( this[ methodTypePrefix + methodName ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                } else if ( checkType( this[ methodTypePrefix + methodName ], PROTECTED ) ) {
+                    // we are calling a protected method, let's see if we are inside it 
+                    if ( !( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ) ) { 
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                    } 
+                    
                 }
                 
               
@@ -651,6 +677,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
 
             } else if ( methodClass !== className ){
+              
+                
               
                 proto = Object.getPrototypeOf( this );
                 while ( proto[ COMPILER.CLASS_NAME ] !== methodClass ) {
