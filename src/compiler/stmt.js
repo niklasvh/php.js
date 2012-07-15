@@ -173,9 +173,9 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     
     
     console.log( action );
-    
-    var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
-    src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + action.byRef + ", " + this.source( action.valueVar );
+    var count = ++this.FOREACH_COUNT;
+    var src = "var iterator" + count + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
+    src += "while(" + this.CTX + 'foreach( iterator' + count + ', ' + action.byRef + ", " + this.source( action.valueVar );
 
     if (action.keyVar !== null) {
         src += ', ' + this.source( action.keyVar );
@@ -186,7 +186,7 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
  
     src += '} '
 
-    src += this.CTX + "$foreachEnd( iterator" + this.FOREACH_COUNT + " )";
+    src += this.CTX + "$foreachEnd( iterator" + count + " )";
     return src;
 };
 

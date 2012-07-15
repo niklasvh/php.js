@@ -344,7 +344,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         shutdownParams = Array.prototype.slice.call( arguments, 1 );
     };
     
-    MODULES.$shutdown = function() {
+    MODULES.$shutdown = function( ) {
+        
+        this.$Class.Shutdown();
+        
         console.log("shutting down");
              if ( shutdownFunc !== undefined ) {
                  console.log("yes");

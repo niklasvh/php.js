@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 391 out of 672 (58.2%)
+Passed 393 out of 672 (58.5%)
 
 Failed tests:
 
@@ -72,7 +72,6 @@ Failed tests:
  - tests/php/classes/ctor_in_interface_04.phpt
  - tests/php/classes/ctor_name_clash.phpt
  - tests/php/classes/ctor_visibility.phpt
- - tests/php/classes/destructor_and_echo.phpt
  - tests/php/classes/destructor_and_globals.phpt
  - tests/php/classes/destructor_inheritance.phpt
  - tests/php/classes/destructor_visibility_001.phpt
@@ -170,7 +169,6 @@ Failed tests:
  - tests/php/lang/bug29566.phpt
  - tests/php/lang/bug29893.phpt
  - tests/php/lang/bug29944.phpt
- - tests/php/lang/bug30578.phpt
  - tests/php/lang/bug30638.phpt
  - tests/php/lang/bug30726.phpt
  - tests/php/lang/bug30862.phpt

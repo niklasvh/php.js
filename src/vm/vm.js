@@ -42,6 +42,13 @@ PHP.VM = function( src, opts ) {
         };
         
         var methods =  {
+            Shutdown: function() {
+                
+                initiatedClasses.forEach( function( classObj ) {
+                        classObj[  COMPILER.CLASS_DESTRUCT ]( ENV );
+                });
+                
+            },
             __autoload: function( name ) {
                 
                 if ( typeof ENV.__autoload === "function" && autoloadedClasses.indexOf( name.toLowerCase() ) === -1) {
@@ -151,7 +158,7 @@ PHP.VM = function( src, opts ) {
         exec.call(this, $$, $, ENV);
         this.$obflush.call( ENV );  
         this.$shutdown.call( ENV );
-        
+          
     } catch( e ) {
         
         console.log("Caught: ", e.message, e);

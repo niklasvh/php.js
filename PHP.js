@@ -1133,9 +1133,9 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     
     
     console.log( action );
-    
-    var src = "var iterator" + ++this.FOREACH_COUNT + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
-    src += "while(" + this.CTX + 'foreach( iterator' + this.FOREACH_COUNT + ', ' + action.byRef + ", " + this.source( action.valueVar );
+    var count = ++this.FOREACH_COUNT;
+    var src = "var iterator" + count + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
+    src += "while(" + this.CTX + 'foreach( iterator' + count + ', ' + action.byRef + ", " + this.source( action.valueVar );
 
     if (action.keyVar !== null) {
         src += ', ' + this.source( action.keyVar );
@@ -1146,7 +1146,7 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
  
     src += '} '
 
-    src += this.CTX + "$foreachEnd( iterator" + this.FOREACH_COUNT + " )";
+    src += this.CTX + "$foreachEnd( iterator" + count + " )";
     return src;
 };
 
@@ -1836,7 +1836,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         shutdownParams = Array.prototype.slice.call( arguments, 1 );
     };
     
-    MODULES.$shutdown = function() {
+    MODULES.$shutdown = function( ) {
+        
+        this.$Class.Shutdown();
+        
         console.log("shutting down");
              if ( shutdownFunc !== undefined ) {
                  console.log("yes");
@@ -9427,6 +9430,13 @@ PHP.VM = function( src, opts ) {
         };
         
         var methods =  {
+            Shutdown: function() {
+                
+                initiatedClasses.forEach( function( classObj ) {
+                        classObj[  COMPILER.CLASS_DESTRUCT ]( ENV );
+                });
+                
+            },
             __autoload: function( name ) {
                 
                 if ( typeof ENV.__autoload === "function" && autoloadedClasses.indexOf( name.toLowerCase() ) === -1) {
@@ -9536,7 +9546,7 @@ PHP.VM = function( src, opts ) {
         exec.call(this, $$, $, ENV);
         this.$obflush.call( ENV );  
         this.$shutdown.call( ENV );
-        
+          
     } catch( e ) {
         
         console.log("Caught: ", e.message, e);
@@ -9753,21 +9763,30 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
                 
                 // PHP 5 style constructor in current class
-                
+               var ret; 
                 if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
-                    return callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) );         
+                    this[ PHP.VM.Class.KILLED ] = true;
+                    ret = callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) ); 
+                    this[ PHP.VM.Class.KILLED ] = undefined;
+                    return ret;
                 }
                 
                 // PHP 4 style constructor in current class
                 
                 else if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + className.toLowerCase()  ) ) {
-                    return callMethod.call( this, className.toLowerCase(), Array.prototype.slice.call( arguments, 1 ) );         
+                    this[ PHP.VM.Class.KILLED ] = true;
+                    ret = callMethod.call( this, className.toLowerCase(), Array.prototype.slice.call( arguments, 1 ) ); 
+                    this[ PHP.VM.Class.KILLED ] = undefined;
+                    return ret;
                 }
                 
                 // PHP 5 style constructor in any inherited class
                 
                 else if ( typeof this[ methodPrefix + __construct ] === "function" ) {
-                    return callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) );         
+                    this[ PHP.VM.Class.KILLED ] = true;
+                    ret = callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) ); 
+                    this[ PHP.VM.Class.KILLED ] = undefined;
+                    return ret;
                 }
                 
                 // PHP 4 style constructor in any inherited class
@@ -9778,8 +9797,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     while ( ( proto = Object.getPrototypeOf( proto ) ) instanceof PHP.VM.ClassPrototype ) {
                         
                         if ( proto.hasOwnProperty( methodPrefix + proto[ COMPILER.CLASS_NAME  ].toLowerCase() ) ) {
-                           
-                            return callMethod.call( proto, proto[ COMPILER.CLASS_NAME  ].toLowerCase(), Array.prototype.slice.call( arguments, 1 ) ); 
+                           this[ PHP.VM.Class.KILLED ] = true;
+                            ret = callMethod.call( proto, proto[ COMPILER.CLASS_NAME  ].toLowerCase(), Array.prototype.slice.call( arguments, 1 ) ); 
+                            this[ PHP.VM.Class.KILLED ] = undefined;
+                            return ret;
                         }
                             
                             
@@ -9996,7 +10017,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                     return false;
                     
-                   // return (( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) && methodProps[ index ] !== undefined && item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]) || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined);
+                // return (( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) && methodProps[ index ] !== undefined && item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]) || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined);
                 //                                                                                                ^^ ^^^^^^ rechecking it on purpose
                 }) || ( methodProps[ ++lastIndex ] !== undefined && methodProps[ lastIndex][ COMPILER.PROPERTY_DEFAULT ] === undefined) ) ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + realName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + (( propDef !== undefined) ? " = " + propDef : "") + ")", PHP.Constants.E_STRICT, true );
@@ -10467,7 +10488,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx ) {
-            
+            // check if this class has been destructed already
+            if ( this[ PHP.VM.Class.KILLED ] === true ) { 
+                return;
+            }
+                                
+            this[ PHP.VM.Class.KILLED ] = true;
             console.log('destruct');
             if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __destruct  ) ) {
                 return callMethod.call( this, __destruct, [] );         
@@ -10503,6 +10529,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
     
 };
+PHP.VM.Class.KILLED = "$Killed";
+
 PHP.VM.ClassPrototype = function() {};
 
 PHP.VM.Class.METHOD = "_";
