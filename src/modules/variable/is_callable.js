@@ -14,7 +14,7 @@ PHP.Modules.prototype.is_callable = function( callback ) {
         var Class = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 )[ COMPILER.VARIABLE_VALUE ],
         methodName = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 1 )[ COMPILER.VARIABLE_VALUE ];
         
-        return new PHP.VM.Variable( typeof Class[ PHP.VM.Class.METHOD + methodName] === "function" );
+        return new PHP.VM.Variable( typeof Class[ PHP.VM.Class.METHOD + methodName.toLowerCase()] === "function" );
              
     } else {
            console.log( callback );

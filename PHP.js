@@ -2357,7 +2357,10 @@ PHP.Modules.prototype.get_class_methods = function( object ) {
     
     Object.keys( classObj ).forEach( function( key ) {
         if ( key.substring(0, prefix.length ) === prefix ) {
-            items.push( item( index++, key.substring( prefix.length )) );
+            var name = key.substring( prefix.length );
+            
+            
+            items.push( item( index++, classObj[ PHP.VM.Class.METHOD_REALNAME + name ]) );
         }
     });
 
@@ -2450,9 +2453,9 @@ PHP.Modules.prototype.method_exists = function( object, method ) {
     var COMPILER = PHP.Compiler.prototype;
     
     if ( object instanceof PHP.VM.Variable ) {
-        return new PHP.VM.Variable( (object[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ]] ) !== undefined );
+        return new PHP.VM.Variable( (object[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ].toLowerCase()] ) !== undefined );
     } else {
-        return new PHP.VM.Variable( (object[ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ]] ) !== undefined ); 
+        return new PHP.VM.Variable( (object[ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ].toLowerCase()] ) !== undefined ); 
     }
     
 };/* 
@@ -4248,7 +4251,7 @@ PHP.Modules.prototype.is_callable = function( callback ) {
         var Class = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 )[ COMPILER.VARIABLE_VALUE ],
         methodName = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 1 )[ COMPILER.VARIABLE_VALUE ];
         
-        return new PHP.VM.Variable( typeof Class[ PHP.VM.Class.METHOD + methodName] === "function" );
+        return new PHP.VM.Variable( typeof Class[ PHP.VM.Class.METHOD + methodName.toLowerCase()] === "function" );
              
     } else {
            console.log( callback );
@@ -9586,7 +9589,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         }
         
     }
-    
+        
     // check if obj inherits className
     function inherits( obj, name ) {
      
@@ -9602,7 +9605,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         return false;
     }
     
-    var buildVariableContext = function( methodName, args, className ) {
+    var buildVariableContext = function( methodName, args, className, realName ) {
         
         var $ = PHP.VM.VariableHandler(),
         argumentObj = this[ methodArgumentPrefix + methodName ];
@@ -9633,7 +9636,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 // perform type hint check
             
                 if ( arg[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
-                    ENV[ COMPILER.TYPE_CHECK ]( $( arg.name ), arg[ COMPILER.PROPERTY_TYPE ], arg[ COMPILER.PROPERTY_DEFAULT ], index, className + "::" + methodName );
+                    ENV[ COMPILER.TYPE_CHECK ]( $( arg.name ), arg[ COMPILER.PROPERTY_TYPE ], arg[ COMPILER.PROPERTY_DEFAULT ], index, className + "::" + realName );
                 }   
                 
 
@@ -9642,7 +9645,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             });
         }
         
-        $("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className + "::" + methodName;
+        $("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className + "::" + realName;
         
         return $;
     }
@@ -9663,7 +9666,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             
-            var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] );
+            var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ], this[ PHP.VM.Class.METHOD_REALNAME + methodName ] );
            
             if (staticVars[ methodName ] === undefined) {
                 staticVars[ methodName ] = {};
@@ -9757,8 +9760,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
                 // PHP 4 style constructor in current class
                 
-                else if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + className  ) ) {
-                    return callMethod.call( this, className, Array.prototype.slice.call( arguments, 1 ) );         
+                else if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + className.toLowerCase()  ) ) {
+                    return callMethod.call( this, className.toLowerCase(), Array.prototype.slice.call( arguments, 1 ) );         
                 }
                 
                 // PHP 5 style constructor in any inherited class
@@ -9774,9 +9777,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     
                     while ( ( proto = Object.getPrototypeOf( proto ) ) instanceof PHP.VM.ClassPrototype ) {
                         
-                        if ( proto.hasOwnProperty( methodPrefix + proto[ COMPILER.CLASS_NAME  ] ) ) {
+                        if ( proto.hasOwnProperty( methodPrefix + proto[ COMPILER.CLASS_NAME  ].toLowerCase() ) ) {
                            
-                            return callMethod.call( proto, proto[ COMPILER.CLASS_NAME  ], Array.prototype.slice.call( arguments, 1 ) ); 
+                            return callMethod.call( proto, proto[ COMPILER.CLASS_NAME  ].toLowerCase(), Array.prototype.slice.call( arguments, 1 ) ); 
                         }
                             
                             
@@ -9891,26 +9894,26 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
          * Declare method
          */
 
-        methods [ COMPILER.CLASS_METHOD ] = function( methodName, methodType, methodProps, methodFunc ) {
+        methods [ COMPILER.CLASS_METHOD ] = function( realName, methodType, methodProps, methodFunc ) {
             
             /*
              * signature checks
              */
-            
+            var methodName = realName.toLowerCase();
                         
             // can't override final 
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], FINAL ) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "()", PHP.Constants.E_ERROR, true );
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true );
             }
             
             // can't make static non-static
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], STATIC ) && !checkType( methodType, STATIC ) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() non static in class " + className, PHP.Constants.E_ERROR, true );
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() non static in class " + className, PHP.Constants.E_ERROR, true );
             }
             
             // can't make non-static  static
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && !checkType( Class.prototype[ methodTypePrefix + methodName ], STATIC ) && checkType( methodType, STATIC ) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make non static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() static in class " + className, PHP.Constants.E_ERROR, true );
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make non static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() static in class " + className, PHP.Constants.E_ERROR, true );
             }
  
             // A final method cannot be abstract
@@ -9921,16 +9924,16 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             // visibility from public
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PUBLIC ) && (checkType( methodType, PROTECTED ) || checkType( methodType, PRIVATE ) ) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be public (as in class same)", PHP.Constants.E_ERROR, true );
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + realName + "() must be public (as in class same)", PHP.Constants.E_ERROR, true );
             } 
             // visibility from protected
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PROTECTED ) && checkType( methodType, PRIVATE ) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be protected (as in class same) or weaker", PHP.Constants.E_ERROR, true );
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + realName + "() must be protected (as in class same) or weaker", PHP.Constants.E_ERROR, true );
             }
             
             // interface methods can't be private 
             if ( classType === PHP.VM.Class.INTERFACE && checkType( methodType, PRIVATE ) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Access type for interface method " + className + "::" + methodName + "() must be omitted", PHP.Constants.E_ERROR, true );
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access type for interface method " + className + "::" + realName + "() must be omitted", PHP.Constants.E_ERROR, true );
             }
            
             
@@ -9938,11 +9941,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             if ( methodName === __call  ) { 
                 
                 if ( methodProps.length !== 2 ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + methodName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + realName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
                 }
                 
                 if ( !checkType( methodType, PUBLIC ) || checkType( methodType, STATIC ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "The magic method " + methodName + "() must have public visibility and cannot be static", PHP.Constants.E_CORE_WARNING, true );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "The magic method " + realName + "() must have public visibility and cannot be static", PHP.Constants.E_CORE_WARNING, true );
                 }
                 
             }
@@ -9951,7 +9954,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             else if ( methodName === __get  ) { 
                 if ( methodProps.length !== 1 ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + methodName + "() must take exactly 1 argument", PHP.Constants.E_ERROR, true );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + realName + "() must take exactly 1 argument", PHP.Constants.E_ERROR, true );
                 }
             }
             
@@ -9959,7 +9962,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             else if ( methodName === __set  ) { 
                 if ( methodProps.length !== 2 ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + methodName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + realName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
                 }
             }
             
@@ -9996,7 +9999,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                    // return (( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) && methodProps[ index ] !== undefined && item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]) || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined);
                 //                                                                                                ^^ ^^^^^^ rechecking it on purpose
                 }) || ( methodProps[ ++lastIndex ] !== undefined && methodProps[ lastIndex][ COMPILER.PROPERTY_DEFAULT ] === undefined) ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + methodName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + (( propDef !== undefined) ? " = " + propDef : "") + ")", PHP.Constants.E_STRICT, true );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + realName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + (( propDef !== undefined) ? " = " + propDef : "") + ")", PHP.Constants.E_STRICT, true );
                 }
                 
       
@@ -10007,6 +10010,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             Object.defineProperty( Class.prototype, PHP.VM.Class.METHOD_PROTOTYPE + methodName, {
                 value: Class.prototype
+            });
+            
+            Object.defineProperty( Class.prototype, PHP.VM.Class.METHOD_REALNAME + methodName, {
+                value: realName
             });
             
             Object.defineProperty( Class.prototype, methodTypePrefix + methodName, {
@@ -10134,7 +10141,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         Class.prototype[ COMPILER.CLASS_NAME ] = className;
         
         Class.prototype[ COMPILER.METHOD_CALL ] = function( ctx, methodName ) {
-             
+            methodName = methodName.toLowerCase(); 
             var args = Array.prototype.slice.call( arguments, 2 ),
             value;
 
@@ -10204,8 +10211,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         Class.prototype.callMethod = callMethod;
         
         
-        Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodClass, methodName ) {
-            
+        Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodClass, realName ) {
+            var methodName = realName.toLowerCase();
             var args = Array.prototype.slice.call( arguments, 3 );
 
             if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
@@ -10229,11 +10236,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             } else {
                
                 if ( checkType( this[ methodTypePrefix + methodName ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
                 } else if ( checkType( this[ methodTypePrefix + methodName ], PROTECTED ) ) {
                     // we are calling a protected method, let's see if we are inside it 
                     if ( !( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ) ) { 
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
                     } 
                     
                 }
@@ -10265,17 +10272,17 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 methodToCall = proto[ methodPrefix + methodName ];
                 methodCTX = proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
                 
-                $ = buildVariableContext.call( this, methodName, args, methodCTX[ COMPILER.CLASS_NAME ] );
+                $ = buildVariableContext.call( this, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName );
            
 
    
                 if ( checkType( proto[ methodTypePrefix + methodName ], PRIVATE ) && methodCTX[ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
                 }
                
                 if ( checkType( proto[ methodTypePrefix + methodName ], ABSTRACT ) ) {
                     
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call abstract method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + methodName + "()", PHP.Constants.E_ERROR, true ); 
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call abstract method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true ); 
                 }
    
                 return methodToCall.call( this, $, methodCTX );
@@ -10499,6 +10506,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 PHP.VM.ClassPrototype = function() {};
 
 PHP.VM.Class.METHOD = "_";
+
+PHP.VM.Class.METHOD_REALNAME = "€€";
 
 PHP.VM.Class.CLASS_UNDEFINED_PROPERTY = "_£$";
 

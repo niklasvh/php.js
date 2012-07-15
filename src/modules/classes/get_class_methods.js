@@ -28,7 +28,10 @@ PHP.Modules.prototype.get_class_methods = function( object ) {
     
     Object.keys( classObj ).forEach( function( key ) {
         if ( key.substring(0, prefix.length ) === prefix ) {
-            items.push( item( index++, key.substring( prefix.length )) );
+            var name = key.substring( prefix.length );
+            
+            
+            items.push( item( index++, classObj[ PHP.VM.Class.METHOD_REALNAME + name ]) );
         }
     });
 
