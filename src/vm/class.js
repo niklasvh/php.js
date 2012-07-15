@@ -517,9 +517,46 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         Object.keys( interfaceProto ).forEach(function( item ){
                             if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
                         
-                                var methodName = item.substring( methodPrefix.length );
+                                var methodName = item.substring( methodPrefix.length ),
+                                propName,
+                                propDef,
+                                lastIndex = -1;
+                                
                                 if (Class.prototype[ methodTypePrefix + methodName ] === undefined ) {
                                     ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + interfaceName + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
+                                } 
+                                
+                                if ( methodName === __construct && interfaceProto[ methodTypePrefix + methodName ] !== undefined ||  interfaceProto[ methodTypePrefix + interfaceName.toLowerCase() ] !== undefined) {
+                                  
+                                    var methodProps = Class.prototype[ methodArgumentPrefix + __construct ];
+                                    
+                                    if ((!interfaceProto[ methodArgumentPrefix + __construct ].every(function( item, index ){
+                                       
+                                        propName = item;
+                                        lastIndex = index;
+        
+                                        if ( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) ) {
+                
+                                            if (methodProps[ index ] !== undefined) {
+                        
+                                                if ( item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]  ) {
+                             
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                        if (item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) {
+                                            propDef = item[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
+                      
+                                        }
+                                      
+                                        return false;
+
+                                    }) || ( methodProps[ ++lastIndex ] !== undefined && methodProps[ lastIndex][ COMPILER.PROPERTY_DEFAULT ] === undefined) ) ) {
+                                        ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + __construct + "() must be compatible with " + interfaceName + "::" + __construct + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + (( propDef !== undefined) ? " = " + propDef : "") + ")", PHP.Constants.E_ERROR, true );
+                                    }
+                                    
+                                    
                                 }
                             }
                         });
