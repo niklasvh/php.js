@@ -726,6 +726,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 methodCTX = this;
             }
             
+            if (methodCTX[ propertyPrefix + propertyName ] === undefined ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access to undeclared static property: " + methodCTX[ COMPILER.CLASS_NAME ] + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
+            }
             
             return methodCTX[ propertyPrefix + propertyName ];
             

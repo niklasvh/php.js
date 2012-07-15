@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 374 out of 672 (55.7%)
+Passed 379 out of 672 (56.4%)
 
 Failed tests:
 
@@ -109,12 +109,7 @@ Failed tests:
  - tests/php/classes/serialize_001.phpt
  - tests/php/classes/static_properties_003.phpt
  - tests/php/classes/static_properties_004.phpt
- - tests/php/classes/static_properties_undeclared_assign.phpt
- - tests/php/classes/static_properties_undeclared_assignInc.phpt
- - tests/php/classes/static_properties_undeclared_assignRef.phpt
- - tests/php/classes/static_properties_undeclared_inc.phpt
  - tests/php/classes/static_properties_undeclared_isset.phpt
- - tests/php/classes/static_properties_undeclared_read.phpt
  - tests/php/classes/static_this.phpt
  - tests/php/classes/tostring_001.phpt
  - tests/php/classes/tostring_002.phpt
