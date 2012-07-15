@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 407 out of 672 (60.6%)
+Passed 408 out of 672 (60.7%)
 
 Failed tests:
 
@@ -75,7 +75,6 @@ Failed tests:
  - tests/php/classes/factory_and_singleton_009.phpt
  - tests/php/classes/factory_and_singleton_010.phpt
  - tests/php/classes/implicit_instantiation_001.phpt
- - tests/php/classes/inheritance_006.phpt
  - tests/php/classes/inheritance_007.phpt
  - tests/php/classes/interface_constant_inheritance_001.phpt
  - tests/php/classes/interface_constant_inheritance_002.phpt

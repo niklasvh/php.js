@@ -69,22 +69,50 @@ PHP.Modules.prototype.var_dump = function() {
             
             str += "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
             
-            var props = [];
+           
             
             // search whole prototype chain
+            
+            var tmp = "",
+            count = 0;
+            
             for ( var item in argument ) {
+                var ignore = false,
+                parent;
                 if (item.substring(0, PHP.VM.Class.PROPERTY.length) === PHP.VM.Class.PROPERTY) {
-                    props.push( item );
+                   
+                    if (!((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PRIVATE) === PHP.VM.Class.PRIVATE)) {
+                        tmp += $INDENT( indent + 2 ) + '["' + item.substring( PHP.VM.Class.PROPERTY.length );
+                        tmp += '"]=>\n';
+                        tmp += $dump( argument[ item ], indent + 2 );
+                        count++;
+                    } else {
+                        ignore = true;
+                    }
+                    
                 }
+                
+                parent = argument;
+                // search for overwritten private members
+                do {
+                    if ( ( argument[ item ] !== parent[ item ] || ignore ) && parent[ item ] instanceof PHP.VM.Variable && parent.hasOwnProperty( item )) {
+                        
+                            
+                        tmp += $INDENT( indent + 2 ) + '["' + item.substring( PHP.VM.Class.PROPERTY.length ) + '":"' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +'":private]=>\n';
+                        tmp += $dump( parent[ item ], indent + 2 );
+                        count++;
+                    }
+                    parent = Object.getPrototypeOf( parent );
+                } while( parent instanceof PHP.VM.ClassPrototype);
+                
             }
          
             
-            str += '(' + props.length + ') {\n';
+            str += '(' + count + ') {\n' + tmp;
             
-            props.forEach(function( prop ){
-                str += $INDENT( indent + 2 ) + '["' + prop.substring( PHP.VM.Class.PROPERTY.length ) + '"]=>\n';
-                str += $dump( argument[ prop ], indent + 2 );
-            });
+
+            
+
             
             str += '}\n';  
         } else if( argument[ VAR.TYPE ] === VAR.FLOAT ) {

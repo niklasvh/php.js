@@ -11,7 +11,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
     methodArgumentPrefix = "_$_",
     propertyPrefix = PHP.VM.Class.PROPERTY,
     methodTypePrefix = "$£",
-    propertyTypePrefix = "$£$",
+    propertyTypePrefix = PHP.VM.Class.PROPERTY_TYPE,
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     __call = "__call",
@@ -1075,6 +1075,8 @@ PHP.VM.Class.METHOD_PROTOTYPE = "$MP";
 PHP.VM.Class.CONSTANT = "€";
 
 PHP.VM.Class.PROPERTY = "$$";
+
+PHP.VM.Class.PROPERTY_TYPE = "$£$";
 
 PHP.VM.Class.CLASS_INDEX = "$CIndex";
 

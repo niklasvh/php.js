@@ -92,10 +92,15 @@ function runTest ( file, complete ) {
             expectResult;
                     
             if (test.EXPECT === undefined ) {
-                var shouldBef = expect.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+                
+                var shouldBef = expect;
+                shouldBef = shouldBef.replace(/\%u\|b\%/g, ""); 
+                shouldBef = shouldBef.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
                 shouldBef = shouldBef.replace(/\%d/g,"\\d+");
                 shouldBef = shouldBef.replace(/\%s/g,".+");
                 shouldBef = shouldBef.replace(/\%S/g,".*?");
+                
+
                         
                 var re = new RegExp("^" + shouldBef + "$", "i");
                          
