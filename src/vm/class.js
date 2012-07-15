@@ -378,6 +378,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PROTECTED ) && checkType( methodType, PRIVATE ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + methodName + "() must be protected (as in class same) or weaker", PHP.Constants.E_ERROR, true );
             }
+            
+            // interface methods can't be private 
+            if ( classType === PHP.VM.Class.INTERFACE && checkType( methodType, PRIVATE ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access type for interface method " + className + "::" + methodName + "() must be omitted", PHP.Constants.E_ERROR, true );
+            }
            
             
             // __call

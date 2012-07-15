@@ -1,7 +1,7 @@
 
 PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
-  
+  console.log( action );
     action.stmts.forEach(function( stmt ){
         if ( stmt.type === "Node_Stmt_ClassMethod" && stmt.stmts !== null) {
             this.FATAL_ERROR = "Interface function " + action.name + "::" + stmt.name + "() cannot contain body {} on line " + action.attributes.startLine;  

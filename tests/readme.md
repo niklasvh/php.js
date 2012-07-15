@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 380 out of 672 (56.5%)
+Passed 381 out of 672 (56.7%)
 
 Failed tests:
 
@@ -98,7 +98,6 @@ Failed tests:
  - tests/php/classes/interface_constant_inheritance_003.phpt
  - tests/php/classes/interface_doubled.phpt
  - tests/php/classes/interface_implemented.phpt
- - tests/php/classes/interface_method_private.phpt
  - tests/php/classes/method_override_optional_arg_001.phpt
  - tests/php/classes/method_override_optional_arg_002.phpt
  - tests/php/classes/new_001.phpt
