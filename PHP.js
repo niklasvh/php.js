@@ -16,7 +16,13 @@ var PHP = function( code, opts ) {
         this.vm.OUTPUT_BUFFER = "Parse error: " + e.message + " in " + opts.SERVER.SCRIPT_FILENAME + " on line " + e.line;
         return this;
     }
-
+    
+    
+    var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" );
+    
+    opts.ini = PHP.ini( iniContent );
+    
+  
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
@@ -3000,13 +3006,36 @@ PHP.Modules.prototype.assert = function( assertion ) {
 };
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 15.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ini_get = function( varname ) {
+    var old = this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ];
+    
+    if (old === undefined ) {
+        return new PHP.VM.Variable( false );
+    } else {
+        return new PHP.VM.Variable( old + "" );
+    }
+    
+    
+  
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 5.7.2012 
 * @website http://hertzen.com
  */
 
-PHP.Modules.prototype.ini_set = function( varname, newvalue ) {
-  // todo add  
+PHP.Modules.prototype.ini_set = PHP.Modules.prototype.ini_alter = function( varname, newvalue ) {
+    var old = this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ];
     
+    this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ] = newvalue[ COMPILER.VARIABLE_VALUE ];
+    
+    
+    return new PHP.VM.Variable( old );
 };
 
 /* 
@@ -6602,7 +6631,52 @@ PHP.Parser.prototype.yylen = [
     1,    3,    1,    3,    1,    1,    4,    0,    0,    2,
     3,    1,    3,    1,    4,    2,    2,    2,    1,    2,
     1,    4,    3,    3,    3,    6,    3,    1,    1,    1
-    ];
+    ];/* 
+ * based on node-iniparser Copyright (c) 2009-2010 Jordy van Gelder <jordyvangelder@gmail.com>
+ * The MIT License
+ */
+
+
+PHP.ini = function( contents ) {
+    
+    var regex = {
+        section: /^\s*\[\s*([^\]]*)\s*\]\s*$/,
+        param: /^\s*([\w\.\-\_]+)\s*=\s*(.*?)\s*$/,
+        comment: /^\s*;.*$/
+    },
+    section = null,
+    value = {};
+    contents.toString().split(/\r\n|\r|\n/).forEach( function( line ) {
+        var match;
+        
+        if ( regex.comment.test( line ) ){
+            return;
+            
+        } else if ( regex.param.test( line ) ){
+            
+            match = line.match( regex.param );
+            
+            if ( section ) {
+                value[ section ][ match[ 1 ] ] = match[ 2 ];
+            }else{
+                value[ match[ 1 ] ] = match[ 2 ];
+            }
+            
+        } else if ( regex.section.test( line ) ){
+            
+            match = line.match( regex.section );
+            value[ match[ 1 ] ] = {};
+            section = match[ 1 ];
+            
+        } else if ( line.length === 0 && section ){
+            section = null;
+        }
+        
+    });
+    
+    return value;
+    
+};
 
 
 PHP.Parser.prototype.yyn1 = function () {
@@ -9333,7 +9407,8 @@ PHP.VM = function( src, opts ) {
  
     ENV[ PHP.Compiler.prototype.CONSTANTS ] = PHP.VM.Constants( PHP.Constants, ENV );
     
- 
+    ENV.$ini = opts.ini;
+    
     ENV.$Class = (function() {
         var classRegistry = {},
         COMPILER = PHP.Compiler.prototype,

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 389 out of 672 (57.9%)
+Passed 390 out of 672 (58%)
 
 Failed tests:
 
@@ -119,7 +119,6 @@ Failed tests:
  - tests/php/func/005a.phpt
  - tests/php/func/007.phpt
  - tests/php/func/010.phpt
- - tests/php/func/ini_alter.phpt
  - tests/php/lang/023.phpt
  - tests/php/lang/024.phpt
  - tests/php/lang/026.phpt

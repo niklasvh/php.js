@@ -75,6 +75,7 @@ var files = {
         },
         options: {
             assert: "js",
+            ini_get: "js",
             ini_set: "js",
             set_time_limit: "js"
         },
@@ -123,6 +124,7 @@ var files = {
         lexer: "js",
         parser: "js",
         data: "js",
+        ini: "js",
         actions: "js"
     },
     vm: {

@@ -16,7 +16,13 @@ var PHP = function( code, opts ) {
         this.vm.OUTPUT_BUFFER = "Parse error: " + e.message + " in " + opts.SERVER.SCRIPT_FILENAME + " on line " + e.line;
         return this;
     }
-
+    
+    
+    var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" );
+    
+    opts.ini = PHP.ini( iniContent );
+    
+  
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);

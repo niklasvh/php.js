@@ -25,7 +25,8 @@ PHP.VM = function( src, opts ) {
  
     ENV[ PHP.Compiler.prototype.CONSTANTS ] = PHP.VM.Constants( PHP.Constants, ENV );
     
- 
+    ENV.$ini = opts.ini;
+    
     ENV.$Class = (function() {
         var classRegistry = {},
         COMPILER = PHP.Compiler.prototype,

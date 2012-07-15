@@ -4,8 +4,12 @@
 * @website http://hertzen.com
  */
 
-PHP.Modules.prototype.ini_set = function( varname, newvalue ) {
-  // todo add  
+PHP.Modules.prototype.ini_set = PHP.Modules.prototype.ini_alter = function( varname, newvalue ) {
+    var old = this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ];
     
+    this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ] = newvalue[ COMPILER.VARIABLE_VALUE ];
+    
+    
+    return new PHP.VM.Variable( old );
 };
 
