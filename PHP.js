@@ -9770,14 +9770,34 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined ) {
                 
                 // method has been defined in an inherited class
-                var propName;
-                if ( !Class.prototype[ methodArgumentPrefix + methodName ].every(function( item, index ){
+                var propName,
+                propDef,
+                lastIndex = -1;
+                if ( methodName !== __construct && (!Class.prototype[ methodArgumentPrefix + methodName ].every(function( item, index ){
                     propName = item;
+                    lastIndex = index;
                     
-                    return (( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) && methodProps[ index ] !== undefined && item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]) || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined);
+                    if ( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) ) {
+                
+                        if (methodProps[ index ] !== undefined) {
+                        
+                            if ( item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]  ) {
+                             
+                                return true;
+                            }
+                        }
+                    }
+                    // or
+                    if (item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) {
+                        propDef = item[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
+                        console.log( propDef );
+                    }
+                    return false;
+                    
+                   // return (( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) && methodProps[ index ] !== undefined && item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]) || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined);
                 //                                                                                                ^^ ^^^^^^ rechecking it on purpose
-                }) ||  Class.prototype[ methodArgumentPrefix + methodName ].length < methodProps.length ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + methodName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + ")", PHP.Constants.E_STRICT, true );
+                }) || ( methodProps[ ++lastIndex ] !== undefined && methodProps[ lastIndex][ COMPILER.PROPERTY_DEFAULT ] === undefined) ) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + methodName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + (( propDef !== undefined) ? " = " + propDef : "") + ")", PHP.Constants.E_STRICT, true );
                 }
                 
       
