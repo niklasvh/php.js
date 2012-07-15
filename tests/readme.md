@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 408 out of 672 (60.7%)
+Passed 409 out of 672 (60.9%)
 
 Failed tests:
 
@@ -47,7 +47,6 @@ Failed tests:
  - tests/php/basic/rfc1867_post_max_size.phpt
  - tests/php/classes/abstract_static.phpt
  - tests/php/classes/array_access_005.phpt
- - tests/php/classes/array_access_007.phpt
  - tests/php/classes/array_access_008.phpt
  - tests/php/classes/array_access_009.phpt
  - tests/php/classes/array_access_010.phpt

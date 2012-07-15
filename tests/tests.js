@@ -72,7 +72,7 @@ PHP_Tests.prototype.runTest = function( li ) {
                
              
             var re = new RegExp("^" + shouldBef + "$", "i");
-             console.log(re, shouldBef);            
+                   
             expectResult = re.test( output );
                         
         } else {

@@ -30,8 +30,10 @@ PHP.VM.Array = function( ENV ) {
             "name":"input"
         }], function( $ ) {
             this[ COMPILER.CLASS_NAME ] = $this.CLASS_NAME;
-        
+                  
             var items = $('input')[ COMPILER.VARIABLE_VALUE ];
+            
+            
             if ( Array.isArray( items ) ) {
            
                 items.forEach( function( item ) {
@@ -84,7 +86,7 @@ PHP.VM.Array = function( ENV ) {
             "name":"value"
         }], function( $ ) {
 
-            
+
             var append = function( item ) {
       
                 if (item[ VARIABLE.CLASS_CONSTANT ] !== true && item[ VARIABLE.CONSTANT ] !== true) {
@@ -167,6 +169,7 @@ PHP.VM.Array = function( ENV ) {
          
             var index = -1,
             value = $('index')[ COMPILER.VARIABLE_VALUE ];
+            
             this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].some(function( item, i ){
                 
                 if ( item instanceof PHP.VM.Variable ) {
@@ -188,11 +191,15 @@ PHP.VM.Array = function( ENV ) {
             } else {
                 // no such key found in array, let's create one
                 //    
+             
                 var variable = new PHP.VM.Variable();
                 
                 variable[ VARIABLE.REGISTER_SETTER ] = function() {
                     // the value was actually defined, let's register item into array
-                    this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( ($('index')[ COMPILER.VARIABLE_VALUE ] !== null) ? $('index')[ COMPILER.VARIABLE_VALUE ] : ++this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ] );
+            
+                    var key = ++this.$Prop( this, $this.INTKEY )[ COMPILER.VARIABLE_VALUE ];
+                    
+                    this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( ($('index')[ COMPILER.VARIABLE_VALUE ] !== null) ? $('index')[ COMPILER.VARIABLE_VALUE ] : key );
                     this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( variable );
                     delete variable[ VARIABLE.REGISTER_SETTER ];
                 }.bind(this);
