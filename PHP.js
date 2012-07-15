@@ -942,8 +942,9 @@ PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
     items = [];
 
     ((Array.isArray(action.items)) ? action.items : [ action.items ]).forEach(function( item ){
-
-        items.push("{" + this.ARRAY_VALUE + ":" + this.source( item.value ) + ( ( item.key !== undefined) ? ", " + this.ARRAY_KEY + ":" + this.source( item.key ) : "") +  "}");
+        if (item.value !== undefined ) {
+            items.push("{" + this.ARRAY_VALUE + ":" + this.source( item.value ) + ( ( item.key !== undefined) ? ", " + this.ARRAY_KEY + ":" + this.source( item.key ) : "") +  "}");
+        }
     }, this);
 
     src += items.join(", ") + "])";
@@ -4223,6 +4224,24 @@ PHP.Modules.prototype.is_callable = function( callback ) {
     } else {
            console.log( callback );
     }
+    
+ 
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 15.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+
+PHP.Modules.prototype.is_null = function( variable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    return new PHP.VM.Variable( variable[ VARIABLE.TYPE ] === VARIABLE.NULL );
     
  
     

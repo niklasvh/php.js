@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 387 out of 672 (57.6%)
+Passed 389 out of 672 (57.9%)
 
 Failed tests:
 
@@ -204,7 +204,6 @@ Failed tests:
  - tests/php/lang/execution_order.phpt
  - tests/php/lang/foreachLoop.002.phpt
  - tests/php/lang/foreachLoop.003.phpt
- - tests/php/lang/foreachLoop.004.phpt
  - tests/php/lang/foreachLoop.006.phpt
  - tests/php/lang/foreachLoop.007.phpt
  - tests/php/lang/foreachLoop.008.phpt
@@ -285,7 +284,6 @@ Failed tests:
  - tests/php/strings/offsets_chaining_4.phpt
  - tests/php/strings/offsets_chaining_5.phpt
  - tests/php/strings/offsets_general.phpt
- - tests/php/ext/tokenizer/001.phpt
  - tests/php/ext/tokenizer/003.phpt
  - tests/php/ext/tokenizer/bug54089.phpt
  - tests/php/ext/tokenizer/token_get_all_variation1.phpt

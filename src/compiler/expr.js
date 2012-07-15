@@ -491,8 +491,9 @@ PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
     items = [];
 
     ((Array.isArray(action.items)) ? action.items : [ action.items ]).forEach(function( item ){
-
-        items.push("{" + this.ARRAY_VALUE + ":" + this.source( item.value ) + ( ( item.key !== undefined) ? ", " + this.ARRAY_KEY + ":" + this.source( item.key ) : "") +  "}");
+        if (item.value !== undefined ) {
+            items.push("{" + this.ARRAY_VALUE + ":" + this.source( item.value ) + ( ( item.key !== undefined) ? ", " + this.ARRAY_KEY + ":" + this.source( item.key ) : "") +  "}");
+        }
     }, this);
 
     src += items.join(", ") + "])";
