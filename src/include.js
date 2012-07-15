@@ -92,6 +92,7 @@ var files = {
             implode: "js",
             parse_str: "js",
             print: "js",
+            printf: "js",
             str_rot13: "js",
             strlen: "js",
             strncmp: "js",

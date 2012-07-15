@@ -443,7 +443,16 @@ PHP.VM.Variable = function( arg ) {
                 // check for __toString();
                 
                 if ( typeof value[PHP.VM.Class.METHOD + __toString ] === "function" ) {
-                    return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
+                    var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
+                    if (val[ this.TYPE ] !==  this.STRING) {
+                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
+                         return new PHP.VM.Variable("");
+                    }
+                    return val;
+                //  return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
+                } else {
+                    this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to string", PHP.Constants.E_RECOVERABLE_ERROR, true );    
+                    return new PHP.VM.Variable("")
                 }
                      
             } else if (this[ this.TYPE ] === this.BOOL) {

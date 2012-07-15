@@ -7,19 +7,21 @@
 
 PHP.Modules.prototype.echo = function() {
     var COMPILER = PHP.Compiler.prototype,
+    __toString = "__toString",
     VARIABLE = PHP.VM.Variable.prototype;
     Array.prototype.slice.call( arguments ).forEach(function( arg ){
         
         if (arg instanceof PHP.VM.VariableProto) {
-            var triggerGet = arg[ COMPILER.VARIABLE_VALUE ];
+            var value = arg[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
             if ( arg[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
-              //  this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg[ COMPILER.VARIABLE_VALUE ];
-                this.$ob( triggerGet );
+                
+                    this.$ob( value );
+                
             }
             
         } else {
             this.$ob( arg );
-         //   this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg;
+        //   this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg;
         }
         
     }, this);

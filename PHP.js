@@ -2387,9 +2387,11 @@ PHP.Modules.prototype.is_subclass_of = function( object, classNameObj ) {
 PHP.Modules.prototype.method_exists = function( object, method ) {
     var COMPILER = PHP.Compiler.prototype;
     
-    
-    return new PHP.VM.Variable( (object[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ]] ) !== undefined );
-    
+    if ( object instanceof PHP.VM.Variable ) {
+        return new PHP.VM.Variable( (object[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ]] ) !== undefined );
+    } else {
+        return new PHP.VM.Variable( (object[ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ]] ) !== undefined ); 
+    }
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -3454,19 +3456,21 @@ PHP.Modules.prototype.ob_get_level = function() {
 
 PHP.Modules.prototype.echo = function() {
     var COMPILER = PHP.Compiler.prototype,
+    __toString = "__toString",
     VARIABLE = PHP.VM.Variable.prototype;
     Array.prototype.slice.call( arguments ).forEach(function( arg ){
         
         if (arg instanceof PHP.VM.VariableProto) {
-            var triggerGet = arg[ COMPILER.VARIABLE_VALUE ];
+            var value = arg[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
             if ( arg[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
-              //  this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg[ COMPILER.VARIABLE_VALUE ];
-                this.$ob( triggerGet );
+                
+                    this.$ob( value );
+                
             }
             
         } else {
             this.$ob( arg );
-         //   this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg;
+        //   this[ COMPILER.OUTPUT_BUFFERS ][this[ COMPILER.OUTPUT_BUFFERS ].length - 1] += arg;
         }
         
     }, this);
@@ -3546,6 +3550,33 @@ PHP.Modules.prototype.parse_str = function( str, arr ) {
 PHP.Modules.prototype.print = function( variable ) {
     this.echo( variable );
     return new PHP.VM.Variable(1);
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 15.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.printf = function( format) {
+    var COMPILER = PHP.Compiler.prototype,
+    __toString = "__toString",
+    VARIABLE = PHP.VM.Variable.prototype;
+ 
+        
+    if (format instanceof PHP.VM.VariableProto) {
+        
+        var value = format[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
+        if ( format[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
+                
+            this.$ob( value );
+                
+        }
+            
+    } 
+        
+
+    
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
@@ -10667,7 +10698,16 @@ PHP.VM.Variable = function( arg ) {
                 // check for __toString();
                 
                 if ( typeof value[PHP.VM.Class.METHOD + __toString ] === "function" ) {
-                    return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
+                    var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
+                    if (val[ this.TYPE ] !==  this.STRING) {
+                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
+                         return new PHP.VM.Variable("");
+                    }
+                    return val;
+                //  return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
+                } else {
+                    this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to string", PHP.Constants.E_RECOVERABLE_ERROR, true );    
+                    return new PHP.VM.Variable("")
                 }
                      
             } else if (this[ this.TYPE ] === this.BOOL) {
