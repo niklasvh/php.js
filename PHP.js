@@ -10489,13 +10489,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx ) {
             // check if this class has been destructed already
+            
             if ( this[ PHP.VM.Class.KILLED ] === true ) { 
                 return;
             }
                                 
             this[ PHP.VM.Class.KILLED ] = true;
             console.log('destruct');
-            if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __destruct  ) ) {
+            if ( this[  methodPrefix + __destruct  ] !== undefined ) {
                 return callMethod.call( this, __destruct, [] );         
             }
      
