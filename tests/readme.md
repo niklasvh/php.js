@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 383 out of 672 (57%)
+Passed 384 out of 672 (57.1%)
 
 Failed tests:
 
@@ -99,7 +99,6 @@ Failed tests:
  - tests/php/classes/interface_doubled.phpt
  - tests/php/classes/interface_implemented.phpt
  - tests/php/classes/new_001.phpt
- - tests/php/classes/private_members.phpt
  - tests/php/classes/property_recreate_private.phpt
  - tests/php/classes/property_recreate_protected.phpt
  - tests/php/classes/serialize_001.phpt

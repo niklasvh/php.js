@@ -4273,31 +4273,61 @@ PHP.Modules.prototype.print_r = function() {
             }, this);
             
             str += $INDENT( indent ) + ")\n";
-        } else if( argument[ VAR.TYPE ] === VAR.OBJECT ) { 
-            var classObj = argument[ COMPILER.VARIABLE_VALUE ];
+        } else if( argument[ VAR.TYPE ] === VAR.OBJECT || argument instanceof PHP.VM.ClassPrototype) { 
+            var classObj;
+            if (argument instanceof PHP.VM.Variable ){
+                classObj = argument[ COMPILER.VARIABLE_VALUE ];
+            } else {
+                classObj = argument;
+            }
             str += classObj[ COMPILER.CLASS_NAME ] + " Object\n";
             str += $INDENT( indent ) + "(";
       
       
-                  
-            var props = [];
-            
+                  var added = false;
+          
+           
             // search whole prototype chain
             for ( var item in classObj ) {
                 if (item.substring(0, PHP.VM.Class.PROPERTY.length) === PHP.VM.Class.PROPERTY) {
-                    props.push( item );
+                    
+                    added = true;
+                    str += "\n" + $INDENT( indent + 4 ) + '[' + item.substring( PHP.VM.Class.PROPERTY.length ) + '] => ';
+                    str += $dump( classObj[ item ], indent + 8 );
+                    
+                    //  props.push( item );
+                  
+                    var parent = classObj;
+                    // search for overwritten private members
+                    do {
+                        if ( classObj[ item ] !== parent[ item ] && parent[ item ] instanceof PHP.VM.Variable) {
+                        
+                            
+                            str += $INDENT( indent + 4 ) + '[' + item.substring( PHP.VM.Class.PROPERTY.length ) + ':' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +':private] => ';
+                            str += $dump( parent[ item ], indent + 8 );
+                            
+                        }
+                        parent = Object.getPrototypeOf( parent );
+                    } while( parent instanceof PHP.VM.ClassPrototype);
+                    
+                    if ( classObj[ item ][ VAR.TYPE ] === VAR.ARRAY ) {
+                          str += "\n";
+                    }
                 }
             }
-         
+            
+            if ( added === false ) {
+                 str += "\n";
+            }
+          
+            /*
  
             props.forEach(function( prop ){
                 str += "\n" + $INDENT( indent + 4 ) + '[' + prop.substring( PHP.VM.Class.PROPERTY.length ) + '] => ';
                 str += $dump( classObj[ prop ], indent + 8 );
             });
-            
-      
-       
-            str += "\n";
+            */
+
             /*
             keys.forEach(function( key, index ){
                 str += $INDENT( indent + 4 ) + "[";
