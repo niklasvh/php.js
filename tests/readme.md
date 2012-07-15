@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 394 out of 672 (58.6%)
+Passed 396 out of 672 (58.9%)
 
 Failed tests:
 
@@ -64,13 +64,11 @@ Failed tests:
  - tests/php/classes/clone_006.phpt
  - tests/php/classes/constants_error_004.phpt
  - tests/php/classes/constants_scope_001.phpt
- - tests/php/classes/ctor_dtor.phpt
  - tests/php/classes/ctor_dtor_inheritance.phpt
  - tests/php/classes/ctor_in_interface_01.phpt
  - tests/php/classes/ctor_in_interface_02.phpt
  - tests/php/classes/ctor_in_interface_03.phpt
  - tests/php/classes/ctor_in_interface_04.phpt
- - tests/php/classes/ctor_name_clash.phpt
  - tests/php/classes/ctor_visibility.phpt
  - tests/php/classes/destructor_and_globals.phpt
  - tests/php/classes/destructor_visibility_001.phpt

@@ -9617,7 +9617,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
     
     var buildVariableContext = function( methodName, args, className, realName ) {
         
-        var $ = PHP.VM.VariableHandler(),
+        var $ = PHP.VM.VariableHandler( ENV ),
         argumentObj = this[ methodArgumentPrefix + methodName ];
 
         if ( Array.isArray(argumentObj) ) {
@@ -9654,7 +9654,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
             });
         }
-        
+        $("$__CLASS__")[ COMPILER.VARIABLE_VALUE ] = className;
+        $("$__FUNCTION__")[ COMPILER.VARIABLE_VALUE ] = realName;
         $("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className + "::" + realName;
         
         return $;
