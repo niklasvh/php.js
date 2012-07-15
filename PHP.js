@@ -9740,6 +9740,21 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 this [ PHP.VM.Class.CLASS_PROPERTY + className + "_" + propertyPrefix + propertyName] = this[ propertyPrefix + propertyName ];
             }, this);
             
+            
+            var callConstruct = function( $this, name, args, ctx ) {
+                /*
+           console.log( this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ], name, checkType( this[ methodTypePrefix + name ], PRIVATE ));
+                if ( checkType( $this[ methodTypePrefix + name ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                   
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call private " + $this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ] + "::" + name + "()", PHP.Constants.E_ERROR, true );
+                }*/
+                
+                this[ PHP.VM.Class.KILLED ] = true;
+                var ret = callMethod.call( $this, name, Array.prototype.slice.call( args, 1 ) ); 
+                this[ PHP.VM.Class.KILLED ] = undefined;
+                return ret;
+            }.bind( this );
+            
             // call constructor
             
             if ( ctx !== true ) {
@@ -9766,30 +9781,20 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
                 
                 // PHP 5 style constructor in current class
-                var ret; 
                 if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
-                    this[ PHP.VM.Class.KILLED ] = true;
-                    ret = callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) ); 
-                    this[ PHP.VM.Class.KILLED ] = undefined;
-                    return ret;
+                    return callConstruct( this, __construct, arguments, ctx );
                 }
                 
                 // PHP 4 style constructor in current class
                 
                 else if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + className.toLowerCase()  ) ) {
-                    this[ PHP.VM.Class.KILLED ] = true;
-                    ret = callMethod.call( this, className.toLowerCase(), Array.prototype.slice.call( arguments, 1 ) ); 
-                    this[ PHP.VM.Class.KILLED ] = undefined;
-                    return ret;
+                    return callConstruct( this, className.toLowerCase(), arguments, ctx  );
                 }
                 
                 // PHP 5 style constructor in any inherited class
                 
                 else if ( typeof this[ methodPrefix + __construct ] === "function" ) {
-                    this[ PHP.VM.Class.KILLED ] = true;
-                    ret = callMethod.call( this, __construct, Array.prototype.slice.call( arguments, 1 ) ); 
-                    this[ PHP.VM.Class.KILLED ] = undefined;
-                    return ret;
+                    return callConstruct( this, __construct, arguments, ctx  );
                 }
                 
                 // PHP 4 style constructor in any inherited class
@@ -9800,10 +9805,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     while ( ( proto = Object.getPrototypeOf( proto ) ) instanceof PHP.VM.ClassPrototype ) {
                         
                         if ( proto.hasOwnProperty( methodPrefix + proto[ COMPILER.CLASS_NAME  ].toLowerCase() ) ) {
-                            this[ PHP.VM.Class.KILLED ] = true;
-                            ret = callMethod.call( proto, proto[ COMPILER.CLASS_NAME  ].toLowerCase(), Array.prototype.slice.call( arguments, 1 ) ); 
-                            this[ PHP.VM.Class.KILLED ] = undefined;
-                            return ret;
+                            return callConstruct( proto, proto[ COMPILER.CLASS_NAME  ].toLowerCase(), arguments, ctx  );
                         }
                             
                             
@@ -10338,7 +10340,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
    
                 if ( checkType( proto[ methodTypePrefix + methodName ], PRIVATE ) && methodCTX[ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                    if ( methodName === __construct ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call private " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true ); 
+                    }
+                    
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                
                 }
                
                 if ( checkType( proto[ methodTypePrefix + methodName ], ABSTRACT ) ) {

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 404 out of 672 (60.1%)
+Passed 405 out of 672 (60.3%)
 
 Failed tests:
 
@@ -64,7 +64,6 @@ Failed tests:
  - tests/php/classes/clone_006.phpt
  - tests/php/classes/constants_error_004.phpt
  - tests/php/classes/constants_scope_001.phpt
- - tests/php/classes/ctor_visibility.phpt
  - tests/php/classes/destructor_and_globals.phpt
  - tests/php/classes/factory_and_singleton_001.phpt
  - tests/php/classes/factory_and_singleton_002.phpt
