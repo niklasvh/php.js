@@ -51,9 +51,13 @@ COMPILER.stmts = function( stmts ) {
 };
 
 COMPILER.source = function( action ) {
+    
+   
+    
     if ( action === null ) {
         return "undefined";
     }
+    
     
     if (typeof action === "string") {
         return action;

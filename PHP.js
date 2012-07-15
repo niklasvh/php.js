@@ -217,9 +217,13 @@ COMPILER.stmts = function( stmts ) {
 };
 
 COMPILER.source = function( action ) {
+    
+   
+    
     if ( action === null ) {
         return "undefined";
     }
+    
     
     if (typeof action === "string") {
         return action;
@@ -950,7 +954,7 @@ PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
-  console.log( action );
+    console.log( action );
     action.stmts.forEach(function( stmt ){
         if ( stmt.type === "Node_Stmt_ClassMethod" && stmt.stmts !== null) {
             this.FATAL_ERROR = "Interface function " + action.name + "::" + stmt.name + "() cannot contain body {} on line " + action.attributes.startLine;  
@@ -1037,12 +1041,24 @@ PHP.Compiler.prototype.Node_Stmt_Echo = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
     
     var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
+   
+    src += "for( ";
     
-    src += "for( " + this.source( action.init ) + "; ";
+    if ( !Array.isArray(action.init) || action.init.length !== 0 ) {
+        src += this.source( action.init );
+    }
     
-    src += "(" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + "; ";
+    src += "; ";
     
-    src += this.source( action.loop ) + "." + this.VARIABLE_VALUE + " ) {\n";
+    if ( !Array.isArray(action.cond) || action.cond.length !== 0 ) {
+        src += "(" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE;
+    }
+    
+    src += "; "
+    if ( !Array.isArray(action.loop) || action.loop.length !== 1 ) { // change
+        src += this.source( action.loop ) + "." + this.VARIABLE_VALUE;
+    }
+    src += " ) {\n";
     
     src += this.stmts( action.stmts );
     
@@ -1478,6 +1494,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     handler,
+    $GLOBAL = this[ COMPILER.GLOBAL ],
+    __FILE__ = "$__FILE__",
     staticVars = {}; // static variable storage
 
 
@@ -1541,9 +1559,9 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
             }
 
         });
-        var _SERVER = ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
+        
         // magic constants
-        handler( "$__FILE__" )[ COMPILER.VARIABLE_VALUE ] = _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ];
+        handler( "$__FILE__" )[ COMPILER.VARIABLE_VALUE ] = $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ];
 
         handler( "$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = functionName;
         handler( "$__FUNCTION__" )[ COMPILER.VARIABLE_VALUE ] = functionName;
@@ -1715,8 +1733,9 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.TYPE_CHECK ] = function( variable,
 
 PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name, len, types ) {
     var COMPILER = PHP.Compiler.prototype,
+    $GLOBAL = this[ COMPILER.GLOBAL ],
+    __FILE__ = "$__FILE__",
     VARIABLE = PHP.VM.Variable.prototype,
-    _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ],
     typeStrings = {};
 
     typeStrings[ VARIABLE.NULL ] = "null";
@@ -1748,7 +1767,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                         if ( type.indexOf( VARIABLE.STRING ) === -1 || ( args[ paramIndex ][ VARIABLE.CAST_STRING ][ VARIABLE.TYPE ] !== VARIABLE.STRING )  ) {
 
                             this[ COMPILER.ERROR ]( name + "() expects parameter " + ( paramIndex + 1 ) + " to be " + typeStrings[ type[ 0 ] ] + ", " + typeStrings[ args[ paramIndex ][ VARIABLE.TYPE ] ] + " given in " +
-                                _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] +
+                                $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] +
                                 " on line " + 0, PHP.Constants.E_CORE_WARNING );
                             fail = true;
                         }
@@ -1765,7 +1784,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
 
                         if ( type !== VARIABLE.STRING || ( typeof args[ paramIndex ][ VARIABLE.CAST_STRING ] !== "function" )  ) {
                             this[ COMPILER.ERROR ]( name + "() expects parameter " + ( paramIndex + 1 ) + " to be " + typeStrings[ type ] + ", " + typeStrings[ args[ paramIndex ][ VARIABLE.TYPE ] ] + " given in " +
-                                _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] +
+                                $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] +
                                 " on line " + 0, PHP.Constants.E_CORE_WARNING );
                             fail = true;
                         }
@@ -1878,18 +1897,19 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
 
         var C = PHP.Constants,
-        _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
+        $GLOBAL = this[ COMPILER.GLOBAL ],
+        __FILE__ = "$__FILE__";
         lastError = {
             message: msg,
             line: 1,
             type: level,
-            file: _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ]
+            file: $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ]
         };
 
         if ( lineAppend === false ) {
-            lineAppend = ", called in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1";
+            lineAppend = ", called in " + $GLOBAL( __FILE__ )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined in " + $GLOBAL( __FILE__ )[ COMPILER.VARIABLE_VALUE ] + " on line 1";
         } else if ( lineAppend === true ) {
-            lineAppend = " in " + _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + " on line 1";
+            lineAppend = " in " + $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] + " on line 1";
         } else {
             lineAppend = "";
         }
@@ -1903,7 +1923,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                         errorHandler,
                         new PHP.VM.Variable( level ),
                         new PHP.VM.Variable( msg ),
-                        new PHP.VM.Variable( _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] ),
+                        new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
                         new PHP.VM.Variable( 1 )
                         );
                 } else {
@@ -9393,6 +9413,8 @@ PHP.VM = function( src, opts ) {
 
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, opts.SERVER ).$;
     
+    
+    $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
      
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);

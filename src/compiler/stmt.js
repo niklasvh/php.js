@@ -1,7 +1,7 @@
 
 PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
-  console.log( action );
+    console.log( action );
     action.stmts.forEach(function( stmt ){
         if ( stmt.type === "Node_Stmt_ClassMethod" && stmt.stmts !== null) {
             this.FATAL_ERROR = "Interface function " + action.name + "::" + stmt.name + "() cannot contain body {} on line " + action.attributes.startLine;  
@@ -88,12 +88,24 @@ PHP.Compiler.prototype.Node_Stmt_Echo = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
     
     var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
+   
+    src += "for( ";
     
-    src += "for( " + this.source( action.init ) + "; ";
+    if ( !Array.isArray(action.init) || action.init.length !== 0 ) {
+        src += this.source( action.init );
+    }
     
-    src += "(" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + "; ";
+    src += "; ";
     
-    src += this.source( action.loop ) + "." + this.VARIABLE_VALUE + " ) {\n";
+    if ( !Array.isArray(action.cond) || action.cond.length !== 0 ) {
+        src += "(" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE;
+    }
+    
+    src += "; "
+    if ( !Array.isArray(action.loop) || action.loop.length !== 1 ) { // change
+        src += this.source( action.loop ) + "." + this.VARIABLE_VALUE;
+    }
+    src += " ) {\n";
     
     src += this.stmts( action.stmts );
     
