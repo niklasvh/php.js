@@ -29,7 +29,7 @@ array(5) {
   [2]=>
   string(%d) "%scatchable_error_002.php"
   [3]=>
-  int(5)
+  int(%d)
   [4]=>
   array(0) {
   }
