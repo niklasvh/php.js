@@ -379,7 +379,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_ELSE,
-        re: /^else(?=[\s{])/i
+        re: /^else(?=[\s{:])/i
     },
     {
         value: PHP.Constants.T_IF,

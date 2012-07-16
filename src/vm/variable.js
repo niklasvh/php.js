@@ -708,6 +708,8 @@ PHP.VM.Variable.prototype.DEFINED = "$Defined";
 
 PHP.VM.Variable.prototype.CAST_INT = "$Int";
 
+PHP.VM.Variable.prototype.CAST_DOUBLE = "$Double";
+
 PHP.VM.Variable.prototype.CAST_BOOL = "$Bool";
 
 PHP.VM.Variable.prototype.CAST_STRING = "$String";

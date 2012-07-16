@@ -5369,7 +5369,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
     },
     {
         value: PHP.Constants.T_ELSE,
-        re: /^else(?=[\s{])/i
+        re: /^else(?=[\s{:])/i
     },
     {
         value: PHP.Constants.T_IF,
@@ -7499,6 +7499,26 @@ PHP.Parser.prototype.yyn55 = function ( attributes ) {
 
 };
 
+PHP.Parser.prototype.yyn56 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_Goto",
+        name: this.yyastk[ this.stackPos-(3-2) ],
+        attributes: attributes
+    };
+
+};
+
+PHP.Parser.prototype.yyn57 = function ( attributes ) {
+
+    this.yyval =  {
+        type: "Node_Stmt_Label",
+        name: this.yyastk[ this.stackPos-(2-1) ],
+        attributes: attributes
+    };
+
+};
+
 PHP.Parser.prototype.yyn58 = function () {
     this.yyval = [ this.yyastk[this.stackPos-(1-1)] ];
 };
@@ -7760,6 +7780,18 @@ PHP.Parser.prototype.yyn108 = function ( attributes ) {
     this.yyval =  {
         type: "Node_Stmt_Else",
         stmts: Array.isArray( this.yyastk[ this.stackPos-(2-2) ] ) ? this.yyastk[ this.stackPos-(2-2) ] : [ this.yyastk[ this.stackPos-(2-2) ] ],
+        attributes: attributes
+    };
+};
+
+PHP.Parser.prototype.yyn109 = function () {
+    this.yyval = null;
+};
+
+PHP.Parser.prototype.yyn110 = function ( attributes ) {
+    this.yyval =  {
+        type: "Node_Stmt_Else",
+        stmts: this.yyastk[ this.stackPos-(3-3) ],
         attributes: attributes
     };
 };
