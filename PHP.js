@@ -2525,6 +2525,9 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
             };
             
         }
+    } else {
+               this[ COMPILER.ERROR ]( "Invalid argument supplied for foreach()", PHP.Constants.E_CORE_WARNING, true );
+     
     }
    
 };

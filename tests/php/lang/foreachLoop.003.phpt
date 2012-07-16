@@ -34,13 +34,13 @@ echo "done.\n";
 
 Not an array.
 
-Warning: Invalid argument supplied for foreach() in %s on line 4
+Warning: Invalid argument supplied for foreach() in %s on line %d
 
-Warning: Invalid argument supplied for foreach() in %s on line 9
+Warning: Invalid argument supplied for foreach() in %s on line %d
 
-Warning: Invalid argument supplied for foreach() in %s on line 14
+Warning: Invalid argument supplied for foreach() in %s on line %d
 
-Warning: Invalid argument supplied for foreach() in %s on line 19
+Warning: Invalid argument supplied for foreach() in %s on line %d
 
-Warning: Invalid argument supplied for foreach() in %s on line 24
+Warning: Invalid argument supplied for foreach() in %s on line %d
 done.
