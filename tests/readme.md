@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 415 out of 672 (61.8%)
+Passed 416 out of 672 (61.9%)
 
 Failed tests:
 
@@ -183,7 +183,6 @@ Failed tests:
  - tests/php/lang/error_2_exception_001.phpt
  - tests/php/lang/execution_order.phpt
  - tests/php/lang/foreachLoop.006.phpt
- - tests/php/lang/foreachLoop.012.phpt
  - tests/php/lang/foreachLoop.013.phpt
  - tests/php/lang/foreachLoop.014.phpt
  - tests/php/lang/foreachLoop.015.phpt
