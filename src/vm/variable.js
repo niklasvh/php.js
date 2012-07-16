@@ -574,6 +574,12 @@ PHP.VM.Variable = function( arg ) {
                 
                 var $this = this;
                 
+                if ( this[ this.TYPE ] === this.INT ) {
+                    this.ENV[ COMPILER.ERROR ]("Cannot use a scalar value as an array", PHP.Constants.E_WARNING, true );    
+                    return new PHP.VM.Variable();
+                }
+              
+                
                 if ( this[ this.REFERRING ] !== undefined ) {
                     $this = this[this.REFERRING];
                 }

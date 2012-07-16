@@ -267,7 +267,7 @@ COMPILER.fixString =  function( result ) {
                 
     }
     
-
+    result = result.replace(/([^\\])\\([^\\nrt\$'"])/g, "$1\\\\$2");
         
     return result;
     

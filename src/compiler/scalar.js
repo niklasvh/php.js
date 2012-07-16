@@ -1,6 +1,6 @@
 PHP.Compiler.prototype.Node_Scalar_String = function( action ) {
 
-    return this.CREATE_VARIABLE + '(' + this.fixString(action.value).replace(/([^\\])\\([^\\nrt\$'"])/g, "$1\\\\$2") + ')';
+    return this.CREATE_VARIABLE + '(' + this.fixString(action.value) + ')';
        
 };
 

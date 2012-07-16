@@ -439,7 +439,7 @@ COMPILER.fixString =  function( result ) {
                 
     }
     
-
+    result = result.replace(/([^\\])\\([^\\nrt\$'"])/g, "$1\\\\$2");
         
     return result;
     
@@ -1430,7 +1430,7 @@ PHP.Compiler.prototype.Node_Stmt_Return = function( action ) {
 
 };PHP.Compiler.prototype.Node_Scalar_String = function( action ) {
 
-    return this.CREATE_VARIABLE + '(' + this.fixString(action.value).replace(/([^\\])\\([^\\nrt\$'"])/g, "$1\\\\$2") + ')';
+    return this.CREATE_VARIABLE + '(' + this.fixString(action.value) + ')';
        
 };
 
@@ -11465,6 +11465,12 @@ PHP.VM.Variable = function( arg ) {
             return function( ctx, variable ) {
                 
                 var $this = this;
+                
+                if ( this[ this.TYPE ] === this.INT ) {
+                    this.ENV[ COMPILER.ERROR ]("Cannot use a scalar value as an array", PHP.Constants.E_WARNING, true );    
+                    return new PHP.VM.Variable();
+                }
+              
                 
                 if ( this[ this.REFERRING ] !== undefined ) {
                     $this = this[this.REFERRING];
