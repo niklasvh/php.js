@@ -67,6 +67,7 @@ var files = {
           dechex: "js"  
         },
         misc: {
+            constant: "js",
             define: "js",
             defined: "js",
             eval: "js",
