@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 416 out of 672 (61.9%)
+Passed 417 out of 672 (62.1%)
 
 Failed tests:
 
@@ -171,7 +171,6 @@ Failed tests:
  - tests/php/lang/comments2.phpt
  - tests/php/lang/compare_objects_basic2.phpt
  - tests/php/lang/each_binary_safety.phpt
- - tests/php/lang/empty_variation.phpt
  - tests/php/lang/engine_assignExecutionOrder_001.phpt
  - tests/php/lang/engine_assignExecutionOrder_002.phpt
  - tests/php/lang/engine_assignExecutionOrder_003.phpt

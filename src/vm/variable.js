@@ -520,13 +520,12 @@ PHP.VM.Variable = function( arg ) {
              
                 if ( exists === true ) {
                     var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ); // trigger offsetGet
-                    var tmp = val[ COMPILER.VARIABLE_VALUE ]; 
+                    return val;
+   
                 } else {
                     return true;
                 }
-           
-                 
-                return (val[ this.TYPE ] === this.NULL);
+
                                         
             } else {
                 // looking in a non-existant array, so obviously its empty        
