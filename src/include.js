@@ -18,6 +18,7 @@ var files = {
             array_key_exists: "js",
             array_pop: "js",
             array_push: "js",
+            array_search: "js",
             array_shift: "js",
             array_unshift: "js",
             count: "js",
@@ -33,6 +34,7 @@ var files = {
         classes: {
             class_exists: "js",
             get_class: "js",
+            get_declared_classes: "js",
             get_class_methods: "js",
             get_parent_class: "js",
             interface_exists: "js",

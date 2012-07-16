@@ -36,21 +36,22 @@ PHP.VM = function( src, opts ) {
                 files.push( file.toLowerCase() );
             },
             Included: function( file ) {
-               return (files.indexOf( file.toLowerCase() ) !== -1) 
+                return (files.indexOf( file.toLowerCase() ) !== -1) 
             } 
         }
         
     })();
     
-    ENV.$Class = (function() {
+    ENV.$Class = (function( declaredClasses ) {
         var classRegistry = {},
         COMPILER = PHP.Compiler.prototype,
         VARIABLE = PHP.VM.Variable.prototype,
         magicConstants = {},
         initiatedClasses = [],
         undefinedConstants = {},
+        declaredClasses = [],
         autoloadedClasses = [],
-        classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants );
+        classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants, declaredClasses );
         
         ENV[ COMPILER.MAGIC_CONSTANTS ] = function( constantName ) {
             return new PHP.VM.Variable( magicConstants[ constantName ] );
@@ -60,7 +61,7 @@ PHP.VM = function( src, opts ) {
             Shutdown: function() {
                 
                 initiatedClasses.forEach( function( classObj ) {
-                        classObj[  COMPILER.CLASS_DESTRUCT ]( ENV, true );
+                    classObj[  COMPILER.CLASS_DESTRUCT ]( ENV, true );
                 });
                 
             },
@@ -75,6 +76,9 @@ PHP.VM = function( src, opts ) {
             },
             INew: function( name, exts, func ) {
                 return classHandler( name, PHP.VM.Class.INTERFACE, exts, func );
+            },
+            DeclaredClasses: function() {
+                return declaredClasses;
             },
             New: function() {
                 return classHandler.apply( null, arguments );

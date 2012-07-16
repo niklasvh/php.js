@@ -5,7 +5,7 @@
  */
 
 
-PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants ) {
+PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants, declaredClasses ) {
     
     var methodPrefix = PHP.VM.Class.METHOD,
     methodArgumentPrefix = "_$_",
@@ -386,7 +386,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
             })( Class.prototype );
          
-             // can't override final php5 ctor extending php4 ctor
+            // can't override final php5 ctor extending php4 ctor
             if ( methodName === __construct && ctorProto !== undefined && checkType( ctorProto[ methodTypePrefix + ctorProto[ COMPILER.CLASS_NAME ].toLowerCase() ], FINAL ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final " + ctorProto[ COMPILER.CLASS_NAME ] + "::" + ctorProto[ COMPILER.CLASS_NAME ] + "() with " + className + "::" + realName + "()", PHP.Constants.E_ERROR, true );
             }
@@ -594,6 +594,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             
             DECLARED = true;
+            
+            if ( classType !== PHP.VM.Class.INTERFACE ) {
+                declaredClasses.push( className );
+            }
             
             return Class;
         };

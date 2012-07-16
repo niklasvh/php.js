@@ -2098,6 +2098,52 @@ PHP.Modules.prototype.array_push = function( array ) {
 
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 17.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.array_search = function( needle, haystack, strict ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VAR = PHP.VM.Variable.prototype;
+    
+    if ( haystack[ VAR.TYPE ] === VAR.ARRAY ) {
+        var values = haystack[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ],
+        keys = haystack[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
+        
+        
+                 
+        var index = -1,
+        value = needle[ COMPILER.VARIABLE_VALUE ];
+        
+        
+        
+        values.some(function( item, i ){
+                
+            if ( item instanceof PHP.VM.Variable ) {
+                item = item[ COMPILER.VARIABLE_VALUE ];
+            } 
+                
+          
+                
+            if ( item === value) {
+                index = i;
+                return true;
+            }
+                
+            return false;
+        });
+        
+        if ( index !== -1 ) {
+            return new PHP.VM.Variable(  keys[ index ] );
+        } 
+        
+        return new PHP.VM.Variable( false );
+    }
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 16.7.2012 
 * @website http://hertzen.com
  */
@@ -2412,6 +2458,25 @@ PHP.Modules.prototype.get_class = function( object ) {
            return new PHP.VM.Variable( object[ COMPILER.CLASS_NAME ] );
     }
  
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 17.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.get_declared_classes = function( ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    item = PHP.VM.Array.arrayItem;
+    
+    var items = [];
+    this.$Class.DeclaredClasses().forEach(function( name, index ){
+        items.push( item( index, name ));
+    });
+    
+    return this.array( items );
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -9698,21 +9763,22 @@ PHP.VM = function( src, opts ) {
                 files.push( file.toLowerCase() );
             },
             Included: function( file ) {
-               return (files.indexOf( file.toLowerCase() ) !== -1) 
+                return (files.indexOf( file.toLowerCase() ) !== -1) 
             } 
         }
         
     })();
     
-    ENV.$Class = (function() {
+    ENV.$Class = (function( declaredClasses ) {
         var classRegistry = {},
         COMPILER = PHP.Compiler.prototype,
         VARIABLE = PHP.VM.Variable.prototype,
         magicConstants = {},
         initiatedClasses = [],
         undefinedConstants = {},
+        declaredClasses = [],
         autoloadedClasses = [],
-        classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants );
+        classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants, declaredClasses );
         
         ENV[ COMPILER.MAGIC_CONSTANTS ] = function( constantName ) {
             return new PHP.VM.Variable( magicConstants[ constantName ] );
@@ -9722,7 +9788,7 @@ PHP.VM = function( src, opts ) {
             Shutdown: function() {
                 
                 initiatedClasses.forEach( function( classObj ) {
-                        classObj[  COMPILER.CLASS_DESTRUCT ]( ENV, true );
+                    classObj[  COMPILER.CLASS_DESTRUCT ]( ENV, true );
                 });
                 
             },
@@ -9737,6 +9803,9 @@ PHP.VM = function( src, opts ) {
             },
             INew: function( name, exts, func ) {
                 return classHandler( name, PHP.VM.Class.INTERFACE, exts, func );
+            },
+            DeclaredClasses: function() {
+                return declaredClasses;
             },
             New: function() {
                 return classHandler.apply( null, arguments );
@@ -9856,7 +9925,7 @@ PHP.VM.prototype = new PHP.Modules();
  */
 
 
-PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants ) {
+PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants, declaredClasses ) {
     
     var methodPrefix = PHP.VM.Class.METHOD,
     methodArgumentPrefix = "_$_",
@@ -10237,7 +10306,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
             })( Class.prototype );
          
-             // can't override final php5 ctor extending php4 ctor
+            // can't override final php5 ctor extending php4 ctor
             if ( methodName === __construct && ctorProto !== undefined && checkType( ctorProto[ methodTypePrefix + ctorProto[ COMPILER.CLASS_NAME ].toLowerCase() ], FINAL ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final " + ctorProto[ COMPILER.CLASS_NAME ] + "::" + ctorProto[ COMPILER.CLASS_NAME ] + "() with " + className + "::" + realName + "()", PHP.Constants.E_ERROR, true );
             }
@@ -10445,6 +10514,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             
             DECLARED = true;
+            
+            if ( classType !== PHP.VM.Class.INTERFACE ) {
+                declaredClasses.push( className );
+            }
             
             return Class;
         };
