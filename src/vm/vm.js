@@ -27,6 +27,21 @@ PHP.VM = function( src, opts ) {
     
     ENV.$ini = opts.ini;
     
+    ENV.$Included = (function(){
+        
+        var files = [];
+        
+        return {
+            Include: function( file ) {
+                files.push( file.toLowerCase() );
+            },
+            Included: function( file ) {
+               return (files.indexOf( file.toLowerCase() ) !== -1) 
+            } 
+        }
+        
+    })();
+    
     ENV.$Class = (function() {
         var classRegistry = {},
         COMPILER = PHP.Compiler.prototype,

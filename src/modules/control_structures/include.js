@@ -16,6 +16,7 @@ PHP.Modules.prototype.$include = function( $, file ) {
     
     var loaded_file = (/^(.:|\/)/.test( filename ) ) ? filename : path + "/" + filename;
     var $this = this;
+    this.$Included.Include( loaded_file );
     try {
     var source = this[ COMPILER.FILESYSTEM ].readFileSync( loaded_file );
     }

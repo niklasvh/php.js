@@ -2736,6 +2736,7 @@ PHP.Modules.prototype.$include = function( $, file ) {
     
     var loaded_file = (/^(.:|\/)/.test( filename ) ) ? filename : path + "/" + filename;
     var $this = this;
+    this.$Included.Include( loaded_file );
     try {
     var source = this[ COMPILER.FILESYSTEM ].readFileSync( loaded_file );
     }
@@ -2776,8 +2777,21 @@ PHP.Modules.prototype.$include = function( $, file ) {
 
 PHP.Modules.prototype.include = function() {
     this.$include.apply(this, arguments);
-};PHP.Modules.prototype.include_once = function() {
-    this.$include.apply(this, arguments);
+};PHP.Modules.prototype.include_once = function( $, file ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    filename = file[ COMPILER.VARIABLE_VALUE ];
+    
+    
+    var path = this[ COMPILER.FILE_PATH ];
+    
+    
+    var loaded_file = (/^(.:|\/)/.test( filename ) ) ? filename : path + "/" + filename;
+    
+    if (!this.$Included.Included( loaded_file )) {
+        this.$include.apply(this, arguments);
+    }
+    
 };PHP.Modules.prototype.require = function() {
     this.$include.apply(this, arguments);
 };PHP.Modules.prototype.require_once = function() {
@@ -9576,6 +9590,21 @@ PHP.VM = function( src, opts ) {
     ENV[ PHP.Compiler.prototype.CONSTANTS ] = PHP.VM.Constants( PHP.Constants, ENV );
     
     ENV.$ini = opts.ini;
+    
+    ENV.$Included = (function(){
+        
+        var files = [];
+        
+        return {
+            Include: function( file ) {
+                files.push( file.toLowerCase() );
+            },
+            Included: function( file ) {
+               return (files.indexOf( file.toLowerCase() ) !== -1) 
+            } 
+        }
+        
+    })();
     
     ENV.$Class = (function() {
         var classRegistry = {},
