@@ -577,6 +577,11 @@ PHP.VM.Variable = function( arg ) {
                 if ( this[ this.TYPE ] === this.INT ) {
                     this.ENV[ COMPILER.ERROR ]("Cannot use a scalar value as an array", PHP.Constants.E_WARNING, true );    
                     return new PHP.VM.Variable();
+                } else if (this[ this.TYPE ] === this.STRING) {
+                    if ( variable[ this.TYPE ] !== this.INT ) {
+                        this.ENV[ COMPILER.ERROR ]("Illegal string offset '" + variable[ COMPILER.VARIABLE_VALUE ] + "'", PHP.Constants.E_WARNING, true );    
+                        return new PHP.VM.Variable();
+                    }
                 }
               
                 
