@@ -2794,8 +2794,21 @@ PHP.Modules.prototype.include = function() {
     
 };PHP.Modules.prototype.require = function() {
     this.$include.apply(this, arguments);
-};PHP.Modules.prototype.require_once = function() {
-    this.$include.apply(this, arguments);
+};PHP.Modules.prototype.require_once = function( $, file ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    filename = file[ COMPILER.VARIABLE_VALUE ];
+    
+    
+    var path = this[ COMPILER.FILE_PATH ];
+    
+    
+    var loaded_file = (/^(.:|\/)/.test( filename ) ) ? filename : path + "/" + filename;
+    
+    if (!this.$Included.Included( loaded_file )) {
+        this.$include.apply(this, arguments);
+    }
+    
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 3.7.2012 
