@@ -436,7 +436,34 @@ PHP.VM.Variable = function( arg ) {
         }
     }
     );
-        
+    
+    Object.defineProperty( this, this.CAST_INT,
+    {
+        get : function(){
+            // http://www.php.net/manual/en/language.types.integer.php
+            
+            var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+            
+            
+            switch ( this[ this.TYPE ] ) {
+                
+                case this.BOOL:
+                    return new PHP.VM.Variable( ( value === true ) ? 1 : 0 );
+                    break;
+                    
+                case this.FLOAT:
+                    return new PHP.VM.Variable( Math.floor( value ) ); 
+                    break;
+                    
+                default:
+                    return this;
+            }
+
+        }
+    }
+    );
+
+
     Object.defineProperty( this, this.CAST_STRING,
     {
         get : function() {
@@ -451,8 +478,8 @@ PHP.VM.Variable = function( arg ) {
                 if ( typeof value[PHP.VM.Class.METHOD + __toString ] === "function" ) {
                     var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
                     if (val[ this.TYPE ] !==  this.STRING) {
-                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
-                         return new PHP.VM.Variable("");
+                        this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
+                        return new PHP.VM.Variable("");
                     }
                     return val;
                 //  return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
@@ -656,6 +683,8 @@ PHP.VM.Variable.prototype = new PHP.VM.VariableProto();
 PHP.VM.Variable.prototype.NAME = "$Name";
 
 PHP.VM.Variable.prototype.DEFINED = "$Defined";
+
+PHP.VM.Variable.prototype.CAST_INT = "$Int";
 
 PHP.VM.Variable.prototype.CAST_BOOL = "$Bool";
 

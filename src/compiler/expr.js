@@ -325,6 +325,10 @@ PHP.Compiler.prototype.Node_Expr_Cast_String = function( action ) {
     return  this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_STRING;
 };
 
+PHP.Compiler.prototype.Node_Expr_Cast_Int = function( action ) {
+    return  this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_INT;
+};
+
 PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
     return  this.CTX + "include( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
 };

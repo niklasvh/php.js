@@ -114,6 +114,7 @@ var files = {
         variable: {
             empty: "js",
             is_callable: "js",
+            is_float: "js",
             is_null: "js",
             is_string: "js",
             isset: "js",

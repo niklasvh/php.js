@@ -782,6 +782,10 @@ PHP.Compiler.prototype.Node_Expr_Cast_String = function( action ) {
     return  this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_STRING;
 };
 
+PHP.Compiler.prototype.Node_Expr_Cast_Int = function( action ) {
+    return  this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_INT;
+};
+
 PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
     return  this.CTX + "include( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
 };
@@ -4419,6 +4423,22 @@ PHP.Modules.prototype.is_callable = function( callback ) {
     } else {
            console.log( callback );
     }
+    
+ 
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 13.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.is_float = function( variable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    return new PHP.VM.Variable( variable[ VARIABLE.TYPE ] === VARIABLE.FLOAT );
     
  
     
@@ -11294,7 +11314,34 @@ PHP.VM.Variable = function( arg ) {
         }
     }
     );
-        
+    
+    Object.defineProperty( this, this.CAST_INT,
+    {
+        get : function(){
+            // http://www.php.net/manual/en/language.types.integer.php
+            
+            var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+            
+            
+            switch ( this[ this.TYPE ] ) {
+                
+                case this.BOOL:
+                    return new PHP.VM.Variable( ( value === true ) ? 1 : 0 );
+                    break;
+                    
+                case this.FLOAT:
+                    return new PHP.VM.Variable( Math.floor( value ) ); 
+                    break;
+                    
+                default:
+                    return this;
+            }
+
+        }
+    }
+    );
+
+
     Object.defineProperty( this, this.CAST_STRING,
     {
         get : function() {
@@ -11309,8 +11356,8 @@ PHP.VM.Variable = function( arg ) {
                 if ( typeof value[PHP.VM.Class.METHOD + __toString ] === "function" ) {
                     var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
                     if (val[ this.TYPE ] !==  this.STRING) {
-                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
-                         return new PHP.VM.Variable("");
+                        this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
+                        return new PHP.VM.Variable("");
                     }
                     return val;
                 //  return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
@@ -11514,6 +11561,8 @@ PHP.VM.Variable.prototype = new PHP.VM.VariableProto();
 PHP.VM.Variable.prototype.NAME = "$Name";
 
 PHP.VM.Variable.prototype.DEFINED = "$Defined";
+
+PHP.VM.Variable.prototype.CAST_INT = "$Int";
 
 PHP.VM.Variable.prototype.CAST_BOOL = "$Bool";
 
@@ -11945,7 +11994,6 @@ return this.$Prop( ctx, "message" );
 .Method( "__clone", 36, [], function( $, ctx, $Static ) {
 })
 .Create()});
-ENV.$ob("");
 
 };/* automatically built from ReflectionClass.php*/
 PHP.VM.Class.Predefined.ReflectionClass = function( ENV, $$ ) {
