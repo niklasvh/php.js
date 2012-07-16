@@ -2057,8 +2057,8 @@ PHP.Modules.prototype.array_pop = function( array ) {
     
 
     var value = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].pop(),
-    key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].pop(),
-    pointer = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] = 0;
+    key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].pop();
+   // pointer = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] = 0;
         
     return value;
 
@@ -2478,7 +2478,8 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
       
         return {
             len: expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].length,
-            expr: expr
+            expr: expr,
+            clone: expr[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_CLONE )
         };
       
     } else if ( expr[ VAR.TYPE ] === VAR.OBJECT ) {
@@ -2552,10 +2553,17 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     expr = iterator.expr;
   
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
-        var values = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
-        keys =  expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
+        
+        if ( !byRef ) {
+            expr = iterator.clone;
+        } else {
+            expr = expr[ COMPILER.VARIABLE_VALUE ];
+        }
+        
+        var values = expr[ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
+        keys =  expr[ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
         len = ( byRef ) ? values.length : iterator.len,
-        pointer = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
+        pointer = expr[ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
       
         var result = ( pointer[ COMPILER.VARIABLE_VALUE ] < len );
         
@@ -2568,7 +2576,9 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
             if ( key instanceof PHP.VM.Variable ) {
                 key[ COMPILER.VARIABLE_VALUE ] = keys[ pointer[ COMPILER.VARIABLE_VALUE ] ];
             }
-            
+            if (!byRef) {
+                iterator.expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ]++;
+            }
             pointer[ COMPILER.VARIABLE_VALUE ]++;
         }
         

@@ -71,7 +71,7 @@ foreach ($a as &$v) {
 var_dump($a);
 
 ?>
---EXPECT--
+--EXPECTF--
 
 Directly changing array values.
 string(10) "original.1"
@@ -103,7 +103,7 @@ array(3) {
   [1]=>
   string(9) "changed.1"
   [2]=>
-  &string(9) "changed.2"
+  %Sstring(9) "changed.2"
 }
 
 Pushing elements onto an unreferenced array.
@@ -148,7 +148,7 @@ array(15) {
   [10]=>
   string(5) "new.7"
   [11]=>
-  &string(5) "new.8"
+  %Sstring(5) "new.8"
   [12]=>
   string(5) "new.9"
   [13]=>
