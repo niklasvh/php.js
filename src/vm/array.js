@@ -120,7 +120,7 @@ PHP.VM.Array = function( ENV ) {
             "name":"index"
         }], function( $ ) {
             var newArr = new (ENV.$Class.Get("ArrayObject"))( ENV );
-            console.log( " array clone triggered ");
+        
             
             // copy keys, can do direct copy ( probably? ) 
             var keys = newArr[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
@@ -135,8 +135,12 @@ PHP.VM.Array = function( ENV ) {
                 values.push( valueObj[ COMPILER.VARIABLE_CLONE ]() );
                 
             });
+        
+            // reset pointers
+            this [ PHP.VM.Class.PROPERTY +  PHP.VM.Array.prototype.POINTER ][ COMPILER.VARIABLE_VALUE ] = 0;
             
-            
+            // copy key index
+            newArr[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.INTKEY][ COMPILER.VARIABLE_VALUE ] = this[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.INTKEY][ COMPILER.VARIABLE_VALUE ];
             return newArr;
             
         
@@ -262,12 +266,10 @@ PHP.VM.Array = function( ENV ) {
         }
     
    
- 
+        var arr = this.array( arr );
+      
 
-    
-    
-
-        return this.array( arr );
+        return arr;
 
 
     };

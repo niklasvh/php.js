@@ -167,24 +167,27 @@ PHP.VM = function( src, opts ) {
     });
     
     
-    /*
+    if ( false ) {
+    
+  
         var exec = new Function( "$$", "$", "ENV", src  );
         exec.call(this, $$, $, ENV);
     
-      */
-    try {
-        var exec = new Function( "$$", "$", "ENV",  src  );
-        exec.call(this, $$, $, ENV);
-        this.$obflush.call( ENV );  
-        this.$shutdown.call( ENV );
+     
+    } else {
+        try {
+            var exec = new Function( "$$", "$", "ENV",  src  );
+            exec.call(this, $$, $, ENV);
+            this.$obflush.call( ENV );  
+            this.$shutdown.call( ENV );
           
-    } catch( e ) {
+        } catch( e ) {
         
-        console.log("Caught: ", e.message, e);
-        console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
+            console.log("Caught: ", e.message, e);
+            console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
         
+        }
     }
-       
 
     this.OUTPUT_BUFFER = this.$strict + this.OUTPUT_BUFFERS.join("");
 };

@@ -2349,7 +2349,9 @@ PHP.Modules.prototype.list = function( array ) {
         values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
        
         Array.prototype.slice.call( arguments, 1 ).forEach(function( variable, index ){
-            variable[ COMPILER.VARIABLE_VALUE ] = values[ index ][ COMPILER.VARIABLE_VALUE ];
+            if ( variable instanceof PHP.VM.Variable ) {
+                variable[ COMPILER.VARIABLE_VALUE ] = values[ index ][ COMPILER.VARIABLE_VALUE ];
+            }
         });
         
         
@@ -2361,7 +2363,9 @@ PHP.Modules.prototype.list = function( array ) {
     
     // fill with null
     Array.prototype.slice.call( arguments, 1 ).forEach(function( variable ){
-        variable[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+        if ( variable instanceof PHP.VM.Variable ) {
+            variable[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+        }
     });
     
     return new PHP.VM.Variable(false);
@@ -5022,6 +5026,10 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
     {
         value: PHP.Constants.T_FINAL,
         re: /^final(?=\s)/i
+    },
+        {
+        value: PHP.Constants.T_VAR,
+        re: /^var(?=\s)/i
     },
     {
         value: PHP.Constants.T_GLOBAL,
@@ -9894,24 +9902,27 @@ PHP.VM = function( src, opts ) {
     });
     
     
-    /*
+    if ( false ) {
+    
+  
         var exec = new Function( "$$", "$", "ENV", src  );
         exec.call(this, $$, $, ENV);
     
-      */
-    try {
-        var exec = new Function( "$$", "$", "ENV",  src  );
-        exec.call(this, $$, $, ENV);
-        this.$obflush.call( ENV );  
-        this.$shutdown.call( ENV );
+     
+    } else {
+        try {
+            var exec = new Function( "$$", "$", "ENV",  src  );
+            exec.call(this, $$, $, ENV);
+            this.$obflush.call( ENV );  
+            this.$shutdown.call( ENV );
           
-    } catch( e ) {
+        } catch( e ) {
         
-        console.log("Caught: ", e.message, e);
-        console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
+            console.log("Caught: ", e.message, e);
+            console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
         
+        }
     }
-       
 
     this.OUTPUT_BUFFER = this.$strict + this.OUTPUT_BUFFERS.join("");
 };
@@ -11088,10 +11099,11 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     } else {
         if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
             // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
-            console.log(combinedVariable, combinedVariable[ COMPILER.VARIABLE_VALUE ]);
+            this[ COMPILER.VARIABLE_VALUE ] = combinedVariable[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
+              
+        } else {
+            this[ COMPILER.VARIABLE_VALUE ] = combinedVariable[ COMPILER.VARIABLE_VALUE ];
         }
-        this[ COMPILER.VARIABLE_VALUE ] = combinedVariable[ COMPILER.VARIABLE_VALUE ];
-    
     }
     
     return this;
@@ -11146,7 +11158,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ADD ] = function( combine
         val1 = 0;
     }
     
-        if ( isNaN(val2 - 0) ) {
+    if ( isNaN(val2 - 0) ) {
         val2 = 0;
     }
     
@@ -11272,10 +11284,7 @@ PHP.VM.Variable = function( arg ) {
             if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
                 this[ this.TYPE ] = this.ARRAY;
                 
-                if ( newValue[ this.DEFINED ] === true ) {
-                    // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
-                    value = newValue[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
-                }
+
                 
             } else {
 
@@ -11879,7 +11888,7 @@ PHP.VM.Array = function( ENV ) {
             "name":"index"
         }], function( $ ) {
             var newArr = new (ENV.$Class.Get("ArrayObject"))( ENV );
-            console.log( " array clone triggered ");
+        
             
             // copy keys, can do direct copy ( probably? ) 
             var keys = newArr[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
@@ -11894,8 +11903,12 @@ PHP.VM.Array = function( ENV ) {
                 values.push( valueObj[ COMPILER.VARIABLE_CLONE ]() );
                 
             });
+        
+            // reset pointers
+            this [ PHP.VM.Class.PROPERTY +  PHP.VM.Array.prototype.POINTER ][ COMPILER.VARIABLE_VALUE ] = 0;
             
-            
+            // copy key index
+            newArr[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.INTKEY][ COMPILER.VARIABLE_VALUE ] = this[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.INTKEY][ COMPILER.VARIABLE_VALUE ];
             return newArr;
             
         
@@ -12021,12 +12034,10 @@ PHP.VM.Array = function( ENV ) {
         }
     
    
- 
+        var arr = this.array( arr );
+      
 
-    
-    
-
-        return this.array( arr );
+        return arr;
 
 
     };

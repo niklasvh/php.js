@@ -17,7 +17,9 @@ PHP.Modules.prototype.list = function( array ) {
         values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
        
         Array.prototype.slice.call( arguments, 1 ).forEach(function( variable, index ){
-            variable[ COMPILER.VARIABLE_VALUE ] = values[ index ][ COMPILER.VARIABLE_VALUE ];
+            if ( variable instanceof PHP.VM.Variable ) {
+                variable[ COMPILER.VARIABLE_VALUE ] = values[ index ][ COMPILER.VARIABLE_VALUE ];
+            }
         });
         
         
@@ -29,7 +31,9 @@ PHP.Modules.prototype.list = function( array ) {
     
     // fill with null
     Array.prototype.slice.call( arguments, 1 ).forEach(function( variable ){
-        variable[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+        if ( variable instanceof PHP.VM.Variable ) {
+            variable[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+        }
     });
     
     return new PHP.VM.Variable(false);
