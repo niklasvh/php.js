@@ -27,7 +27,7 @@ function includeFiles( path, obj ) {
 
 }
 
-includeFiles("src/", files.files );
+includeFiles("", files.files );
 
 
 fs.writeFile('PHP.js', content, function (err) {

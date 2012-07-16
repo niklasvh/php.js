@@ -13,7 +13,9 @@ PHP.Modules.prototype.echo = function() {
         
         if (arg instanceof PHP.VM.VariableProto) {
             var value = arg[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
-            if ( arg[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
+            if ( arg[ VARIABLE.TYPE ] !== VARIABLE.FLOAT ) {
+                this.$ob( value.replace(/\./, this.$locale.decimal_point ) );
+            } else if ( arg[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
                 
                     this.$ob( value );
                 

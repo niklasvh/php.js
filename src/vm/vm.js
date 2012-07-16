@@ -27,6 +27,11 @@ PHP.VM = function( src, opts ) {
     
     ENV.$ini = opts.ini;
     
+    ENV.$locale = {
+        decimal_point: ".",
+        thousands_sep: ","
+    };
+    
     ENV.$Included = (function(){
         
         var files = [];

@@ -20,7 +20,7 @@ PHP.VM.Constants = function(  predefined, ENV ) {
     methods[ COMPILER.CONSTANT_GET ] = function( constantName ) {
         
         var variable = new PHP.VM.Variable( constants[ constantName ] ); 
-        
+
         if ( constants[ constantName ] === undefined  ) {
             
             if ( constantVariables[ constantName ] === undefined ) {

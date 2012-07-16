@@ -11,8 +11,13 @@ function getItems($constants, &$str, $start) {
         if (substr($key, 0, strlen($start)) === $start) {
 
             $str .= "PHP.Constants." . $key . " = ";
-
-            $str .= (is_string($value)) ? '"' . $value . '"' : $value;
+            
+            if (is_string($value)  || $value == INF || (string)$value == "NAN") {
+                $str .= '"' . str_replace("\\","\\\\",$value) . '"';
+            } else {
+                $str .=  $value;
+            }
+           
             $str .= ";\n";
         }
     }
@@ -34,5 +39,7 @@ createFile('src/modules/output/constants.js', "Core", "PHP_OUTPUT_");
 createFile('src/modules/error/constants.js', "Core", "E_");
 
 createFile('src/modules/date/constants.js', "date", "");
+
+createFile('src/modules/variable/constants.js', "standard", "");
 
 ?>

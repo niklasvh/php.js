@@ -475,6 +475,32 @@ PHP.VM.Variable = function( arg ) {
     );
 
 
+    Object.defineProperty( this, this.CAST_DOUBLE,
+    {
+        get : function(){
+            // http://www.php.net/manual/en/language.types.integer.php
+            
+            var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+            
+            
+            switch ( this[ this.TYPE ] ) {
+                
+                case this.BOOL:
+                    return new PHP.VM.Variable( ( value === true ) ? 1.0 : 0.0 );
+                    break;
+                    
+                case this.INT:
+                    this[ this.TYPE ] = this.FLOAT;
+                    break;
+                    
+                default:
+                    return this;
+            }
+
+        }
+    }
+    );
+
     Object.defineProperty( this, this.CAST_STRING,
     {
         get : function() {
