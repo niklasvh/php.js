@@ -12,7 +12,7 @@ PHP.Compiler = function( AST, file ) {
     }, this );
 
     if ( this.FATAL_ERROR !== undefined ) {
-        this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", PHP.Constants.E_ERROR);';
+        this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", ' +((  this.ERROR_TYPE === undefined ) ? "PHP.Constants.E_ERROR" : this.ERROR_TYPE ) + ');';
     }
     
     this.INSIDE_METHOD = false;

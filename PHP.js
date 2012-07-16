@@ -184,7 +184,7 @@ PHP.Compiler = function( AST, file ) {
     }, this );
 
     if ( this.FATAL_ERROR !== undefined ) {
-        this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", PHP.Constants.E_ERROR);';
+        this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", ' +((  this.ERROR_TYPE === undefined ) ? "PHP.Constants.E_ERROR" : this.ERROR_TYPE ) + ');';
     }
     
     this.INSIDE_METHOD = false;
@@ -1131,8 +1131,17 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     
+    if ( action.expr.type === "Node_Expr_Array" && action.byRef === true ) {
+        console.log( action );
+        if (action.keyVar === null) {
+        this.FATAL_ERROR = "syntax error, unexpected '&' in " + this.file + " on line " + action.attributes.startLine;
+        this.ERROR_TYPE = PHP.Constants.E_PARSE;
+        } else {
+             this.FATAL_ERROR = "Cannot create references to elements of a temporary array expression in " + this.file + " on line " + action.attributes.startLine;
+        }
+        return;
+    }
     
-    console.log( action );
     var count = ++this.FOREACH_COUNT;
     var src = "var iterator" + count + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
     src += "while(" + this.CTX + 'foreach( iterator' + count + ', ' + action.byRef + ", " + this.source( action.valueVar );
