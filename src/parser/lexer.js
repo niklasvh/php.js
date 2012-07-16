@@ -159,7 +159,7 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_CLOSE_TAG,
-        re: /^(\?\>|\%\>)\s?/,
+        re: /^(\?\>|\%\>)\s?\s?/,
         func: function( result ) {
             insidePHP = false;
             return result;

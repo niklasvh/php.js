@@ -16,6 +16,7 @@ PHP.Modules.prototype.define = function( name, value, case_insensitive ) {
           this.ENV[ COMPILER.ERROR ]("Class constants cannot be defined or redefined", PHP.Constants.E_CORE_WARNING, true );    
           return new PHP.VM.Variable( false );
     }
+   
     
     this[ COMPILER.CONSTANTS ][ COMPILER.CONSTANT_SET ]( variableName, variableValue );
     

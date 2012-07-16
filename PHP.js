@@ -3044,6 +3044,7 @@ PHP.Modules.prototype.define = function( name, value, case_insensitive ) {
           this.ENV[ COMPILER.ERROR ]("Class constants cannot be defined or redefined", PHP.Constants.E_CORE_WARNING, true );    
           return new PHP.VM.Variable( false );
     }
+   
     
     this[ COMPILER.CONSTANTS ][ COMPILER.CONSTANT_SET ]( variableName, variableValue );
     
@@ -4517,7 +4518,7 @@ PHP.Modules.prototype.print_r = function() {
                 str += key;
                 
                 str += "] => ";
-                
+
                 str += $dump( values[ index ], indent + 8 );
                 
                 if ( values[ index ][ VAR.TYPE] === VAR.ARRAY ) {
@@ -4706,7 +4707,6 @@ PHP.Modules.prototype.var_dump = function() {
                     str += key;
                 } 
                 str += "]=>\n";
-               
                 str += $dump( values[ index ], indent + 2 );
                 
             }, this);
@@ -4995,7 +4995,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
     },
     {
         value: PHP.Constants.T_CLOSE_TAG,
-        re: /^(\?\>|\%\>)\s?/,
+        re: /^(\?\>|\%\>)\s?\s?/,
         func: function( result ) {
             insidePHP = false;
             return result;
@@ -11581,9 +11581,9 @@ PHP.VM.Array = function( ENV ) {
             
             
             if ( Array.isArray( items ) ) {
-           
+       
                 items.forEach( function( item ) {
-               
+                 
                     // this.$Prop( this, $this.VALUES ).$.push( item[ COMPILER.ARRAY_VALUE ] );
                     if (item[ COMPILER.ARRAY_VALUE ][ VARIABLE.CLASS_CONSTANT ] !== true && item[ COMPILER.ARRAY_VALUE ][ VARIABLE.CONSTANT ] !== true) {
                         this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( new PHP.VM.Variable( item[ COMPILER.ARRAY_VALUE ][ COMPILER.VARIABLE_VALUE ] ) );
@@ -11595,7 +11595,9 @@ PHP.VM.Array = function( ENV ) {
                     if ( item[ COMPILER.ARRAY_KEY ] !== undefined ) {
                         if ( !item[ COMPILER.ARRAY_KEY ] instanceof PHP.VM.Variable || (item[ COMPILER.ARRAY_KEY ][ VARIABLE.CLASS_CONSTANT ] !== true && item[ COMPILER.ARRAY_KEY ][ VARIABLE.CONSTANT ] !== true )) {
                             var key = ( item[ COMPILER.ARRAY_KEY ] instanceof PHP.VM.Variable ) ? item[ COMPILER.ARRAY_KEY ][ COMPILER.VARIABLE_VALUE ] : item[ COMPILER.ARRAY_KEY ];
-                   
+                            if ( key === true || key === false ) {
+                                key = ( key === true ) ? 1 : 0;
+                            }
                             if ( /^\d+$/.test( key )) {
                                 // integer key
                         
@@ -11609,7 +11611,7 @@ PHP.VM.Array = function( ENV ) {
                             }
                         } else {
                             // class constant as key
-                           
+                                                         
                             this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( item[ COMPILER.ARRAY_KEY ] );
                       
                         }
@@ -11899,7 +11901,7 @@ PHP.VM.Constants = function(  predefined, ENV ) {
             
             
         }
-        
+
         return variable;    
     };
     

@@ -36,7 +36,7 @@ PHP.VM.Constants = function(  predefined, ENV ) {
             
             
         }
-        
+
         return variable;    
     };
     

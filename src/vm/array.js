@@ -35,9 +35,9 @@ PHP.VM.Array = function( ENV ) {
             
             
             if ( Array.isArray( items ) ) {
-           
+       
                 items.forEach( function( item ) {
-               
+                 
                     // this.$Prop( this, $this.VALUES ).$.push( item[ COMPILER.ARRAY_VALUE ] );
                     if (item[ COMPILER.ARRAY_VALUE ][ VARIABLE.CLASS_CONSTANT ] !== true && item[ COMPILER.ARRAY_VALUE ][ VARIABLE.CONSTANT ] !== true) {
                         this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].push( new PHP.VM.Variable( item[ COMPILER.ARRAY_VALUE ][ COMPILER.VARIABLE_VALUE ] ) );
@@ -49,7 +49,9 @@ PHP.VM.Array = function( ENV ) {
                     if ( item[ COMPILER.ARRAY_KEY ] !== undefined ) {
                         if ( !item[ COMPILER.ARRAY_KEY ] instanceof PHP.VM.Variable || (item[ COMPILER.ARRAY_KEY ][ VARIABLE.CLASS_CONSTANT ] !== true && item[ COMPILER.ARRAY_KEY ][ VARIABLE.CONSTANT ] !== true )) {
                             var key = ( item[ COMPILER.ARRAY_KEY ] instanceof PHP.VM.Variable ) ? item[ COMPILER.ARRAY_KEY ][ COMPILER.VARIABLE_VALUE ] : item[ COMPILER.ARRAY_KEY ];
-                   
+                            if ( key === true || key === false ) {
+                                key = ( key === true ) ? 1 : 0;
+                            }
                             if ( /^\d+$/.test( key )) {
                                 // integer key
                         
@@ -63,7 +65,7 @@ PHP.VM.Array = function( ENV ) {
                             }
                         } else {
                             // class constant as key
-                           
+                                                         
                             this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ].push( item[ COMPILER.ARRAY_KEY ] );
                       
                         }

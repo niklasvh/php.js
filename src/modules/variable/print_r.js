@@ -34,7 +34,7 @@ PHP.Modules.prototype.print_r = function() {
                 str += key;
                 
                 str += "] => ";
-                
+
                 str += $dump( values[ index ], indent + 8 );
                 
                 if ( values[ index ][ VAR.TYPE] === VAR.ARRAY ) {

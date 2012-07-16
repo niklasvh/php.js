@@ -48,7 +48,6 @@ PHP.Modules.prototype.var_dump = function() {
                     str += key;
                 } 
                 str += "]=>\n";
-               
                 str += $dump( values[ index ], indent + 2 );
                 
             }, this);
