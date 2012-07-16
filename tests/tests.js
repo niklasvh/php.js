@@ -140,7 +140,7 @@ PHP_Tests.prototype.buildTest = function( path, callback ) {
         opts.filesystem = new PHP.Adapters.XHRFileSystem();
                     
         //      try {
-        engine = new PHP( json.FILE, opts );
+        engine = new PHP( json.FILE || json.FILEEOF , opts );
         //    } catch( e ) {
         //      engine.error = e;
         //  }

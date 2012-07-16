@@ -85,7 +85,7 @@ function runTest ( file, complete ) {
                     
         try {
            
-            engine = new PHP( test.FILE, opts );
+            engine = new PHP( test.FILE || test.FILEEOF, opts );
               
             var expect = ((test.EXPECT === undefined) ? test.EXPECTF : test.EXPECT ).trim(),
             output = engine.vm.OUTPUT_BUFFER.replace(/\n/g, "\r\n").trim(),
