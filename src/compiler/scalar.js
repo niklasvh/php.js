@@ -1,7 +1,7 @@
 PHP.Compiler.prototype.Node_Scalar_String = function( action ) {
 
-    return this.CREATE_VARIABLE + '(' + this.fixString(action.value) + ')';
-    
+    return this.CREATE_VARIABLE + '(' + this.fixString(action.value).replace(/([^\\])\\([^\\nrt\$'"])/g, "$1\\\\$2") + ')';
+       
 };
 
 PHP.Compiler.prototype.Node_Scalar_Encapsed = function( action ) {

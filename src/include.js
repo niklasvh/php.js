@@ -92,6 +92,9 @@ var files = {
             ob_get_level: "js"
             
         },
+        pcre: {
+          preg_match: "js"  
+        },
         string: {
             echo: "js",
             explode: "js",
