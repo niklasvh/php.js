@@ -86,15 +86,15 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,
     expr;
-  
+
     if ( iterator === undefined  || iterator.expr === undefined ) {
         return false;
     }
     expr = iterator.expr;
-  
+
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
         
-        if ( !byRef ) {
+        if ( !byRef && iterator.expr[ VAR.IS_REF ] !== true ) {
             expr = iterator.clone;
         } else {
             expr = expr[ COMPILER.VARIABLE_VALUE ];
@@ -102,13 +102,13 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
         
         var values = expr[ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
         keys =  expr[ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
-        len = ( byRef ) ? values.length : iterator.len,
+        len = ( byRef || iterator.expr[ VAR.IS_REF ] === true) ? values.length : iterator.len,
         pointer = expr[ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
       
         var result = ( pointer[ COMPILER.VARIABLE_VALUE ] < len );
         
         if ( result === true ) {
-            if (byRef === true ) {
+            if (byRef === true || iterator.expr[ VAR.IS_REF ] === true  ) {
                 value[ VAR.REF ]( values[ pointer[ COMPILER.VARIABLE_VALUE ] ] );
             } else {
                 value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
@@ -116,7 +116,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
             if ( key instanceof PHP.VM.Variable ) {
                 key[ COMPILER.VARIABLE_VALUE ] = keys[ pointer[ COMPILER.VARIABLE_VALUE ] ];
             }
-            if (!byRef) {
+            if (!byRef && iterator.expr[ VAR.IS_REF ] !== true ) {
                 iterator.expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ]++;
             }
             pointer[ COMPILER.VARIABLE_VALUE ]++;
