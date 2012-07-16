@@ -11014,8 +11014,19 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( comb
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ADD ] = function( combinedVariable ) {
     
-    var COMPILER = PHP.Compiler.prototype;
-    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) + ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
+    var COMPILER = PHP.Compiler.prototype,
+    val1 = this[ COMPILER.VARIABLE_VALUE ],
+    val2 = combinedVariable[ COMPILER.VARIABLE_VALUE ];
+    
+    if ( isNaN(val1 - 0) ) {
+        val1 = 0;
+    }
+    
+        if ( isNaN(val2 - 0) ) {
+        val2 = 0;
+    }
+    
+    return new PHP.VM.Variable( (val1 - 0) + (val2 - 0) );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MUL ] = function( combinedVariable ) {
