@@ -61,6 +61,7 @@ var files = {
         },
         functions: {
             call_user_func: "js",
+            create_function: "js",
             function_exists: "js"
         },
         math: {

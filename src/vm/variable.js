@@ -235,6 +235,8 @@ PHP.VM.Variable = function( arg ) {
      
         if ( typeof newValue === "string" ) {
             this[ this.TYPE ] = this.STRING;
+        } else if ( typeof newValue === "function" ) { 
+            this[ this.TYPE ] = this.LAMBDA;
         } else if ( typeof newValue === "number" ) {
             if ( newValue % 1 === 0 ) {
                 this[ this.TYPE ] = this.INT;
@@ -720,6 +722,8 @@ PHP.VM.Variable.prototype.STRING = 4;
 PHP.VM.Variable.prototype.ARRAY = 5;
 PHP.VM.Variable.prototype.OBJECT = 6;
 PHP.VM.Variable.prototype.RESOURCE = 7;
+PHP.VM.Variable.prototype.LAMBDA = 8;
+
 PHP.VM.Variable.prototype.TYPE = "type";
 
 PHP.VM.Variable.prototype.PROPERTY = "$Property";

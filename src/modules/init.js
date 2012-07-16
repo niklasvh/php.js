@@ -17,7 +17,6 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     // initializer
     args.push( function( args, values ) {
         handler = PHP.VM.VariableHandler( ENV );
-
         var vals = Array.prototype.slice.call( values, 2 );
 
 
@@ -162,7 +161,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
         });
 
         return this.array( props );
-
+    } else if ( typeof functionName === "function" ) {
+        // anonymous lambda function
+        
+        return functionName.apply( this, Array.prototype.slice.call( arguments, 2 ) );
+ 
     } else if ( this[ functionName ] === undefined ) {
         this[ PHP.Compiler.prototype.ERROR ]( "Call to undefined function " + functionName + "()", PHP.Constants.E_ERROR, true );
     }
