@@ -15,10 +15,15 @@ PHP.Modules.prototype.$include = function( $, file ) {
     
     
     var loaded_file = (/^(.:|\/)/.test( filename ) ) ? filename : path + "/" + filename;
-    
-    
+    var $this = this;
+    try {
     var source = this[ COMPILER.FILESYSTEM ].readFileSync( loaded_file );
-    
+    }
+    catch( e ) {
+  
+         $this.ENV[ COMPILER.ERROR ]("include(" + filename + "): failed to open stream: No such file or directory", PHP.Constants.E_CORE_WARNING, true );
+         $this.ENV[ COMPILER.ERROR ]("include(): Failed opening '" +  filename + "' for inclusion (include_path='" + path + "')", PHP.Constants.E_CORE_WARNING, true ); 
+    }
         
     var COMPILER = PHP.Compiler.prototype;
    

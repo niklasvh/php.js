@@ -786,6 +786,10 @@ PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
     return  this.CTX + "include( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
 };
 
+PHP.Compiler.prototype.Node_Expr_IncludeOnce = function( action ) {
+    return  this.CTX + "include_once( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
+};
+
 PHP.Compiler.prototype.Node_Expr_RequireOnce = function( action ) {
     return  this.CTX + "require_once( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
 };
@@ -2731,10 +2735,15 @@ PHP.Modules.prototype.$include = function( $, file ) {
     
     
     var loaded_file = (/^(.:|\/)/.test( filename ) ) ? filename : path + "/" + filename;
-    
-    
+    var $this = this;
+    try {
     var source = this[ COMPILER.FILESYSTEM ].readFileSync( loaded_file );
-    
+    }
+    catch( e ) {
+  
+         $this.ENV[ COMPILER.ERROR ]("include(" + filename + "): failed to open stream: No such file or directory", PHP.Constants.E_CORE_WARNING, true );
+         $this.ENV[ COMPILER.ERROR ]("include(): Failed opening '" +  filename + "' for inclusion (include_path='" + path + "')", PHP.Constants.E_CORE_WARNING, true ); 
+    }
         
     var COMPILER = PHP.Compiler.prototype;
    
@@ -3006,12 +3015,12 @@ PHP.Modules.prototype.define = function( name, value, case_insensitive ) {
     
     if ( variableName.indexOf("::") !== -1 ) {
           this.ENV[ COMPILER.ERROR ]("Class constants cannot be defined or redefined", PHP.Constants.E_CORE_WARNING, true );    
-          return;
+          return new PHP.VM.Variable( false );
     }
     
     this[ COMPILER.CONSTANTS ][ COMPILER.CONSTANT_SET ]( variableName, variableValue );
     
-    
+     return new PHP.VM.Variable( true );
   
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -3850,6 +3859,19 @@ PHP.Modules.prototype.strtolower = function( str ) {
     COMPILER = PHP.Compiler.prototype;
     
     return new PHP.VM.Variable( str[ COMPILER.VARIABLE_VALUE ].toLowerCase() );
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 10.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.strtoupper = function( str ) {
+    var VARIABLE = PHP.VM.Variable.prototype,
+    COMPILER = PHP.Compiler.prototype;
+    
+    return new PHP.VM.Variable( str[ COMPILER.VARIABLE_VALUE ].toUpperCase() );
 };
 
 

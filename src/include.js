@@ -102,7 +102,8 @@ var files = {
             str_rot13: "js",
             strlen: "js",
             strncmp: "js",
-            strtolower: "js"
+            strtolower: "js",
+            strtoupper: "js"
         },
         tokenizer: {
             constants: "js",
