@@ -74,6 +74,7 @@ var files = {
                 define: "js",
                 defined: "js",
                 eval: "js",
+                exit: "js",
                 php_egg_logo_guid: "js",
                 php_logo_guid: "js",
                 php_real_logo_guid: "js",

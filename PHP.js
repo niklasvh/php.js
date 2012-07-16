@@ -2981,8 +2981,12 @@ PHP.Modules.prototype.fclose = function( fp ) {
  */
 
 
-PHP.Modules.prototype.fopen = function( filename ) {
-
+PHP.Modules.prototype.fopen = function( filenameObj ) {
+    var COMPILER = PHP.Compiler.prototype,
+    filename = filenameObj[ COMPILER.VARIABLE_VALUE ];
+    
+    this.ENV[ COMPILER.ERROR ]("fopen(" + filename + "): failed to open stream: No such file or directory", PHP.Constants.E_WARNING, true );    
+                        
     return new PHP.VM.Variable( new PHP.VM.Resource() );
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -3234,6 +3238,16 @@ PHP.Modules.prototype.eval = function( $, code ) {
             "(1) : eval()'d code on line " + 1, PHP.Constants.E_PARSE );    
         
     }
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 17.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.exit = function( message ) {
+    
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
