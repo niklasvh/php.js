@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 417 out of 672 (62.1%)
+Passed 418 out of 672 (62.2%)
 
 Failed tests:
 
@@ -166,7 +166,6 @@ Failed tests:
  - tests/php/lang/bug44827.phpt
  - tests/php/lang/bug45392.phpt
  - tests/php/lang/bug7515.phpt
- - tests/php/lang/catchable_error_001.phpt
  - tests/php/lang/catchable_error_002.phpt
  - tests/php/lang/comments2.phpt
  - tests/php/lang/compare_objects_basic2.phpt
