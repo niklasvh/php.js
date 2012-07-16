@@ -866,7 +866,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         };
         
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
-           
+         
             if ( this[ propertyPrefix + propertyName ] === undefined ) {
 
 
@@ -958,7 +958,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     
                         variable[ VARIABLE.REGISTER_SETTER ] = function() {
                             this[ propertyPrefix + propertyName ] = variable;
-                        }
+                        }.bind(this);
                     
                     
                     

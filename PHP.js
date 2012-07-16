@@ -2558,7 +2558,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,
     expr;
-
+console.log( iterator );
     if ( iterator === undefined  || iterator.expr === undefined ) {
         return false;
     }
@@ -2645,6 +2645,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
         
        
     } else {
+         this[ COMPILER.ERROR ]( "Invalid argument supplied for foreach()", PHP.Constants.E_CORE_WARNING, true );
         return false;
     }
     
@@ -10480,7 +10481,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         };
         
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
-           
+         
             if ( this[ propertyPrefix + propertyName ] === undefined ) {
 
 
@@ -10572,7 +10573,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     
                         variable[ VARIABLE.REGISTER_SETTER ] = function() {
                             this[ propertyPrefix + propertyName ] = variable;
-                        }
+                        }.bind(this);
                     
                     
                     
