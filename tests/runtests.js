@@ -70,6 +70,7 @@ function runTest ( file, complete ) {
         opts = {
             POST: ( test.POST !== undefined ) ? PHP.Utils.QueryString( test.POST ) : (test.POST_RAW !== undefined ) ? RAW.Post() : {},
             GET: ( test.GET !== undefined ) ? PHP.Utils.QueryString( test.GET ) : {},
+            RAW_POST: ( test.POST !== undefined ) ?  test.POST.trim()  : (test.POST_RAW !== undefined ) ? RAW.Raw() : "",
             SERVER: {
                 SCRIPT_FILENAME: __dirname.replace(/\\/g,"/") + "/" + file.substring(5, file.length - 1)
             },

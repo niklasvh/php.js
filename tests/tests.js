@@ -115,6 +115,7 @@ PHP_Tests.prototype.buildTest = function( path, callback ) {
         RAW = (json.POST_RAW !== undefined ) ? PHP.RAWPost( json.POST_RAW ) : {},
         opts = {
             POST: ( json.POST !== undefined ) ? PHP.Utils.QueryString( json.POST ) : (json.POST_RAW !== undefined ) ? RAW.Post() : {},
+            RAW_POST: ( json.POST !== undefined ) ?  json.POST.trim()  : (json.POST_RAW !== undefined ) ? RAW.Raw() : "",
             GET: ( json.GET !== undefined ) ? PHP.Utils.QueryString( json.GET ) : {},
             SERVER: {
                 SCRIPT_FILENAME: path.substring(0, path.length - 1)

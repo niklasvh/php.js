@@ -171,6 +171,7 @@ PHP.VM = function( src, opts ) {
     
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
      
+    $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST; 
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
      

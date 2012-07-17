@@ -109,7 +109,11 @@ PHP.RAWPost = function( content ) {
             });
           
             return arr;
-        }  
+        },
+        Raw: function() {
+            lines = content.split(/\r\n|\r|\n/);
+            return lines[ 1 ]; // works hardly
+        }
     };
     
  
