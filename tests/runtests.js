@@ -102,11 +102,16 @@ function runTest ( file, complete ) {
             var expect = ((test.EXPECT === undefined) ? test.EXPECTF : test.EXPECT ).trim(),
             output = engine.vm.OUTPUT_BUFFER.replace(/\n/g, "\r\n").trim(),
             expectResult;
+            
+            
+            expect = expect.replace(/\%unicode\|string\%/g, "string");  // Matches the string 'unicode' in PHP6 test output and 'string' in PHP5 test output.
+            expect = expect.replace(/\%u\|b\%/g, "");  // Matches a single 'u' in PHP6 test output where the PHP5 output from the same test hs no character in that position.            
+
+            
                     
             if (test.EXPECT === undefined ) {
                 
                 var shouldBef = expect;
-                shouldBef = shouldBef.replace(/\%u\|b\%/g, ""); 
                 shouldBef = shouldBef.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
                 shouldBef = shouldBef.replace(/\%d/g,"\\d+");
                 shouldBef = shouldBef.replace(/\%s/g,".+");

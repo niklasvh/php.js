@@ -97,13 +97,37 @@ PHP.RAWPost = function( content ) {
         Files: function() {
             var arr = {};
             items.forEach(function( item ){
+               
                 if ( item.filename !== undefined ) {
-                    arr[ item.name ] = {
-                        name: item.filename,
-                        type: item.contentType,
-                        tmp_name: item.filename,
-                        error: 0,
-                        size: item.value.length
+                    if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
+                        if ( /^[a-z0-9]+\[\]/i.test(item.name) ) {
+                            var name = item.name.replace(/\[\]/g,"");
+                            
+                            if ( arr[ name ] === undefined ) {
+                                arr[ name ] = {
+                                    name: [],
+                                    type: [],
+                                    tmp_name: [],
+                                    error: [],
+                                    size: []
+                                }
+                            } 
+                            
+                            arr[ name ].name.push( item.filename );
+                            arr[ name ].type.push( item.contentType );
+                            arr[ name ].tmp_name.push( item.filename );
+                            arr[ name ].error.push( 0 );
+                            arr[ name ].size.push( item.value.length );
+                            
+                        } else {
+                            arr[ item.name ] = {
+                                name: item.filename,
+                                type: item.contentType,
+                                tmp_name: item.filename,
+                                error: 0,
+                                size: item.value.length
+                            }
+                        }
                     }
                 }
             });
