@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 461 out of 672 (68.6%)
+Passed 462 out of 672 (68.8%)
 
 Failed tests:
 
@@ -12,7 +12,6 @@ Failed tests:
  - tests/php/basic/req44164.phpt
  - tests/php/basic/rfc1867_array_upload.phpt
  - tests/php/basic/rfc1867_empty_upload.phpt
- - tests/php/basic/rfc1867_file_upload_disabled.phpt
  - tests/php/basic/rfc1867_garbled_mime_headers.phpt
  - tests/php/basic/rfc1867_invalid_boundary.phpt
  - tests/php/basic/rfc1867_malicious_input.phpt

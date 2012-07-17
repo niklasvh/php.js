@@ -10269,7 +10269,7 @@ PHP.RAWPost = function( content ) {
                 });
             }
         } else if ( startCapture ) {    
-            if (line.length === 0 ) {
+            if (line.length === 0 && itemValue !== undefined && itemValue.length > 0) {
                 line =  "\n";
             }
             itemValue += line;
@@ -10306,7 +10306,7 @@ PHP.RAWPost = function( content ) {
                
                 if ( item.filename !== undefined ) {
                     if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
-                        var error = (item.contentType.length === 0);
+                        var error = (item.contentType.length === 0 || item.value.length === 0);
                         
                         if ( /^[a-z0-9]+\[\]/i.test(item.name) ) {
                             var name = item.name.replace(/\[\]/g,"");
@@ -10322,7 +10322,7 @@ PHP.RAWPost = function( content ) {
                             } 
                             
                             arr[ name ].name.push( item.filename );
-                            arr[ name ].type.push( item.contentType );
+                            arr[ name ].type.push( ( error ) ? "" :item.contentType );
                             arr[ name ].tmp_name.push( ( error ) ? "" : item.filename );
                             arr[ name ].error.push( ( error ) ? 3 :  0 );
                             arr[ name ].size.push( ( error ) ? 0 : item.value.length );
@@ -10330,9 +10330,9 @@ PHP.RAWPost = function( content ) {
                         } else {
                             arr[ (item.name === undefined ) ? index : item.name ] = {
                                 name: item.filename,
-                                type: item.contentType,
+                                type: ( error ) ? "" : item.contentType,
                                 tmp_name: ( error ) ? "" : item.filename,
-                                error: ( error ) ? 3 : 0,
+                                error: ( error ) ? ( item.value.length === 0 ) ? 4 : 3 : 0,
                                 size: ( error ) ? 0 : item.value.length
                             }
                         }
@@ -10553,7 +10553,7 @@ PHP.VM = function( src, opts ) {
 
 
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("S") !== -1 ) ? opts.SERVER : {} ).$;
-    $('_FILES').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 && this.$ini.enable_post_data_reading != 0 ) ? opts.FILES : {} ).$;
+    $('_FILES').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 && this.$ini.enable_post_data_reading != 0 && this.$ini.file_uploads == 1 ) ? opts.FILES : {} ).$;
     
     $('_ENV').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("E") !== -1 ) ? {} : {} ).$;
     
