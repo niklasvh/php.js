@@ -99,17 +99,18 @@ PHP.Utils.QueryString = function( str ) {
     
     var items = {};
     
+    // going through each variable which have been split by &
     variables.forEach( function( variable ) {
         
         var parts = variable.split(/=/),
             key = decodeURIComponent( parts[ 0 ] ),
             value = (parts.length > 1 ) ? decodeURIComponent( parts[ 1 ] ) : null,
-            
+           
             arrayManager = function( item, parse, value ) {
                
                 
-                var arraySearch = parse.match(/^\[([a-z+0-9_\-])*\]/i);
-                
+                var arraySearch = parse.match(/^\[([a-z+0-9_\-\[])*\]/i);
+             
                 if ( arraySearch !== null ) {
                     var key = ( arraySearch[ 1 ] === undefined ) ? Object.keys( item ).length : arraySearch[ 1 ];
 
@@ -121,11 +122,23 @@ PHP.Utils.QueryString = function( str ) {
                             item[ key ] = {};
                         }
                         
-                        arrayManager( item[ key ], parse, value );
+                       var ret = arrayManager( item[ key ], parse, value );
+                       
+                       if ( ret !== undefined ) {
+                           item[ key ] = ret;
+                       }
+                       
                     } else {
+
                         item[ key ] = ( value !== null) ? value.replace(/\+/g," ") : null;
                     }
                     
+                } else {
+                    if ( parse === "]") {
+                        item = value;
+                        return value;
+                    }
+
                 }
                 
                 
@@ -134,7 +147,7 @@ PHP.Utils.QueryString = function( str ) {
             // 
         
         
-            var arraySearch = key.match(/^(.*?)((\[[a-z+0-9_\-]*\])+)$/i);
+            var arraySearch = key.match(/^(.*?)((\[[a-z+0-9_\-\[\]]*\])+)$/i);
 
             if ( arraySearch !== null ) {
                 key =  arraySearch[ 1 ];
