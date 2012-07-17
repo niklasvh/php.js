@@ -10282,6 +10282,11 @@ PHP.RAWPost = function( content ) {
         
     });
     
+    if ( item !== undefined && Object.keys( item ).length > 0 ) {
+        item.value = itemValue;
+        item.contentType  = "";
+        items.push( item );
+    }
     console.log( items );
 
     return {
@@ -10301,6 +10306,8 @@ PHP.RAWPost = function( content ) {
                
                 if ( item.filename !== undefined ) {
                     if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
+                        var error = (item.contentType.length === 0);
+                        
                         if ( /^[a-z0-9]+\[\]/i.test(item.name) ) {
                             var name = item.name.replace(/\[\]/g,"");
                             
@@ -10316,17 +10323,17 @@ PHP.RAWPost = function( content ) {
                             
                             arr[ name ].name.push( item.filename );
                             arr[ name ].type.push( item.contentType );
-                            arr[ name ].tmp_name.push( item.filename );
-                            arr[ name ].error.push( 0 );
-                            arr[ name ].size.push( item.value.length );
+                            arr[ name ].tmp_name.push( ( error ) ? "" : item.filename );
+                            arr[ name ].error.push( ( error ) ? 3 :  0 );
+                            arr[ name ].size.push( ( error ) ? 0 : item.value.length );
                             
                         } else {
                             arr[ (item.name === undefined ) ? index : item.name ] = {
                                 name: item.filename,
                                 type: item.contentType,
-                                tmp_name: item.filename,
-                                error: 0,
-                                size: item.value.length
+                                tmp_name: ( error ) ? "" : item.filename,
+                                error: ( error ) ? 3 : 0,
+                                size: ( error ) ? 0 : item.value.length
                             }
                         }
                     }
