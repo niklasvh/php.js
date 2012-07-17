@@ -1,7 +1,7 @@
 /* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 27.6.2012 
-* @website http://hertzen.com
+ * @author Niklas von Hertzen <niklas at hertzen.com>
+ * @created 27.6.2012 
+ * @website http://hertzen.com
  */
 
 PHP.VM.Array = function( ENV ) {
@@ -24,8 +24,8 @@ PHP.VM.Array = function( ENV ) {
         [ COMPILER.CLASS_PROPERTY ]( $this.POINTER, PHP.VM.Class.PRIVATE, 0 )
     
         /*
-     * __construct method
-     */ 
+         * __construct method
+         */ 
         [ COMPILER.CLASS_METHOD ]( "__construct", PHP.VM.Class.PUBLIC, [{
             "name":"input"
         }], function( $ ) {
@@ -82,8 +82,8 @@ PHP.VM.Array = function( ENV ) {
         
         } )
         /*
-     * append
-     */
+         * append
+         */
         [ COMPILER.CLASS_METHOD ]( "append", PHP.VM.Class.PUBLIC, [{
             "name":"value"
         }], function( $ ) {
@@ -114,8 +114,8 @@ PHP.VM.Array = function( ENV ) {
         })
         
         /*
-     * Custom $clone method, shouldn't be triggerable by php manually
-     */
+         * Custom $clone method, shouldn't be triggerable by php manually
+         */
         [ COMPILER.CLASS_METHOD ]( COMPILER.ARRAY_CLONE, PHP.VM.Class.PUBLIC, [{
             "name":"index"
         }], function( $ ) {
@@ -147,8 +147,8 @@ PHP.VM.Array = function( ENV ) {
         })
         
         /*
-     * offsetUnset method
-     */ 
+         * offsetUnset method
+         */ 
         [ COMPILER.CLASS_METHOD ]( "offsetUnset", PHP.VM.Class.PUBLIC, [{
             "name":"index"
         }], function( $ ) {
@@ -167,8 +167,8 @@ PHP.VM.Array = function( ENV ) {
          
         
         /*
-     * offsetGet method
-     */ 
+         * offsetGet method
+         */ 
         [ COMPILER.CLASS_METHOD ]( COMPILER.ARRAY_GET, PHP.VM.Class.PUBLIC, [{
             "name":"index"
         }], function( $ ) {
@@ -223,7 +223,7 @@ PHP.VM.Array = function( ENV ) {
 
     /*
  Convert JavaScript array/object into a PHP array 
- */
+     */
 
     PHP.VM.Array.arrayItem = function( key, value ) {
         var obj = {};
@@ -235,8 +235,8 @@ PHP.VM.Array = function( ENV ) {
 
 
     PHP.VM.Array.fromObject = function( items, depth ) {
-
-        var arr = [],
+        var COMPILER = PHP.Compiler.prototype,
+        arr = [],
         obj,
         depth = (depth === undefined) ? 0 : depth,
    
@@ -261,7 +261,7 @@ PHP.VM.Array = function( ENV ) {
         }.bind(this);
      
      
-     
+        var $this = this;
         if (Array.isArray( items ) ) {
             items.forEach( addItem );
         } else {
@@ -272,10 +272,13 @@ PHP.VM.Array = function( ENV ) {
                     // error all the way down the array
                     if ( depth !== 0 ) {
                         throw Error;
+                    } else if( $this.$ini.track_errors == 1 ) {
+                        $this[ COMPILER.GLOBAL ]("php_errormsg")[ COMPILER.VARIABLE_VALUE ] = "Unknown: Input variable nesting level exceeded " + $this.$ini.max_input_nesting_level + ". To increase the limit change max_input_nesting_level in php.ini.";
                     }
+                
                     
                 }
-            });
+            }), this;
         }
     
    

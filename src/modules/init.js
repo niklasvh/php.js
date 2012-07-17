@@ -438,7 +438,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         } else {
             lineAppend = "";
         }
-
+        
+        if ( this.$ini.track_errors == 1 ) {
+            this[ COMPILER.GLOBAL ]("php_errormsg")[ COMPILER.VARIABLE_VALUE ] = msg;
+        }
 
 
         if (reportingLevel !== 0) {

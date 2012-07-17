@@ -8,7 +8,7 @@ max_input_vars=1000
 track_errors=1
 log_errors=0
 --POST--
-a=1&b=ZYX&c[][][][][][][][][][][][][][][][][][][][][][]=123&d=123&e[][]][]=3
+a=1&b=ZYX&c[][][][][][][][][][][][][][][][][][][][][][]=123&d=123&e[][]]=3
 --FILE--
 <?php
 var_dump($_POST, $php_errormsg);
