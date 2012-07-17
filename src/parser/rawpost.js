@@ -48,9 +48,10 @@ PHP.RAWPost = function( content ) {
                   
                 var part = parts[ 1 ].split(",");
                 part = part[ 0 ];
-                  
-                boundary = part.substring( BOUNDARY.length ).replace(/-/g,"").trim(); 
-
+               
+                boundary = part.substring( BOUNDARY.length ).replace(/[-"]/g,"").trim(); 
+                
+             
 
             }
         } else if ( is( parts[ 0 ], CONTENT_DISPOSITION ) ) {
