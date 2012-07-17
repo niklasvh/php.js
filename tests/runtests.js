@@ -57,14 +57,24 @@ function runTest ( file, complete ) {
         eval( content + "GLOBAL.PHP = PHP; " );
         
         var engine = {},
+        /*
         opts = {
             POST: ( test.POST !== undefined ) ? PHP.Utils.QueryString( test.POST ) : {},
             GET: ( test.GET !== undefined ) ? PHP.Utils.QueryString( test.GET ) : {},
             SERVER: {
                 SCRIPT_FILENAME: __dirname.replace(/\\/g,"/") + "/" + file.substring(5, file.length - 1)
             }
+        },
+          */                  
+        RAW = (test.POST_RAW !== undefined ) ? PHP.RAWPost( test.POST_RAW ) : {},
+        opts = {
+            POST: ( test.POST !== undefined ) ? PHP.Utils.QueryString( test.POST ) : (test.POST_RAW !== undefined ) ? RAW.Post() : {},
+            GET: ( test.GET !== undefined ) ? PHP.Utils.QueryString( test.GET ) : {},
+            SERVER: {
+                SCRIPT_FILENAME: __dirname.replace(/\\/g,"/") + "/" + file.substring(5, file.length - 1)
+            },
+            FILES: (test.POST_RAW !== undefined ) ? RAW.Files() : {}
         };
-                    
                    
                     
         if (test.ARGS !== undefined ) {

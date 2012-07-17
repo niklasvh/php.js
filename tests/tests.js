@@ -112,16 +112,18 @@ PHP_Tests.prototype.buildTest = function( path, callback ) {
               
     this.loadJSON('/?file=' + path, function( json ){
         var engine = {},
+        RAW = (json.POST_RAW !== undefined ) ? PHP.RAWPost( json.POST_RAW ) : {},
         opts = {
-            POST: ( json.POST !== undefined ) ? PHP.Utils.QueryString( json.POST ) : {},
+            POST: ( json.POST !== undefined ) ? PHP.Utils.QueryString( json.POST ) : (json.POST_RAW !== undefined ) ? RAW.Post() : {},
             GET: ( json.GET !== undefined ) ? PHP.Utils.QueryString( json.GET ) : {},
             SERVER: {
                 SCRIPT_FILENAME: path.substring(0, path.length - 1)
             //    SCRIPT_FILENAME: "%s"
-            }
+            },
+            FILES: (json.POST_RAW !== undefined ) ? RAW.Files() : {}
         };
                     
-                   
+        
                     
         if (json.ARGS !== undefined ) {
             var args = json.ARGS.trim().split(/\s/);

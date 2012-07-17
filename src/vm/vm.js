@@ -167,7 +167,7 @@ PHP.VM = function( src, opts ) {
     $('_GET').$ = PHP.VM.Array.fromObject.call( this, opts.GET ).$;
 
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, opts.SERVER ).$;
-    
+    $('_FILES').$ = PHP.VM.Array.fromObject.call( this, opts.FILES ).$;
     
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
      

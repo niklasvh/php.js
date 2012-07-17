@@ -139,7 +139,8 @@ var files = {
             parser: "js",
             data: "js",
             ini: "js",
-            actions: "js"
+            actions: "js",
+            rawpost: "js"
         },
         vm: {
             vm: "js",
