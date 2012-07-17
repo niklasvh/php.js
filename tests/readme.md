@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 450 out of 672 (67%)
+Passed 451 out of 672 (67.1%)
 
 Failed tests:
 
@@ -12,7 +12,6 @@ Failed tests:
  - tests/php/basic/029.phpt
  - tests/php/basic/bug20539.phpt
  - tests/php/basic/bug54514.phpt
- - tests/php/basic/bug61000.phpt
  - tests/php/basic/enable_post_data_reading_01.phpt
  - tests/php/basic/enable_post_data_reading_02.phpt
  - tests/php/basic/enable_post_data_reading_03.phpt

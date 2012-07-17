@@ -114,7 +114,7 @@ PHP.Utils.QueryString = function( str ) {
                
                 
                 var arraySearch = parse.match(/^\[([a-z0-9+_\-\[]*)\]/i);
-                console.log(item, parse, value, arraySearch);
+              //  console.log(item, parse, value, arraySearch);
                 if ( arraySearch !== null ) {
                     var key = ( arraySearch[ 1 ] === undefined ) ? Object.keys( item ).length : arraySearch[ 1 ];
 

@@ -234,10 +234,11 @@ PHP.VM.Array = function( ENV ) {
     };
 
 
-    PHP.VM.Array.fromObject = function( items ) {
+    PHP.VM.Array.fromObject = function( items, depth ) {
 
         var arr = [],
         obj,
+        depth = (depth === undefined) ? 0 : depth,
    
         addItem = function( value, key ) {
             obj = {};
@@ -247,7 +248,11 @@ PHP.VM.Array = function( ENV ) {
             if ( value instanceof PHP.VM.Variable ) {
                 obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = value;
             } else if ( typeof value === "object" && value !== null ) {
-                obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = PHP.VM.Array.fromObject.call( this, value );
+                if ( depth >= this.$ini.max_input_nesting_level ) {
+                    throw Error;
+                } else {
+                    obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = PHP.VM.Array.fromObject.call( this, value, depth + 1 );
+                }
             } else {
                 obj[ PHP.Compiler.prototype.ARRAY_VALUE ] = new PHP.VM.Variable( value );
             }
@@ -261,7 +266,15 @@ PHP.VM.Array = function( ENV ) {
             items.forEach( addItem );
         } else {
             Object.keys( items ).forEach( function( key ) {
-                addItem( items[ key ], key );   
+                try {
+                    addItem( items[ key ], key );   
+                } catch( e ) {
+                    // error all the way down the array
+                    if ( depth !== 0 ) {
+                        throw Error;
+                    }
+                    
+                }
             });
         }
     
