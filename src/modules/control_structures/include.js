@@ -7,7 +7,6 @@
 PHP.Modules.prototype.$include = function( $, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
-    _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ],
     filename = file[ COMPILER.VARIABLE_VALUE ];
     
     

@@ -19,9 +19,13 @@ var PHP = function( code, opts ) {
     
     
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" );
-    
+
+    var iniSet = opts.ini;
     opts.ini = PHP.ini( iniContent );
     
+    Object.keys( iniSet ).forEach(function(key){
+        this[ key ] = iniSet[ key ];
+    }, opts.ini);
   
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );

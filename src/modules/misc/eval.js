@@ -9,8 +9,7 @@ PHP.Modules.prototype.eval = function( $, code ) {
     
 
     
-    var COMPILER = PHP.Compiler.prototype,
-    _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
+    var COMPILER = PHP.Compiler.prototype;
    
     var source = code[ COMPILER.VARIABLE_VALUE ];
         
@@ -43,7 +42,7 @@ PHP.Modules.prototype.eval = function( $, code ) {
     } else {
         
                 this[ COMPILER.ERROR ]( "syntax error, unexpected $end in " + 
-            _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
+            this[ COMPILER.GLOBAL ]("$__FILE__")[ COMPILER.VARIABLE_VALUE ] + 
             "(1) : eval()'d code on line " + 1, PHP.Constants.E_PARSE );    
         
     }

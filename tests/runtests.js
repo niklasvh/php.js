@@ -74,6 +74,7 @@ function runTest ( file, complete ) {
             SERVER: {
                 SCRIPT_FILENAME: __dirname.replace(/\\/g,"/") + "/" + file.substring(5, file.length - 1)
             },
+            ini: (test.INI !== undefined ) ? PHP.ini( test.INI ) : {},
             FILES: (test.POST_RAW !== undefined ) ? RAW.Files() : {}
         };
                    

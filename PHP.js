@@ -19,9 +19,13 @@ var PHP = function( code, opts ) {
     
     
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" );
-    
+
+    var iniSet = opts.ini;
     opts.ini = PHP.ini( iniContent );
     
+    Object.keys( iniSet ).forEach(function(key){
+        this[ key ] = iniSet[ key ];
+    }, opts.ini);
   
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
@@ -2831,7 +2835,6 @@ console.log( iterator );
 PHP.Modules.prototype.$include = function( $, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
-    _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ],
     filename = file[ COMPILER.VARIABLE_VALUE ];
     
     
@@ -3240,8 +3243,7 @@ PHP.Modules.prototype.eval = function( $, code ) {
     
 
     
-    var COMPILER = PHP.Compiler.prototype,
-    _SERVER = this[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ];
+    var COMPILER = PHP.Compiler.prototype;
    
     var source = code[ COMPILER.VARIABLE_VALUE ];
         
@@ -3274,7 +3276,7 @@ PHP.Modules.prototype.eval = function( $, code ) {
     } else {
         
                 this[ COMPILER.ERROR ]( "syntax error, unexpected $end in " + 
-            _SERVER[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ] + 
+            this[ COMPILER.GLOBAL ]("$__FILE__")[ COMPILER.VARIABLE_VALUE ] + 
             "(1) : eval()'d code on line " + 1, PHP.Constants.E_PARSE );    
         
     }
@@ -7384,7 +7386,7 @@ PHP.ini = function( contents ) {
     
     var regex = {
         section: /^\s*\[\s*([^\]]*)\s*\]\s*$/,
-        param: /^\s*([\w\.\-\_]+)\s*=\s*(.*?)\s*$/,
+        param: /^\s*([\w\.\-\_]+)\s*=\s*"?(.*?)"?\s*$/,
         comment: /^\s*;.*$/
     },
     section = null,
@@ -10441,20 +10443,22 @@ PHP.VM = function( src, opts ) {
     ENV[ PHP.Compiler.prototype.RESOURCES ] = PHP.VM.ResourceManager( ENV ); 
     
     ENV.$Array = new PHP.VM.Array( ENV );
+    var variables_order = this.$ini.variables_order;
     
-    $('_POST').$ = PHP.VM.Array.fromObject.call( this, opts.POST ).$;
-    $('_GET').$ = PHP.VM.Array.fromObject.call( this, opts.GET ).$;
+    $('_POST').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 ) ? opts.POST : {} ).$;
+    $('_GET').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("G") !== -1 ) ? opts.GET : {} ).$;
 
-    $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, opts.SERVER ).$;
-    $('_FILES').$ = PHP.VM.Array.fromObject.call( this, opts.FILES ).$;
+
+    $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("S") !== -1 ) ? opts.SERVER : {} ).$;
+    $('_FILES').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 ) ? opts.FILES : {} ).$;
     
-    $('_ENV').$ = PHP.VM.Array.fromObject.call( this, {} ).$;
+    $('_ENV').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("E") !== -1 ) ? {} : {} ).$;
     
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
      
     $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST; 
         
-    ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( this[ PHP.Compiler.prototype.GLOBAL ]('_SERVER')[ PHP.Compiler.prototype.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ]( this, PHP.Compiler.prototype.ARRAY_GET, 'SCRIPT_FILENAME' )[ PHP.Compiler.prototype.VARIABLE_VALUE ]);
+    ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( opts.SERVER.SCRIPT_FILENAME );
      
     this.OUTPUT_BUFFERS = [""];
     this.$obreset();
