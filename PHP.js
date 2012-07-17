@@ -3018,6 +3018,25 @@ PHP.Modules.prototype.fclose = function( fp ) {
     return new PHP.VM.Variable( true );
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 18.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.file_get_contents = function( filenameObj ) {
+    var COMPILER = PHP.Compiler.prototype,
+    filename = filenameObj[ COMPILER.VARIABLE_VALUE ];
+    
+    if ( filename === "php://input") {
+        return new PHP.VM.Variable( this.INPUT_BUFFER );
+    } else {
+        this.ENV[ COMPILER.ERROR ]("file_get_contents(" + filename + "): failed to open stream: No such file or directory", PHP.Constants.E_WARNING, true );    
+        return new PHP.VM.Variable( new PHP.VM.Resource() );
+    }            
+
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 29.6.2012 
 * @website http://hertzen.com
  */
@@ -10317,7 +10336,9 @@ PHP.RAWPost = function( content ) {
         },
         Raw: function() {
             lines = content.split(/\r\n|\r|\n/);
-            return lines[ 1 ]; // works hardly
+            lines.shift();
+            lines.pop();
+            return lines.join("\n");
         }
     };
     
@@ -10500,14 +10521,19 @@ PHP.VM = function( src, opts ) {
     this.$obreset();
     this.$ErrorReset();
     this.$strict = "";
+    this.INPUT_BUFFER = opts.RAW_POST;
     
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
     
     var post_max_size;
     
     if (  (post_max_size = PHP.Utils.Filesize(this.$ini.post_max_size)) > opts.RAW_POST.length || post_max_size == 0 ) {
-        $('_POST').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 ) ? opts.POST : {} ).$;
-        $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST; 
+        if (this.$ini.enable_post_data_reading != 0) {
+            $('_POST').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 ) ? opts.POST : {} ).$;
+            $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST; 
+        } else {
+            $('_POST').$ = PHP.VM.Array.fromObject.call( this, {} ).$;
+        }
     } else {
         $('_POST').$ = PHP.VM.Array.fromObject.call( this, {} ).$;
         ENV[ PHP.Compiler.prototype.ERROR ]( "Unknown: POST Content-Length of " + opts.RAW_POST.length + " bytes exceeds the limit of " + post_max_size + " bytes in Unknown on line 0", PHP.Constants.E_WARNING ); 
@@ -10519,7 +10545,7 @@ PHP.VM = function( src, opts ) {
 
 
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("S") !== -1 ) ? opts.SERVER : {} ).$;
-    $('_FILES').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 ) ? opts.FILES : {} ).$;
+    $('_FILES').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 && this.$ini.enable_post_data_reading != 0 ) ? opts.FILES : {} ).$;
     
     $('_ENV').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("E") !== -1 ) ? {} : {} ).$;
     

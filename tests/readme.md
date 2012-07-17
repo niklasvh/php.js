@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 454 out of 672 (67.6%)
+Passed 458 out of 672 (68.2%)
 
 Failed tests:
 
@@ -9,10 +9,6 @@ Failed tests:
  - tests/php/basic/029.phpt
  - tests/php/basic/bug20539.phpt
  - tests/php/basic/bug54514.phpt
- - tests/php/basic/enable_post_data_reading_01.phpt
- - tests/php/basic/enable_post_data_reading_02.phpt
- - tests/php/basic/enable_post_data_reading_03.phpt
- - tests/php/basic/enable_post_data_reading_04.phpt
  - tests/php/basic/req44164.phpt
  - tests/php/basic/rfc1867_anonymous_upload.phpt
  - tests/php/basic/rfc1867_array_upload.phpt

@@ -59,6 +59,7 @@ var files = {
             filesystem: {
                 dirname: "js",
                 fclose: "js",
+                file_get_contents: "js",
                 fopen: "js",
                 rename: "js"
             },
