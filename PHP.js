@@ -10236,7 +10236,14 @@ PHP.RAWPost = function( content ) {
                 
                     if ( vals.length === 2 ) {
                         var val = vals[ 1 ].trim();
-                        val = val.substring( 1, val.length - 1 ); 
+                        val = val.replace( /\\\\/g,"\\"); 
+                        if (/^('|").*('|")$/.test(val)) {
+                            var quote = val.substring( 0, 1);
+                            val = val.substring( 1, val.length - 1 ); 
+                            val = val.replace( new RegExp("\\\\" + quote, "g"), quote);
+                           
+                        } 
+                        
                         item[ vals[ 0 ].trim() ] = val;
                     }
                 });
