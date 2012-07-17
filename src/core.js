@@ -97,6 +97,18 @@ PHP.Utils.TokenName = function( token ) {
     return current;
 };
 
+PHP.Utils.Filesize = function( size ) {
+  
+    if ( /^\d+M$/i.test( size )) {
+        return (size.replace(/M/g,"") - 0) * 1024 * 1024;
+    } else if ( /^\d+K$/i.test( size )) {
+        return (size.replace(/K/g,"") - 0) * 1024;    
+    }
+    
+    return size;
+    
+};
+
 PHP.Utils.QueryString = function( str ) {
     str = str.trim();
     var variables = str.split(/&/);
@@ -114,7 +126,7 @@ PHP.Utils.QueryString = function( str ) {
                
                 
                 var arraySearch = parse.match(/^\[([a-z0-9+_\-\[]*)\]/i);
-              //  console.log(item, parse, value, arraySearch);
+                //  console.log(item, parse, value, arraySearch);
                 if ( arraySearch !== null ) {
                     var key = ( arraySearch[ 1 ] === undefined ) ? Object.keys( item ).length : arraySearch[ 1 ];
 

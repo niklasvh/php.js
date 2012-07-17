@@ -97,6 +97,18 @@ PHP.Utils.TokenName = function( token ) {
     return current;
 };
 
+PHP.Utils.Filesize = function( size ) {
+  
+    if ( /^\d+M$/i.test( size )) {
+        return (size.replace(/M/g,"") - 0) * 1024 * 1024;
+    } else if ( /^\d+K$/i.test( size )) {
+        return (size.replace(/K/g,"") - 0) * 1024;    
+    }
+    
+    return size;
+    
+};
+
 PHP.Utils.QueryString = function( str ) {
     str = str.trim();
     var variables = str.split(/&/);
@@ -114,7 +126,7 @@ PHP.Utils.QueryString = function( str ) {
                
                 
                 var arraySearch = parse.match(/^\[([a-z0-9+_\-\[]*)\]/i);
-              //  console.log(item, parse, value, arraySearch);
+                //  console.log(item, parse, value, arraySearch);
                 if ( arraySearch !== null ) {
                     var key = ( arraySearch[ 1 ] === undefined ) ? Object.keys( item ).length : arraySearch[ 1 ];
 
@@ -10472,7 +10484,30 @@ PHP.VM = function( src, opts ) {
     ENV.$Array = new PHP.VM.Array( ENV );
     var variables_order = this.$ini.variables_order;
     
-    $('_POST').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 ) ? opts.POST : {} ).$;
+       
+    
+        
+    ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( opts.SERVER.SCRIPT_FILENAME );
+     
+    this.OUTPUT_BUFFERS = [""];
+    this.$obreset();
+    this.$ErrorReset();
+    this.$strict = "";
+    
+    $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
+    
+    var post_max_size;
+    
+    if (  (post_max_size = PHP.Utils.Filesize(this.$ini.post_max_size)) > opts.RAW_POST.length || post_max_size == 0 ) {
+        $('_POST').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 ) ? opts.POST : {} ).$;
+        $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST; 
+    } else {
+        $('_POST').$ = PHP.VM.Array.fromObject.call( this, {} ).$;
+        ENV[ PHP.Compiler.prototype.ERROR ]( "Unknown: POST Content-Length of " + opts.RAW_POST.length + " bytes exceeds the limit of " + post_max_size + " bytes in Unknown on line 0", PHP.Constants.E_WARNING ); 
+        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot modify header information - headers already sent in Unknown on line 0", PHP.Constants.E_WARNING ); 
+             
+    }
+    
     $('_GET').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("G") !== -1 ) ? opts.GET : {} ).$;
 
 
@@ -10481,16 +10516,8 @@ PHP.VM = function( src, opts ) {
     
     $('_ENV').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("E") !== -1 ) ? {} : {} ).$;
     
-    $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
-     
-    $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST; 
-        
-    ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( opts.SERVER.SCRIPT_FILENAME );
-     
-    this.OUTPUT_BUFFERS = [""];
-    this.$obreset();
-    this.$ErrorReset();
-    this.$strict = "";
+
+
     
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
