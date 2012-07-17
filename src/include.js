@@ -59,7 +59,8 @@ var files = {
             filesystem: {
                 dirname: "js",
                 fclose: "js",
-                fopen: "js"
+                fopen: "js",
+                rename: "js"
             },
             functions: {
                 call_user_func: "js",

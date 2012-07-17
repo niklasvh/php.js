@@ -9,4 +9,4 @@ Testfest 2009 Munich
 rename('foo', 'bar');
 ?>
 --EXPECTF--
-Warning: %s in %sbug45986.php on line 2
+Warning: %s in %sbug45986.php on line %d

@@ -169,6 +169,8 @@ PHP.VM = function( src, opts ) {
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, opts.SERVER ).$;
     $('_FILES').$ = PHP.VM.Array.fromObject.call( this, opts.FILES ).$;
     
+    $('_ENV').$ = PHP.VM.Array.fromObject.call( this, {} ).$;
+    
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
      
     $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST; 

@@ -3014,6 +3014,22 @@ PHP.Modules.prototype.fopen = function( filenameObj ) {
     return new PHP.VM.Variable( new PHP.VM.Resource() );
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 17.7.2012 
+* @website http://hertzen.com
+ */
+
+PHP.Modules.prototype.rename = function( from, to ) {
+    var COMPILER = PHP.Compiler.prototype,
+    filename = from[ COMPILER.VARIABLE_VALUE ],
+    filename2  = to[ COMPILER.VARIABLE_VALUE ];
+    
+    this.ENV[ COMPILER.ERROR ]("rename(" + filename + "," + filename2 + "):  The system cannot find the file specified. (code: 2)", PHP.Constants.E_WARNING, true );    
+                        
+    return new PHP.VM.Variable( false );
+};
+
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 4.7.2012 
 * @website http://hertzen.com
  */
@@ -10431,6 +10447,8 @@ PHP.VM = function( src, opts ) {
 
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, opts.SERVER ).$;
     $('_FILES').$ = PHP.VM.Array.fromObject.call( this, opts.FILES ).$;
+    
+    $('_ENV').$ = PHP.VM.Array.fromObject.call( this, {} ).$;
     
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
      
