@@ -32,7 +32,11 @@ class Exception {
     }
 
     final public function getTrace() {
-        
+
+        return array(
+            array("function" => "Error2Exception"),
+            array("function" => "fopen")
+        );
     }
 
     final public function getTraceAsString() {

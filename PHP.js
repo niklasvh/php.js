@@ -1865,10 +1865,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         this.$Class.Shutdown();
         
         console.log("shutting down");
-             if ( shutdownFunc !== undefined ) {
-                 console.log("yes");
-                    this.call_user_func.apply( this, [ shutdownFunc ].concat( arguments ) );
-             }
+        if ( shutdownFunc !== undefined ) {
+            console.log("yes");
+            this.call_user_func.apply( this, [ shutdownFunc ].concat( arguments ) );
+        }
     };
 
 
@@ -1890,20 +1890,24 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     MODULES[ COMPILER.EXCEPTION ] = function( variable ) {
 
         var methods =  {},
-        VARIABLE = PHP.VM.Variable.prototype;
+        VARIABLE = PHP.VM.Variable.prototype,
+        caught = false;
 
         methods[ COMPILER.CATCH ] = function( name, type, $, func ) {
+            if ( caught ) return methods;
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
-
-                if ( variable[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] === type ) {
+                
+            var classObj = variable[ COMPILER.VARIABLE_VALUE ];
+            
+                if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1  ) {
                     $( name, variable );
-
+                    caught = true;
                     func();
                 }
             }
             return methods;
 
-        };
+        }.bind( this );
 
         return methods;
     };
@@ -1953,13 +1957,16 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         if (reportingLevel !== 0) {
             if ( suppress === false ) {
                 if ( errorHandler !== undefined ) {
-                    this.call_user_func(
-                        errorHandler,
-                        new PHP.VM.Variable( level ),
-                        new PHP.VM.Variable( msg ),
-                        new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
-                        new PHP.VM.Variable( 1 )
-                        );
+                   
+                        
+                        this.call_user_func(
+                            errorHandler,
+                            new PHP.VM.Variable( level ),
+                            new PHP.VM.Variable( msg ),
+                            new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
+                            new PHP.VM.Variable( 1 )
+                            );
+                    
                 } else {
                     switch ( level ) {
                         case C.E_ERROR:
@@ -3031,8 +3038,8 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
         if ( methodParts.length === 1 ) {
             // function call
             args = Array.prototype.slice.call( arguments, 1 );
-        
-            return this[ callback[ COMPILER.VARIABLE_VALUE ]].apply( this, args  );
+            
+                return this[ callback[ COMPILER.VARIABLE_VALUE ]].apply( this, args  );
         } else {
             // static call
             
@@ -10196,6 +10203,18 @@ PHP.VM = function( src, opts ) {
                 
                 return methods.Exists( name );
             },
+            Inherits: function(  obj, name ) {       
+                do {
+                    if ( obj[ COMPILER.CLASS_NAME ] === name) {
+                        return true;
+                    }
+
+                    obj = Object.getPrototypeOf( obj );
+                }
+        
+                while( obj !== undefined && obj instanceof PHP.VM.ClassPrototype );
+                return false; 
+            },
             INew: function( name, exts, func ) {
                 return classHandler( name, PHP.VM.Class.INTERFACE, exts, func );
             },
@@ -10358,17 +10377,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
     // check if obj inherits className
     function inherits( obj, name ) {
-     
-        do {
-            if ( obj[ COMPILER.CLASS_NAME ] === name) {
-                return true;
-            }
-
-            obj = Object.getPrototypeOf( obj );
-        }
-        
-        while( obj !== undefined && obj instanceof PHP.VM.ClassPrototype );
-        return false;
+        return ENV.$Class.Inherits( obj, name );
     }
     
     var buildVariableContext = function( methodName, args, className, realName ) {
@@ -10381,7 +10390,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
-                    
+
                  
                     if ( args[ index ] instanceof PHP.VM.VariableProto) {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
@@ -11116,7 +11125,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 methodToCall = proto[ methodPrefix + methodName ];
                 methodCTX = proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
                 
-                $ = buildVariableContext.call( this, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName );
+                $ = buildVariableContext.call( proto, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName );
            
 
    
@@ -11133,7 +11142,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call abstract method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true ); 
                 }
-   
+                console.log('static call ', methodName, proto);
+            
                 return methodToCall.call( this, $, methodCTX );
             }
             
@@ -12576,6 +12586,7 @@ return this.$Prop( ctx, "message" );
 .Method( "getLine", 33, [], function( $, ctx, $Static ) {
 })
 .Method( "getTrace", 33, [], function( $, ctx, $Static ) {
+return ENV.array([{v:ENV.array([{v:$$("Error2Exception"), k:$$("function")}])}, {v:ENV.array([{v:$$("fopen"), k:$$("function")}])}]);
 })
 .Method( "getTraceAsString", 33, [], function( $, ctx, $Static ) {
 })

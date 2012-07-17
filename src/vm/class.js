@@ -40,17 +40,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
     // check if obj inherits className
     function inherits( obj, name ) {
-     
-        do {
-            if ( obj[ COMPILER.CLASS_NAME ] === name) {
-                return true;
-            }
-
-            obj = Object.getPrototypeOf( obj );
-        }
-        
-        while( obj !== undefined && obj instanceof PHP.VM.ClassPrototype );
-        return false;
+        return ENV.$Class.Inherits( obj, name );
     }
     
     var buildVariableContext = function( methodName, args, className, realName ) {
@@ -63,7 +53,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
-                    
+
                  
                     if ( args[ index ] instanceof PHP.VM.VariableProto) {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
@@ -798,7 +788,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 methodToCall = proto[ methodPrefix + methodName ];
                 methodCTX = proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
                 
-                $ = buildVariableContext.call( this, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName );
+                $ = buildVariableContext.call( proto, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName );
            
 
    
@@ -815,7 +805,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call abstract method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true ); 
                 }
-   
+                console.log('static call ', methodName, proto);
+            
                 return methodToCall.call( this, $, methodCTX );
             }
             

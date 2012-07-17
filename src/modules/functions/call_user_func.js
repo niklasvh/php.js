@@ -41,8 +41,8 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
         if ( methodParts.length === 1 ) {
             // function call
             args = Array.prototype.slice.call( arguments, 1 );
-        
-            return this[ callback[ COMPILER.VARIABLE_VALUE ]].apply( this, args  );
+            
+                return this[ callback[ COMPILER.VARIABLE_VALUE ]].apply( this, args  );
         } else {
             // static call
             

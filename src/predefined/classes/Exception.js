@@ -20,6 +20,7 @@ return this.$Prop( ctx, "message" );
 .Method( "getLine", 33, [], function( $, ctx, $Static ) {
 })
 .Method( "getTrace", 33, [], function( $, ctx, $Static ) {
+return ENV.array([{v:ENV.array([{v:$$("Error2Exception"), k:$$("function")}])}, {v:ENV.array([{v:$$("fopen"), k:$$("function")}])}]);
 })
 .Method( "getTraceAsString", 33, [], function( $, ctx, $Static ) {
 })

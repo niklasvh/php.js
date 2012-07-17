@@ -79,6 +79,18 @@ PHP.VM = function( src, opts ) {
                 
                 return methods.Exists( name );
             },
+            Inherits: function(  obj, name ) {       
+                do {
+                    if ( obj[ COMPILER.CLASS_NAME ] === name) {
+                        return true;
+                    }
+
+                    obj = Object.getPrototypeOf( obj );
+                }
+        
+                while( obj !== undefined && obj instanceof PHP.VM.ClassPrototype );
+                return false; 
+            },
             INew: function( name, exts, func ) {
                 return classHandler( name, PHP.VM.Class.INTERFACE, exts, func );
             },

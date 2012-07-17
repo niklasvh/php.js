@@ -352,10 +352,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         this.$Class.Shutdown();
         
         console.log("shutting down");
-             if ( shutdownFunc !== undefined ) {
-                 console.log("yes");
-                    this.call_user_func.apply( this, [ shutdownFunc ].concat( arguments ) );
-             }
+        if ( shutdownFunc !== undefined ) {
+            console.log("yes");
+            this.call_user_func.apply( this, [ shutdownFunc ].concat( arguments ) );
+        }
     };
 
 
@@ -377,20 +377,24 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     MODULES[ COMPILER.EXCEPTION ] = function( variable ) {
 
         var methods =  {},
-        VARIABLE = PHP.VM.Variable.prototype;
+        VARIABLE = PHP.VM.Variable.prototype,
+        caught = false;
 
         methods[ COMPILER.CATCH ] = function( name, type, $, func ) {
+            if ( caught ) return methods;
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
-
-                if ( variable[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] === type ) {
+                
+            var classObj = variable[ COMPILER.VARIABLE_VALUE ];
+            
+                if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1  ) {
                     $( name, variable );
-
+                    caught = true;
                     func();
                 }
             }
             return methods;
 
-        };
+        }.bind( this );
 
         return methods;
     };
@@ -440,13 +444,16 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         if (reportingLevel !== 0) {
             if ( suppress === false ) {
                 if ( errorHandler !== undefined ) {
-                    this.call_user_func(
-                        errorHandler,
-                        new PHP.VM.Variable( level ),
-                        new PHP.VM.Variable( msg ),
-                        new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
-                        new PHP.VM.Variable( 1 )
-                        );
+                   
+                        
+                        this.call_user_func(
+                            errorHandler,
+                            new PHP.VM.Variable( level ),
+                            new PHP.VM.Variable( msg ),
+                            new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
+                            new PHP.VM.Variable( 1 )
+                            );
+                    
                 } else {
                     switch ( level ) {
                         case C.E_ERROR:
