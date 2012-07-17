@@ -109,29 +109,33 @@ PHP.Utils.QueryString = function( str ) {
             arrayManager = function( item, parse, value ) {
                
                 
-                var arraySearch = parse.match(/^\[([a-z+0-9_\-\[])*\]/i);
-             
+                var arraySearch = parse.match(/^\[([a-z0-9+_\-\[]*)\]/i);
+                console.log(item, parse, value, arraySearch);
                 if ( arraySearch !== null ) {
                     var key = ( arraySearch[ 1 ] === undefined ) ? Object.keys( item ).length : arraySearch[ 1 ];
 
-                    
+                    if ( key.length === 0 ) {
+                        key = Object.keys(item).length;
+                       
+                    } 
                     parse = parse.substring( arraySearch[ 0 ].length );
-                    
-                    if ( parse.length > 0 ) {
+                  
+                    if ( parse.length > 0  ) {
                         if ( typeof item[ key ] !== "object" && item[ key ] !== null ) {
                             item[ key ] = {};
                         }
                         
-                       var ret = arrayManager( item[ key ], parse, value );
+                        var ret = arrayManager( item[ key ], parse, value );
                        
-                       if ( ret !== undefined ) {
-                           item[ key ] = ret;
-                       }
+                        if ( ret !== undefined ) {
+                            item[ key ] = ret;
+                        }
                        
                     } else {
-
+ 
                         item[ key ] = ( value !== null) ? value.replace(/\+/g," ") : null;
                     }
+                    
                     
                 } else {
                     if ( parse === "]") {
