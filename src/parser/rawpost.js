@@ -103,7 +103,7 @@ PHP.RAWPost = function( content ) {
         },  
         Files: function() {
             var arr = {};
-            items.forEach(function( item ){
+            items.forEach(function( item, index ){
                
                 if ( item.filename !== undefined ) {
                     if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
@@ -127,7 +127,7 @@ PHP.RAWPost = function( content ) {
                             arr[ name ].size.push( item.value.length );
                             
                         } else {
-                            arr[ item.name ] = {
+                            arr[ (item.name === undefined ) ? index : item.name ] = {
                                 name: item.filename,
                                 type: item.contentType,
                                 tmp_name: item.filename,

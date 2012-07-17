@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 458 out of 672 (68.2%)
+Passed 459 out of 672 (68.3%)
 
 Failed tests:
 
@@ -10,7 +10,6 @@ Failed tests:
  - tests/php/basic/bug20539.phpt
  - tests/php/basic/bug54514.phpt
  - tests/php/basic/req44164.phpt
- - tests/php/basic/rfc1867_anonymous_upload.phpt
  - tests/php/basic/rfc1867_array_upload.phpt
  - tests/php/basic/rfc1867_boundary_1.phpt
  - tests/php/basic/rfc1867_empty_upload.phpt
