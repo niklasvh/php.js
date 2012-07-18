@@ -419,7 +419,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         errorHandler = error_handler;
     };
 
-    MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend ) {
+    MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend, strict ) {
 
         var C = PHP.Constants,
         $GLOBAL = this[ COMPILER.GLOBAL ],
@@ -489,7 +489,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             return;
                             break;
                         case C.E_STRICT:
-                            this.$strict += "Strict Standards: " + msg + lineAppend + "\n";
+                            if ( strict) {
+                                this.$strict += "Strict Standards: " + msg + lineAppend + "\n";
+                            } else {
+                                this.echo( new PHP.VM.Variable("\nStrict Standards: " + msg + lineAppend + "\n"));
+                            }
                             return;
                             break;
                         default:

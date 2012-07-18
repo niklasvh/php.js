@@ -480,7 +480,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 // return (( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) && methodProps[ index ] !== undefined && item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]) || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined);
                 //                                                                                                ^^ ^^^^^^ rechecking it on purpose
                 }) || ( methodProps[ ++lastIndex ] !== undefined && methodProps[ lastIndex][ COMPILER.PROPERTY_DEFAULT ] === undefined) ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + realName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + (( propDef !== undefined) ? " = " + propDef : "") + ")", PHP.Constants.E_STRICT, true );
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + realName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + (( propDef !== undefined) ? " = " + propDef : "") + ")", PHP.Constants.E_STRICT, true, true );
                 }
                 
       
@@ -872,6 +872,15 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
         };
         
+        Class.prototype[ COMPILER.CLASS_PROPERTY_ISSET ] = function( ctx, propertyName ) {
+            if ( this[ propertyPrefix + propertyName ] === undefined || checkType( this[ propertyTypePrefix + propertyName ], STATIC )) {
+                return false;
+            } else {
+                return true;
+            }
+             
+        };
+        
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
          
             if ( this[ propertyPrefix + propertyName ] === undefined ) {
@@ -998,7 +1007,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     Object.defineProperties( obj, props );
                           
                 } else {
-                    
+
+
+
                     if ( this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] === undefined ) {
                         var variable = new PHP.VM.Variable();
                         variable[ VARIABLE.PROPERTY ] = true;
@@ -1024,9 +1035,15 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             } else {
                
                 
+
+
+                
+                
                 if ( checkType( this[ propertyTypePrefix + propertyName ], PROTECTED ) && !(ctx instanceof PHP.VM.ClassPrototype) ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access protected property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
                 }
+
+ 
 
                 
                 if ( ctx instanceof PHP.VM.ClassPrototype && this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] !== undefined ) {
@@ -1035,7 +1052,32 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
                     }
                 }
-               
+                     
+                   
+                if ( checkType( this[ propertyTypePrefix + propertyName ], STATIC ) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Accessing static property " + className + "::$" + propertyName + " as non static", PHP.Constants.E_STRICT, true );      
+                    if ( this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] === undefined ) {
+                        var variable = new PHP.VM.Variable();
+                        variable[ VARIABLE.PROPERTY ] = true;
+                        variable[ VARIABLE.DEFINED ] = className + "::$" + propertyName;
+                    
+                        this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] = variable;
+                    
+                        variable[ VARIABLE.REGISTER_SETTER ] = function() {
+                            this[ propertyPrefix + propertyName ] = variable;
+                        }.bind(this);
+                    
+                    
+                    
+                        return variable;
+                    } else {
+                        if ( this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ][ VARIABLE.DEFINED ] !== true ) {
+                            this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ][ VARIABLE.DEFINED ] = className + "::$" + propertyName;
+                        }
+                        return this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ];
+                    }
+                } 
+                     
                 return this[ propertyPrefix + propertyName ];
             }
             

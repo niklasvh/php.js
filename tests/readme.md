@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 481 out of 672 (71.6%)
+Passed 482 out of 672 (71.7%)
 
 Failed tests:
 
@@ -45,7 +45,6 @@ Failed tests:
  - tests/php/classes/property_recreate_private.phpt
  - tests/php/classes/property_recreate_protected.phpt
  - tests/php/classes/serialize_001.phpt
- - tests/php/classes/static_properties_003.phpt
  - tests/php/classes/static_properties_004.phpt
  - tests/php/classes/static_properties_undeclared_isset.phpt
  - tests/php/classes/tostring_001.phpt

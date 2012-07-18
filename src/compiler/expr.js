@@ -28,7 +28,7 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_AssignMinus = function( action ) {
     var src = this.source( action.variable ) + "." + this.ASSIGN_MINUS + "(" + this.source( action.expr ) + ")";
-  /*
+    /*
   if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
     }*/
@@ -147,6 +147,11 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
             
             case "Node_Expr_ArrayDimFetch":
                 args.push( this.source( arg.variable ) + "."  + this.DIM_ISSET + '( this, ' + this.source( arg.dim ) + " )" );
+                break;
+            case "Node_Expr_PropertyFetch":
+                
+                args.push(  this.source( arg.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_ISSET + '( this, "' + this.source( arg.name ) + '" )');
+          
                 break;
             default:
                 args.push( this.source( arg) );
@@ -307,7 +312,7 @@ PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
 
     if ( action.name === "this" ) {
         src += '"' + this.source( action.name ) + '"';
-      //  return action.name;
+    //  return action.name;
     } else {
 
         if ( typeof action.name === "string" ) {

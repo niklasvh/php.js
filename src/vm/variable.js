@@ -375,8 +375,9 @@ PHP.VM.Variable = function( arg ) {
 
    
     this[ PHP.Compiler.prototype.UNSET ] = function() {
+        console.log("unsetting", this);
         setValue( null );
-        this.DEFINED = false;
+        this[ this.DEFINED ] = false;
     };
     
     Object.defineProperty( this, COMPILER.VARIABLE_VALUE,
@@ -408,6 +409,7 @@ PHP.VM.Variable = function( arg ) {
                     $this[ this.DEFINED ] = true;
                     return returning;
                 } else {
+ 
                     this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_CORE_NOTICE, true );    
                 }
             }
