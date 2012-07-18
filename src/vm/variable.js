@@ -70,6 +70,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
 
 
     if ( arguments.length > 1 ) {
+        // chaining, todo make it work for unlimited vars
         this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
     } else {
         var val = combinedVariable[ COMPILER.VARIABLE_VALUE ]; // trigger get
@@ -78,8 +79,14 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
             this[ COMPILER.VARIABLE_VALUE ] = val[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
               
         } else {
-            this[ COMPILER.VARIABLE_VALUE ] = val;
+            this[ COMPILER.VARIABLE_VALUE ] = val;          
         }
+        
+        if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY || combinedVariable[ VARIABLE.TYPE ] === VARIABLE.OBJECT ) {
+            this[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_STORED ].push( this );           
+        }
+                
+    
     }
     
     return this;
@@ -269,7 +276,16 @@ PHP.VM.Variable = function( arg ) {
                     }
                 } else if ( newValue === null ) {   
                     if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
-                        value[ COMPILER.CLASS_DESTRUCT ]();
+                        console.log( value[ COMPILER.CLASS_STORED ]);
+                        this[ PHP.VM.Class.KILLED ] = true;
+                        if (value[ COMPILER.CLASS_STORED ].every(function( variable ){
+                            console.log( variable, variable[ PHP.VM.Class.KILLED ] === true );
+                            return ( variable[ PHP.VM.Class.KILLED ] === true );
+                        })) {
+                            // all variable instances have been killed, can safely destruct
+                            value[ COMPILER.CLASS_DESTRUCT ]();
+                        }
+                        
                     }
             
                     this[ this.TYPE ] = this.NULL;
@@ -279,8 +295,6 @@ PHP.VM.Variable = function( arg ) {
                 } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
                     if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
                         this[ this.TYPE ] = this.ARRAY;
-                
-
                 
                     } else {
 
@@ -674,7 +688,7 @@ PHP.VM.Variable = function( arg ) {
                             //   item[ this.OVERLOADED ] = returned[ this.OVERLOADING ];
                             }
                         }
-                        */
+                     */
                         return item;
                     }
                     
@@ -764,7 +778,7 @@ PHP.VM.Variable = function( arg ) {
                         
                         
                         console.log("sending!", dimHandler);
-                        */
+                     */
                         return dimHandler;
                        
                         

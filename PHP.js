@@ -447,6 +447,8 @@ COMPILER.CLASS_NEW = "$Class.New";
 
 COMPILER.CLASS_GET = "$Class.Get";
 
+COMPILER.CLASS_STORED = "$StoredIn";
+
 COMPILER.CLASS_PROPERTY_GET = "$Prop";
 
 COMPILER.CLASS_PROPERTY_ISSET = "$PropIsset";
@@ -2853,7 +2855,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype,
     expr;
-console.log( iterator );
+
     if ( iterator === undefined  || iterator.expr === undefined ) {
         return false;
     }
@@ -5478,7 +5480,6 @@ PHP.Modules.prototype.var_dump = function() {
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ],
         ARG_TYPE = argument[ VAR.TYPE ]; // trigger get for undefined
-          console.log( value, argument, ARG_TYPE );
         str += $INDENT( indent );
         
         /*
@@ -11143,7 +11144,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             if ( ctx !== true ) {
                 // check if we are extending class, i.e. don't call constructors
                  
-                 
+                this[ COMPILER.CLASS_STORED ] = []; // variables that store an instance of this class, needed for destructors 
                  
                  
                 // make sure we aren't initiating an abstract class 
@@ -12054,11 +12055,20 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx, shutdown ) {
             // check if this class has been destructed already
             
-            console.log( ctx );
+        
             
             if ( this[ PHP.VM.Class.KILLED ] === true ) { 
                 return;
             }
+            
+            // go through all assigned class props to see if we have closure classes to be killed
+            // for...in, since we wanna go through the whole proto chain
+            for (var prop in this) {
+                if ( prop.substring(0, propertyPrefix.length) === propertyPrefix) {
+                    this[ prop ][ PHP.VM.Class.KILLED ] = true;
+                }
+            }
+            
             
             if ( checkType( this[ methodTypePrefix + __destruct ], PRIVATE ) && ( !(ctx instanceof PHP.VM.ClassPrototype) || this[ PHP.VM.Class.METHOD_PROTOTYPE + __destruct ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ]  )) {
                    
@@ -12220,6 +12230,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
 
 
     if ( arguments.length > 1 ) {
+        // chaining, todo make it work for unlimited vars
         this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
     } else {
         var val = combinedVariable[ COMPILER.VARIABLE_VALUE ]; // trigger get
@@ -12228,8 +12239,15 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
             this[ COMPILER.VARIABLE_VALUE ] = val[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
               
         } else {
-            this[ COMPILER.VARIABLE_VALUE ] = val;
+            this[ COMPILER.VARIABLE_VALUE ] = val;          
         }
+        
+        if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY || combinedVariable[ VARIABLE.TYPE ] === VARIABLE.OBJECT ) {
+            console.log( "adding:-------------------",this );
+            this[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_STORED ].push( this );           
+        }
+                
+    
     }
     
     return this;
@@ -12419,7 +12437,16 @@ PHP.VM.Variable = function( arg ) {
                     }
                 } else if ( newValue === null ) {   
                     if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
-                        value[ COMPILER.CLASS_DESTRUCT ]();
+                        console.log( value[ COMPILER.CLASS_STORED ]);
+                        this[ PHP.VM.Class.KILLED ] = true;
+                        if (value[ COMPILER.CLASS_STORED ].every(function( variable ){
+                            console.log( variable, variable[ PHP.VM.Class.KILLED ] === true );
+                            return ( variable[ PHP.VM.Class.KILLED ] === true );
+                        })) {
+                            // all variable instances have been killed, can safely destruct
+                            value[ COMPILER.CLASS_DESTRUCT ]();
+                        }
+                        
                     }
             
                     this[ this.TYPE ] = this.NULL;
@@ -12429,8 +12456,6 @@ PHP.VM.Variable = function( arg ) {
                 } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
                     if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
                         this[ this.TYPE ] = this.ARRAY;
-                
-
                 
                     } else {
 
@@ -12824,7 +12849,7 @@ PHP.VM.Variable = function( arg ) {
                             //   item[ this.OVERLOADED ] = returned[ this.OVERLOADING ];
                             }
                         }
-                        */
+                     */
                         return item;
                     }
                     
@@ -12914,7 +12939,7 @@ PHP.VM.Variable = function( arg ) {
                         
                         
                         console.log("sending!", dimHandler);
-                        */
+                     */
                         return dimHandler;
                        
                         

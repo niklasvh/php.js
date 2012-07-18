@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 491 out of 672 (73.1%)
+Passed 492 out of 672 (73.2%)
 
 Failed tests:
 
@@ -19,7 +19,6 @@ Failed tests:
  - tests/php/classes/constants_error_004.phpt
  - tests/php/classes/constants_scope_001.phpt
  - tests/php/classes/destructor_and_globals.phpt
- - tests/php/classes/factory_and_singleton_001.phpt
  - tests/php/classes/factory_and_singleton_002.phpt
  - tests/php/classes/factory_and_singleton_003.phpt
  - tests/php/classes/factory_and_singleton_004.phpt

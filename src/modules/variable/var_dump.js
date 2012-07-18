@@ -17,7 +17,6 @@ PHP.Modules.prototype.var_dump = function() {
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ],
         ARG_TYPE = argument[ VAR.TYPE ]; // trigger get for undefined
-          console.log( value, argument, ARG_TYPE );
         str += $INDENT( indent );
         
         /*

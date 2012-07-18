@@ -192,7 +192,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             if ( ctx !== true ) {
                 // check if we are extending class, i.e. don't call constructors
                  
-                 
+                this[ COMPILER.CLASS_STORED ] = []; // variables that store an instance of this class, needed for destructors 
                  
                  
                 // make sure we aren't initiating an abstract class 
@@ -1103,11 +1103,20 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx, shutdown ) {
             // check if this class has been destructed already
             
-            console.log( ctx );
+        
             
             if ( this[ PHP.VM.Class.KILLED ] === true ) { 
                 return;
             }
+            
+            // go through all assigned class props to see if we have closure classes to be killed
+            // for...in, since we wanna go through the whole proto chain
+            for (var prop in this) {
+                if ( prop.substring(0, propertyPrefix.length) === propertyPrefix) {
+                    this[ prop ][ PHP.VM.Class.KILLED ] = true;
+                }
+            }
+            
             
             if ( checkType( this[ methodTypePrefix + __destruct ], PRIVATE ) && ( !(ctx instanceof PHP.VM.ClassPrototype) || this[ PHP.VM.Class.METHOD_PROTOTYPE + __destruct ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ]  )) {
                    
