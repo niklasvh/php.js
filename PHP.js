@@ -1062,6 +1062,31 @@ PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
     var src = this.CTX + this.INTERFACE_NEW + '( "' + action.name + '", [';
     
+    
+    var ints = [];
+       
+    function addInterface( interf ) {
+            
+        interf.forEach( function( item ){
+            if  (Array.isArray( item )) {
+                addInterface( item );
+            } else {
+                  
+                ints.push( '"' + item.parts + '"' );
+            }
+        });
+    }
+        
+    addInterface( action.Extends );
+    /*
+        src += (Array.isArray(action.Implements[ 0 ]) ? action.Implements[ 0 ] : action.Implements ).map(function( item ){
+            
+            return '"' + item.parts + '"';
+        }).join(", "); 
+        */
+    src += ints.join(", "); 
+    
+    /*
     var exts = [];
     
     action.Extends.forEach(function( ext ){
@@ -1069,7 +1094,7 @@ PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     }, this);
     
     src += exts.join(", ")
-    
+    */
     src += "], function( M, $ ){\n M";
     
     this.currentClass = action.name;
@@ -1086,7 +1111,7 @@ PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
     
-    console.log( action );
+    //  console.log( action );
     
     var src = this.CTX + this.CLASS_NEW + '( "' + action.name + '", ' + action.Type + ', {';
     
@@ -1098,9 +1123,33 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
         if ( action.Extends !== null ) {
             src += ", "
         }
-        src += 'Implements: [' + (Array.isArray(action.Implements[ 0 ]) ? action.Implements[ 0 ] : action.Implements ).map(function( item ){
+        
+        // properly borken somewhere in the parser
+        src += 'Implements: [';
+        
+        var ints = [];
+       
+        function addInterface( interf ) {
+            
+            interf.forEach( function( item ){
+                if  (Array.isArray( item )) {
+                    addInterface( item );
+                } else {
+                  
+                    ints.push( '"' + item.parts + '"' );
+                }
+            });
+        }
+        
+        addInterface( action.Implements );
+        /*
+        src += (Array.isArray(action.Implements[ 0 ]) ? action.Implements[ 0 ] : action.Implements ).map(function( item ){
+            
             return '"' + item.parts + '"';
-        }).join(", ") + "]";
+        }).join(", "); 
+        */
+        src += ints.join(", "); 
+        src += "]";
     }
     
     src += "}, function( M, $ ){\n M";
@@ -1226,10 +1275,10 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     if ( action.expr.type === "Node_Expr_Array" && action.byRef === true ) {
         console.log( action );
         if (action.keyVar === null) {
-        this.FATAL_ERROR = "syntax error, unexpected '&' in " + this.file + " on line " + action.attributes.startLine;
-        this.ERROR_TYPE = PHP.Constants.E_PARSE;
+            this.FATAL_ERROR = "syntax error, unexpected '&' in " + this.file + " on line " + action.attributes.startLine;
+            this.ERROR_TYPE = PHP.Constants.E_PARSE;
         } else {
-             this.FATAL_ERROR = "Cannot create references to elements of a temporary array expression in " + this.file + " on line " + action.attributes.startLine;
+            this.FATAL_ERROR = "Cannot create references to elements of a temporary array expression in " + this.file + " on line " + action.attributes.startLine;
         }
         return;
     }
@@ -11426,7 +11475,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     });
                 
                     // interfaces
-                
+                console.log(Class.prototype[ PHP.VM.Class.INTERFACES ]);
                     Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
                   
                         var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;
@@ -11515,8 +11564,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             Class.prototype = new Extends( true );
         } else {      
             Class.prototype = new PHP.VM.ClassPrototype();
-            Class.prototype[ PHP.VM.Class.INTERFACES ] = [];
+
         }
+      
+        
+        Class.prototype[ PHP.VM.Class.INTERFACES ] = (Class.prototype[ PHP.VM.Class.INTERFACES ] === undefined ) ? [] : Array.prototype.slice.call(Class.prototype[ PHP.VM.Class.INTERFACES ], 0);
         
         var pushInterface = function( interfaceName, interfaces, ignore ) {
             
@@ -12165,7 +12217,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.INSTANCEOF ] = function( instanceName ) {
     
     var COMPILER = PHP.Compiler.prototype;
-    
+    console.log(this[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ], this[ COMPILER.VARIABLE_VALUE ], instanceName);
     
     var className,
     classObj = this[ COMPILER.VARIABLE_VALUE ];

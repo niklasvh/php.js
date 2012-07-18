@@ -531,7 +531,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     });
                 
                     // interfaces
-                
+                console.log(Class.prototype[ PHP.VM.Class.INTERFACES ]);
                     Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
                   
                         var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;
@@ -620,8 +620,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             Class.prototype = new Extends( true );
         } else {      
             Class.prototype = new PHP.VM.ClassPrototype();
-            Class.prototype[ PHP.VM.Class.INTERFACES ] = [];
+
         }
+      
+        
+        Class.prototype[ PHP.VM.Class.INTERFACES ] = (Class.prototype[ PHP.VM.Class.INTERFACES ] === undefined ) ? [] : Array.prototype.slice.call(Class.prototype[ PHP.VM.Class.INTERFACES ], 0);
         
         var pushInterface = function( interfaceName, interfaces, ignore ) {
             

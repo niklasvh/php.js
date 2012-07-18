@@ -86,7 +86,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.INSTANCEOF ] = function( instanceName ) {
     
     var COMPILER = PHP.Compiler.prototype;
-    
+    console.log(this[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ], this[ COMPILER.VARIABLE_VALUE ], instanceName);
     
     var className,
     classObj = this[ COMPILER.VARIABLE_VALUE ];
