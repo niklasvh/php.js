@@ -176,10 +176,15 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             var callConstruct = function( $this, name, args, ctx ) {
                 /*
            console.log( this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ], name, checkType( this[ methodTypePrefix + name ], PRIVATE ));
+                */
+                
                 if ( checkType( $this[ methodTypePrefix + name ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
-                   
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call private " + $this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ] + "::" + name + "()", PHP.Constants.E_ERROR, true );
-                }*/
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + $this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ] + "::" + name + "() from invalid context", PHP.Constants.E_ERROR, true );
+                }
+                
+                if ( checkType( this[ methodTypePrefix + name ], PROTECTED) && (!( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ))) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + name + "() from invalid context", PHP.Constants.E_ERROR, true );
+                } 
                 
                 this[ PHP.VM.Class.KILLED ] = true;
                 var ret = callMethod.call( $this, name, Array.prototype.slice.call( args, 1 ) ); 
@@ -1144,7 +1149,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     return;
                 } 
                 
-                /* fail of epic proportion
+            /* fail of epic proportion
                 else {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                 }
