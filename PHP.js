@@ -10713,7 +10713,6 @@ PHP.VM = function( src, opts ) {
     var $$ = function( arg ) {
         
         var item = new PHP.VM.Variable( arg );
-        
         item[ PHP.Compiler.prototype.NAV ] = true;
         
         return item;
@@ -12079,7 +12078,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __destruct ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
                     
                     if ( shutdown === true ) {
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 1", PHP.Constants.E_WARNING );
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 0", PHP.Constants.E_WARNING );
                         return;
                     } else {
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
@@ -12087,7 +12086,23 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
                     
             } 
-                                
+            
+           
+            if ( checkType( this[ methodTypePrefix + __destruct ], PROTECTED) && (!( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ))) {
+                
+                if ( shutdown === true ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 0", PHP.Constants.E_WARNING );
+                    return;
+                } 
+                
+                /* fail of epic proportion
+                else {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
+                }
+                */
+            }
+            
+            
             this[ PHP.VM.Class.KILLED ] = true;
             console.log('destruct');
             if ( this[  methodPrefix + __destruct  ] !== undefined ) {
@@ -12243,7 +12258,6 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
         }
         
         if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY || combinedVariable[ VARIABLE.TYPE ] === VARIABLE.OBJECT ) {
-            console.log( "adding:-------------------",this );
             this[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_STORED ].push( this );           
         }
                 
@@ -12444,7 +12458,7 @@ PHP.VM.Variable = function( arg ) {
                             return ( variable[ PHP.VM.Class.KILLED ] === true );
                         })) {
                             // all variable instances have been killed, can safely destruct
-                            value[ COMPILER.CLASS_DESTRUCT ]();
+                            value[ COMPILER.CLASS_DESTRUCT ]( this[ this.INSTANCE ]);
                         }
                         
                     }

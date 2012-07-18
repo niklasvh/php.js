@@ -283,7 +283,7 @@ PHP.VM.Variable = function( arg ) {
                             return ( variable[ PHP.VM.Class.KILLED ] === true );
                         })) {
                             // all variable instances have been killed, can safely destruct
-                            value[ COMPILER.CLASS_DESTRUCT ]();
+                            value[ COMPILER.CLASS_DESTRUCT ]( this[ this.INSTANCE ]);
                         }
                         
                     }
