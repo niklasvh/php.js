@@ -35,47 +35,47 @@ array(1) {
   array(5) {
     [%u|b%"name"]=>
     array(3) {
-      [0]=>
+      [%d]=>
       %unicode|string%(9) "file1.txt"
-      [2]=>
+      [%d]=>
       %unicode|string%(9) "file2.txt"
-      [3]=>
+      [%d]=>
       %unicode|string%(9) "file3.txt"
     }
     [%u|b%"type"]=>
     array(3) {
-      [0]=>
+      [%d]=>
       %unicode|string%(16) "text/plain-file1"
-      [2]=>
+      [%d]=>
       %unicode|string%(16) "text/plain-file2"
-      [3]=>
+      [%d]=>
       %unicode|string%(16) "text/plain-file3"
     }
     [%u|b%"tmp_name"]=>
     array(3) {
-      [0]=>
+      [%d]=>
       %unicode|string%(%d) "%s"
-      [2]=>
+      [%d]=>
       %unicode|string%(%d) "%s"
-      [3]=>
+      [%d]=>
       %unicode|string%(%d) "%s"
     }
     [%u|b%"error"]=>
     array(3) {
-      [0]=>
+      [%d]=>
       int(0)
-      [2]=>
+      [%d]=>
       int(0)
-      [3]=>
+      [%d]=>
       int(0)
     }
     [%u|b%"size"]=>
     array(3) {
-      [0]=>
+      [%d]=>
       int(1)
-      [2]=>
+      [%d]=>
       int(1)
-      [3]=>
+      [%d]=>
       int(1)
     }
   }

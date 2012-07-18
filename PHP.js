@@ -10493,7 +10493,7 @@ PHP.RAWPost = function( content ) {
                                   
                     
                     
-                    if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
+                    if ( !/^[a-z0-9]+\[.*[a-z]+.*\]/i.test(item.name) ) {
                        
                         var error = 0;
                         if ( item.filename.length === 0 ) {
@@ -10514,15 +10514,16 @@ PHP.RAWPost = function( content ) {
                         item.filename = item.filename.substring(item.filename.lastIndexOf("/") + 1); 
                         item.filename = item.filename.substring(item.filename.lastIndexOf("\\") + 1);
                          
-                        
-                        if ( /^[a-z0-9]+\[\]/i.test(item.name) ) {
-                            
-                            if (!/^[a-z0-9]+\[\]$/i.test(item.name)) {
+                       
+                        if ( /^[a-z0-9]+\[\d*\]/i.test(item.name) ) {
+                          
+                            if (!/^[a-z0-9]+\[\d*\]$/i.test(item.name)) {
                                 // malicious input
                                 return;
                             }
                             
-                            var name = item.name.replace(/\[\]/g,"");
+                            var name = item.name.substring(0, item.name.indexOf("["));
+                            //replace(/\[\]/g,"");
                             
                             if ( arr[ name ] === undefined ) {
                                 arr[ name ] = {
