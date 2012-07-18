@@ -11745,7 +11745,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 if ( this[ methodPrefix + __set ] !== undefined ) {
                     obj [ COMPILER.ASSIGN ] = function( value ) {
                         console.log( propertyName, value );
-                        callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), value ] );        
+                        callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), value ] );       
+                        return value;
                     }.bind( this );
                 }
                 
