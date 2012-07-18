@@ -120,6 +120,21 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( comb
     return new PHP.VM.Variable( this[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ] + "" + combinedVariable[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ] );
 };
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_PLUS ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    this[ COMPILER.VARIABLE_VALUE ] = (this[ COMPILER.VARIABLE_VALUE ] - 0) + (combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0);
+    return this;
+};
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_MINUS ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    this[ COMPILER.VARIABLE_VALUE ] = this[ COMPILER.VARIABLE_VALUE ] - combinedVariable[ COMPILER.VARIABLE_VALUE ];
+    return this;
+};
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ADD ] = function( combinedVariable ) {
     

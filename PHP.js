@@ -349,6 +349,10 @@ COMPILER.MAGIC_CONSTANTS = "$MConstants";
 
 COMPILER.ASSIGN = "_";
 
+COMPILER.ASSIGN_PLUS = "_Plus";
+
+COMPILER.ASSIGN_MINUS = "_Minus";
+
 COMPILER.NEG = "$Neg";
 
 COMPILER.ADD = "$Add";
@@ -536,9 +540,7 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
         this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;  
     }
     
-    console.log( action );
-    
-    
+ 
     var src = this.source( action.variable ) + "." + this.ASSIGN;
     if ( action.expr.type !== "Node_Expr_Assign") {    
         src += "(" + this.source( action.expr ) + ")";
@@ -554,18 +556,20 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignMinus = function( action ) {
-    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " -= " + this.source( action.expr );
-    if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
+    var src = this.source( action.variable ) + "." + this.ASSIGN_MINUS + "(" + this.source( action.expr ) + ")";
+  /*
+  if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
-    }
+    }*/
     return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignPlus = function( action ) {
-    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " += " + this.source( action.expr );
+    var src = this.source( action.variable ) + "." + this.ASSIGN_PLUS + "(" + this.source( action.expr ) + ")";
+    /*
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
-    }
+    }*/
     return src;
 };
 
@@ -11787,6 +11791,44 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 }.bind( this );
                 
+                obj [ COMPILER.ASSIGN_PLUS ] = function( combined ) {
+                 
+                    if ( this[ methodPrefix + __get ] !== undefined ) {
+                     
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
+                        
+                        
+                        // setting ++
+                        if ( this[ methodPrefix + __set ] !== undefined ) {
+                            
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? value[ COMPILER.VARIABLE_VALUE ] + combined[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+                        }
+                     
+                        return value;
+                
+                    }
+                }.bind( this );
+                
+                 
+                obj [ COMPILER.ASSIGN_MINUS ] = function( combined ) {
+                 
+                    if ( this[ methodPrefix + __get ] !== undefined ) {
+                     
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
+                        
+                        
+                        // setting ++
+                        if ( this[ methodPrefix + __set ] !== undefined ) {
+                            
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? value[ COMPILER.VARIABLE_VALUE ] - combined[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+                        }
+                     
+                        return value;
+                
+                    }
+                }.bind( this );
+                
+                
                 var $this = this;
                 // property get
                 if ( this[ methodPrefix + __get ] !== undefined ) {
@@ -12077,6 +12119,21 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( comb
     return new PHP.VM.Variable( this[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ] + "" + combinedVariable[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ] );
 };
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_PLUS ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    this[ COMPILER.VARIABLE_VALUE ] = (this[ COMPILER.VARIABLE_VALUE ] - 0) + (combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0);
+    return this;
+};
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_MINUS ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    this[ COMPILER.VARIABLE_VALUE ] = this[ COMPILER.VARIABLE_VALUE ] - combinedVariable[ COMPILER.VARIABLE_VALUE ];
+    return this;
+};
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ADD ] = function( combinedVariable ) {
     

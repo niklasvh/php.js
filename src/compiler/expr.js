@@ -11,9 +11,7 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
         this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;  
     }
     
-    console.log( action );
-    
-    
+ 
     var src = this.source( action.variable ) + "." + this.ASSIGN;
     if ( action.expr.type !== "Node_Expr_Assign") {    
         src += "(" + this.source( action.expr ) + ")";
@@ -29,18 +27,20 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignMinus = function( action ) {
-    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " -= " + this.source( action.expr );
-    if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
+    var src = this.source( action.variable ) + "." + this.ASSIGN_MINUS + "(" + this.source( action.expr ) + ")";
+  /*
+  if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
-    }
+    }*/
     return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignPlus = function( action ) {
-    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " += " + this.source( action.expr );
+    var src = this.source( action.variable ) + "." + this.ASSIGN_PLUS + "(" + this.source( action.expr ) + ")";
+    /*
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
-    }
+    }*/
     return src;
 };
 

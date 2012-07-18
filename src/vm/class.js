@@ -917,6 +917,44 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 }.bind( this );
                 
+                obj [ COMPILER.ASSIGN_PLUS ] = function( combined ) {
+                 
+                    if ( this[ methodPrefix + __get ] !== undefined ) {
+                     
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
+                        
+                        
+                        // setting ++
+                        if ( this[ methodPrefix + __set ] !== undefined ) {
+                            
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? value[ COMPILER.VARIABLE_VALUE ] + combined[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+                        }
+                     
+                        return value;
+                
+                    }
+                }.bind( this );
+                
+                 
+                obj [ COMPILER.ASSIGN_MINUS ] = function( combined ) {
+                 
+                    if ( this[ methodPrefix + __get ] !== undefined ) {
+                     
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
+                        
+                        
+                        // setting ++
+                        if ( this[ methodPrefix + __set ] !== undefined ) {
+                            
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? value[ COMPILER.VARIABLE_VALUE ] - combined[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+                        }
+                     
+                        return value;
+                
+                    }
+                }.bind( this );
+                
+                
                 var $this = this;
                 // property get
                 if ( this[ methodPrefix + __get ] !== undefined ) {
