@@ -35,12 +35,12 @@ var PHP = function( code, opts ) {
     opts.RAW_POST = ( RAW_POST !== undefined ) ? RAW.Raw() : (POST !== undefined ) ? POST.trim() :  "";
     opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
     
-    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.upload_tmp_dir ) : {};
-    
+    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.max_file_uploads, opts.ini.upload_tmp_dir ) : {};
+    /*
     if (RAW_POST !== undefined ) {
         var rawError = RAW.Error();
     }
-    
+    */
     // needs to be called after RAW.Files
     if (RAW_POST !== undefined ) {
         RAW.WriteFiles( opts.filesystem.writeFileSync );
@@ -52,10 +52,16 @@ var PHP = function( code, opts ) {
     console.log(this.compiler.src);
     this.vm = new PHP.VM( this.compiler.src, opts );
     
+    
+    if (RAW_POST !== undefined ) {
+        RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
+    }
+    
+    /*
     if (rawError !== undefined ) {
         this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING ); 
     }
-          
+           */
     
     this.vm.Run();
     

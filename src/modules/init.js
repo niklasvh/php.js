@@ -384,7 +384,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             if ( caught ) return methods;
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
                 
-            var classObj = variable[ COMPILER.VARIABLE_VALUE ];
+                var classObj = variable[ COMPILER.VARIABLE_VALUE ];
             
                 if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1  ) {
                     $( name, variable );
@@ -449,13 +449,13 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                 if ( errorHandler !== undefined ) {
                    
                         
-                        this.call_user_func(
-                            errorHandler,
-                            new PHP.VM.Variable( level ),
-                            new PHP.VM.Variable( msg ),
-                            new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
-                            new PHP.VM.Variable( 1 )
-                            );
+                    this.call_user_func(
+                        errorHandler,
+                        new PHP.VM.Variable( level ),
+                        new PHP.VM.Variable( msg ),
+                        new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
+                        new PHP.VM.Variable( 1 )
+                        );
                     
                 } else {
                     switch ( level ) {
@@ -484,6 +484,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             return;
                             break;
                         case C.E_CORE_NOTICE:
+                        case C.E_NOTICE:
                             this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
                             return;
                             break;

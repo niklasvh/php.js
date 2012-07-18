@@ -35,12 +35,12 @@ var PHP = function( code, opts ) {
     opts.RAW_POST = ( RAW_POST !== undefined ) ? RAW.Raw() : (POST !== undefined ) ? POST.trim() :  "";
     opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
     
-    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.upload_tmp_dir ) : {};
-    
+    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.max_file_uploads, opts.ini.upload_tmp_dir ) : {};
+    /*
     if (RAW_POST !== undefined ) {
         var rawError = RAW.Error();
     }
-    
+    */
     // needs to be called after RAW.Files
     if (RAW_POST !== undefined ) {
         RAW.WriteFiles( opts.filesystem.writeFileSync );
@@ -52,10 +52,16 @@ var PHP = function( code, opts ) {
     console.log(this.compiler.src);
     this.vm = new PHP.VM( this.compiler.src, opts );
     
+    
+    if (RAW_POST !== undefined ) {
+        RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
+    }
+    
+    /*
     if (rawError !== undefined ) {
         this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING ); 
     }
-          
+           */
     
     this.vm.Run();
     
@@ -1959,7 +1965,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             if ( caught ) return methods;
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
                 
-            var classObj = variable[ COMPILER.VARIABLE_VALUE ];
+                var classObj = variable[ COMPILER.VARIABLE_VALUE ];
             
                 if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1  ) {
                     $( name, variable );
@@ -2024,13 +2030,13 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                 if ( errorHandler !== undefined ) {
                    
                         
-                        this.call_user_func(
-                            errorHandler,
-                            new PHP.VM.Variable( level ),
-                            new PHP.VM.Variable( msg ),
-                            new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
-                            new PHP.VM.Variable( 1 )
-                            );
+                    this.call_user_func(
+                        errorHandler,
+                        new PHP.VM.Variable( level ),
+                        new PHP.VM.Variable( msg ),
+                        new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
+                        new PHP.VM.Variable( 1 )
+                        );
                     
                 } else {
                     switch ( level ) {
@@ -2059,6 +2065,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             return;
                             break;
                         case C.E_CORE_NOTICE:
+                        case C.E_NOTICE:
                             this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
                             return;
                             break;
@@ -10348,13 +10355,17 @@ PHP.RAWPost = function( content ) {
     CONTENT_TYPE = "Content-Type:",
     CONTENT_DISPOSITION = "Content-Disposition:",
     BOUNDARY = "boundary=",
-    contentType,
     item,
     items = [],
     startCapture,
     itemValue,
-    errorMsg,
-    boundary;
+    boundary,
+    storedFiles = [],
+    emptyFiles = [],
+    totalFiles = 0,
+    errors = [],
+    post;
+    
     
     function is( part, item ) {
         return ( part !== undefined && part.substring(0, item.length ) === item );
@@ -10398,12 +10409,12 @@ PHP.RAWPost = function( content ) {
                         if (boundary.substring(0,1) === '"' && boundary.substr(-1,1) === '"') {
                             boundary = boundary.substring(1, boundary.length - 1);
                         } else {
-                            errorMsg = "Invalid boundary in multipart/form-data POST data";
+                            errors.push(["Invalid boundary in multipart/form-data POST data", PHP.Constants.E_WARNING, true]);
                         }
                     }
                 
                 } else {
-                    errorMsg = "Missing boundary in multipart/form-data POST data";
+                    errors.push(["Missing boundary in multipart/form-data POST data", PHP.Constants.E_WARNING, true]);
                 }
             }
         } else if ( is( parts[ 0 ], CONTENT_DISPOSITION ) ) {
@@ -10451,10 +10462,9 @@ PHP.RAWPost = function( content ) {
         item.contentType  = "";
         items.push( item );
     }
-    console.log( items );
+    
 
-    var storedFiles = [],
-    post;
+
     
     return {
         Post: function() {
@@ -10463,7 +10473,7 @@ PHP.RAWPost = function( content ) {
                 if ( item.filename === undefined ) {
                     
                     if ( item.garbled === true )  {
-                        errorMsg = "File Upload Mime headers garbled";
+                        errors.push(["File Upload Mime headers garbled", PHP.Constants.E_WARNING, true]);
                         return;
                     } 
                     
@@ -10473,7 +10483,7 @@ PHP.RAWPost = function( content ) {
             post = arr;
             return arr;
         },  
-        Files: function( max_filesize, path ) {
+        Files: function( max_filesize, max_files, path ) {
             var arr = {};
             items.forEach(function( item, index ){
   
@@ -10546,24 +10556,58 @@ PHP.RAWPost = function( content ) {
                         
                         // store file
                         if ( !error ) {
-                            storedFiles.push({
-                                name: path + item.filename, 
-                                content: item.value
-                            });
+                            if (item.value.length === 0) {
+                                emptyFiles.push({
+                                    real: (item.name === undefined ) ? index : item.name,
+                                    name: path + item.filename, 
+                                    content: item.value
+                                });
+                            } else {
+                                storedFiles.push({
+                                    name: path + item.filename, 
+                                    content: item.value
+                                });  
+                                totalFiles++;
+                            }
+                            
+                           
                         }
                     }
                 }
+            });
+          
+            while( totalFiles <  max_files && emptyFiles.length > 0) {
+                var item = emptyFiles.shift();
+                storedFiles.push( item );
+                totalFiles++;
+            }
+            
+            // no room
+            emptyFiles.forEach(function( file ){
+
+                var item = arr[ file.real ];
+                item.error = 5;
+                item.tmp_name = "";
+                item.type = "";
+                errors.push(["No file uploaded in Unknown on line 0", PHP.Constants.E_NOTICE ]);
+                errors.push(["No file uploaded in Unknown on line 0", PHP.Constants.E_NOTICE ]);
+                errors.push(["Uploaded file size 0 - file [" + file.real + "=" + item.name + "] not saved in Unknown on line 0", PHP.Constants.E_WARNING, ]);
+
             });
           
             return arr;
         },
         WriteFiles: function( func ) {
             storedFiles.forEach( function( item ){
+                              
                 func( item.name, item.content );
             });
         },
-        Error: function() {
-            return errorMsg;
+        Error: function( func, file ) {
+            errors.forEach(function( err ){
+                func( err[ 0 ] + (( err[2] === true ) ? " in " + file : ""), err[1] );
+            });
+            
         },
         Raw: function() {
             lines = content.split(/\r\n|\r|\n/);
@@ -10604,7 +10648,8 @@ PHP.VM = function( src, opts ) {
  
     ENV[ PHP.Compiler.prototype.CONSTANTS ] = PHP.VM.Constants( PHP.Constants, ENV );
     
-    ENV.$ini = opts.ini;
+    ENV.$ini = {}
+    ENV.$ini.__proto__ = opts.ini;
     
     ENV.$locale = {
         decimal_point: ".",

@@ -11,13 +11,17 @@ PHP.RAWPost = function( content ) {
     CONTENT_TYPE = "Content-Type:",
     CONTENT_DISPOSITION = "Content-Disposition:",
     BOUNDARY = "boundary=",
-    contentType,
     item,
     items = [],
     startCapture,
     itemValue,
-    errorMsg,
-    boundary;
+    boundary,
+    storedFiles = [],
+    emptyFiles = [],
+    totalFiles = 0,
+    errors = [],
+    post;
+    
     
     function is( part, item ) {
         return ( part !== undefined && part.substring(0, item.length ) === item );
@@ -61,12 +65,12 @@ PHP.RAWPost = function( content ) {
                         if (boundary.substring(0,1) === '"' && boundary.substr(-1,1) === '"') {
                             boundary = boundary.substring(1, boundary.length - 1);
                         } else {
-                            errorMsg = "Invalid boundary in multipart/form-data POST data";
+                            errors.push(["Invalid boundary in multipart/form-data POST data", PHP.Constants.E_WARNING, true]);
                         }
                     }
                 
                 } else {
-                    errorMsg = "Missing boundary in multipart/form-data POST data";
+                    errors.push(["Missing boundary in multipart/form-data POST data", PHP.Constants.E_WARNING, true]);
                 }
             }
         } else if ( is( parts[ 0 ], CONTENT_DISPOSITION ) ) {
@@ -114,10 +118,9 @@ PHP.RAWPost = function( content ) {
         item.contentType  = "";
         items.push( item );
     }
-    console.log( items );
+    
 
-    var storedFiles = [],
-    post;
+
     
     return {
         Post: function() {
@@ -126,7 +129,7 @@ PHP.RAWPost = function( content ) {
                 if ( item.filename === undefined ) {
                     
                     if ( item.garbled === true )  {
-                        errorMsg = "File Upload Mime headers garbled";
+                        errors.push(["File Upload Mime headers garbled", PHP.Constants.E_WARNING, true]);
                         return;
                     } 
                     
@@ -136,7 +139,7 @@ PHP.RAWPost = function( content ) {
             post = arr;
             return arr;
         },  
-        Files: function( max_filesize, path ) {
+        Files: function( max_filesize, max_files, path ) {
             var arr = {};
             items.forEach(function( item, index ){
   
@@ -209,24 +212,58 @@ PHP.RAWPost = function( content ) {
                         
                         // store file
                         if ( !error ) {
-                            storedFiles.push({
-                                name: path + item.filename, 
-                                content: item.value
-                            });
+                            if (item.value.length === 0) {
+                                emptyFiles.push({
+                                    real: (item.name === undefined ) ? index : item.name,
+                                    name: path + item.filename, 
+                                    content: item.value
+                                });
+                            } else {
+                                storedFiles.push({
+                                    name: path + item.filename, 
+                                    content: item.value
+                                });  
+                                totalFiles++;
+                            }
+                            
+                           
                         }
                     }
                 }
+            });
+          
+            while( totalFiles <  max_files && emptyFiles.length > 0) {
+                var item = emptyFiles.shift();
+                storedFiles.push( item );
+                totalFiles++;
+            }
+            
+            // no room
+            emptyFiles.forEach(function( file ){
+
+                var item = arr[ file.real ];
+                item.error = 5;
+                item.tmp_name = "";
+                item.type = "";
+                errors.push(["No file uploaded in Unknown on line 0", PHP.Constants.E_NOTICE ]);
+                errors.push(["No file uploaded in Unknown on line 0", PHP.Constants.E_NOTICE ]);
+                errors.push(["Uploaded file size 0 - file [" + file.real + "=" + item.name + "] not saved in Unknown on line 0", PHP.Constants.E_WARNING, ]);
+
             });
           
             return arr;
         },
         WriteFiles: function( func ) {
             storedFiles.forEach( function( item ){
+                              
                 func( item.name, item.content );
             });
         },
-        Error: function() {
-            return errorMsg;
+        Error: function( func, file ) {
+            errors.forEach(function( err ){
+                func( err[ 0 ] + (( err[2] === true ) ? " in " + file : ""), err[1] );
+            });
+            
         },
         Raw: function() {
             lines = content.split(/\r\n|\r|\n/);
