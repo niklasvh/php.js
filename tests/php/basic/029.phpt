@@ -14,9 +14,9 @@ mbstring.internal_encoding=UTF-8
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
-Content-Disposition: form-data; name="—\Ž\”\"
+Content-Disposition: form-data; name="ï¿½\ï¿½\ï¿½\"
 
-ƒhƒŒƒ~ƒtƒ@ƒ\
+ï¿½hï¿½ï¿½ï¿½~ï¿½tï¿½@ï¿½\
 -----------------------------20896060251896012921717172737
 Content-Disposition: form-data; name="pics"; filename="file1.txt"
 Content-Type: text/plain
@@ -46,6 +46,6 @@ array(1) {
   }
 }
 array(1) {
-  ["äºˆèš•èƒ½"]=>
-  string(18) "ãƒ‰ãƒ¬ãƒŸãƒ•ã‚¡ã‚½"
+  ["%s"]=>
+  string(%d) "%s"
 }

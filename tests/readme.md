@@ -1,12 +1,11 @@
 ### Test results ###
 
-Passed 471 out of 672 (70.1%)
+Passed 472 out of 672 (70.2%)
 
 Failed tests:
 
  - tests/php/basic/022.phpt
  - tests/php/basic/023.phpt
- - tests/php/basic/029.phpt
  - tests/php/basic/bug20539.phpt
  - tests/php/basic/bug54514.phpt
  - tests/php/basic/rfc1867_array_upload.phpt
