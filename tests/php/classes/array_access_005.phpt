@@ -69,9 +69,9 @@ array(1) {
   string(6) "JoeFoo"
 }
 
-Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line 46
+Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line %d
 string(6) "JoeFoo"
 
-Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line 48
+Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line %d
 string(6) "JoeFoo"
 ===DONE===
