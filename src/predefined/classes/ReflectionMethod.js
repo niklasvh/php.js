@@ -1,6 +1,6 @@
 /* automatically built from ReflectionMethod.php*/
 PHP.VM.Class.Predefined.ReflectionMethod = function( ENV, $$ ) {
-ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $ ){
+ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $, $$ ){
  M.Constant("IS_IMPLICIT_ABSTRACT", $$(16))
 .Constant("IS_EXPLICIT_ABSTRACT", $$(32))
 .Constant("IS_FINAL", $$(64))

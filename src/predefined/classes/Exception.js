@@ -1,6 +1,6 @@
 /* automatically built from Exception.php*/
 PHP.VM.Class.Predefined.Exception = function( ENV, $$ ) {
-ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
+ENV.$Class.New( "Exception", 0, {}, function( M, $, $$ ){
  M.Variable( "message", 2 )
 .Variable( "code", 2 )
 .Variable( "file", 2 )

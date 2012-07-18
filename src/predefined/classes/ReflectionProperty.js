@@ -1,6 +1,6 @@
 /* automatically built from ReflectionProperty.php*/
 PHP.VM.Class.Predefined.ReflectionProperty = function( ENV, $$ ) {
-ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $ ){
+ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $, $$ ){
  M.Constant("IS_STATIC", $$(1))
 .Constant("IS_PUBLIC", $$(256))
 .Constant("IS_PROTECTED", $$(512))

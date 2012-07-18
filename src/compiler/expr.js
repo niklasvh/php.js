@@ -519,3 +519,10 @@ PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
 
 };
 
+PHP.Compiler.prototype.Node_Expr_Clone = function( action ) {
+    
+    var src = "";
+    src += this.source( action.expr ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_CLONE + "( this )";
+    return src;
+
+};

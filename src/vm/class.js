@@ -1104,6 +1104,43 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
         };
         
+        Class.prototype[  COMPILER.CLASS_CLONE  ] = function( ctx ) {
+            
+            var cloned = new (ENV.$Class.Get( this[ COMPILER.CLASS_NAME ] ))(),
+            __clone = "__clone";
+            
+            console.log( this, ctx, this[ COMPILER.CLASS_NAME ], cloned );
+            
+            if ( this[ methodPrefix + __clone ] !== undefined ) {
+              
+                             
+                if ( checkType( this[ methodTypePrefix + __clone ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                   
+                    // targeted function is private and inaccessible from current context, 
+                    // but let's make sure current context doesn't have it's own private method that has been overwritten
+                    if ( !ctx instanceof PHP.VM.ClassPrototype || 
+                        ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ] === undefined ||
+                        ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] + "::" + __clone + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
+                    }
+                    
+                } else if ( checkType( this[ methodTypePrefix + __clone ], PROTECTED ) ) {
+                    // we are calling a protected method, let's see if we are inside it 
+                    if ( !( ctx instanceof PHP.VM.ClassPrototype) ) { // todo check actually parents as well 
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] + "::" + __clone + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                    }
+                }
+              
+            }
+            
+                
+                
+   
+                
+            
+            return new PHP.VM.Variable( cloned );
+        };
+        
         
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx, shutdown ) {
             // check if this class has been destructed already
@@ -1147,7 +1184,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 if ( shutdown === true ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 0", PHP.Constants.E_WARNING );
                     return;
-                }  else {
+                } else {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                 }
                 

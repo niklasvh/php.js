@@ -449,6 +449,8 @@ COMPILER.CLASS_GET = "$Class.Get";
 
 COMPILER.CLASS_STORED = "$StoredIn";
 
+COMPILER.CLASS_CLONE = "$CClone";
+
 COMPILER.CLASS_PROPERTY_GET = "$Prop";
 
 COMPILER.CLASS_PROPERTY_ISSET = "$PropIsset";
@@ -1052,7 +1054,13 @@ PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
 
 };
 
+PHP.Compiler.prototype.Node_Expr_Clone = function( action ) {
+    
+    var src = "";
+    src += this.source( action.expr ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_CLONE + "( this )";
+    return src;
 
+};
 PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
     console.log( action );
@@ -12055,6 +12063,43 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
         };
         
+        Class.prototype[  COMPILER.CLASS_CLONE  ] = function( ctx ) {
+            
+            var cloned = new (ENV.$Class.Get( this[ COMPILER.CLASS_NAME ] ))(),
+            __clone = "__clone";
+            
+            console.log( this, ctx, this[ COMPILER.CLASS_NAME ], cloned );
+            
+            if ( this[ methodPrefix + __clone ] !== undefined ) {
+              
+                             
+                if ( checkType( this[ methodTypePrefix + __clone ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                   
+                    // targeted function is private and inaccessible from current context, 
+                    // but let's make sure current context doesn't have it's own private method that has been overwritten
+                    if ( !ctx instanceof PHP.VM.ClassPrototype || 
+                        ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ] === undefined ||
+                        ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] + "::" + __clone + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
+                    }
+                    
+                } else if ( checkType( this[ methodTypePrefix + __clone ], PROTECTED ) ) {
+                    // we are calling a protected method, let's see if we are inside it 
+                    if ( !( ctx instanceof PHP.VM.ClassPrototype) ) { // todo check actually parents as well 
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] + "::" + __clone + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                    }
+                }
+              
+            }
+            
+                
+                
+   
+                
+            
+            return new PHP.VM.Variable( cloned );
+        };
+        
         
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx, shutdown ) {
             // check if this class has been destructed already
@@ -12098,7 +12143,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 if ( shutdown === true ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 0", PHP.Constants.E_WARNING );
                     return;
-                }  else {
+                } else {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                 }
                 
@@ -12264,8 +12309,6 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
         } else {
             if (combinedVariable[ VARIABLE.TYPE ] === VARIABLE.NULL && this[ VARIABLE.TYPE ] === VARIABLE.OBJECT) {
                this.TMPCTX =   combinedVariable[ VARIABLE.INSTANCE ];
-               console.log( combinedVariable );
-               console.log("heheheh");
             }
             
             this[ COMPILER.VARIABLE_VALUE ] = val;          
@@ -13484,7 +13527,7 @@ PHP.VM.Constants = function(  predefined, ENV ) {
 
 PHP.Constants.PHP_BINARY = "/bin/php";/* automatically built from Exception.php*/
 PHP.VM.Class.Predefined.Exception = function( ENV, $$ ) {
-ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
+ENV.$Class.New( "Exception", 0, {}, function( M, $, $$ ){
  M.Variable( "message", 2 )
 .Variable( "code", 2 )
 .Variable( "file", 2 )
@@ -13516,7 +13559,7 @@ return ENV.array([{v:ENV.array([{v:$$("Error2Exception"), k:$$("function")}])}, 
 
 };/* automatically built from ReflectionClass.php*/
 PHP.VM.Class.Predefined.ReflectionClass = function( ENV, $$ ) {
-ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $ ){
+ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $, $$ ){
  M.Constant("IS_IMPLICIT_ABSTRACT", $$(16))
 .Constant("IS_EXPLICIT_ABSTRACT", $$(32))
 .Constant("IS_FINAL", $$(64))
@@ -13550,12 +13593,12 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Co
 
 };/* automatically built from ReflectionException.php*/
 PHP.VM.Class.Predefined.ReflectionException = function( ENV, $$ ) {
-ENV.$Class.New( "ReflectionException", 0, {Extends: "Exception"}, function( M, $ ){
+ENV.$Class.New( "ReflectionException", 0, {Extends: "Exception"}, function( M, $, $$ ){
  M.Create()});
 
 };/* automatically built from ReflectionMethod.php*/
 PHP.VM.Class.Predefined.ReflectionMethod = function( ENV, $$ ) {
-ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $ ){
+ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $, $$ ){
  M.Constant("IS_IMPLICIT_ABSTRACT", $$(16))
 .Constant("IS_EXPLICIT_ABSTRACT", $$(32))
 .Constant("IS_FINAL", $$(64))
@@ -13579,7 +13622,7 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat
 
 };/* automatically built from ReflectionProperty.php*/
 PHP.VM.Class.Predefined.ReflectionProperty = function( ENV, $$ ) {
-ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $ ){
+ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $, $$ ){
  M.Constant("IS_STATIC", $$(1))
 .Constant("IS_PUBLIC", $$(256))
 .Constant("IS_PROTECTED", $$(512))
@@ -13599,17 +13642,17 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat
 
 };/* automatically built from stdClass.php*/
 PHP.VM.Class.Predefined.stdClass = function( ENV, $$ ) {
-ENV.$Class.New( "stdClass", 0, {}, function( M, $ ){
+ENV.$Class.New( "stdClass", 0, {}, function( M, $, $$ ){
  M.Create()});
 
 };/* automatically built from Traversable.php*/
 PHP.VM.Class.Predefined.Traversable = function( ENV, $$ ) {
-ENV.$Class.INew( "Traversable", [], function( M, $ ){
+ENV.$Class.INew( "Traversable", [], function( M, $, $$ ){
  M.Create()});
 
 };/* automatically built from ArrayAccess.php*/
 PHP.VM.Class.Predefined.ArrayAccess = function( ENV, $$ ) {
-ENV.$Class.INew( "ArrayAccess", [], function( M, $ ){
+ENV.$Class.INew( "ArrayAccess", [], function( M, $, $$ ){
  M.Method( "offsetExists", 1, [{name:"offset"}], function( $, ctx, $Static ) {
 })
 .Method( "offsetGet", 1, [{name:"offset"}], function( $, ctx, $Static ) {
@@ -13622,7 +13665,7 @@ ENV.$Class.INew( "ArrayAccess", [], function( M, $ ){
 
 };/* automatically built from Iterator.php*/
 PHP.VM.Class.Predefined.Iterator = function( ENV, $$ ) {
-ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $ ){
+ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $, $$ ){
  M.Method( "current", 1, [], function( $, ctx, $Static ) {
 })
 .Method( "key", 1, [], function( $, ctx, $Static ) {
@@ -13637,14 +13680,14 @@ ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $ ){
 
 };/* automatically built from IteratorAggregate.php*/
 PHP.VM.Class.Predefined.IteratorAggregate = function( ENV, $$ ) {
-ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $ ){
+ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $, $$ ){
  M.Method( "getIterator", 17, [], function( $, ctx, $Static ) {
 })
 .Create()});
 
 };/* automatically built from Reflector.php*/
 PHP.VM.Class.Predefined.Reflector = function( ENV, $$ ) {
-ENV.$Class.INew( "Reflector", [], function( M, $ ){
+ENV.$Class.INew( "Reflector", [], function( M, $, $$ ){
  M.Method( "export", 25, [], function( $, ctx, $Static ) {
 })
 .Method( "__toString", 17, [], function( $, ctx, $Static ) {

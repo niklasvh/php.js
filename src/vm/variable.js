@@ -81,8 +81,6 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
         } else {
             if (combinedVariable[ VARIABLE.TYPE ] === VARIABLE.NULL && this[ VARIABLE.TYPE ] === VARIABLE.OBJECT) {
                this.TMPCTX =   combinedVariable[ VARIABLE.INSTANCE ];
-               console.log( combinedVariable );
-               console.log("heheheh");
             }
             
             this[ COMPILER.VARIABLE_VALUE ] = val;          
