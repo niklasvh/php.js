@@ -570,14 +570,16 @@ PHP.VM.Variable = function( arg ) {
     );
     
     this[ COMPILER.DIM_UNSET ] = function( ctx, variable  ) {
-        
+         
+         var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get 
+         
         if ( this[ this.TYPE ] !== this.ARRAY ) {
             if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
                        
                 value[ COMPILER.METHOD_CALL ]( ctx, "offsetUnset", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetUnset          
             } 
         } else {
-        
+       
             value[ COMPILER.METHOD_CALL ]( ctx, "offsetUnset", variable );
         }
                 
