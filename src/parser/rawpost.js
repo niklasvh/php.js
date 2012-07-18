@@ -111,7 +111,8 @@ PHP.RAWPost = function( content ) {
     }
     console.log( items );
 
-    var storedFiles = [];
+    var storedFiles = [],
+    post;
     
     return {
         Post: function() {
@@ -121,7 +122,7 @@ PHP.RAWPost = function( content ) {
                     arr[ item.name ] = item.value;
                 }
             });
-          
+            post = arr;
             return arr;
         },  
         Files: function( max_filesize, path ) {
@@ -134,12 +135,18 @@ PHP.RAWPost = function( content ) {
                         var error = 0;
                         if ( item.value.length === 0 ) {
                             error = 4;
-                        } else if (item.value.length > max_filesize) {
+                        } else if (post.MAX_FILE_SIZE !== undefined && post.MAX_FILE_SIZE < item.value.length) {
+                            error = 2;
+                        } else if (item.value.length > max_filesize) {  
                             error = 1;
                         } else if (item.contentType.length === 0) {
                             error = 3;
                         }
                         
+                 
+                        item.filename = item.filename.substring(item.filename.lastIndexOf("/") + 1); 
+                        item.filename = item.filename.substring(item.filename.lastIndexOf("\\") + 1);
+                         
                         
                         if ( /^[a-z0-9]+\[\]/i.test(item.name) ) {
                             var name = item.name.replace(/\[\]/g,"");
