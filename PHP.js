@@ -44,6 +44,17 @@ var PHP = function( code, opts ) {
     
 
     
+    // needs to be called after RAW.Files
+    if (RAW_POST !== undefined ) {
+        RAW.WriteFiles( opts.filesystem.writeFileSync, opts.ini.upload_tmp_dir );
+    }
+    
+
+    
+    
+    
+    console.log("done!");
+    
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
     this.vm = new PHP.VM( this.compiler.src, opts );
@@ -10328,6 +10339,8 @@ PHP.RAWPost = function( content ) {
     }
     console.log( items );
 
+    var storedFiles = [];
+    
     return {
         Post: function() {
             var arr = {};
@@ -10375,6 +10388,8 @@ PHP.RAWPost = function( content ) {
                             arr[ name ].error.push(  error );
                             arr[ name ].size.push( ( error ) ? 0 : item.value.length );
                             
+
+                            
                         } else {
                             arr[ (item.name === undefined ) ? index : item.name ] = {
                                 name: item.filename,
@@ -10383,12 +10398,27 @@ PHP.RAWPost = function( content ) {
                                 error: error,
                                 size: ( error ) ? 0 : item.value.length
                             }
+                            
+                           
+                        }
+                        
+                        // store file
+                        if ( !error ) {
+                            storedFiles.push({
+                                name: item.filename, 
+                                content: item.value
+                            });
                         }
                     }
                 }
             });
           
             return arr;
+        },
+        WriteFiles: function( func, path ) {
+            storedFiles.forEach( function( item ){
+                func( path + item.name, item.content );
+            });
         },
         Error: function() {
             return errorMsg;

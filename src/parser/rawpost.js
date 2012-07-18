@@ -111,6 +111,8 @@ PHP.RAWPost = function( content ) {
     }
     console.log( items );
 
+    var storedFiles = [];
+    
     return {
         Post: function() {
             var arr = {};
@@ -122,7 +124,7 @@ PHP.RAWPost = function( content ) {
           
             return arr;
         },  
-        Files: function( max_filesize ) {
+        Files: function( max_filesize, path ) {
             var arr = {};
             items.forEach(function( item, index ){
                
@@ -154,24 +156,41 @@ PHP.RAWPost = function( content ) {
                             
                             arr[ name ].name.push( item.filename );
                             arr[ name ].type.push( ( error ) ? "" :item.contentType );
-                            arr[ name ].tmp_name.push( ( error ) ? "" : item.filename );
+                            arr[ name ].tmp_name.push( ( error ) ? "" : path + item.filename );
                             arr[ name ].error.push(  error );
                             arr[ name ].size.push( ( error ) ? 0 : item.value.length );
+                            
+
                             
                         } else {
                             arr[ (item.name === undefined ) ? index : item.name ] = {
                                 name: item.filename,
                                 type: ( error ) ? "" : item.contentType,
-                                tmp_name: ( error ) ? "" : item.filename,
+                                tmp_name: ( error ) ? "" : path + item.filename,
                                 error: error,
                                 size: ( error ) ? 0 : item.value.length
                             }
+                            
+                           
+                        }
+                        
+                        // store file
+                        if ( !error ) {
+                            storedFiles.push({
+                                name: path + item.filename, 
+                                content: item.value
+                            });
                         }
                     }
                 }
             });
           
             return arr;
+        },
+        WriteFiles: function( func ) {
+            storedFiles.forEach( function( item ){
+                func( item.name, item.content );
+            });
         },
         Error: function() {
             return errorMsg;

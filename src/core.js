@@ -40,9 +40,20 @@ var PHP = function( code, opts ) {
     opts.RAW_POST = ( RAW_POST !== undefined ) ? RAW.Raw() : (POST !== undefined ) ? POST.trim() :  "";
     opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
     
-    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize ) : {};
+    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.upload_tmp_dir ) : {};
     
 
+    
+    // needs to be called after RAW.Files
+    if (RAW_POST !== undefined ) {
+        RAW.WriteFiles( opts.filesystem.writeFileSync );
+    }
+    
+
+    
+    
+    
+    console.log("done!");
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
