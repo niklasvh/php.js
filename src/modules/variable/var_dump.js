@@ -13,10 +13,11 @@ PHP.Modules.prototype.var_dump = function() {
     VAR = PHP.VM.Variable.prototype;
     
     var $dump = function( argument, indent ) {
+     
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ],
         ARG_TYPE = argument[ VAR.TYPE ]; // trigger get for undefined
-       
+          console.log( value, argument, ARG_TYPE );
         str += $INDENT( indent );
         
         /*

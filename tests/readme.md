@@ -1,14 +1,12 @@
 ### Test results ###
 
-Passed 489 out of 672 (72.8%)
+Passed 491 out of 672 (73.1%)
 
 Failed tests:
 
  - tests/php/basic/022.phpt
  - tests/php/basic/023.phpt
  - tests/php/basic/bug20539.phpt
- - tests/php/classes/array_access_010.phpt
- - tests/php/classes/array_access_011.phpt
  - tests/php/classes/autoload_020.phpt
  - tests/php/classes/bug26737.phpt
  - tests/php/classes/bug27468.phpt

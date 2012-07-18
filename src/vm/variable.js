@@ -571,7 +571,7 @@ PHP.VM.Variable = function( arg ) {
     
     this[ COMPILER.DIM_UNSET ] = function( ctx, variable  ) {
          
-         var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get 
+        var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get 
          
         if ( this[ this.TYPE ] !== this.ARRAY ) {
             if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
@@ -588,10 +588,17 @@ PHP.VM.Variable = function( arg ) {
     };
 
     this[ COMPILER.DIM_ISSET ] = function( ctx, variable  ) {
-        if ( this[ this.TYPE ] !== this.ARRAY ) {
-            if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
+        
+        var $this = this;
+        
+        if ( this[ this.REFERRING ] !== undefined ) {
+            $this = this[ this.REFERRING ];
+        }
+        
+        if ( $this[ this.TYPE ] !== this.ARRAY ) {
+            if ( $this[ this.TYPE ] === this.OBJECT && $this.val[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
                        
-                var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
+                var exists = $this.val[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
                 return exists;
       
                         
@@ -601,7 +608,7 @@ PHP.VM.Variable = function( arg ) {
             }
         } 
         
-        var returning = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+        var returning = $this.val[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
                 
         return (returning[ this.DEFINED ] === true );
 
@@ -780,9 +787,13 @@ PHP.VM.Variable = function( arg ) {
                 } 
   
                 //  console.log(value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ));
-               
+                var returning;
+                if ( value === null ) {
+                    returning = this[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                } else {
+                    returning = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
+                }
                 
-                var returning = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
                 
 
                 

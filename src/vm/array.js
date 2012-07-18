@@ -206,7 +206,7 @@ PHP.VM.Array = function( ENV ) {
                 //    
              
                 var variable = new PHP.VM.Variable();
-                
+               
                 variable[ VARIABLE.REGISTER_SETTER ] = function() {
                     // the value was actually defined, let's register item into array
             
