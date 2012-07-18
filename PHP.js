@@ -10420,6 +10420,12 @@ PHP.RAWPost = function( content ) {
                          
                         
                         if ( /^[a-z0-9]+\[\]/i.test(item.name) ) {
+                            
+                            if (!/^[a-z0-9]+\[\]$/i.test(item.name)) {
+                                // malicious input
+                                return;
+                            }
+                            
                             var name = item.name.replace(/\[\]/g,"");
                             
                             if ( arr[ name ] === undefined ) {
