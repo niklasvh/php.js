@@ -90,6 +90,11 @@ PHP.RAWPost = function( content ) {
                     }
                 });
             }
+            
+            if ( parts.length === 0 && item !== undefined ) {
+                item.garbled = true;
+            }
+            
         } else if ( startCapture ) {    
             if (line.length === 0 && itemValue !== undefined && itemValue.length > 0) {
                 line =  "\n";
@@ -119,6 +124,12 @@ PHP.RAWPost = function( content ) {
             var arr = {};
             items.forEach(function( item ){
                 if ( item.filename === undefined ) {
+                    
+                    if ( item.garbled === true )  {
+                        errorMsg = "File Upload Mime headers garbled";
+                        return;
+                    } 
+                    
                     arr[ item.name ] = item.value;
                 }
             });
@@ -128,8 +139,13 @@ PHP.RAWPost = function( content ) {
         Files: function( max_filesize, path ) {
             var arr = {};
             items.forEach(function( item, index ){
-               
+  
+                
                 if ( item.filename !== undefined ) {
+                    
+                                  
+                    
+                    
                     if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
                        
                         var error = 0;

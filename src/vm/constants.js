@@ -51,3 +51,7 @@ PHP.VM.Constants = function(  predefined, ENV ) {
     return methods;
     
 };
+
+// manually defined constants
+
+PHP.Constants.PHP_BINARY = "/bin/php";

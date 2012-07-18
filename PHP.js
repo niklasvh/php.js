@@ -31,18 +31,15 @@ var PHP = function( code, opts ) {
     RAW_POST = opts.RAW_POST,
     RAW = (RAW_POST !== undefined ) ? PHP.RAWPost( RAW_POST ) : {};
     
-    if (RAW_POST !== undefined ) {
-        var rawError = RAW.Error();
-    }
-
-   
     opts.POST = ( POST !== undefined ) ? PHP.Utils.QueryString( POST ) : (RAW_POST !== undefined ) ? RAW.Post() : {};
     opts.RAW_POST = ( RAW_POST !== undefined ) ? RAW.Raw() : (POST !== undefined ) ? POST.trim() :  "";
     opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
     
     opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.upload_tmp_dir ) : {};
     
-
+    if (RAW_POST !== undefined ) {
+        var rawError = RAW.Error();
+    }
     
     // needs to be called after RAW.Files
     if (RAW_POST !== undefined ) {
@@ -3122,6 +3119,20 @@ PHP.Modules.prototype.is_uploaded_file = function( filenameObj ) {
     return new PHP.VM.Variable( true );
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 18.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.realpath = function( filenameObj ) {
+    var COMPILER = PHP.Compiler.prototype,
+    filename = filenameObj[ COMPILER.VARIABLE_VALUE ];
+    
+    // todo implement properly
+                        
+    return new PHP.VM.Variable( filename );
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 17.7.2012 
 * @website http://hertzen.com
  */
@@ -3500,6 +3511,31 @@ PHP.Modules.prototype.ini_set = PHP.Modules.prototype.ini_alter = function( varn
 };
 
 /* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 18.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.getenv = function( name ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    variableValue = name[ COMPILER.VARIABLE_VALUE ];
+ 
+ 
+    switch( variableValue ) {
+        case "TEST_PHP_EXECUTABLE":
+            console.log(PHP.Constants.PHP_BINARY);
+            return new PHP.VM.Variable( PHP.Constants.PHP_BINARY )
+            break;
+        default:
+            return new PHP.VM.Variable( false );
+        
+    }
+};
+    /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 11.7.2012 
 * @website http://hertzen.com
@@ -10391,6 +10427,11 @@ PHP.RAWPost = function( content ) {
                     }
                 });
             }
+            
+            if ( parts.length === 0 && item !== undefined ) {
+                item.garbled = true;
+            }
+            
         } else if ( startCapture ) {    
             if (line.length === 0 && itemValue !== undefined && itemValue.length > 0) {
                 line =  "\n";
@@ -10420,6 +10461,12 @@ PHP.RAWPost = function( content ) {
             var arr = {};
             items.forEach(function( item ){
                 if ( item.filename === undefined ) {
+                    
+                    if ( item.garbled === true )  {
+                        errorMsg = "File Upload Mime headers garbled";
+                        return;
+                    } 
+                    
                     arr[ item.name ] = item.value;
                 }
             });
@@ -10429,8 +10476,13 @@ PHP.RAWPost = function( content ) {
         Files: function( max_filesize, path ) {
             var arr = {};
             items.forEach(function( item, index ){
-               
+  
+                
                 if ( item.filename !== undefined ) {
+                    
+                                  
+                    
+                    
                     if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
                        
                         var error = 0;
@@ -13015,7 +13067,11 @@ PHP.VM.Constants = function(  predefined, ENV ) {
     
     return methods;
     
-};/* automatically built from Exception.php*/
+};
+
+// manually defined constants
+
+PHP.Constants.PHP_BINARY = "/bin/php";/* automatically built from Exception.php*/
 PHP.VM.Class.Predefined.Exception = function( ENV, $$ ) {
 ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
  M.Variable( "message", 2 )

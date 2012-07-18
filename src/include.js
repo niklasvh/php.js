@@ -63,6 +63,7 @@ var files = {
                 file_get_contents: "js",
                 fopen: "js",
                 is_uploaded_file: "js",
+                realpath: "js",
                 rename: "js"
             },
             functions: {
@@ -91,6 +92,7 @@ var files = {
                 assert: "js",
                 ini_get: "js",
                 ini_set: "js",
+                getenv: "js",
                 set_time_limit: "js"
             },
             output: {
