@@ -67,6 +67,8 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
 
+
+
     if ( arguments.length > 1 ) {
         this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
     } else {
@@ -542,7 +544,8 @@ PHP.VM.Variable = function( arg ) {
                     return new PHP.VM.Variable("")
                 }
                      
-            } else if (this[ this.TYPE ] === this.BOOL) {
+            }
+            else if (this[ this.TYPE ] === this.BOOL) {
                 return new PHP.VM.Variable( ( value ) ? "1" : "0" );
             } else if (this[ this.TYPE ] === this.INT) {
                 return new PHP.VM.Variable(  value + "" );
@@ -628,6 +631,17 @@ PHP.VM.Variable = function( arg ) {
                 
                 var $this = this;
                 
+                
+                if ( typeof this[this.REGISTER_GETTER ] === "function" ) {
+                    var returned = this[ this.REGISTER_GETTER ]();
+                    if ( returned instanceof PHP.VM.Variable ) {
+                        this[ this.TYPE ] = returned[ this.TYPE ];
+                        this[ this.DEFINED ] = returned[ this.DEFINED ];
+                        return returned[ COMPILER.DIM_FETCH ]( ctx, variable );
+                    }
+                    
+                }
+                
                 if ( this[ this.TYPE ] === this.INT ) {
                     this.ENV[ COMPILER.ERROR ]("Cannot use a scalar value as an array", PHP.Constants.E_WARNING, true );    
                     return new PHP.VM.Variable();
@@ -645,13 +659,13 @@ PHP.VM.Variable = function( arg ) {
                 
 
           
-                if ( this[ this.TYPE ] !== this.ARRAY ) {
-                    if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
+                if ( $this[ this.TYPE ] !== this.ARRAY ) {
+                    if ( $this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
                        
                         var dimHandler = new PHP.VM.Variable();
                         dimHandler[ this.REGISTER_GETTER ] = function() {
                             var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
-                        
+                            val [ $this.OVERLOADED ] = true;
                             if ( val[ this.DEFINED ] !== true ) {
                                 this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );    
                                 return new PHP.VM.Variable();
@@ -683,7 +697,25 @@ PHP.VM.Variable = function( arg ) {
                         dimHandler[ this.REF ] = function() {
                             this.ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot assign by reference to overloaded object", PHP.Constants.E_ERROR, true ); 
                         };
+                        /*                  
+                        delete dimHandler.$Dim;
                         
+                        Object.defineProperty( dimHandler, COMPILER.DIM_FETCH,
+                        {
+                            get : function(){
+                                return function( ctx, variable ) {
+                                    console.log("sup", variable);
+                                }
+                            }
+                        });
+                        
+                       dimHandler[ COMPILER.DIM_FETCH ] = function() {
+                           console.log("yo");
+                       }
+                        
+                        
+                        console.log("sending!", dimHandler);
+                        */
                         return dimHandler;
                        
                         
@@ -766,6 +798,8 @@ PHP.VM.Variable.prototype.ARRAY = 5;
 PHP.VM.Variable.prototype.OBJECT = 6;
 PHP.VM.Variable.prototype.RESOURCE = 7;
 PHP.VM.Variable.prototype.LAMBDA = 8;
+
+PHP.VM.Variable.prototype.OVERLOADED = "$Overloaded";
 
 PHP.VM.Variable.prototype.TYPE = "type";
 
