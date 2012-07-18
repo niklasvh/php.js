@@ -117,17 +117,16 @@ PHP_Tests.prototype.buildTest = function( path, callback ) {
               
     this.loadJSON('/?file=' + path, function( json ){
         var engine = {},
-        RAW = (json.POST_RAW !== undefined ) ? PHP.RAWPost( json.POST_RAW ) : {},
+
         opts = {
-            POST: ( json.POST !== undefined ) ? PHP.Utils.QueryString( json.POST ) : (json.POST_RAW !== undefined ) ? RAW.Post() : {},
-            RAW_POST: ( json.POST !== undefined ) ?  json.POST.trim()  : (json.POST_RAW !== undefined ) ? RAW.Raw() : "",
-            GET: ( json.GET !== undefined ) ? PHP.Utils.QueryString( json.GET ) : {},
+            POST: json.POST,
+            RAW_POST: json.POST_RAW,
+            GET: json.GET,
             ini: (json.INI !== undefined ) ? PHP.ini( json.INI ) : {},
             SERVER: {
                 SCRIPT_FILENAME: path.substring(0, path.length - 1)
             //    SCRIPT_FILENAME: "%s"
-            },
-            FILES: (json.POST_RAW !== undefined ) ? RAW.Files() : {}
+            }
         };
                     
         

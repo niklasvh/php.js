@@ -17,7 +17,6 @@ var PHP = function( code, opts ) {
         return this;
     }
     
-    
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" );
 
     var iniSet = opts.ini;
@@ -28,11 +27,36 @@ var PHP = function( code, opts ) {
     }, opts.ini);
   
     
+    var POST = opts.POST,
+    RAW_POST = opts.RAW_POST,
+    RAW = (RAW_POST !== undefined ) ? PHP.RAWPost( RAW_POST ) : {};
+    
+    if (RAW_POST !== undefined ) {
+        var rawError = RAW.Error();
+    }
+
+   
+    opts.POST = ( POST !== undefined ) ? PHP.Utils.QueryString( POST ) : (RAW_POST !== undefined ) ? RAW.Post() : {};
+    opts.RAW_POST = ( RAW_POST !== undefined ) ? RAW.Raw() : (POST !== undefined ) ? POST.trim() :  "";
+    opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
+    
+    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize ) : {};
+    
+
+    
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
     this.vm = new PHP.VM( this.compiler.src, opts );
     
-
+    if (rawError !== undefined ) {
+        this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING ); 
+    }
+          
+    
+    this.vm.Run();
+    
+    
+   
     
 };
 
@@ -10209,6 +10233,7 @@ PHP.RAWPost = function( content ) {
     items = [],
     startCapture,
     itemValue,
+    errorMsg,
     boundary;
     
     function is( part, item ) {
@@ -10236,16 +10261,30 @@ PHP.RAWPost = function( content ) {
           
             
             parts[ 1 ] = ( parts[ 1 ] !== undefined ) ? parts[ 1 ].trim() : undefined;
-            if ( is( parts[ 1 ], BOUNDARY) ) {
+            
+            
+            if (parts[ 0 ].substring( CONTENT_TYPE.length ).trim() === "multipart/form-data") {
+                if ( is( parts[ 1 ], BOUNDARY) ) {
 
                   
-                var part = parts[ 1 ].split(",");
-                part = part[ 0 ];
+                    var part = parts[ 1 ].split(",");
+                    part = part[ 0 ];
                
-                boundary = part.substring( BOUNDARY.length ).replace(/[-"]/g,"").trim(); 
+                    boundary = part.substring( BOUNDARY.length ).replace(/[-]/g,"").trim(); 
+              
+                    // starts OR finishes with quotes
+                    if (boundary.substring(0,1) === '"' || boundary.substr(-1,1) === '"') {
+                        // starts AND finishes with quotes
+                        if (boundary.substring(0,1) === '"' && boundary.substr(-1,1) === '"') {
+                            boundary = boundary.substring(1, boundary.length - 1);
+                        } else {
+                            errorMsg = "Invalid boundary in multipart/form-data POST data";
+                        }
+                    }
                 
-             
-
+                } else {
+                    errorMsg = "Missing boundary in multipart/form-data POST data";
+                }
             }
         } else if ( is( parts[ 0 ], CONTENT_DISPOSITION ) ) {
             if ( item !== undefined ) {
@@ -10300,13 +10339,22 @@ PHP.RAWPost = function( content ) {
           
             return arr;
         },  
-        Files: function() {
+        Files: function( max_filesize ) {
             var arr = {};
             items.forEach(function( item, index ){
                
                 if ( item.filename !== undefined ) {
                     if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
-                        var error = (item.contentType.length === 0 || item.value.length === 0);
+                       
+                        var error = 0;
+                        if ( item.value.length === 0 ) {
+                            error = 4;
+                        } else if (item.value.length > max_filesize) {
+                            error = 1;
+                        } else if (item.contentType.length === 0) {
+                            error = 3;
+                        }
+                        
                         
                         if ( /^[a-z0-9]+\[\]/i.test(item.name) ) {
                             var name = item.name.replace(/\[\]/g,"");
@@ -10324,7 +10372,7 @@ PHP.RAWPost = function( content ) {
                             arr[ name ].name.push( item.filename );
                             arr[ name ].type.push( ( error ) ? "" :item.contentType );
                             arr[ name ].tmp_name.push( ( error ) ? "" : item.filename );
-                            arr[ name ].error.push( ( error ) ? 3 :  0 );
+                            arr[ name ].error.push(  error );
                             arr[ name ].size.push( ( error ) ? 0 : item.value.length );
                             
                         } else {
@@ -10332,7 +10380,7 @@ PHP.RAWPost = function( content ) {
                                 name: item.filename,
                                 type: ( error ) ? "" : item.contentType,
                                 tmp_name: ( error ) ? "" : item.filename,
-                                error: ( error ) ? ( item.value.length === 0 ) ? 4 : 3 : 0,
+                                error: error,
                                 size: ( error ) ? 0 : item.value.length
                             }
                         }
@@ -10341,6 +10389,9 @@ PHP.RAWPost = function( content ) {
             });
           
             return arr;
+        },
+        Error: function() {
+            return errorMsg;
         },
         Raw: function() {
             lines = content.split(/\r\n|\r|\n/);
@@ -10567,30 +10618,33 @@ PHP.VM = function( src, opts ) {
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
     });
     
-    
-    if ( false ) {
+    this.Run = function() {
+        if ( false ) {
     
   
-        var exec = new Function( "$$", "$", "ENV", src  );
-        exec.call(this, $$, $, ENV);
+            var exec = new Function( "$$", "$", "ENV", src  );
+            exec.call(this, $$, $, ENV);
     
      
-    } else {
-        try {
-            var exec = new Function( "$$", "$", "ENV",  src  );
-            exec.call(this, $$, $, ENV);
-            this.$obflush.call( ENV );  
-            this.$shutdown.call( ENV );
+        } else {
+            try {
+                var exec = new Function( "$$", "$", "ENV",  src  );
+                exec.call(this, $$, $, ENV);
+                this.$obflush.call( ENV );  
+                this.$shutdown.call( ENV );
           
-        } catch( e ) {
+            } catch( e ) {
         
-            console.log("Caught: ", e.message, e);
-            console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
+                console.log("Caught: ", e.message, e);
+                console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
         
+            }
         }
-    }
 
-    this.OUTPUT_BUFFER = this.$strict + this.OUTPUT_BUFFERS.join("");
+        this.OUTPUT_BUFFER = this.$strict + this.OUTPUT_BUFFERS.join("");
+    }.bind( this );
+    
+
 };
 
 PHP.VM.prototype = new PHP.Modules();

@@ -211,30 +211,33 @@ PHP.VM = function( src, opts ) {
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
     });
     
-    
-    if ( false ) {
+    this.Run = function() {
+        if ( false ) {
     
   
-        var exec = new Function( "$$", "$", "ENV", src  );
-        exec.call(this, $$, $, ENV);
+            var exec = new Function( "$$", "$", "ENV", src  );
+            exec.call(this, $$, $, ENV);
     
      
-    } else {
-        try {
-            var exec = new Function( "$$", "$", "ENV",  src  );
-            exec.call(this, $$, $, ENV);
-            this.$obflush.call( ENV );  
-            this.$shutdown.call( ENV );
+        } else {
+            try {
+                var exec = new Function( "$$", "$", "ENV",  src  );
+                exec.call(this, $$, $, ENV);
+                this.$obflush.call( ENV );  
+                this.$shutdown.call( ENV );
           
-        } catch( e ) {
+            } catch( e ) {
         
-            console.log("Caught: ", e.message, e);
-            console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
+                console.log("Caught: ", e.message, e);
+                console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
         
+            }
         }
-    }
 
-    this.OUTPUT_BUFFER = this.$strict + this.OUTPUT_BUFFERS.join("");
+        this.OUTPUT_BUFFER = this.$strict + this.OUTPUT_BUFFERS.join("");
+    }.bind( this );
+    
+
 };
 
 PHP.VM.prototype = new PHP.Modules();

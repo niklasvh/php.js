@@ -17,7 +17,6 @@ var PHP = function( code, opts ) {
         return this;
     }
     
-    
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" );
 
     var iniSet = opts.ini;
@@ -28,11 +27,36 @@ var PHP = function( code, opts ) {
     }, opts.ini);
   
     
+    var POST = opts.POST,
+    RAW_POST = opts.RAW_POST,
+    RAW = (RAW_POST !== undefined ) ? PHP.RAWPost( RAW_POST ) : {};
+    
+    if (RAW_POST !== undefined ) {
+        var rawError = RAW.Error();
+    }
+
+   
+    opts.POST = ( POST !== undefined ) ? PHP.Utils.QueryString( POST ) : (RAW_POST !== undefined ) ? RAW.Post() : {};
+    opts.RAW_POST = ( RAW_POST !== undefined ) ? RAW.Raw() : (POST !== undefined ) ? POST.trim() :  "";
+    opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
+    
+    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize ) : {};
+    
+
+    
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
     this.vm = new PHP.VM( this.compiler.src, opts );
     
-
+    if (rawError !== undefined ) {
+        this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING ); 
+    }
+          
+    
+    this.vm.Run();
+    
+    
+   
     
 };
 

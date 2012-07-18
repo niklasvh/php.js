@@ -68,14 +68,17 @@ function runTest ( file, complete ) {
           */                  
         RAW = (test.POST_RAW !== undefined ) ? PHP.RAWPost( test.POST_RAW ) : {},
         opts = {
-            POST: ( test.POST !== undefined ) ? PHP.Utils.QueryString( test.POST ) : (test.POST_RAW !== undefined ) ? RAW.Post() : {},
-            GET: ( test.GET !== undefined ) ? PHP.Utils.QueryString( test.GET ) : {},
-            RAW_POST: ( test.POST !== undefined ) ?  test.POST.trim()  : (test.POST_RAW !== undefined ) ? RAW.Raw() : "",
+            POST: test.POST,
+            RAW_POST: test.POST_RAW,
+            GET: test.GET,
+            //        POST: ( test.POST !== undefined ) ? PHP.Utils.QueryString( test.POST ) : (test.POST_RAW !== undefined ) ? RAW.Post() : {},
+            //      GET: ( test.GET !== undefined ) ? PHP.Utils.QueryString( test.GET ) : {},
+            //    RAW_POST: ( test.POST !== undefined ) ?  test.POST.trim()  : (test.POST_RAW !== undefined ) ? RAW.Raw() : "",
             SERVER: {
                 SCRIPT_FILENAME: __dirname.replace(/\\/g,"/") + "/" + file.substring(5, file.length - 1)
             },
             ini: (test.INI !== undefined ) ? PHP.ini( test.INI ) : {},
-            FILES: (test.POST_RAW !== undefined ) ? RAW.Files() : {}
+        //       FILES: (test.POST_RAW !== undefined ) ? RAW.Files() : {}
         };
                    
                     

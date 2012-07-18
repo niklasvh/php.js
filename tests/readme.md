@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 463 out of 672 (68.9%)
+Passed 465 out of 672 (69.2%)
 
 Failed tests:
 
@@ -13,12 +13,10 @@ Failed tests:
  - tests/php/basic/rfc1867_array_upload.phpt
  - tests/php/basic/rfc1867_empty_upload.phpt
  - tests/php/basic/rfc1867_garbled_mime_headers.phpt
- - tests/php/basic/rfc1867_invalid_boundary.phpt
  - tests/php/basic/rfc1867_malicious_input.phpt
  - tests/php/basic/rfc1867_max_file_size.phpt
  - tests/php/basic/rfc1867_max_file_uploads_empty_files.phpt
  - tests/php/basic/rfc1867_max_file_uploads_empty_files_debug.phpt
- - tests/php/basic/rfc1867_missing_boundary.phpt
  - tests/php/basic/rfc1867_post_max_filesize.phpt
  - tests/php/classes/abstract_static.phpt
  - tests/php/classes/array_access_005.phpt
