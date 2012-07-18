@@ -61,6 +61,7 @@ var files = {
                 fclose: "js",
                 file_get_contents: "js",
                 fopen: "js",
+                is_uploaded_file: "js",
                 rename: "js"
             },
             functions: {

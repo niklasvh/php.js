@@ -56,14 +56,26 @@ function runTest ( file ) {
         if (err) throw err;
         var test = parsePHPT( data );
         
+        var content = fs.readFileSync( 'PHP.js', 'utf8') ;
+
+
+        eval(content + "GLOBAL.PHP = PHP; ");
+      
         
         var engine = {},
+                
         opts = {
-            POST: ( test.POST !== undefined ) ? PHP.Utils.QueryString( test.POST ) : {},
-            GET: ( test.GET !== undefined ) ? PHP.Utils.QueryString( test.GET ) : {},
+            POST: test.POST,
+            RAW_POST: test.POST_RAW,
+            GET: test.GET,
+            //        POST: ( test.POST !== undefined ) ? PHP.Utils.QueryString( test.POST ) : (test.POST_RAW !== undefined ) ? RAW.Post() : {},
+            //      GET: ( test.GET !== undefined ) ? PHP.Utils.QueryString( test.GET ) : {},
+            //    RAW_POST: ( test.POST !== undefined ) ?  test.POST.trim()  : (test.POST_RAW !== undefined ) ? RAW.Raw() : "",
             SERVER: {
-                SCRIPT_FILENAME: __dirname.replace(/\\/g,"/") + "/" + file.substring(6, file.length - 1)
-            }
+                SCRIPT_FILENAME: __dirname.replace(/\\/g,"/") + "/" + file.substring(5, file.length - 1)
+            },
+            ini: (test.INI !== undefined ) ? PHP.ini( test.INI ) : {},
+        //       FILES: (test.POST_RAW !== undefined ) ? RAW.Files() : {}
         };
                     
                    
@@ -84,18 +96,13 @@ function runTest ( file ) {
                     
         opts.filesystem = fs;
                     
-        var content = fs.readFileSync( 'PHP.js', 'utf8') ;
 
-
-        //    var php = require('F:/Websites/php.js/PHP.js');
-        //     engine = new php.PHP( php.PHP.Lexer(test.FILE), opts );
-        eval(content + "GLOBAL.PHP = PHP; ");
-        engine = new PHP( test.FILE, opts );
         //     var exec = new Function( "test", "opts", content + "return new PHP( PHP.Lexer(test.FILE), opts );" );
         //    engine = exec.call({}, test, opts);
-            
-           
-     
+        var log = console.log;
+     console.log = function() {};       
+             engine = new PHP( test.FILE, opts );
+
         
 
               
@@ -115,17 +122,18 @@ function runTest ( file ) {
                         
         } else {
             //   diff( expect, output );
-            console.log( output );
+
             expectResult = (expect === output);
         }
             
-                                
+                           log( output );       
         if ( expectResult ) {
         //     console.log( "SUCCESS " + file, output );
-           
+                     
+            log("SUCCESS")
         } else {
     //   console.log( "FAILED " + file, output );
-       
+           log("FAILED")
     }
         
         
@@ -144,4 +152,4 @@ function runTest ( file ) {
 
 
 
-runTest("tests/php/classes/this.phpt");
+runTest("tests/php/basic/rfc1867_post_max_filesize.phpt");

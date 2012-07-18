@@ -55,7 +55,7 @@ function runTest ( file, complete ) {
         var content = fs.readFileSync( 'PHP.js', 'utf8') ;
 
         eval( content + "GLOBAL.PHP = PHP; " );
-        
+             
         var engine = {},
         /*
         opts = {
@@ -66,7 +66,7 @@ function runTest ( file, complete ) {
             }
         },
           */                  
-        RAW = (test.POST_RAW !== undefined ) ? PHP.RAWPost( test.POST_RAW ) : {},
+        
         opts = {
             POST: test.POST,
             RAW_POST: test.POST_RAW,

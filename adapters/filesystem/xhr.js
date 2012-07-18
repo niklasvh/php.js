@@ -30,7 +30,17 @@ PHP.Adapters.XHRFileSystem = function() {
     */
     
     
-}; 
+    }; 
+
+PHP.Adapters.XHRFileSystem.prototype.lstatSync = function( filename ) {
+    
+    if (localStorage[ filename ] === undefined ) {
+        throw Error; 
+    } else {
+        return true;
+    }
+    
+}
 
 PHP.Adapters.XHRFileSystem.prototype.error = function( e ) {
     this.db = false;
@@ -43,7 +53,7 @@ PHP.Adapters.XHRFileSystem.prototype.writeFileSync = function( filename, data ) 
     
     localStorage[ filename ] = data;
     
-    /*
+/*
     if ( this.db === false ) {
         return;
     }
@@ -75,24 +85,35 @@ PHP.Adapters.XHRFileSystem.prototype.writeFileSync = function( filename, data ) 
     
 };
 
-PHP.Adapters.XHRFileSystem.prototype.readFileSync = function( filename ) {
-    var xhr = new XMLHttpRequest();
+PHP.Adapters.XHRFileSystem.prototype.readFileSync = function( filename, xhr ) {
     
-    xhr.open('GET', filename, false); // async set to false!
+    if ( xhr === undefined ) {
     
-    var response; 
-    xhr.onload = function() {
-        response = this.response; 
+        var xhr = new XMLHttpRequest();
+    
+        xhr.open('GET', filename, false); // async set to false!
+    
+        var response; 
+        xhr.onload = function() {
+            response = this.response; 
    
-    };
+        };
 
-    xhr.send();
+        xhr.send();
     
-    return response;
+        return response;
+    } else {
+        if (localStorage[ filename ] === undefined ) {
+            throw Error; 
+        } else {
+            return localStorage[ filename ];
+        }
+    }
 
     
 };
-
+PHP.Adapters.XHRFileSystem.prototype.xhr = true;
+ 
 PHP.Adapters.XHRFileSystem.prototype.version = "1.2";
 
 PHP.Adapters.XHRFileSystem.prototype.FILES = "files";

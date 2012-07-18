@@ -40,13 +40,13 @@ var PHP = function( code, opts ) {
     opts.RAW_POST = ( RAW_POST !== undefined ) ? RAW.Raw() : (POST !== undefined ) ? POST.trim() :  "";
     opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
     
-    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize ) : {};
+    opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.upload_tmp_dir ) : {};
     
 
     
     // needs to be called after RAW.Files
     if (RAW_POST !== undefined ) {
-        RAW.WriteFiles( opts.filesystem.writeFileSync, opts.ini.upload_tmp_dir );
+        RAW.WriteFiles( opts.filesystem.writeFileSync );
     }
     
 
@@ -3066,8 +3066,17 @@ PHP.Modules.prototype.file_get_contents = function( filenameObj ) {
     if ( filename === "php://input") {
         return new PHP.VM.Variable( this.INPUT_BUFFER );
     } else {
-        this.ENV[ COMPILER.ERROR ]("file_get_contents(" + filename + "): failed to open stream: No such file or directory", PHP.Constants.E_WARNING, true );    
-        return new PHP.VM.Variable( new PHP.VM.Resource() );
+
+        try {
+            if ( PHP.Adapters.XHRFileSystem !== undefined ) {
+                return new PHP.VM.Variable(  this[ COMPILER.FILESYSTEM ].readFileSync( filename, true ) );
+            } else {
+                return new PHP.VM.Variable(  this[ COMPILER.FILESYSTEM ].readFileSync( filename ).toString() );
+            }
+        } catch( e ) {
+            this.ENV[ COMPILER.ERROR ]("file_get_contents(" + filename + "): failed to open stream: No such file or directory", PHP.Constants.E_WARNING, true );    
+            return new PHP.VM.Variable( false );
+        }
     }            
 
 };/* 
@@ -3084,6 +3093,27 @@ PHP.Modules.prototype.fopen = function( filenameObj ) {
     this.ENV[ COMPILER.ERROR ]("fopen(" + filename + "): failed to open stream: No such file or directory", PHP.Constants.E_WARNING, true );    
                         
     return new PHP.VM.Variable( new PHP.VM.Resource() );
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 18.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.is_uploaded_file = function( filenameObj ) {
+    var COMPILER = PHP.Compiler.prototype,
+    filename = filenameObj[ COMPILER.VARIABLE_VALUE ];
+    
+    // todo add check to see it is an uploaded file
+    try {
+        var stats = this[ COMPILER.FILESYSTEM ].lstatSync( filename );
+    } catch(e) {
+        return new PHP.VM.Variable( false );
+    }
+  
+                        
+    return new PHP.VM.Variable( true );
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 17.7.2012 
@@ -10352,7 +10382,7 @@ PHP.RAWPost = function( content ) {
           
             return arr;
         },  
-        Files: function( max_filesize ) {
+        Files: function( max_filesize, path ) {
             var arr = {};
             items.forEach(function( item, index ){
                
@@ -10384,7 +10414,7 @@ PHP.RAWPost = function( content ) {
                             
                             arr[ name ].name.push( item.filename );
                             arr[ name ].type.push( ( error ) ? "" :item.contentType );
-                            arr[ name ].tmp_name.push( ( error ) ? "" : item.filename );
+                            arr[ name ].tmp_name.push( ( error ) ? "" : path + item.filename );
                             arr[ name ].error.push(  error );
                             arr[ name ].size.push( ( error ) ? 0 : item.value.length );
                             
@@ -10394,7 +10424,7 @@ PHP.RAWPost = function( content ) {
                             arr[ (item.name === undefined ) ? index : item.name ] = {
                                 name: item.filename,
                                 type: ( error ) ? "" : item.contentType,
-                                tmp_name: ( error ) ? "" : item.filename,
+                                tmp_name: ( error ) ? "" : path + item.filename,
                                 error: error,
                                 size: ( error ) ? 0 : item.value.length
                             }
@@ -10405,7 +10435,7 @@ PHP.RAWPost = function( content ) {
                         // store file
                         if ( !error ) {
                             storedFiles.push({
-                                name: item.filename, 
+                                name: path + item.filename, 
                                 content: item.value
                             });
                         }
@@ -10415,9 +10445,9 @@ PHP.RAWPost = function( content ) {
           
             return arr;
         },
-        WriteFiles: function( func, path ) {
+        WriteFiles: function( func ) {
             storedFiles.forEach( function( item ){
-                func( path + item.name, item.content );
+                func( item.name, item.content );
             });
         },
         Error: function() {
