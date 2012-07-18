@@ -121,7 +121,7 @@ PHP.VM.Array = function( ENV ) {
         }], function( $ ) {
             var newArr = new (ENV.$Class.Get("ArrayObject"))( ENV );
         
-            
+
             // copy keys, can do direct copy ( probably? ) 
             var keys = newArr[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
             this[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ].forEach( function( key ){
@@ -193,7 +193,14 @@ PHP.VM.Array = function( ENV ) {
             });
 
             if ( index !== -1 ) {
-                return this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ][ index ];
+                var item = this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ][ index ];
+                if (this[ VARIABLE.REGISTER_ARRAY_SETTER ] !== undefined) {
+                    var func = this[ VARIABLE.REGISTER_ARRAY_SETTER ];
+                    item[ VARIABLE.REGISTER_SETTER ] = function( val ) {
+                       return func( val );
+                    };
+                }
+                return item;
             } else {
                 // no such key found in array, let's create one
                 //    
