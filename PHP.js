@@ -2076,7 +2076,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         if ( lineAppend === false ) {
             lineAppend = ", called in " + $GLOBAL( __FILE__ )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined in " + $GLOBAL( __FILE__ )[ COMPILER.VARIABLE_VALUE ] + " on line 1";
         } else if ( lineAppend === true ) {
-            lineAppend = " in " + $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] + " on line 1";
+            if (this.EVALING === true ) {
+                lineAppend = " in " + $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] + "(1) : eval()'d code on line 1";
+            } else {
+                lineAppend = " in " + $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] + " on line 1";
+            }
         } else {
             lineAppend = "";
         }
@@ -3457,10 +3461,12 @@ PHP.Modules.prototype.eval = function( $, code ) {
     
         // execture code in current context ($)
         var exec = new Function( "$$", "$", "ENV", compiler.src  );
+        this.EVALING = true;
         exec.call(this, function( arg ) {
             return new PHP.VM.Variable( arg );
         }, $, this);
-    
+        this.EVALING = undefined;
+        
     } else {
         
                 this[ COMPILER.ERROR ]( "syntax error, unexpected $end in " + 
@@ -11346,6 +11352,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member", PHP.Constants.E_ERROR, true );
             }
            
+            // abstract static warning
+            if ( !checkType( classType, INTERFACE ) && checkType( methodType, STATIC ) && checkType( methodType, ABSTRACT ) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Static function " + className + "::" + methodName + "() should not be abstract", PHP.Constants.E_STRICT, true );
+            }
             
             // visibility from public
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PUBLIC ) && (checkType( methodType, PROTECTED ) || checkType( methodType, PRIVATE ) ) ) {
@@ -11475,7 +11485,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     });
                 
                     // interfaces
-                console.log(Class.prototype[ PHP.VM.Class.INTERFACES ]);
+                
                     Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
                   
                         var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;

@@ -35,10 +35,12 @@ PHP.Modules.prototype.eval = function( $, code ) {
     
         // execture code in current context ($)
         var exec = new Function( "$$", "$", "ENV", compiler.src  );
+        this.EVALING = true;
         exec.call(this, function( arg ) {
             return new PHP.VM.Variable( arg );
         }, $, this);
-    
+        this.EVALING = undefined;
+        
     } else {
         
                 this[ COMPILER.ERROR ]( "syntax error, unexpected $end in " + 

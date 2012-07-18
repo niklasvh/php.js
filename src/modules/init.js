@@ -434,7 +434,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         if ( lineAppend === false ) {
             lineAppend = ", called in " + $GLOBAL( __FILE__ )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined in " + $GLOBAL( __FILE__ )[ COMPILER.VARIABLE_VALUE ] + " on line 1";
         } else if ( lineAppend === true ) {
-            lineAppend = " in " + $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] + " on line 1";
+            if (this.EVALING === true ) {
+                lineAppend = " in " + $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] + "(1) : eval()'d code on line 1";
+            } else {
+                lineAppend = " in " + $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] + " on line 1";
+            }
         } else {
             lineAppend = "";
         }
