@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 479 out of 672 (71.3%)
+Passed 481 out of 672 (71.6%)
 
 Failed tests:
 
@@ -48,12 +48,10 @@ Failed tests:
  - tests/php/classes/static_properties_003.phpt
  - tests/php/classes/static_properties_004.phpt
  - tests/php/classes/static_properties_undeclared_isset.phpt
- - tests/php/classes/static_this.phpt
  - tests/php/classes/tostring_001.phpt
  - tests/php/classes/tostring_002.phpt
  - tests/php/classes/tostring_003.phpt
  - tests/php/classes/tostring_004.phpt
- - tests/php/classes/type_hinting_004.phpt
  - tests/php/classes/visibility_005.phpt
  - tests/php/classes/__call_003.phpt
  - tests/php/func/004.phpt

@@ -835,7 +835,8 @@ PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
     var src = this.VARIABLE + "(";
 
     if ( action.name === "this" ) {
-        return action.name;
+        src += '"' + this.source( action.name ) + '"';
+      //  return action.name;
     } else {
 
         if ( typeof action.name === "string" ) {
@@ -946,7 +947,7 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
     if ( action.variable.name !== "this" ) {
         return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     } else {
-        return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
+        return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
     }
 
 };
@@ -5476,7 +5477,7 @@ PHP.Modules.prototype.var_dump = function() {
                 if (item.substring(0, PHP.VM.Class.PROPERTY.length) === PHP.VM.Class.PROPERTY) {
                    
                     if (!((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PRIVATE) === PHP.VM.Class.PRIVATE) && !((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PROTECTED) === PHP.VM.Class.PROTECTED)) {
-                        console.log(argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ]);
+
                         tmp += $INDENT( indent + 2 ) + '["' + item.substring( PHP.VM.Class.PROPERTY.length );
                         tmp += '"]=>\n';
                         tmp += $dump( argument[ item ], indent + 2 );
@@ -10926,7 +10927,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         return ENV.$Class.Inherits( obj, name );
     }
     
-    var buildVariableContext = function( methodName, args, className, realName ) {
+    var buildVariableContext = function( methodName, args, className, realName, ctx ) {
         
         var $ = PHP.VM.VariableHandler( ENV ),
         argumentObj = this[ methodArgumentPrefix + methodName ];
@@ -10969,6 +10970,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         $("$__FUNCTION__")[ COMPILER.VARIABLE_VALUE ] = realName;
         $("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className + "::" + realName;
         
+        if ( ctx !== false ) {
+            $("this")[ COMPILER.VARIABLE_VALUE ] = ( ctx !== undefined ) ? ctx : this;
+        }
+        
         return $;
     }
     
@@ -10988,7 +10993,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             
-            var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ], this[ PHP.VM.Class.METHOD_REALNAME + methodName ] );
+
+            
+            var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ], this[ PHP.VM.Class.METHOD_REALNAME + methodName ], (checkType( this[ methodTypePrefix + methodName ], STATIC )) ? false : this );
            
             if (staticVars[ methodName ] === undefined) {
                 staticVars[ methodName ] = {};
@@ -11652,16 +11659,20 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             methodCTX,
             $;
             var proto;
+            
+            
+            
             if ( /^parent$/i.test( methodClass ) ) {
                 proto = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
                 
-
+            } else if ( /^self$/i.test( methodClass ) ) {
+                proto = Object.getPrototypeOf( this );
+                
             } else if ( methodClass !== className ){
               
-                
-              
+
                 proto = Object.getPrototypeOf( this );
-                while ( proto[ COMPILER.CLASS_NAME ] !== methodClass ) {
+                while ( proto !== null && proto[ COMPILER.CLASS_NAME ] !== methodClass ) {
                     proto = Object.getPrototypeOf( proto );
                 }
 
@@ -11671,7 +11682,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 methodToCall = proto[ methodPrefix + methodName ];
                 methodCTX = proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
                 
-                $ = buildVariableContext.call( proto, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName );
+                $ = buildVariableContext.call( proto, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName, (checkType( proto[ methodTypePrefix + methodName ], STATIC )) ? false : this );
            
 
    
@@ -11689,7 +11700,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call abstract method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true ); 
                 }
                 console.log('static call ', methodName, proto);
-            
+                
+                
+                
                 return methodToCall.call( this, $, methodCTX );
             }
             
@@ -13196,10 +13209,10 @@ ENV.$Class.New( "Exception", 0, {}, function( M, $ ){
 .Variable( "file", 2 )
 .Variable( "line", 2 )
 .Method( "__construct", 1, [{name:"message", d: $$("")}, {name:"code", d: $$(0)}, {name:"previous", d: $$(null)}], function( $, ctx, $Static ) {
-this.$Prop( ctx, "message" )._($("message"));
+$("this").$.$Prop( ctx, "message" )._($("message"));
 })
 .Method( "getMessage", 33, [], function( $, ctx, $Static ) {
-return this.$Prop( ctx, "message" );
+return $("this").$.$Prop( ctx, "message" );
 })
 .Method( "getPrevious", 33, [], function( $, ctx, $Static ) {
 })
@@ -13233,7 +13246,7 @@ if ( ((ENV.$F("is_string", arguments, $("argument")))).$Bool.$) {
 if ( ((ENV.$F("class_exists", arguments, $("argument"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) ));
 } else {
-this.$Prop( ctx, "name" )._($("argument"));
+$("this").$.$Prop( ctx, "name" )._($("argument"));
 };
 };
 })

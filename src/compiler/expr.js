@@ -306,7 +306,8 @@ PHP.Compiler.prototype.Node_Expr_Variable = function( action ) {
     var src = this.VARIABLE + "(";
 
     if ( action.name === "this" ) {
-        return action.name;
+        src += '"' + this.source( action.name ) + '"';
+      //  return action.name;
     } else {
 
         if ( typeof action.name === "string" ) {
@@ -417,7 +418,7 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
     if ( action.variable.name !== "this" ) {
         return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     } else {
-        return "this." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
+        return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
     }
 
 };

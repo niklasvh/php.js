@@ -43,7 +43,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         return ENV.$Class.Inherits( obj, name );
     }
     
-    var buildVariableContext = function( methodName, args, className, realName ) {
+    var buildVariableContext = function( methodName, args, className, realName, ctx ) {
         
         var $ = PHP.VM.VariableHandler( ENV ),
         argumentObj = this[ methodArgumentPrefix + methodName ];
@@ -86,6 +86,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         $("$__FUNCTION__")[ COMPILER.VARIABLE_VALUE ] = realName;
         $("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className + "::" + realName;
         
+        if ( ctx !== false ) {
+            $("this")[ COMPILER.VARIABLE_VALUE ] = ( ctx !== undefined ) ? ctx : this;
+        }
+        
         return $;
     }
     
@@ -105,7 +109,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             
-            var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ], this[ PHP.VM.Class.METHOD_REALNAME + methodName ] );
+
+            
+            var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ], this[ PHP.VM.Class.METHOD_REALNAME + methodName ], (checkType( this[ methodTypePrefix + methodName ], STATIC )) ? false : this );
            
             if (staticVars[ methodName ] === undefined) {
                 staticVars[ methodName ] = {};
@@ -769,16 +775,20 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             methodCTX,
             $;
             var proto;
+            
+            
+            
             if ( /^parent$/i.test( methodClass ) ) {
                 proto = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
                 
-
+            } else if ( /^self$/i.test( methodClass ) ) {
+                proto = Object.getPrototypeOf( this );
+                
             } else if ( methodClass !== className ){
               
-                
-              
+
                 proto = Object.getPrototypeOf( this );
-                while ( proto[ COMPILER.CLASS_NAME ] !== methodClass ) {
+                while ( proto !== null && proto[ COMPILER.CLASS_NAME ] !== methodClass ) {
                     proto = Object.getPrototypeOf( proto );
                 }
 
@@ -788,7 +798,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 methodToCall = proto[ methodPrefix + methodName ];
                 methodCTX = proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
                 
-                $ = buildVariableContext.call( proto, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName );
+                $ = buildVariableContext.call( proto, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName, (checkType( proto[ methodTypePrefix + methodName ], STATIC )) ? false : this );
            
 
    
@@ -806,7 +816,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call abstract method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true ); 
                 }
                 console.log('static call ', methodName, proto);
-            
+                
+                
+                
                 return methodToCall.call( this, $, methodCTX );
             }
             
