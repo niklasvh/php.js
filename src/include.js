@@ -84,6 +84,9 @@ var files = {
                 php_real_logo_guid: "js",
                 zend_logo_guid: "js"
             },
+            network: {
+                header: "js"  
+            },
             options: {
                 assert: "js",
                 ini_get: "js",
@@ -111,6 +114,7 @@ var files = {
                 print: "js",
                 printf: "js",
                 setlocale: "js",
+                str_repeat: "js",
                 str_rot13: "js",
                 strlen: "js",
                 strncmp: "js",

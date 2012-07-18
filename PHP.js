@@ -51,10 +51,6 @@ var PHP = function( code, opts ) {
     
 
     
-    
-    
-    console.log("done!");
-    
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
     this.vm = new PHP.VM( this.compiler.src, opts );
@@ -65,6 +61,7 @@ var PHP = function( code, opts ) {
           
     
     this.vm.Run();
+    
     
     
    
@@ -3441,6 +3438,22 @@ PHP.Modules.prototype.zend_logo_guid = function(  ) {
     return new PHP.VM.Variable("PHPE9568F35-D428-11d2-A769-00AA001ACF42");
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 18.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.header= function( string ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    variableValue = string[ COMPILER.VARIABLE_VALUE ];
+    
+    // todo add to output
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 14.7.2012 
 * @website http://hertzen.com
  */
@@ -4175,6 +4188,27 @@ PHP.Modules.prototype.setlocale = function( category ) {
     }, this);
     
     return new PHP.VM.Variable( localeName );
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 18.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.str_repeat = function( input, multiplier ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    variableValue = input[ COMPILER.VARIABLE_VALUE ];
+    var str = "";
+    
+    for ( var i = 0, len = multiplier[ COMPILER.VARIABLE_VALUE ]; i < len; i++ ) {
+        str += variableValue;
+    }
+    
+    return new PHP.VM.Variable( str );
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -10669,6 +10703,7 @@ PHP.VM = function( src, opts ) {
     this.INPUT_BUFFER = opts.RAW_POST;
     
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
+    $('$__DIR__').$ = ENV[ PHP.Compiler.prototype.FILE_PATH ];
     
     var post_max_size;
     

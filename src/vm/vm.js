@@ -176,6 +176,7 @@ PHP.VM = function( src, opts ) {
     this.INPUT_BUFFER = opts.RAW_POST;
     
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
+    $('$__DIR__').$ = ENV[ PHP.Compiler.prototype.FILE_PATH ];
     
     var post_max_size;
     

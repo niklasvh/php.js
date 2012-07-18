@@ -51,10 +51,6 @@ var PHP = function( code, opts ) {
     
 
     
-    
-    
-    console.log("done!");
-    
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
     this.vm = new PHP.VM( this.compiler.src, opts );
@@ -65,6 +61,7 @@ var PHP = function( code, opts ) {
           
     
     this.vm.Run();
+    
     
     
    

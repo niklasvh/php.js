@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 470 out of 672 (69.9%)
+Passed 471 out of 672 (70.1%)
 
 Failed tests:
 
@@ -9,7 +9,6 @@ Failed tests:
  - tests/php/basic/029.phpt
  - tests/php/basic/bug20539.phpt
  - tests/php/basic/bug54514.phpt
- - tests/php/basic/req44164.phpt
  - tests/php/basic/rfc1867_array_upload.phpt
  - tests/php/basic/rfc1867_garbled_mime_headers.phpt
  - tests/php/basic/rfc1867_max_file_uploads_empty_files_debug.phpt
