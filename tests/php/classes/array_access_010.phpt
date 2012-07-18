@@ -109,14 +109,14 @@ object(ArrayReferenceProxy)#%d (2) {
     ["person"]=>
     array(1) {
       [0]=>
-      &array(1) {
+      %Sarray(1) {
         ["name"]=>
         string(3) "Foo"
       }
     }
   }
   ["element":"ArrayReferenceProxy":private]=>
-  &array(1) {
+  %Sarray(1) {
     ["name"]=>
     string(3) "Foo"
   }
@@ -149,12 +149,12 @@ object(ArrayReferenceProxy)#%d (2) {
     ["person"]=>
     array(1) {
       [0]=>
-      &array(0) {
+      %Sarray(0) {
       }
     }
   }
   ["element":"ArrayReferenceProxy":private]=>
-  &array(0) {
+  %Sarray(0) {
   }
 }
 ArrayReferenceProxy::__construct(Array)

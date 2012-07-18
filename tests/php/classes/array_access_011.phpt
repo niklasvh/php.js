@@ -116,7 +116,7 @@ object(ArrayAccessReferenceProxy)#%d (3) {
   ["object":"ArrayAccessReferenceProxy":private]=>
   object(Peoples)#%d (1) {
     ["person"]=>
-    &array(1) {
+    %Sarray(1) {
       [0]=>
       array(1) {
         ["name"]=>
@@ -125,7 +125,7 @@ object(ArrayAccessReferenceProxy)#%d (3) {
     }
   }
   ["oarray":"ArrayAccessReferenceProxy":private]=>
-  &array(1) {
+  %Sarray(1) {
     [0]=>
     array(1) {
       ["name"]=>
@@ -161,14 +161,14 @@ object(ArrayAccessReferenceProxy)#%d (3) {
   ["object":"ArrayAccessReferenceProxy":private]=>
   object(Peoples)#%d (1) {
     ["person"]=>
-    &array(1) {
+    %Sarray(1) {
       [0]=>
       array(0) {
       }
     }
   }
   ["oarray":"ArrayAccessReferenceProxy":private]=>
-  &array(1) {
+  %Sarray(1) {
     [0]=>
     array(0) {
     }
