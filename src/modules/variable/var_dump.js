@@ -122,7 +122,7 @@ PHP.Modules.prototype.var_dump = function() {
       
 
             
-            str += '}\n';  
+            str += $INDENT( indent ) + '}\n';  
         } else if( ARG_TYPE === VAR.FLOAT ) {
             str += "float(" + value + ')\n';      
         } else {

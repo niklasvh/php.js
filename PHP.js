@@ -5583,7 +5583,7 @@ PHP.Modules.prototype.var_dump = function() {
       
 
             
-            str += '}\n';  
+            str += $INDENT( indent ) + '}\n';  
         } else if( ARG_TYPE === VAR.FLOAT ) {
             str += "float(" + value + ')\n';      
         } else {
@@ -12465,7 +12465,6 @@ PHP.VM.Variable = function( arg ) {
                 setType( prev );
                 value = prev;
             }
-            console.log( ret );
         }
         
     }.bind( this ); // something strange going on with context in node.js?? iterators_2.phpt

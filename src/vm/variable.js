@@ -78,7 +78,6 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
             this[ COMPILER.VARIABLE_VALUE ] = val[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
               
         } else {
-            console.log("wtf", this, combinedVariable[ COMPILER.VARIABLE_VALUE ], combinedVariable);
             this[ COMPILER.VARIABLE_VALUE ] = val;
         }
     }
@@ -316,7 +315,6 @@ PHP.VM.Variable = function( arg ) {
                 setType( prev );
                 value = prev;
             }
-            console.log( ret );
         }
         
     }.bind( this ); // something strange going on with context in node.js?? iterators_2.phpt
