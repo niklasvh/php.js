@@ -3028,7 +3028,16 @@ PHP.Constants.E_ALL = 32767;
 PHP.Modules.prototype.trigger_error = function( msg, level ) {
     throw new Error( "Fatal error: " + msg.$ );
     
-};/* 
+};/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
+PHP.Constants.UPLOAD_ERR_OK = 0;
+PHP.Constants.UPLOAD_ERR_INI_SIZE = 1;
+PHP.Constants.UPLOAD_ERR_FORM_SIZE = 2;
+PHP.Constants.UPLOAD_ERR_PARTIAL = 3;
+PHP.Constants.UPLOAD_ERR_NO_FILE = 4;
+PHP.Constants.UPLOAD_ERR_NO_TMP_DIR = 6;
+PHP.Constants.UPLOAD_ERR_CANT_WRITE = 7;
+PHP.Constants.UPLOAD_ERR_EXTENSION = 8;
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 12.7.2012 
 * @website http://hertzen.com
@@ -10391,14 +10400,18 @@ PHP.RAWPost = function( content ) {
                     if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
                        
                         var error = 0;
-                        if ( item.value.length === 0 ) {
-                            error = 4;
+                        if ( item.filename.length === 0 ) {
+                            error = PHP.Constants.UPLOAD_ERR_NO_FILE;
+                            
                         } else if (post.MAX_FILE_SIZE !== undefined && post.MAX_FILE_SIZE < item.value.length) {
-                            error = 2;
+                            error = PHP.Constants.UPLOAD_ERR_FORM_SIZE;
+                            
                         } else if (item.value.length > max_filesize) {  
-                            error = 1;
+                            error = PHP.Constants.UPLOAD_ERR_INI_SIZE;
+                            
                         } else if (item.contentType.length === 0) {
-                            error = 3;
+                            error = PHP.Constants.UPLOAD_ERR_PARTIAL;
+                            
                         }
                         
                  

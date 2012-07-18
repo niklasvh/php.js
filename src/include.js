@@ -57,6 +57,7 @@ var files = {
                 trigger_error: "js"
             },
             filesystem: {
+                constants: "js",
                 dirname: "js",
                 fclose: "js",
                 file_get_contents: "js",

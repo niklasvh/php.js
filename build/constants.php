@@ -33,6 +33,7 @@ function createFile($file, $submodule, $start) {
     fclose($fp);
 }
 
+createFile('src/modules/filesystem/constants.js', "Core", "UPLOAD_");
 
 createFile('src/modules/output/constants.js', "Core", "PHP_OUTPUT_");
 

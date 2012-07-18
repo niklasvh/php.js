@@ -133,14 +133,18 @@ PHP.RAWPost = function( content ) {
                     if ( !/^[a-z0-9]+\[.+\]/i.test(item.name) ) {
                        
                         var error = 0;
-                        if ( item.value.length === 0 ) {
-                            error = 4;
+                        if ( item.filename.length === 0 ) {
+                            error = PHP.Constants.UPLOAD_ERR_NO_FILE;
+                            
                         } else if (post.MAX_FILE_SIZE !== undefined && post.MAX_FILE_SIZE < item.value.length) {
-                            error = 2;
+                            error = PHP.Constants.UPLOAD_ERR_FORM_SIZE;
+                            
                         } else if (item.value.length > max_filesize) {  
-                            error = 1;
+                            error = PHP.Constants.UPLOAD_ERR_INI_SIZE;
+                            
                         } else if (item.contentType.length === 0) {
-                            error = 3;
+                            error = PHP.Constants.UPLOAD_ERR_PARTIAL;
+                            
                         }
                         
                  
