@@ -56,12 +56,12 @@ string(9) "FooBarBaz"
 ===ArrayOverloading===
 string(3) "Foo"
 
-Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 40
+Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line %d
 string(3) "Foo"
 
-Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 42
+Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line %d
 string(3) "Foo"
 
-Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 44
+Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line %d
 string(3) "Foo"
 ===DONE===
