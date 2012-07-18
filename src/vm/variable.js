@@ -79,6 +79,12 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
             this[ COMPILER.VARIABLE_VALUE ] = val[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
               
         } else {
+            if (combinedVariable[ VARIABLE.TYPE ] === VARIABLE.NULL && this[ VARIABLE.TYPE ] === VARIABLE.OBJECT) {
+               this.TMPCTX =   combinedVariable[ VARIABLE.INSTANCE ];
+               console.log( combinedVariable );
+               console.log("heheheh");
+            }
+            
             this[ COMPILER.VARIABLE_VALUE ] = val;          
         }
         
@@ -276,14 +282,15 @@ PHP.VM.Variable = function( arg ) {
                     }
                 } else if ( newValue === null ) {   
                     if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
-                        console.log( value[ COMPILER.CLASS_STORED ]);
+                      
                         this[ PHP.VM.Class.KILLED ] = true;
                         if (value[ COMPILER.CLASS_STORED ].every(function( variable ){
-                            console.log( variable, variable[ PHP.VM.Class.KILLED ] === true );
+  
                             return ( variable[ PHP.VM.Class.KILLED ] === true );
                         })) {
                             // all variable instances have been killed, can safely destruct
-                            value[ COMPILER.CLASS_DESTRUCT ]( this[ this.INSTANCE ]);
+                            console.log( this.TMPCTX );
+                            value[ COMPILER.CLASS_DESTRUCT ]( this.TMPCTX );
                         }
                         
                     }
@@ -891,3 +898,5 @@ PHP.VM.Variable.prototype.REGISTER_SETTER = "$Setter";
 PHP.VM.Variable.prototype.REGISTER_ARRAY_SETTER = "$ASetter";
 
 PHP.VM.Variable.prototype.REGISTER_GETTER = "$Getter";
+
+PHP.VM.Variable.prototype.INSTANCE = "$Instance";

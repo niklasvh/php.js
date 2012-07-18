@@ -1143,17 +1143,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
            
             if ( checkType( this[ methodTypePrefix + __destruct ], PROTECTED) && (!( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ))) {
-                
+                console.log( ctx );
                 if ( shutdown === true ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 0", PHP.Constants.E_WARNING );
                     return;
-                } 
-                
-            /* fail of epic proportion
-                else {
+                }  else {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                 }
-                */
+                
             }
             
             
@@ -1185,7 +1182,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         constant$("$__LINE__")[ COMPILER.VARIABLE_VALUE ] = 1;
         
-        classDefinition.call( Class, methods, constant$ );
+        classDefinition.call( Class, methods, constant$, function( arg ) {
+            var item = new PHP.VM.Variable( arg );
+            item[ PHP.Compiler.prototype.NAV ] = true;
+            item[ VARIABLE.INSTANCE ] = Class.prototype;
+        
+            return item;
+        } );
         
         return methods;
     };

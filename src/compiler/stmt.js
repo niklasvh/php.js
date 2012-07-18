@@ -43,7 +43,7 @@ PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
     src += exts.join(", ")
     */
-    src += "], function( M, $ ){\n M";
+    src += "], function( M, $, $$ ){\n M";
     
     this.currentClass = action.name;
     action.stmts.forEach(function( stmt ) {
@@ -100,7 +100,7 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
         src += "]";
     }
     
-    src += "}, function( M, $ ){\n M";
+    src += "}, function( M, $, $$ ){\n M";
     
     this.currentClass = action.name;
     action.stmts.forEach(function( stmt ) {

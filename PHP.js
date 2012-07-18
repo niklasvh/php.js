@@ -1097,7 +1097,7 @@ PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
     src += exts.join(", ")
     */
-    src += "], function( M, $ ){\n M";
+    src += "], function( M, $, $$ ){\n M";
     
     this.currentClass = action.name;
     action.stmts.forEach(function( stmt ) {
@@ -1154,7 +1154,7 @@ PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
         src += "]";
     }
     
-    src += "}, function( M, $ ){\n M";
+    src += "}, function( M, $, $$ ){\n M";
     
     this.currentClass = action.name;
     action.stmts.forEach(function( stmt ) {
@@ -12094,17 +12094,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
            
             if ( checkType( this[ methodTypePrefix + __destruct ], PROTECTED) && (!( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ))) {
-                
+                console.log( ctx );
                 if ( shutdown === true ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 0", PHP.Constants.E_WARNING );
                     return;
-                } 
-                
-            /* fail of epic proportion
-                else {
+                }  else {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                 }
-                */
+                
             }
             
             
@@ -12136,7 +12133,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         constant$("$__LINE__")[ COMPILER.VARIABLE_VALUE ] = 1;
         
-        classDefinition.call( Class, methods, constant$ );
+        classDefinition.call( Class, methods, constant$, function( arg ) {
+            var item = new PHP.VM.Variable( arg );
+            item[ PHP.Compiler.prototype.NAV ] = true;
+            item[ VARIABLE.INSTANCE ] = Class.prototype;
+        
+            return item;
+        } );
         
         return methods;
     };
@@ -12259,6 +12262,12 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
             this[ COMPILER.VARIABLE_VALUE ] = val[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
               
         } else {
+            if (combinedVariable[ VARIABLE.TYPE ] === VARIABLE.NULL && this[ VARIABLE.TYPE ] === VARIABLE.OBJECT) {
+               this.TMPCTX =   combinedVariable[ VARIABLE.INSTANCE ];
+               console.log( combinedVariable );
+               console.log("heheheh");
+            }
+            
             this[ COMPILER.VARIABLE_VALUE ] = val;          
         }
         
@@ -12456,14 +12465,15 @@ PHP.VM.Variable = function( arg ) {
                     }
                 } else if ( newValue === null ) {   
                     if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
-                        console.log( value[ COMPILER.CLASS_STORED ]);
+                      
                         this[ PHP.VM.Class.KILLED ] = true;
                         if (value[ COMPILER.CLASS_STORED ].every(function( variable ){
-                            console.log( variable, variable[ PHP.VM.Class.KILLED ] === true );
+  
                             return ( variable[ PHP.VM.Class.KILLED ] === true );
                         })) {
                             // all variable instances have been killed, can safely destruct
-                            value[ COMPILER.CLASS_DESTRUCT ]( this[ this.INSTANCE ]);
+                            console.log( this.TMPCTX );
+                            value[ COMPILER.CLASS_DESTRUCT ]( this.TMPCTX );
                         }
                         
                     }
@@ -13071,7 +13081,8 @@ PHP.VM.Variable.prototype.REGISTER_SETTER = "$Setter";
 PHP.VM.Variable.prototype.REGISTER_ARRAY_SETTER = "$ASetter";
 
 PHP.VM.Variable.prototype.REGISTER_GETTER = "$Getter";
-/* 
+
+PHP.VM.Variable.prototype.INSTANCE = "$Instance";/* 
  * @author Niklas von Hertzen <niklas at hertzen.com>
  * @created 27.6.2012 
  * @website http://hertzen.com
