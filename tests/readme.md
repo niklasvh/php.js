@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 478 out of 672 (71.1%)
+Passed 479 out of 672 (71.3%)
 
 Failed tests:
 
@@ -56,7 +56,6 @@ Failed tests:
  - tests/php/classes/type_hinting_004.phpt
  - tests/php/classes/visibility_005.phpt
  - tests/php/classes/__call_003.phpt
- - tests/php/classes/__set__get_005.phpt
  - tests/php/func/004.phpt
  - tests/php/func/005a.phpt
  - tests/php/func/007.phpt

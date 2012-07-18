@@ -962,9 +962,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                   
                     props[ COMPILER.VARIABLE_VALUE ] = {
                         get : function(){
-                            console.log( "getting", propertyName );
-                            console.log( $this );
-                            return callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] )[ COMPILER.VARIABLE_VALUE ];   
+                            
+                            if (obj.__get === undefined ) {
+                                obj.__get = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] );
+                            }
+                            return obj.__get[ COMPILER.VARIABLE_VALUE ];   
                              
                             
                         }
@@ -972,9 +974,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     
                     props[ VARIABLE.TYPE ] = {
                         get: function() {
-                            console.log( VARIABLE.TYPE );
-                            obj = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] );   
-                            return obj[ VARIABLE.TYPE ];
+                            
+                            if (obj.__get === undefined ) {
+                                obj.__get = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] ); 
+                            }
+                            return obj.__get[ VARIABLE.TYPE ];
                         }
                       
                     };

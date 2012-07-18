@@ -5408,7 +5408,8 @@ PHP.Modules.prototype.var_dump = function() {
     
     var $dump = function( argument, indent ) {
         var str = "",
-        value = argument[ COMPILER.VARIABLE_VALUE ]; // trigger get for undefined
+        value = argument[ COMPILER.VARIABLE_VALUE ],
+        ARG_TYPE = argument[ VAR.TYPE ]; // trigger get for undefined
        
         str += $INDENT( indent );
         
@@ -5416,10 +5417,10 @@ PHP.Modules.prototype.var_dump = function() {
         if (argument[ VAR.IS_REF] !== undefined ) {
             str += "&";
         }*/
-        if( argument[ VAR.TYPE ] === VAR.NULL || (argument[ VAR.DEFINED ] !== true && !(argument instanceof PHP.VM.ClassPrototype)) ) {
+        if( ARG_TYPE === VAR.NULL || (argument[ VAR.DEFINED ] !== true && !(argument instanceof PHP.VM.ClassPrototype)) ) {
             
             str += "NULL\n";  
-        } else if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
+        } else if ( ARG_TYPE === VAR.ARRAY ) {
             str += "array(";
 
             var values = value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
@@ -5447,19 +5448,19 @@ PHP.Modules.prototype.var_dump = function() {
             }, this);
             
             str += $INDENT( indent ) + "}\n";
-        } else if( argument[ VAR.TYPE ] === VAR.BOOL ) {    
+        } else if( ARG_TYPE === VAR.BOOL ) {    
             str += "bool(" + value + ")\n";  
-        } else if( argument[ VAR.TYPE ] === VAR.STRING ) {
+        } else if( ARG_TYPE === VAR.STRING ) {
             
             str += "string(" + value.length + ') "' + value + '"\n';  
-        } else if( argument[ VAR.TYPE ] === VAR.INT ) {
+        } else if( ARG_TYPE === VAR.INT ) {
             str += "int(" + value + ')\n';  
-        } else if( argument instanceof PHP.VM.ClassPrototype || argument[ VAR.TYPE ] === VAR.OBJECT ) {
+        } else if( argument instanceof PHP.VM.ClassPrototype || ARG_TYPE === VAR.OBJECT ) {
             // todo, complete
-            if( argument[ VAR.TYPE ] === VAR.OBJECT ) {
+            if( ARG_TYPE === VAR.OBJECT ) {
                 argument = value;
             }
-            
+
             str += "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
             
            
@@ -5474,7 +5475,8 @@ PHP.Modules.prototype.var_dump = function() {
                 parent;
                 if (item.substring(0, PHP.VM.Class.PROPERTY.length) === PHP.VM.Class.PROPERTY) {
                    
-                    if (!((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PRIVATE) === PHP.VM.Class.PRIVATE)) {
+                    if (!((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PRIVATE) === PHP.VM.Class.PRIVATE) && !((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PROTECTED) === PHP.VM.Class.PROTECTED)) {
+                        console.log(argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ]);
                         tmp += $INDENT( indent + 2 ) + '["' + item.substring( PHP.VM.Class.PROPERTY.length );
                         tmp += '"]=>\n';
                         tmp += $dump( argument[ item ], indent + 2 );
@@ -5491,7 +5493,14 @@ PHP.Modules.prototype.var_dump = function() {
                     if ( ( argument[ item ] !== parent[ item ] || ignore ) && parent[ item ] instanceof PHP.VM.Variable && parent.hasOwnProperty( item )) {
                         
                             
-                        tmp += $INDENT( indent + 2 ) + '["' + item.substring( PHP.VM.Class.PROPERTY.length ) + '":"' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +'":private]=>\n';
+                        tmp += $INDENT( indent + 2 ) + '["' + item.substring( PHP.VM.Class.PROPERTY.length ) + '":';
+                        if ((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PRIVATE) === PHP.VM.Class.PRIVATE) {
+                            tmp +=  '"' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +'":' + "private";
+                        } else {
+                            tmp +=  "protected";
+                        }
+                        
+                        tmp += ']=>\n';
                         tmp += $dump( parent[ item ], indent + 2 );
                         count++;
                     }
@@ -5504,18 +5513,18 @@ PHP.Modules.prototype.var_dump = function() {
             str += '(' + count + ') {\n' + tmp;
             
 
-            
+      
 
             
             str += '}\n';  
-        } else if( argument[ VAR.TYPE ] === VAR.FLOAT ) {
+        } else if( ARG_TYPE === VAR.FLOAT ) {
             str += "float(" + value + ')\n';      
         } else {
             console.log( argument );
         }
-    
+
         return str;
-    }, 
+    }.bind(this), 
     $INDENT = function( num ) {
         var str = "", i ;
         for (i = 0; i < num; i++) {
@@ -11744,7 +11753,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 // property set
                 if ( this[ methodPrefix + __set ] !== undefined ) {
                     obj [ COMPILER.ASSIGN ] = function( value ) {
-                        console.log( propertyName, value );
+                        
                         callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), value ] );       
                         return value;
                     }.bind( this );
@@ -11836,9 +11845,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                   
                     props[ COMPILER.VARIABLE_VALUE ] = {
                         get : function(){
-                            console.log( "getting", propertyName );
-                            console.log( $this );
-                            return callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] )[ COMPILER.VARIABLE_VALUE ];   
+                            
+                            if (obj.__get === undefined ) {
+                                obj.__get = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] );
+                            }
+                            return obj.__get[ COMPILER.VARIABLE_VALUE ];   
                              
                             
                         }
@@ -11846,9 +11857,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     
                     props[ VARIABLE.TYPE ] = {
                         get: function() {
-                            console.log( VARIABLE.TYPE );
-                            obj = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] );   
-                            return obj[ VARIABLE.TYPE ];
+                            
+                            if (obj.__get === undefined ) {
+                                obj.__get = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] ); 
+                            }
+                            return obj.__get[ VARIABLE.TYPE ];
                         }
                       
                     };
