@@ -1053,10 +1053,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
                 if (this[ propertyPrefix + propertyName ][ VARIABLE.DEFINED ] !== true && (!(ctx instanceof PHP.VM.ClassPrototype) || this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] === undefined  )) {
                     if (!(ctx instanceof PHP.VM.ClassPrototype) && checkType( this[ propertyTypePrefix + propertyName ], PRIVATE )) {
-                        console.log(this);
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access private property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
-           
-                    }
+                    } 
+                    
                     console.log( this);
                     Object.getPrototypeOf(this)[ propertyTypePrefix + propertyName ] = 1;
                 }

@@ -12003,10 +12003,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
                 if (this[ propertyPrefix + propertyName ][ VARIABLE.DEFINED ] !== true && (!(ctx instanceof PHP.VM.ClassPrototype) || this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] === undefined  )) {
                     if (!(ctx instanceof PHP.VM.ClassPrototype) && checkType( this[ propertyTypePrefix + propertyName ], PRIVATE )) {
-                        console.log(this);
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access private property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
-           
-                    }
+                    } 
+                    
                     console.log( this);
                     Object.getPrototypeOf(this)[ propertyTypePrefix + propertyName ] = 1;
                 }
@@ -12391,71 +12390,76 @@ PHP.VM.Variable = function( arg ) {
     COMPILER = PHP.Compiler.prototype,
     
     setValue = function( newValue ) {
-             
-
-        if ( newValue === undefined ) {
-            newValue = null;
-        }
+        
+        
+        if (this[ this.OVERLOADED ] === undefined) {
+           
+        
+        
+            if ( newValue === undefined ) {
+                newValue = null;
+            }
        
-        if ( newValue instanceof PHP.VM.Variable ) {
-            newValue = newValue[ COMPILER.VARIABLE_VALUE ];
-        }
+            if ( newValue instanceof PHP.VM.Variable ) {
+                newValue = newValue[ COMPILER.VARIABLE_VALUE ];
+            }
      
-        if ( typeof newValue === "string" ) {
-            this[ this.TYPE ] = this.STRING;
-        } else if ( typeof newValue === "function" ) { 
-            this[ this.TYPE ] = this.LAMBDA;
-        } else if ( typeof newValue === "number" ) {
-            if ( newValue % 1 === 0 ) {
-                this[ this.TYPE ] = this.INT;
-            } else {
-                this[ this.TYPE ] = this.FLOAT;
-            }
-        } else if ( newValue === null ) {   
-            if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
-                value[ COMPILER.CLASS_DESTRUCT ]();
-            }
+            if ( typeof newValue === "string" ) {
+                this[ this.TYPE ] = this.STRING;
+            } else if ( typeof newValue === "function" ) { 
+                this[ this.TYPE ] = this.LAMBDA;
+            } else if ( typeof newValue === "number" ) {
+                if ( newValue % 1 === 0 ) {
+                    this[ this.TYPE ] = this.INT;
+                } else {
+                    this[ this.TYPE ] = this.FLOAT;
+                }
+            } else if ( newValue === null ) {   
+                if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
+                    value[ COMPILER.CLASS_DESTRUCT ]();
+                }
             
-            this[ this.TYPE ] = this.NULL;
+                this[ this.TYPE ] = this.NULL;
 
-        } else if ( typeof newValue === "boolean" ) {
-            this[ this.TYPE ] = this.BOOL;
-        } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
-            if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
-                this[ this.TYPE ] = this.ARRAY;
+            } else if ( typeof newValue === "boolean" ) {
+                this[ this.TYPE ] = this.BOOL;
+            } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
+                if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
+                    this[ this.TYPE ] = this.ARRAY;
                 
 
                 
-            } else {
+                } else {
 
-                this[ this.TYPE ] = this.OBJECT;
+                    this[ this.TYPE ] = this.OBJECT;
+                }
+            } else if ( newValue instanceof PHP.VM.Resource ) {    
+                this[ this.TYPE ] = this.RESOURCE;
+            } else {
+         
             }
-        } else if ( newValue instanceof PHP.VM.Resource ) {    
-            this[ this.TYPE ] = this.RESOURCE;
-        } else {
+            this[ this.DEFINED ] = true;
          
-        }
-        this[ this.DEFINED ] = true;
-         
-        // is variable a reference
-        if ( this[ this.REFERRING ] !== undefined ) {
+            // is variable a reference
+            if ( this[ this.REFERRING ] !== undefined ) {
             
-            this[ this.REFERRING ][ COMPILER.VARIABLE_VALUE ] = newValue;
-        } else {
+                this[ this.REFERRING ][ COMPILER.VARIABLE_VALUE ] = newValue;
+            } else {
        
-            value = newValue;
+                value = newValue;
             
-            // remove this later, debugging only
-            this.val = newValue;
+                // remove this later, debugging only
+                this.val = newValue;
             
-        }
-        
+            }
+        } 
    
-        
+    
         if ( typeof this[this.REGISTER_SETTER ] === "function" ) {
             this[ this.REGISTER_SETTER ]( value );
         }
         
+
     }.bind( this ); // something strange going on with context in node.js?? iterators_2.phpt
     
     
@@ -12468,13 +12472,13 @@ PHP.VM.Variable = function( arg ) {
             case this.INT:
             case this.FLOAT:
             case this.STRING:
-                return new PHP.VM.Variable( value );               
+                return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );               
                 break;
             case this.OBJECT:
             case this.RESOURCE:
                 return this;
             case this.ARRAY:
-                return new PHP.VM.Variable( value[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  ) )
+                return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  ) )
                 break;
             default:
                 console.log("Unknown variable type cloned");
@@ -12785,9 +12789,26 @@ PHP.VM.Variable = function( arg ) {
                 if ( typeof this[this.REGISTER_GETTER ] === "function" ) {
                     var returned = this[ this.REGISTER_GETTER ]();
                     if ( returned instanceof PHP.VM.Variable ) {
+                        
                         this[ this.TYPE ] = returned[ this.TYPE ];
                         this[ this.DEFINED ] = returned[ this.DEFINED ];
-                        return returned[ COMPILER.DIM_FETCH ]( ctx, variable );
+                        var item = returned[ COMPILER.DIM_FETCH ]( ctx, variable );
+                       
+                        if (returned[ this.OVERLOADING ] !== undefined) {
+                            item[ this.OVERLOADED ] = returned[ this.OVERLOADING ];
+
+                        }
+                       
+                        item[ this.REGISTER_SETTER ] = function() {
+                            
+                            if (returned[ this.OVERLOADING ] !== undefined) {
+                                this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + returned[ this.OVERLOADING ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
+                                item[ this.OVERLOADED ] = returned[ this.OVERLOADING ];
+                            //   item[ this.OVERLOADED ] = returned[ this.OVERLOADING ];
+                            }
+                        }
+                        
+                        return item;
                     }
                     
                 }
@@ -12815,7 +12836,7 @@ PHP.VM.Variable = function( arg ) {
                         var dimHandler = new PHP.VM.Variable();
                         dimHandler[ this.REGISTER_GETTER ] = function() {
                             var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
-                            val [ $this.OVERLOADED ] = true;
+                            val [ $this.OVERLOADING ] = value[ COMPILER.CLASS_NAME ];
                             if ( val[ this.DEFINED ] !== true ) {
                                 this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );    
                                 return new PHP.VM.Variable();
@@ -12891,7 +12912,7 @@ PHP.VM.Variable = function( arg ) {
                
                 
                 var returning = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
-                
+                console.log( returning );
                 if (returning[ this.DEFINED ] !== true ) {
                     
                     var saveFunc = returning[ this.REGISTER_SETTER ],
@@ -12948,6 +12969,8 @@ PHP.VM.Variable.prototype.ARRAY = 5;
 PHP.VM.Variable.prototype.OBJECT = 6;
 PHP.VM.Variable.prototype.RESOURCE = 7;
 PHP.VM.Variable.prototype.LAMBDA = 8;
+
+PHP.VM.Variable.prototype.OVERLOADING = "$Overloading";
 
 PHP.VM.Variable.prototype.OVERLOADED = "$Overloaded";
 
