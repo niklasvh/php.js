@@ -37,7 +37,7 @@ $o2->show();
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 Original
 object(test)#1 (2) {
   ["b"]=>
@@ -56,7 +56,7 @@ object(test)#1 (2) {
   }
 }
 Clone
-object(test)#2 (2) {
+object(test)#%d (2) {
   ["b"]=>
   array(2) {
     [0]=>
@@ -73,7 +73,7 @@ object(test)#2 (2) {
   }
 }
 Modify
-object(test)#2 (2) {
+object(test)#%d (2) {
   ["b"]=>
   int(6)
   ["a"]=>

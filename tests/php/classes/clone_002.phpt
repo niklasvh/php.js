@@ -23,7 +23,7 @@ echo "Clown\n";
 var_dump($copy);
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 Object
 object(test)#1 (3) {
   ["p1"]=>
@@ -34,7 +34,7 @@ object(test)#1 (3) {
   string(1) "B"
 }
 Clown
-object(test)#2 (3) {
+object(test)#%d (3) {
   ["p1"]=>
   int(1)
   ["p2"]=>
