@@ -327,7 +327,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     var COMPILER = PHP.Compiler.prototype,
     lastError,
     errorHandler,
-    reportingLevel,
+    reportingLevel = 32767,
     shutdownFunc,
     shutdownParams,
     suppress = false;
@@ -338,7 +338,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         shutdownFunc = undefined;
         shutdownParams = undefined;
         suppress = false;
-        reportingLevel = undefined;
+        reportingLevel = 32767; // E_ALL
     };
 
     MODULES.register_shutdown_function = function( func ) {
@@ -431,6 +431,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             file: $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ]
         };
 
+        function checkType( type ) {
+            
+            return ((reportingLevel & C[ type ]) === C[ type ]);
+        }
+
         if ( lineAppend === false ) {
             lineAppend = ", called in " + $GLOBAL( __FILE__ )[ COMPILER.VARIABLE_VALUE ] + " on line 1 and defined in " + $GLOBAL( __FILE__ )[ COMPILER.VARIABLE_VALUE ] + " on line 1";
         } else if ( lineAppend === true ) {
@@ -493,10 +498,12 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             return;
                             break;
                         case C.E_STRICT:
-                            if ( strict) {
-                                this.$strict += "Strict Standards: " + msg + lineAppend + "\n";
-                            } else {
-                                this.echo( new PHP.VM.Variable("\nStrict Standards: " + msg + lineAppend + "\n"));
+                            if (checkType("E_STRICT")) {
+                                if ( strict ) {
+                                    this.$strict += "Strict Standards: " + msg + lineAppend + "\n";
+                                } else {
+                                    this.echo( new PHP.VM.Variable("\nStrict Standards: " + msg + lineAppend + "\n"));
+                                }
                             }
                             return;
                             break;

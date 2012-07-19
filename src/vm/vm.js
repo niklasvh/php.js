@@ -175,6 +175,9 @@ PHP.VM = function( src, opts ) {
     this.$strict = "";
     this.INPUT_BUFFER = opts.RAW_POST;
     
+    // todo add error reporting level parser
+    this.error_reporting(new PHP.VM.Variable( (!isNaN( this.$ini.error_reporting - 0)) ? this.$ini.error_reporting : 32767));
+    
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
     $('$__DIR__').$ = ENV[ PHP.Compiler.prototype.FILE_PATH ];
     
@@ -205,6 +208,7 @@ PHP.VM = function( src, opts ) {
     
     $('_ENV').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("E") !== -1 ) ? {} : {} ).$;
     
+
 
 
     

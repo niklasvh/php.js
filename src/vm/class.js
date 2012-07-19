@@ -338,9 +338,16 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
                     
             if ( checkType( propertyType, STATIC )) {
+                /*
                 Object.defineProperty( Class.prototype,  propertyPrefix + propertyName, {
                     value: propertyDefault
                 });
+                */
+                Object.defineProperty( Class.prototype,  PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName, {
+                    value: propertyDefault
+                });
+                
+                
             } 
             
             
@@ -853,11 +860,19 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 methodCTX = this;
             }
             
-            if (methodCTX[ propertyPrefix + propertyName ] === undefined ) {
+            if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] === undefined ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access to undeclared static property: " + methodCTX[ COMPILER.CLASS_NAME ] + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
             }
             
-            return methodCTX[ propertyPrefix + propertyName ];
+            if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] !== undefined ) {
+                console.log(ctx, methodCTX, this);
+                console.log(className);
+                console.log(methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ][ COMPILER.VARIABLE_VALUE ]);
+                return methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ];
+            } else {
+
+        //      return methodCTX[ propertyPrefix + propertyName ];
+        }
             
             
         };
@@ -895,7 +910,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
          
-            if ( this[ propertyPrefix + propertyName ] === undefined ) {
+            if ( this[ propertyPrefix + propertyName ] === undefined && this[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName] === undefined ) {
 
 
                 var obj = {}, props = {};
@@ -1046,34 +1061,47 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
             } else {
                
+                var checkPermissions = function( propertyPrefix ) {
+                    if ( checkType( this[ propertyTypePrefix + propertyName ], PROTECTED ) && !(ctx instanceof PHP.VM.ClassPrototype) ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access protected property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
+                    }
 
 
-
-                
-                
-                if ( checkType( this[ propertyTypePrefix + propertyName ], PROTECTED ) && !(ctx instanceof PHP.VM.ClassPrototype) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access protected property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
-                }
-
-
-                if (this[ propertyPrefix + propertyName ][ VARIABLE.DEFINED ] !== true && (!(ctx instanceof PHP.VM.ClassPrototype) || this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] === undefined  )) {
-                    if (!(ctx instanceof PHP.VM.ClassPrototype) && checkType( this[ propertyTypePrefix + propertyName ], PRIVATE )) {
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access private property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
-                    } 
+                    if (this[ propertyPrefix + propertyName ][ VARIABLE.DEFINED ] !== true && (!(ctx instanceof PHP.VM.ClassPrototype) || this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] === undefined  )) {
+                        if (!(ctx instanceof PHP.VM.ClassPrototype) && checkType( this[ propertyTypePrefix + propertyName ], PRIVATE )) {
+                            ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access private property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
+                        } 
                     
-                    console.log( this);
-                    Object.getPrototypeOf(this)[ propertyTypePrefix + propertyName ] = 1;
-                }
+                    
+                        Object.getPrototypeOf(this)[ propertyTypePrefix + propertyName ] = 1;
+                    }
                 
-                if ( ctx instanceof PHP.VM.ClassPrototype && this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] !== undefined ) {
-                    // favor current context over object only if current context property is private
-                    if ( checkType( ctx[ propertyTypePrefix + propertyName ], PRIVATE ) ) {
-                        return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
+                    if ( ctx instanceof PHP.VM.ClassPrototype && this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] !== undefined ) {
+                        // favor current context over object only if current context property is private
+                        if ( checkType( ctx[ propertyTypePrefix + propertyName ], PRIVATE ) ) {
+                            return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
+                        }
+                    }
+                    
+                }.bind(this),
+                ret;
+                
+                if ( this[ propertyPrefix + propertyName ] !== undefined ) {
+                    ret = checkPermissions( propertyPrefix );
+                    if (ret !== undefined ) {
+                        return ret;
                     }
                 }
-                     
-                   
+                
                 if ( checkType( this[ propertyTypePrefix + propertyName ], STATIC ) ) {
+                    
+                
+                    
+                    ret = checkPermissions( PHP.VM.Class.CLASS_STATIC_PROPERTY );
+                    if (ret !== undefined ) {
+                        return ret;
+                    }
+                    
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Accessing static property " + className + "::$" + propertyName + " as non static", PHP.Constants.E_STRICT, true );      
                     if ( this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] === undefined ) {
                         var variable = new PHP.VM.Variable();
@@ -1106,15 +1134,20 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         Class.prototype[  COMPILER.CLASS_CLONE  ] = function( ctx ) {
             
-            var cloned = new (ENV.$Class.Get( this[ COMPILER.CLASS_NAME ] ))(),
+            var cloned = new (ENV.$Class.Get( this[ COMPILER.CLASS_NAME ] ))( true ),
             __clone = "__clone";
-            
-            console.log( this, ctx, this[ COMPILER.CLASS_NAME ], cloned );
+            cloned[ COMPILER.CLASS_STORED ] = []; // variables that store an instance of this class, needed for destructors 
+            console.log( "cloning", cloned );
             
             // for...in, since we wanna go through the whole proto chain
             for (var prop in this) {
                 if ( prop.substring(0, propertyPrefix.length) === propertyPrefix) {
-                    cloned[ prop ][ COMPILER.VARIABLE_VALUE ] = this[ prop ][ COMPILER.VARIABLE_VALUE ];
+                                         
+                    if ( cloned[ prop ] === undefined ) {
+                        cloned[ prop ] = new PHP.VM.Variable( this[ prop ][ COMPILER.VARIABLE_VALUE ] );
+                    } else {
+                        cloned[ prop ][ COMPILER.VARIABLE_VALUE ] = this[ prop ][ COMPILER.VARIABLE_VALUE ];
+                    }
                 }
             }
             
@@ -1139,7 +1172,16 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
               
               
-                cloned.callMethod.call( cloned, __clone );
+          
+              
+                var $ = buildVariableContext.call( this, __clone, [], className, __clone, cloned );
+           
+
+                
+                this[ methodPrefix + __clone ].call( this, $, Object.getPrototypeOf(this) );
+              
+              
+            // cloned.callMethod.call( cloned, __clone );
             }
             
             
@@ -1191,7 +1233,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
            
             if ( checkType( this[ methodTypePrefix + __destruct ], PROTECTED) && (!( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ))) {
-                console.log( ctx );
+                
                 if ( shutdown === true ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 0", PHP.Constants.E_WARNING );
                     return;
@@ -1203,7 +1245,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             
             this[ PHP.VM.Class.KILLED ] = true;
-            console.log('destruct');
+            
             if ( this[  methodPrefix + __destruct  ] !== undefined ) {
                 return callMethod.call( this, __destruct, [] );         
             }
@@ -1255,6 +1297,8 @@ PHP.VM.Class.METHOD_REALNAME = "€€";
 PHP.VM.Class.CLASS_UNDEFINED_PROPERTY = "_£$";
 
 PHP.VM.Class.CLASS_PROPERTY = "_£";
+
+PHP.VM.Class.CLASS_STATIC_PROPERTY = "$_";
 
 PHP.VM.Class.INTERFACES = "$Interfaces";
 
