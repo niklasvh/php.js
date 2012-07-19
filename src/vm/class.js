@@ -1138,7 +1138,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 }
               
+              
+                cloned.callMethod.call( cloned, __clone );
             }
+            
+            
             
                 
                 

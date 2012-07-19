@@ -10,8 +10,11 @@ PHP.Modules.prototype.print_r = function() {
     var str = "",
     indent = 0,
     COMPILER = PHP.Compiler.prototype,
+    PRIVATE = PHP.VM.Class.PRIVATE,
+    PROTECTED = PHP.VM.Class.PROTECTED,
+    PROPERTY = PHP.VM.Class.PROPERTY,
     VAR = PHP.VM.Variable.prototype;
-    console.log('print_r');
+   
     if (this[ COMPILER.DISPLAY_HANDLER ] === true) {
         this[ COMPILER.ERROR ]( "print_r(): Cannot use output buffering in output buffering display handlers", PHP.Constants.E_ERROR, true );  
     }
@@ -21,8 +24,8 @@ PHP.Modules.prototype.print_r = function() {
         if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
             str += "Array\n";
             str += $INDENT( indent ) + "(";
-            var values = argument[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
-            var keys = argument[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
+            var values = argument[ COMPILER.VARIABLE_VALUE ][ PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
+            var keys = argument[ COMPILER.VARIABLE_VALUE ][ PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
             
            
        
@@ -55,68 +58,62 @@ PHP.Modules.prototype.print_r = function() {
             str += $INDENT( indent ) + "(";
       
       
-                  var added = false;
+            var added = false,
+            definedItems = [],
+            tmp = "";
           
-           
+            console.log( classObj );
             // search whole prototype chain
             for ( var item in classObj ) {
-                if (item.substring(0, PHP.VM.Class.PROPERTY.length) === PHP.VM.Class.PROPERTY) {
+                
+            
+                if (item.substring(0, PROPERTY.length) === PROPERTY) {
                     if ( added === false ) {
                         str += "\n";
                     }
                     added = true;
-                    str += $INDENT( indent + 4 ) + '[' + item.substring( PHP.VM.Class.PROPERTY.length ) + '] => ';
-                    str += $dump( classObj[ item ], indent + 8 );
-                    
+                    if ( classObj.hasOwnProperty( item )) {
+                        definedItems.push( item );
+                        str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length );
+                        str += '] => ';
+                        str += $dump( classObj[ item ], indent + 8 );
+                    }
                     //  props.push( item );
                   
                     var parent = classObj;
                     // search for overwritten private members
                     do {
-                        if ( classObj[ item ] !== parent[ item ] && parent[ item ] instanceof PHP.VM.Variable) {
-                        
-                            
-                            str += $INDENT( indent + 4 ) + '[' + item.substring( PHP.VM.Class.PROPERTY.length ) + ':' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +':private] => ';
-                            str += $dump( parent[ item ], indent + 8 );
-                            
+                       
+                        if ( parent.hasOwnProperty(item) ) {
+                      
+                            if ((Object.getPrototypeOf( parent )[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PROPERTY.length ) ] & PRIVATE) === PRIVATE) {
+                                str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + ':' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +':private] => ';
+                                str += $dump( parent[ item ], indent + 8 );
+                            } else if ((Object.getPrototypeOf( parent )[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PROPERTY.length ) ] & PROTECTED) === PROTECTED && definedItems.indexOf( item ) === -1) {
+                                str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + ':' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +':protected] => ';
+                                str += $dump( parent[ item ], indent + 8 );
+                                definedItems.push( item );
+                            } else if ( definedItems.indexOf( item ) === -1 ) {
+                                str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + '] => ';
+                                str += $dump( parent[ item ], indent + 8 );
+                                definedItems.push( item );
+                            }
                         }
                         parent = Object.getPrototypeOf( parent );
                     } while( parent instanceof PHP.VM.ClassPrototype);
                     
                     if ( classObj[ item ][ VAR.TYPE ] === VAR.ARRAY ) {
-                          str += "\n";
+                        str += "\n";
                     }
                 }
             }
+            str += tmp;
             
             if ( added === false ) {
-                 str += "\n";
+                str += "\n";
             }
           
-            /*
  
-            props.forEach(function( prop ){
-                str += "\n" + $INDENT( indent + 4 ) + '[' + prop.substring( PHP.VM.Class.PROPERTY.length ) + '] => ';
-                str += $dump( classObj[ prop ], indent + 8 );
-            });
-            */
-
-            /*
-            keys.forEach(function( key, index ){
-                str += $INDENT( indent + 4 ) + "[";
-
-                str += key;
-                
-                str += "] => ";
-                
-                str += $dump( values[ index ], indent + 8 );
-                
-                if ( values[ index ][ VAR.TYPE] === VAR.ARRAY ) {
-                    str += "\n";
-                }
-                
-            }, this);
-            */
             str += $INDENT( indent ) + ")\n";
             
         } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
