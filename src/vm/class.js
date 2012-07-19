@@ -154,6 +154,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
         var Class = function( ctx ) {
          
+     
+         
             Object.keys( props ).forEach(function( propertyName ){
                 
                 if ( checkType(this[propertyTypePrefix + propertyName], STATIC)) {
@@ -193,9 +195,18 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             }.bind( this );
             
             // call constructor
-            
+          
             if ( ctx !== true ) {
                 // check if we are extending class, i.e. don't call constructors
+                if ( className !== "ArrayObject" ) {
+                    Object.keys(undefinedConstants).forEach(function( itm ){
+                        var parts = itm.split("::");
+                        if (!this.$Class.Exists( parts[ 0 ])) {
+                            ENV[ PHP.Compiler.prototype.ERROR ]( "Class '" + parts[0] + "' not found", PHP.Constants.E_ERROR, true );
+                        }
+                    }, ENV);
+                    undefinedConstants = [];
+                }
                  
                 this[ COMPILER.CLASS_STORED ] = []; // variables that store an instance of this class, needed for destructors 
                  

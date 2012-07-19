@@ -97,7 +97,7 @@ PHP.VM = function( src, opts ) {
             DeclaredClasses: function() {
                 return declaredClasses;
             },
-            New: function() {
+            New: function() {       
                 return classHandler.apply( null, arguments );
             },
             Exists: function( name ) {

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 505 out of 672 (75.1%)
+Passed 506 out of 672 (75.3%)
 
 Failed tests:
 
@@ -11,7 +11,6 @@ Failed tests:
  - tests/php/classes/bug26737.phpt
  - tests/php/classes/bug27468.phpt
  - tests/php/classes/bug27504.phpt
- - tests/php/classes/constants_error_004.phpt
  - tests/php/classes/constants_scope_001.phpt
  - tests/php/classes/destructor_and_globals.phpt
  - tests/php/classes/implicit_instantiation_001.phpt
