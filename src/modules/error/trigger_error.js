@@ -5,6 +5,7 @@
  */
 
 PHP.Modules.prototype.trigger_error = function( msg, level ) {
-    throw new Error( "Fatal error: " + msg.$ );
+          this[ PHP.Compiler.prototype.ERROR ]( "Fatal error: " + msg.$, PHP.Constants.E_ERROR, true );    
+ //   throw new Error( "Fatal error: " + msg.$ );
     
 };

@@ -9,7 +9,7 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
     VARIABLE = PHP.VM.Variable.prototype,
     Class,
     methodParts;
- 
+  
     if ( callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
 
         var ClassVar = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 ),
@@ -19,7 +19,7 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
         methodParts = methodName.split("::");
         
       
-        
+       
         if ( ClassVar[ VARIABLE.TYPE] === VARIABLE.STRING ) {
             Class = this.$Class.Get(ClassVar[ COMPILER.VARIABLE_VALUE ]).prototype;
         } else if ( ClassVar[ VARIABLE.TYPE] === VARIABLE.OBJECT ) {

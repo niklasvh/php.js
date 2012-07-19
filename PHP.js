@@ -3113,7 +3113,8 @@ PHP.Constants.E_ALL = 32767;
  */
 
 PHP.Modules.prototype.trigger_error = function( msg, level ) {
-    throw new Error( "Fatal error: " + msg.$ );
+          this[ PHP.Compiler.prototype.ERROR ]( "Fatal error: " + msg.$, PHP.Constants.E_ERROR, true );    
+ //   throw new Error( "Fatal error: " + msg.$ );
     
 };/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
 PHP.Constants.UPLOAD_ERR_OK = 0;
@@ -3251,7 +3252,7 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
     VARIABLE = PHP.VM.Variable.prototype,
     Class,
     methodParts;
- 
+  
     if ( callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
 
         var ClassVar = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 ),
@@ -3261,7 +3262,7 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
         methodParts = methodName.split("::");
         
       
-        
+       
         if ( ClassVar[ VARIABLE.TYPE] === VARIABLE.STRING ) {
             Class = this.$Class.Get(ClassVar[ COMPILER.VARIABLE_VALUE ]).prototype;
         } else if ( ClassVar[ VARIABLE.TYPE] === VARIABLE.OBJECT ) {
