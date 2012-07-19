@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 508 out of 672 (75.6%)
+Passed 511 out of 672 (76%)
 
 Failed tests:
 
@@ -32,7 +32,6 @@ Failed tests:
  - tests/php/func/005a.phpt
  - tests/php/func/007.phpt
  - tests/php/func/010.phpt
- - tests/php/lang/024.phpt
  - tests/php/lang/026.phpt
  - tests/php/lang/030.phpt
  - tests/php/lang/045.phpt
@@ -74,11 +73,9 @@ Failed tests:
  - tests/php/lang/bug30638.phpt
  - tests/php/lang/bug32828.phpt
  - tests/php/lang/bug35176.phpt
- - tests/php/lang/bug44654.phpt
  - tests/php/lang/bug45392.phpt
  - tests/php/lang/bug7515.phpt
  - tests/php/lang/catchable_error_002.phpt
- - tests/php/lang/comments2.phpt
  - tests/php/lang/compare_objects_basic2.phpt
  - tests/php/lang/each_binary_safety.phpt
  - tests/php/lang/engine_assignExecutionOrder_001.phpt

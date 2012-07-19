@@ -16,6 +16,7 @@ var files = {
             array: {
                 array: "js",
                 array_key_exists: "js",
+                array_merge: "js",
                 array_pop: "js",
                 array_push: "js",
                 array_search: "js",

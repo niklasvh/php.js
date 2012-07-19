@@ -2233,6 +2233,30 @@ PHP.Modules.prototype.array_key_exists = function( key, search ) {
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 19.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+
+PHP.Modules.prototype.$array_merge = function() {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+    ARRAY = PHP.VM.Array.prototype,
+    CLASS_PROPERTY = PHP.VM.Class.PROPERTY;
+    
+    var array = this.array([]);
+
+    var value = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].pop(),
+    key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].pop();
+
+        
+    return array;
+
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 14.7.2012 
 * @website http://hertzen.com
  */
@@ -7912,7 +7936,7 @@ PHP.Parser.prototype.yyn23 = function ( attributes ) {
 
 PHP.Parser.prototype.yyn24 = function () {
     if (Array.isArray(this.yyastk[this.stackPos-(2-2)])) {
-        this.yyval = array_merge(this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)]);
+        this.yyval = this.yyastk[this.stackPos-(2-1)].concat( this.yyastk[this.stackPos-(2-2)] );
     } else {
         this.yyastk[this.stackPos-(2-1)].push( this.yyastk[this.stackPos-(2-2)] );
         this.yyval = this.yyastk[this.stackPos-(2-1)];
@@ -11102,7 +11126,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         callMethod = function( methodName, args ) {
             
-            console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
+         //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             
 
             

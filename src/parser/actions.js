@@ -196,7 +196,7 @@ PHP.Parser.prototype.yyn23 = function ( attributes ) {
 
 PHP.Parser.prototype.yyn24 = function () {
     if (Array.isArray(this.yyastk[this.stackPos-(2-2)])) {
-        this.yyval = array_merge(this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)]);
+        this.yyval = this.yyastk[this.stackPos-(2-1)].concat( this.yyastk[this.stackPos-(2-2)] );
     } else {
         this.yyastk[this.stackPos-(2-1)].push( this.yyastk[this.stackPos-(2-2)] );
         this.yyval = this.yyastk[this.stackPos-(2-1)];
