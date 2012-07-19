@@ -9,7 +9,7 @@ PHP.VM.VariableHandler = function( ENV ) {
     var variables = {},
     methods = function( variableName, setTo ) {
         
-        if (setTo instanceof PHP.VM.Variable) {
+        if ( setTo !== undefined ) {
             variables[ variableName ] = setTo;
             return methods;
         }

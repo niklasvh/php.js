@@ -288,7 +288,19 @@ PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
-    return this.source( action.left ) + "." + this.CONCAT + "(" + this.source( action.right ) + ")";
+    var str =  "";
+   
+  console.log( "concat", action );
+    if ( /^Node_Expr_(Static)?PropertyFetch$/.test(action.left.type)  ) {
+      str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_STRING + "." + this.VARIABLE_VALUE + ")";
+    } else {
+        str += this.source( action.left );
+    }
+  
+    str += "." + this.CONCAT + "(" + this.source( action.right ) + ")";
+    
+    return str;    
+    
 };
 
 PHP.Compiler.prototype.Node_Expr_BooleanOr = function( action ) {

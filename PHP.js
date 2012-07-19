@@ -823,7 +823,19 @@ PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
-    return this.source( action.left ) + "." + this.CONCAT + "(" + this.source( action.right ) + ")";
+    var str =  "";
+   
+  console.log( "concat", action );
+    if ( /^Node_Expr_(Static)?PropertyFetch$/.test(action.left.type)  ) {
+      str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_STRING + "." + this.VARIABLE_VALUE + ")";
+    } else {
+        str += this.source( action.left );
+    }
+  
+    str += "." + this.CONCAT + "(" + this.source( action.right ) + ")";
+    
+    return str;    
+    
 };
 
 PHP.Compiler.prototype.Node_Expr_BooleanOr = function( action ) {
@@ -11101,6 +11113,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
             });
         }
+        var obj = {};
+        obj[ COMPILER.DIM_FETCH ] = function( ctx, variable ) {
+            return ENV[ COMPILER.GLOBAL ]( variable[ COMPILER.VARIABLE_VALUE ] );
+        };
+        
+        $("GLOBALS", obj);
+        
         $("$__CLASS__")[ COMPILER.VARIABLE_VALUE ] = className;
         $("$__FUNCTION__")[ COMPILER.VARIABLE_VALUE ] = realName;
         $("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className + "::" + realName;
@@ -12365,7 +12384,7 @@ PHP.VM.VariableHandler = function( ENV ) {
     var variables = {},
     methods = function( variableName, setTo ) {
         
-        if (setTo instanceof PHP.VM.Variable) {
+        if ( setTo !== undefined ) {
             variables[ variableName ] = setTo;
             return methods;
         }
