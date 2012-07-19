@@ -12070,6 +12070,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             console.log( this, ctx, this[ COMPILER.CLASS_NAME ], cloned );
             
+            // for...in, since we wanna go through the whole proto chain
+            for (var prop in this) {
+                if ( prop.substring(0, propertyPrefix.length) === propertyPrefix) {
+                    cloned[ prop ][ COMPILER.VARIABLE_VALUE ] = this[ prop ][ COMPILER.VARIABLE_VALUE ];
+                }
+            }
+            
             if ( this[ methodPrefix + __clone ] !== undefined ) {
               
                              
