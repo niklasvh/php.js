@@ -438,7 +438,9 @@ PHP.VM.Variable = function( arg ) {
                     $this[ this.TYPE ] = this.STRING;
                     
                     returning = $this[ this.DEFINED ];
+                    $this[ COMPILER.VARIABLE_VALUE ] = $this[ this.DEFINED ];
                     $this[ this.DEFINED ] = true;
+                    
                     return returning;
                 } else {
  

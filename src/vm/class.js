@@ -272,7 +272,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
          */ 
         methods [ COMPILER.CLASS_CONSTANT ] = function( constantName, constantValue ) {
             
-            if ( Class.prototype[ PHP.VM.Class.CONSTANT + constantName ] !== undefined ) {
+            if (  Class.prototype[ PHP.VM.Class.CONSTANT + className  + "$" + constantName] !== undefined ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redefine class constant " + className + "::" + constantName, PHP.Constants.E_ERROR, true );    
             }
             
@@ -294,6 +294,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 constantValue[ VARIABLE.CLASS_CONSTANT ] = true;
                 Class.prototype[ PHP.VM.Class.CONSTANT + constantName ] = constantValue;
             }
+            
+            Class.prototype[ PHP.VM.Class.CONSTANT + className  + "$" + constantName] = Class.prototype[ PHP.VM.Class.CONSTANT + constantName ];
             
             if (Class.prototype[ PHP.VM.Class.CONSTANT + constantName ][ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Arrays are not allowed in class constants", PHP.Constants.E_ERROR, true );  

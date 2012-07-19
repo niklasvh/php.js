@@ -105,7 +105,7 @@ PHP.VM = function( src, opts ) {
             },
             ConstantGet: function( className, state, constantName ) {
                 
-                if ( !/(self|parent)/i.test( className ) && classRegistry[ className.toLowerCase() ] === undefined ) {
+                if ( !/^(self|parent)$/i.test( className ) && classRegistry[ className.toLowerCase() ] === undefined ) {
                     if ( undefinedConstants[ className + "::" + constantName] === undefined ) {
                         var variable = new PHP.VM.Variable();
                         variable[ VARIABLE.CLASS_CONSTANT ] = true;
@@ -121,15 +121,25 @@ PHP.VM = function( src, opts ) {
                 
                     return undefinedConstants[ className + "::" + constantName];
                     
+                } else if ( /^(self|parent)$/i.test( className )) {
+                    
+                    if (/^(self)$/i.test( className)) {
+                        
+                        return (( typeof state === "function") ? state.prototype : state)[ COMPILER.CLASS_CONSTANT_FETCH ]( state, constantName );
+                       
+                    } else {
+                        return Object.getPrototypeOf( ( typeof state === "function") ? state.prototype : state )[ COMPILER.CLASS_CONSTANT_FETCH ]( state, constantName );
+                    }
+
+                    
                 } else {
                     return methods.Get(  className, state )[ COMPILER.CLASS_CONSTANT_FETCH ]( state, constantName );
-                    
                 }
                 
             },
             Get: function( className, state, isInterface ) {
                
-                if ( !/(self|parent)/i.test( className ) ) {
+                if ( !/^(self|parent)$/i.test( className ) ) {
                     
                     if (classRegistry[ className.toLowerCase() ] === undefined && methods.__autoload( className ) === false ) {
                         
@@ -141,7 +151,7 @@ PHP.VM = function( src, opts ) {
                     } else {
                         return classRegistry[ className.toLowerCase() ];
                     }
-                } else if ( /self/i.test( className ) ) {
+                } else if ( /^self$/i.test( className ) ) {
                     return state.prototype;
                 //      return Object.getPrototypeOf( state );  
                 } else if ( /parent/i.test( className ) ) {
