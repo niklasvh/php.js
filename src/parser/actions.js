@@ -9,7 +9,11 @@ PHP.Parser.prototype.yyn1 = function () {
 PHP.Parser.prototype.yyn2 = function () {
 
     if (Array.isArray(this.yyastk[this.stackPos-(2-2)])) {
-        this.yyval = PHP.Utils.Merge( this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)] );
+      //  console.log(this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)]);
+      //   throw a;
+         this.yyval = this.yyastk[this.stackPos-(2-1)].concat(this.yyastk[this.stackPos-(2-2)]); 
+        //this.yyval = PHP.Utils.Merge( this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)] );
+       
     } else {
         this.yyastk[this.stackPos-(2-1)].push( this.yyastk[this.stackPos-(2-2)] );
         //  this.yyastk[this.stackPos-(2-1)] = PHP.Utils.Merge( this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)]);

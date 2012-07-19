@@ -5699,7 +5699,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
         value: PHP.Constants.T_FINAL,
         re: /^final(?=\s)/i
     },
-        {
+    {
         value: PHP.Constants.T_VAR,
         re: /^var(?=\s)/i
     },
@@ -6083,6 +6083,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
         value: PHP.Constants.T_FOR,
         re: /^for(?=[ (])/i
     },
+
     {
         value: PHP.Constants.T_DNUMBER,
         re: /^[0-9]*\.[0-9]+([eE][-]?[0-9]*)?/
@@ -6120,6 +6121,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
         func: function( result, token ) {
 
             var curlyOpen = 0,
+            len,
             bracketOpen = 0;
 
             if (result.substring( 0,1 ) === "'") {
@@ -6131,10 +6133,11 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                 // string has a variable
 
                 while( result.length > 0 ) {
-
-                    match = result.match( /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\']/ );
+                    len = result.length;
+                    match = result.match( /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\@\^\%\"\'\{\}]/ );
 
                     if ( match !== null ) {
+                       
                         results.push( match[ 0 ] );
                         result = result.substring( 1 );
 
@@ -6190,10 +6193,10 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                     }
                     
                     var re;
-                    if ( bracketOpen > 0) {
+                    if ( curlyOpen > 0) {
                         re = /^([^\\\$"{}\]]|\\.)+/g;
                     } else {
-                        re = /^([^\\\$"{}]|\\.)+/g;
+                        re = /^([^\\\$"{]|\\.|{[^\$])+/g;
                     }
 
                     while(( match = result.match( re )) !== null ) {
@@ -6218,6 +6221,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                     }
 
                     if( result.match(/^{\$/) !== null ) {
+                       
                         results.push([
                             parseInt(PHP.Constants.T_CURLY_OPEN, 10),
                             "{",
@@ -6226,6 +6230,15 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                         result = result.substring( 1 );
                         curlyOpen++;
                     }
+                    
+                    if (len === result.length) {
+                        //  nothing has been found yet
+                        if ((match =  result.match( /^(([^\\]|\\.)*?[^\\]\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)/g )) !== null) {
+                            console.log( result, match, match[0], match[1] );
+                            return;
+                        }
+                    }
+                    
                 }
 
                 return undefined;
@@ -7712,7 +7725,11 @@ PHP.Parser.prototype.yyn1 = function () {
 PHP.Parser.prototype.yyn2 = function () {
 
     if (Array.isArray(this.yyastk[this.stackPos-(2-2)])) {
-        this.yyval = PHP.Utils.Merge( this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)] );
+      //  console.log(this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)]);
+      //   throw a;
+         this.yyval = this.yyastk[this.stackPos-(2-1)].concat(this.yyastk[this.stackPos-(2-2)]); 
+        //this.yyval = PHP.Utils.Merge( this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)] );
+       
     } else {
         this.yyastk[this.stackPos-(2-1)].push( this.yyastk[this.stackPos-(2-2)] );
         //  this.yyastk[this.stackPos-(2-1)] = PHP.Utils.Merge( this.yyastk[this.stackPos-(2-1)], this.yyastk[this.stackPos-(2-2)]);

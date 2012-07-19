@@ -37,7 +37,7 @@ PHP.Lexer = function( src ) {
         value: PHP.Constants.T_FINAL,
         re: /^final(?=\s)/i
     },
-        {
+    {
         value: PHP.Constants.T_VAR,
         re: /^var(?=\s)/i
     },
@@ -421,6 +421,7 @@ PHP.Lexer = function( src ) {
         value: PHP.Constants.T_FOR,
         re: /^for(?=[ (])/i
     },
+
     {
         value: PHP.Constants.T_DNUMBER,
         re: /^[0-9]*\.[0-9]+([eE][-]?[0-9]*)?/
@@ -458,6 +459,7 @@ PHP.Lexer = function( src ) {
         func: function( result, token ) {
 
             var curlyOpen = 0,
+            len,
             bracketOpen = 0;
 
             if (result.substring( 0,1 ) === "'") {
@@ -469,10 +471,11 @@ PHP.Lexer = function( src ) {
                 // string has a variable
 
                 while( result.length > 0 ) {
-
-                    match = result.match( /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\']/ );
+                    len = result.length;
+                    match = result.match( /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\@\^\%\"\'\{\}]/ );
 
                     if ( match !== null ) {
+                       
                         results.push( match[ 0 ] );
                         result = result.substring( 1 );
 
@@ -528,10 +531,10 @@ PHP.Lexer = function( src ) {
                     }
                     
                     var re;
-                    if ( bracketOpen > 0) {
+                    if ( curlyOpen > 0) {
                         re = /^([^\\\$"{}\]]|\\.)+/g;
                     } else {
-                        re = /^([^\\\$"{}]|\\.)+/g;
+                        re = /^([^\\\$"{]|\\.|{[^\$])+/g;
                     }
 
                     while(( match = result.match( re )) !== null ) {
@@ -556,6 +559,7 @@ PHP.Lexer = function( src ) {
                     }
 
                     if( result.match(/^{\$/) !== null ) {
+                       
                         results.push([
                             parseInt(PHP.Constants.T_CURLY_OPEN, 10),
                             "{",
@@ -564,6 +568,15 @@ PHP.Lexer = function( src ) {
                         result = result.substring( 1 );
                         curlyOpen++;
                     }
+                    
+                    if (len === result.length) {
+                        //  nothing has been found yet
+                        if ((match =  result.match( /^(([^\\]|\\.)*?[^\\]\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)/g )) !== null) {
+                            console.log( result, match, match[0], match[1] );
+                            return;
+                        }
+                    }
+                    
                 }
 
                 return undefined;
