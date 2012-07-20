@@ -216,7 +216,8 @@ PHP.Compiler.prototype.Node_Expr_Div = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Minus = function( action ) {
-    return this.source( action.left ) + "." + this.MINUS + "(" + this.source( action.right ) + ")";
+    console.log( action );
+    return this.source( action.left ) + "." + this.MINUS + "(" + this.source( action.right ) + ( /^Node_Expr_Post/.test( action.right.type ) ? ", true" : "" ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Mul = function( action ) {
@@ -228,7 +229,21 @@ PHP.Compiler.prototype.Node_Expr_Mod = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
-    return this.source( action.left ) + "." + this.ADD + "(" + this.source( action.right ) + ")";
+    
+    var str =  "";
+   
+
+    if ( /^Node_Expr_((Static)?Property|ArrayDim)Fetch$/.test(action.left.type) ) {
+        str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_DOUBLE + "." + this.VARIABLE_VALUE + ")";
+    } else {
+        str += this.source( action.left );
+    }
+  
+    str += "." + this.ADD + "(" + this.source( action.right ) + ")";
+    
+    return str;    
+    
+
 };
 
 PHP.Compiler.prototype.Node_Expr_Equal = function( action ) {
@@ -290,9 +305,9 @@ PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
     var str =  "";
    
-  console.log( "concat", action );
-    if ( /^Node_Expr_(Static)?PropertyFetch$/.test(action.left.type)  ) {
-      str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_STRING + "." + this.VARIABLE_VALUE + ")";
+
+    if ( /^Node_Expr_((Static)?Property|ArrayDim)Fetch$/.test(action.left.type) )  {
+        str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_STRING + "." + this.VARIABLE_VALUE + ")";
     } else {
         str += this.source( action.left );
     }

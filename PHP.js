@@ -244,12 +244,16 @@ PHP.Compiler = function( AST, file ) {
     this.file = file;
     this.src = "";
     this.FOREACH_COUNT = 0;
+    
+    this.src += this.stmts( AST, true );
+    
+    /*
     AST.forEach( function( action ){
         if ( this.FATAL_ERROR !== undefined ) {
             return;
         }
         this.src += this[ action.type ]( action ) + ";\n";     
-    }, this );
+    }, this );*/
 
     if ( this.FATAL_ERROR !== undefined ) {
         this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", ' +((  this.ERROR_TYPE === undefined ) ? "PHP.Constants.E_ERROR" : this.ERROR_TYPE ) + ');';
@@ -271,7 +275,7 @@ COMPILER.getName = function( item ) {
 
 };
 
-COMPILER.stmts = function( stmts ) {
+COMPILER.stmts = function( stmts, main ) {
     var src = "";
     
     stmts.forEach(function( stmt ){
@@ -279,7 +283,8 @@ COMPILER.stmts = function( stmts ) {
             return;
         }
         src += this.source( stmt );
-        if ( /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
+        
+        if ( main !== true && /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
             // trigger POST_MOD
             src += "." + this.VARIABLE_VALUE;
         }
@@ -751,7 +756,8 @@ PHP.Compiler.prototype.Node_Expr_Div = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Minus = function( action ) {
-    return this.source( action.left ) + "." + this.MINUS + "(" + this.source( action.right ) + ")";
+    console.log( action );
+    return this.source( action.left ) + "." + this.MINUS + "(" + this.source( action.right ) + ( /^Node_Expr_Post/.test( action.right.type ) ? ", true" : "" ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Mul = function( action ) {
@@ -763,7 +769,21 @@ PHP.Compiler.prototype.Node_Expr_Mod = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
-    return this.source( action.left ) + "." + this.ADD + "(" + this.source( action.right ) + ")";
+    
+    var str =  "";
+   
+
+    if ( /^Node_Expr_((Static)?Property|ArrayDim)Fetch$/.test(action.left.type) ) {
+        str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_DOUBLE + "." + this.VARIABLE_VALUE + ")";
+    } else {
+        str += this.source( action.left );
+    }
+  
+    str += "." + this.ADD + "(" + this.source( action.right ) + ")";
+    
+    return str;    
+    
+
 };
 
 PHP.Compiler.prototype.Node_Expr_Equal = function( action ) {
@@ -825,9 +845,9 @@ PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
     var str =  "";
    
-  console.log( "concat", action );
-    if ( /^Node_Expr_(Static)?PropertyFetch$/.test(action.left.type)  ) {
-      str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_STRING + "." + this.VARIABLE_VALUE + ")";
+
+    if ( /^Node_Expr_((Static)?Property|ArrayDim)Fetch$/.test(action.left.type) )  {
+        str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_STRING + "." + this.VARIABLE_VALUE + ")";
     } else {
         str += this.source( action.left );
     }
@@ -11916,9 +11936,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             }
             
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] !== undefined ) {
-                console.log(ctx, methodCTX, this);
-                console.log(className);
-                console.log(methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ][ COMPILER.VARIABLE_VALUE ]);
+
                 return methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ];
             } else {
 
@@ -12454,7 +12472,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
               
         } else {
             if (combinedVariable[ VARIABLE.TYPE ] === VARIABLE.NULL && this[ VARIABLE.TYPE ] === VARIABLE.OBJECT) {
-               this.TMPCTX =   combinedVariable[ VARIABLE.INSTANCE ];
+                this.TMPCTX =   combinedVariable[ VARIABLE.INSTANCE ];
             }
             
             this[ COMPILER.VARIABLE_VALUE ] = val;          
@@ -12559,10 +12577,18 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MOD ] = function( combine
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) % ( combinedVariable[ COMPILER.VARIABLE_VALUE ]) );
 };
 
-PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MINUS ] = function( combinedVariable ) {
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MINUS ] = function( combinedVariable, post ) {
     
     var COMPILER = PHP.Compiler.prototype;
-    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) - ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
+    
+    if ( post === true ) { 
+        var after = combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0,
+        before = this[ COMPILER.VARIABLE_VALUE ] - 0;
+        return new PHP.VM.Variable( before - after );
+        
+    } else {
+        return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) - ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
+    }
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.METHOD_CALL ] = function() {
@@ -12917,6 +12943,7 @@ PHP.VM.Variable = function( arg ) {
                     
                 case this.INT:
                     this[ this.TYPE ] = this.FLOAT;
+                    return this;
                     break;
                     
                 default:

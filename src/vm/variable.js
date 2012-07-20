@@ -79,7 +79,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
               
         } else {
             if (combinedVariable[ VARIABLE.TYPE ] === VARIABLE.NULL && this[ VARIABLE.TYPE ] === VARIABLE.OBJECT) {
-               this.TMPCTX =   combinedVariable[ VARIABLE.INSTANCE ];
+                this.TMPCTX =   combinedVariable[ VARIABLE.INSTANCE ];
             }
             
             this[ COMPILER.VARIABLE_VALUE ] = val;          
@@ -184,10 +184,18 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MOD ] = function( combine
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) % ( combinedVariable[ COMPILER.VARIABLE_VALUE ]) );
 };
 
-PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MINUS ] = function( combinedVariable ) {
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MINUS ] = function( combinedVariable, post ) {
     
     var COMPILER = PHP.Compiler.prototype;
-    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) - ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
+    
+    if ( post === true ) { 
+        var after = combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0,
+        before = this[ COMPILER.VARIABLE_VALUE ] - 0;
+        return new PHP.VM.Variable( before - after );
+        
+    } else {
+        return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) - ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
+    }
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.METHOD_CALL ] = function() {
@@ -542,6 +550,7 @@ PHP.VM.Variable = function( arg ) {
                     
                 case this.INT:
                     this[ this.TYPE ] = this.FLOAT;
+                    return this;
                     break;
                     
                 default:

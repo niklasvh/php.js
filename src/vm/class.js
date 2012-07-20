@@ -885,9 +885,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             }
             
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] !== undefined ) {
-                console.log(ctx, methodCTX, this);
-                console.log(className);
-                console.log(methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ][ COMPILER.VARIABLE_VALUE ]);
+
                 return methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ];
             } else {
 

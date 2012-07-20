@@ -4,12 +4,16 @@ PHP.Compiler = function( AST, file ) {
     this.file = file;
     this.src = "";
     this.FOREACH_COUNT = 0;
+    
+    this.src += this.stmts( AST, true );
+    
+    /*
     AST.forEach( function( action ){
         if ( this.FATAL_ERROR !== undefined ) {
             return;
         }
         this.src += this[ action.type ]( action ) + ";\n";     
-    }, this );
+    }, this );*/
 
     if ( this.FATAL_ERROR !== undefined ) {
         this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", ' +((  this.ERROR_TYPE === undefined ) ? "PHP.Constants.E_ERROR" : this.ERROR_TYPE ) + ');';
@@ -31,7 +35,7 @@ COMPILER.getName = function( item ) {
 
 };
 
-COMPILER.stmts = function( stmts ) {
+COMPILER.stmts = function( stmts, main ) {
     var src = "";
     
     stmts.forEach(function( stmt ){
@@ -39,7 +43,8 @@ COMPILER.stmts = function( stmts ) {
             return;
         }
         src += this.source( stmt );
-        if ( /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
+        
+        if ( main !== true && /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
             // trigger POST_MOD
             src += "." + this.VARIABLE_VALUE;
         }
