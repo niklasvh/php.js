@@ -9,18 +9,20 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
     VAR = PHP.VM.Variable.prototype,
     ARRAY = PHP.VM.Array.prototype;
     
+    var itm = expr[ COMPILER.VARIABLE_VALUE ]; // trigger get
+    
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
-        var pointer = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
+        var pointer = itm[ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
         pointer[ COMPILER.VARIABLE_VALUE ] = 0;
       
         return {
-            len: expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].length,
+            len: itm[ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].length,
             expr: expr,
-            clone: expr[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_CLONE )
+            clone: itm[ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_CLONE )
         };
       
     } else if ( expr[ VAR.TYPE ] === VAR.OBJECT ) {
-        var objectValue = expr[ COMPILER.VARIABLE_VALUE ]
+        var objectValue = itm;
         
         
         // iteratorAggregate implemented objects
