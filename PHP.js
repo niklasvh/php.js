@@ -2309,8 +2309,9 @@ PHP.Modules.prototype.array_pop = function( array ) {
 
     var value = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].pop(),
     key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].pop();
-   // pointer = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] = 0;
-        
+ 
+    this.reset( array );
+    
     return value;
 
 };
@@ -2389,8 +2390,8 @@ PHP.Modules.prototype.array_shift = function( array ) {
 
     var value = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].shift(),
     key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].shift();
-   // pointer = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] = 0;
-        
+   
+     this.reset( array );   
     return value;
 
 };
@@ -2911,7 +2912,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
             
         }
     } else {
-               this[ COMPILER.ERROR ]( "Invalid argument supplied for foreach()", PHP.Constants.E_CORE_WARNING, true );
+        this[ COMPILER.ERROR ]( "Invalid argument supplied for foreach()", PHP.Constants.E_CORE_WARNING, true );
      
     }
    
@@ -2939,35 +2940,94 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
         return false;
     }
     expr = iterator.expr;
-
+    
+    if ( iterator.count === undefined ) {
+        iterator.count = 0;
+    }
+    
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
         
-        if ( !byRef && iterator.expr[ VAR.IS_REF ] !== true ) {
+       
+        
+        /*
+        if ( iterator.expr[ VAR.IS_REF ] !== true ) {
             expr = iterator.clone;
         } else {
             expr = expr[ COMPILER.VARIABLE_VALUE ];
         }
-        
-        var values = expr[ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
-        keys =  expr[ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
-        len = ( byRef || iterator.expr[ VAR.IS_REF ] === true) ? values.length : iterator.len,
-        pointer = expr[ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
-      
-        var result = ( pointer[ COMPILER.VARIABLE_VALUE ] < len );
+        */
+        var clonedValues = iterator.clone[ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
+        clonedKeys =  iterator.clone[ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
+        origValues = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
+        origKeys = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
+        len = (byRef === true || iterator.expr[ VAR.IS_REF ] === true) ? origValues.length : iterator.len,
+        pointer = (( byRef === true ) ? expr[ COMPILER.VARIABLE_VALUE ] : iterator.clone )[ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
+     
+     
+        // clean unset elements off array
+        /*
+        if ( byRef === true ) {
+            origValues.forEach(function( variable, index ) {
+                if ( variable[ VAR.DEFINED ] !== true ) {
+                    origValues.splice( index, 1 );
+                    origKeys.splice( index, 1 );
+                    console.log(origValues);
+                }
+            });
+        }*/
+     
+        var result = ( iterator.count < len );
         
         if ( result === true ) {
-            if (byRef === true || iterator.expr[ VAR.IS_REF ] === true  ) {
-                value[ VAR.REF ]( values[ pointer[ COMPILER.VARIABLE_VALUE ] ] );
+            
+            var compareTo = (byRef === true || iterator.expr[ VAR.IS_REF ] === true)  ? origValues : clonedValues,
+            
+            index, lowerLoop = function( index ) {
+                while( compareTo [ --index ] === undefined && index > 0 ) {}
+                return index;
+            }
+            
+           
+            if ( pointer[ COMPILER.VARIABLE_VALUE ] !== iterator.count ) {
+                if ( compareTo [ iterator.count ] !== undefined ) {
+                    index = iterator.count;
+                } else if ( compareTo [ pointer[ COMPILER.VARIABLE_VALUE ] ] !== undefined ) {
+                    index = pointer[ COMPILER.VARIABLE_VALUE ];
+                } else {
+                    index =  lowerLoop( pointer[ COMPILER.VARIABLE_VALUE ] );     
+                }
+                       
+            } else if ( compareTo [ iterator.count ] !== undefined ){
+                index = iterator.count;
             } else {
-                value[ COMPILER.VARIABLE_VALUE ] = values[ pointer[ COMPILER.VARIABLE_VALUE ] ][ COMPILER.VARIABLE_VALUE ];
+                index =  lowerLoop( pointer[ COMPILER.VARIABLE_VALUE ] );    
+            }
+               
+            
+            if ( byRef === true || iterator.expr[ VAR.IS_REF ] === true ) {
+                value[ VAR.REF ]( origValues[ index ] );
+            } else {
+                value[ COMPILER.VARIABLE_VALUE ] = clonedValues[ iterator.count ][ COMPILER.VARIABLE_VALUE ];
             }
             if ( key instanceof PHP.VM.Variable ) {
-                key[ COMPILER.VARIABLE_VALUE ] = keys[ pointer[ COMPILER.VARIABLE_VALUE ] ];
+                if (iterator.expr[ VAR.IS_REF ] === true ) {
+                    key[ COMPILER.VARIABLE_VALUE ] = origKeys[ index ];
+                } else {
+                    key[ COMPILER.VARIABLE_VALUE ] = clonedKeys[ index ];
+                }
+              
             }
+            /*
             if (!byRef && iterator.expr[ VAR.IS_REF ] !== true ) {
                 iterator.expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ]++;
-            }
-            pointer[ COMPILER.VARIABLE_VALUE ]++;
+            }*/
+            iterator.prev = origValues[ index ];
+            iterator.count++;
+            
+            expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ]++;
+            iterator.clone[ PHP.VM.Class.PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ]++;
+        // pointer[ COMPILER.VARIABLE_VALUE ]++;
+
         }
         
         return result;
@@ -3021,7 +3081,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
         
        
     } else {
-         this[ COMPILER.ERROR ]( "Invalid argument supplied for foreach()", PHP.Constants.E_CORE_WARNING, true );
+        this[ COMPILER.ERROR ]( "Invalid argument supplied for foreach()", PHP.Constants.E_CORE_WARNING, true );
         return false;
     }
     
@@ -12898,6 +12958,10 @@ PHP.VM.Variable = function( arg ) {
         console.log("unsetting", this);
         setValue( null );
         this[ this.DEFINED ] = false;
+        console.log( this );
+        if ( this[ this.REFERRING ] !== undefined ) {
+            this [ this.REFERRING ]( PHP.Compiler.prototype.UNSET );
+        }
     };
     
     Object.defineProperty( this, COMPILER.VARIABLE_VALUE,

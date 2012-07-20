@@ -424,6 +424,10 @@ PHP.VM.Variable = function( arg ) {
         console.log("unsetting", this);
         setValue( null );
         this[ this.DEFINED ] = false;
+        console.log( this );
+        if ( this[ this.REFERRING ] !== undefined ) {
+            this [ this.REFERRING ]( PHP.Compiler.prototype.UNSET );
+        }
     };
     
     Object.defineProperty( this, COMPILER.VARIABLE_VALUE,
