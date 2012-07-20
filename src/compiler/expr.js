@@ -11,14 +11,18 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
         this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;  
     }
     
- 
+  
     var src = this.source( action.variable ) + "." + this.ASSIGN;
-    if ( action.expr.type !== "Node_Expr_Assign") {    
-        src += "(" + this.source( action.expr ) + ")";
-    } else {
-        src += "(" + this.source( action.expr.variable ) + ", " + this.source( action.expr.expr ) + ")";
+    if ( action.expr !== undefined ) {
+        if ( action.expr.type !== "Node_Expr_Assign") {    
+            src += "(" + this.source( action.expr ) + ")";
+        } else {
+            src += "(" + this.source( action.expr.variable ) + ", " + this.source( action.expr.expr ) + ")";
+        }
+    } else  {
+        src += "(" + this.source( action.refVar ) + ")";
+
     }
-    
     /*
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;

@@ -94,7 +94,8 @@ var files = {
                 ini_get: "js",
                 ini_set: "js",
                 getenv: "js",
-                set_time_limit: "js"
+                set_time_limit: "js",
+                zend_version: "js"
             },
             output: {
                 constants: "js",
