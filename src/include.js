@@ -114,6 +114,7 @@ var files = {
                 echo: "js",
                 explode: "js",
                 implode: "js",
+                localeconv: "js",
                 parse_str: "js",
                 print: "js",
                 printf: "js",

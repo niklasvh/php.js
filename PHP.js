@@ -4421,6 +4421,27 @@ PHP.Modules.prototype.implode = function( glue, pieces ) {
     }).join( glue ) );
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 20.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.localeconv = function(  ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
+     item = PHP.VM.Array.arrayItem;
+    
+    var locale = this.$locale;
+   
+    
+    // todo add all
+    return this.array( [ 
+        item( "decimal_point", locale.decimal_point ), 
+        item( "thousands_sep", locale.thousands_sep ) ] 
+);
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 27.6.2012 
 * @website http://hertzen.com
  */
@@ -4451,7 +4472,7 @@ PHP.Modules.prototype.print = function( variable ) {
 
 
 
-PHP.Modules.prototype.printf = function( format) {
+PHP.Modules.prototype.printf = function( format ) {
     var COMPILER = PHP.Compiler.prototype,
     __toString = "__toString",
     VARIABLE = PHP.VM.Variable.prototype;
@@ -4461,7 +4482,12 @@ PHP.Modules.prototype.printf = function( format) {
         
         var value = format[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
         if ( format[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
-                
+            
+            
+            // todo fix to make more specific
+            Array.prototype.slice.call( arguments, 1 ).forEach( function( item ) {
+               value = value.replace(/%./, item[ COMPILER.VARIABLE_VALUE ] );
+            });
             this.$ob( value );
                 
         }
