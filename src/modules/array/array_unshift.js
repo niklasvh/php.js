@@ -36,7 +36,7 @@ PHP.Modules.prototype.array_unshift = function( array ) {
     });
     
     Array.prototype.unshift.apply(array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ], keys);
-   // pointer = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] = 0;
+    array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] -= vals.length;
         
     return new PHP.VM.Variable( value.length );
 

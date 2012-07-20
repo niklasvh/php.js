@@ -16,6 +16,12 @@ PHP.Modules.prototype.array_shift = function( array ) {
     key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].shift();
    
     this.reset( array );   
+    
+    
+    // key remapper    
+    array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.METHOD + "remap"]();
+    
+    
     return value;
 
 };

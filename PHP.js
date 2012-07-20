@@ -2392,6 +2392,12 @@ PHP.Modules.prototype.array_shift = function( array ) {
     key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].shift();
    
     this.reset( array );   
+    
+    
+    // key remapper    
+    array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.METHOD + "remap"]();
+    
+    
     return value;
 
 };
@@ -2433,7 +2439,7 @@ PHP.Modules.prototype.array_unshift = function( array ) {
     });
     
     Array.prototype.unshift.apply(array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ], keys);
-   // pointer = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] = 0;
+    array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] -= vals.length;
         
     return new PHP.VM.Variable( value.length );
 
@@ -13493,6 +13499,8 @@ PHP.VM.Array = function( ENV ) {
    
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
+    ARRAY = PHP.VM.Array.prototype,
+    CLASS = PHP.VM.Class,
     $this = this;
     
     ENV.$Class.New( "ArrayObject", 0, {}, function( M ) {
@@ -13647,14 +13655,26 @@ PHP.VM.Array = function( ENV ) {
                 this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].splice( removeIndex, 1);
             }
             
-            if (removeIndex <= this [ PHP.VM.Class.PROPERTY +  PHP.VM.Array.prototype.POINTER ][ COMPILER.VARIABLE_VALUE ]) {
-                this [ PHP.VM.Class.PROPERTY +  PHP.VM.Array.prototype.POINTER ][ COMPILER.VARIABLE_VALUE ]--;
+            if (removeIndex <= this [ CLASS.PROPERTY + ARRAY.POINTER ][ COMPILER.VARIABLE_VALUE ]) {
+                this [ CLASS.PROPERTY +  ARRAY.POINTER ][ COMPILER.VARIABLE_VALUE ]--;
             }
           
+
             
             
         })
-         
+        // remap keys
+        [ COMPILER.CLASS_METHOD ]( "remap", PHP.VM.Class.PRIVATE, [], function( $ ) {
+                     
+            this[ CLASS.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].forEach(function( key, index ){
+                // todo take into account other type of keys
+                if ( typeof key === "number" && key % 1 === 0) {
+                  
+                    this[ CLASS.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ][ index ]--;
+                }
+            }, this);
+            
+        })
         
         /*
          * offsetGet method
@@ -13687,7 +13707,7 @@ PHP.VM.Array = function( ENV ) {
                 if (this[ VARIABLE.REGISTER_ARRAY_SETTER ] !== undefined) {
                     var func = this[ VARIABLE.REGISTER_ARRAY_SETTER ];
                     item[ VARIABLE.REGISTER_SETTER ] = function( val ) {
-                       return func( val );
+                        return func( val );
                     };
                 }
                 return item;
