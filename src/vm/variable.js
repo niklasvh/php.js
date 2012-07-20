@@ -429,6 +429,17 @@ PHP.VM.Variable = function( arg ) {
             this [ this.REFERRING ]( PHP.Compiler.prototype.UNSET );
         }
     };
+    // property get proxy
+    this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
+        var val;
+        if (this[ this.TYPE ] === this.NULL ) {
+            this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
+            this[ COMPILER.VARIABLE_VALUE ] = val = new (this.ENV.$Class.Get("stdClass"))( this );
+        } else {
+            val =  this[ COMPILER.VARIABLE_VALUE ];
+        }
+        return val[ COMPILER.CLASS_PROPERTY_GET ].apply( val, arguments );
+    };
     
     Object.defineProperty( this, COMPILER.VARIABLE_VALUE,
     {

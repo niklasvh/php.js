@@ -114,7 +114,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         callMethod = function( methodName, args ) {
             
-         //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
+            //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             
 
             
@@ -1002,6 +1002,16 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 }.bind( this );
                 
+                obj [ COMPILER.CLASS_PROPERTY_GET ] = function() {
+                       
+                    if ( this[ methodPrefix + __get ] !== undefined ) {
+                       
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
+               
+                        return value[ COMPILER.CLASS_PROPERTY_GET ].apply( value, arguments );
+                    }
+                    
+                }.bind( this );
                  
                 obj [ COMPILER.ASSIGN_MINUS ] = function( combined ) {
                  

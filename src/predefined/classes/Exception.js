@@ -6,10 +6,10 @@ ENV.$Class.New( "Exception", 0, {}, function( M, $, $$ ){
 .Variable( "file", 2 )
 .Variable( "line", 2 )
 .Method( "__construct", 1, [{name:"message", d: $$("")}, {name:"code", d: $$(0)}, {name:"previous", d: $$(null)}], function( $, ctx, $Static ) {
-$("this").$.$Prop( ctx, "message" )._($("message"));
+$("this").$Prop( ctx, "message" )._($("message"));
 })
 .Method( "getMessage", 33, [], function( $, ctx, $Static ) {
-return $("this").$.$Prop( ctx, "message" );
+return $("this").$Prop( ctx, "message" );
 })
 .Method( "getPrevious", 33, [], function( $, ctx, $Static ) {
 })

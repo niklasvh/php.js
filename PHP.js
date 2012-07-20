@@ -757,6 +757,10 @@ PHP.Compiler.prototype.Node_Expr_BitwiseAnd = function( action ) {
     return this.source( action.left )  + "." + this.VARIABLE_VALUE + " & " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
 };
 
+PHP.Compiler.prototype.Node_Expr_BitwiseNot = function( action ) {
+    return " ~ " + this.source( action.expr ) + "." + this.VARIABLE_VALUE;
+};
+
 PHP.Compiler.prototype.Node_Expr_Div = function( action ) {
     return this.source( action.left ) + "." + this.DIV + "(" + this.source( action.right ) + ")";
 };
@@ -994,9 +998,9 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 
     if ( action.variable.name !== "this" ) {
-        return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
+        return this.source( action.variable ) + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
     } else {
-        return this.source( action.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
+        return this.source( action.variable ) + "." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
     }
 
 };
@@ -6497,7 +6501,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
     },
     {
         value: -1,
-        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\'\$]/
+        re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\'\$\~]/
     }];
 
 
@@ -11342,7 +11346,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         callMethod = function( methodName, args ) {
             
-         //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
+            //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             
 
             
@@ -12230,6 +12234,16 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 }.bind( this );
                 
+                obj [ COMPILER.CLASS_PROPERTY_GET ] = function() {
+                       
+                    if ( this[ methodPrefix + __get ] !== undefined ) {
+                       
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
+               
+                        return value[ COMPILER.CLASS_PROPERTY_GET ].apply( value, arguments );
+                    }
+                    
+                }.bind( this );
                  
                 obj [ COMPILER.ASSIGN_MINUS ] = function( combined ) {
                  
@@ -12998,6 +13012,17 @@ PHP.VM.Variable = function( arg ) {
         if ( this[ this.REFERRING ] !== undefined ) {
             this [ this.REFERRING ]( PHP.Compiler.prototype.UNSET );
         }
+    };
+    // property get proxy
+    this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
+        var val;
+        if (this[ this.TYPE ] === this.NULL ) {
+            this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
+            this[ COMPILER.VARIABLE_VALUE ] = val = new (this.ENV.$Class.Get("stdClass"))( this );
+        } else {
+            val =  this[ COMPILER.VARIABLE_VALUE ];
+        }
+        return val[ COMPILER.CLASS_PROPERTY_GET ].apply( val, arguments );
     };
     
     Object.defineProperty( this, COMPILER.VARIABLE_VALUE,
@@ -13920,10 +13945,10 @@ ENV.$Class.New( "Exception", 0, {}, function( M, $, $$ ){
 .Variable( "file", 2 )
 .Variable( "line", 2 )
 .Method( "__construct", 1, [{name:"message", d: $$("")}, {name:"code", d: $$(0)}, {name:"previous", d: $$(null)}], function( $, ctx, $Static ) {
-$("this").$.$Prop( ctx, "message" )._($("message"));
+$("this").$Prop( ctx, "message" )._($("message"));
 })
 .Method( "getMessage", 33, [], function( $, ctx, $Static ) {
-return $("this").$.$Prop( ctx, "message" );
+return $("this").$Prop( ctx, "message" );
 })
 .Method( "getPrevious", 33, [], function( $, ctx, $Static ) {
 })
@@ -13957,7 +13982,7 @@ if ( ((ENV.$F("is_string", arguments, $("argument")))).$Bool.$) {
 if ( ((ENV.$F("class_exists", arguments, $("argument"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) ));
 } else {
-$("this").$.$Prop( ctx, "name" )._($("argument"));
+$("this").$Prop( ctx, "name" )._($("argument"));
 };
 };
 })

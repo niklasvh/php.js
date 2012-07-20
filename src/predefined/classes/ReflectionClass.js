@@ -11,7 +11,7 @@ if ( ((ENV.$F("is_string", arguments, $("argument")))).$Bool.$) {
 if ( ((ENV.$F("class_exists", arguments, $("argument"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) ));
 } else {
-$("this").$.$Prop( ctx, "name" )._($("argument"));
+$("this").$Prop( ctx, "name" )._($("argument"));
 };
 };
 })
