@@ -2433,12 +2433,8 @@ PHP.Modules.prototype.array_unshift = function( array ) {
     });
     
     Array.prototype.unshift.apply(array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ], keys);
-    // pointer = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] = 0;
-    
-
-   
- 
-
+   // pointer = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.POINTER][ COMPILER.VARIABLE_VALUE ] = 0;
+        
     return new PHP.VM.Variable( value.length );
 
 };/* 
@@ -3271,7 +3267,7 @@ PHP.Constants.E_ALL = 32767;
  */
 
 PHP.Modules.prototype.trigger_error = function( msg, level ) {
-          this[ PHP.Compiler.prototype.ERROR ]( "Fatal error: " + msg.$, PHP.Constants.E_ERROR, true );    
+          this[ PHP.Compiler.prototype.ERROR ]( msg.$, level.$ || PHP.Constants.E_ERROR  , true );    
  //   throw new Error( "Fatal error: " + msg.$ );
     
 };/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
