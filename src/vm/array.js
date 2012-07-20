@@ -162,6 +162,11 @@ PHP.VM.Array = function( ENV ) {
                 this.$Prop( this, $this.VALUES )[ COMPILER.VARIABLE_VALUE ].splice( removeIndex, 1);
             }
             
+            if (removeIndex <= this [ PHP.VM.Class.PROPERTY +  PHP.VM.Array.prototype.POINTER ][ COMPILER.VARIABLE_VALUE ]) {
+                this [ PHP.VM.Class.PROPERTY +  PHP.VM.Array.prototype.POINTER ][ COMPILER.VARIABLE_VALUE ]--;
+            }
+          
+            
             
         })
          

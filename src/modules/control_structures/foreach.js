@@ -113,7 +113,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
         clonedKeys =  iterator.clone[ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
         origValues = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
         origKeys = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
-        len = (byRef === true || iterator.expr[ VAR.IS_REF ] === true) ? origValues.length : iterator.len,
+        len = ( byRef === true || iterator.expr[ VAR.IS_REF ] === true ) ? origValues.length : iterator.len,
         pointer = (( byRef === true ) ? expr[ COMPILER.VARIABLE_VALUE ] : iterator.clone )[ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
      
      
@@ -128,20 +128,19 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
                 }
             });
         }*/
-     
-        var result = ( iterator.count < len );
+
+        var compareTo = (byRef === true || iterator.expr[ VAR.IS_REF ] === true)  ? origValues : clonedValues,
+        result;
         
-        if ( result === true ) {
-            
-            var compareTo = (byRef === true || iterator.expr[ VAR.IS_REF ] === true)  ? origValues : clonedValues,
-            
-            index, lowerLoop = function( index ) {
+                    
+            var index, lowerLoop = function( index ) {
                 while( compareTo [ --index ] === undefined && index > 0 ) {}
                 return index;
             }
             
            
             if ( pointer[ COMPILER.VARIABLE_VALUE ] !== iterator.count ) {
+                
                 if ( compareTo [ iterator.count ] !== undefined ) {
                     index = iterator.count;
                 } else if ( compareTo [ pointer[ COMPILER.VARIABLE_VALUE ] ] !== undefined ) {
@@ -155,7 +154,23 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
             } else {
                 index =  lowerLoop( pointer[ COMPILER.VARIABLE_VALUE ] );    
             }
-               
+            
+       
+        
+        if ( byRef === true || iterator.expr[ VAR.IS_REF ] === true) {
+            result = ( origValues[ pointer[ COMPILER.VARIABLE_VALUE ] ] !== undefined && (iterator.count <= origValues.length || iterator.diff || iterator.first !== origValues[ 0 ]) );
+        } else {
+            result = ( clonedValues[ iterator.count ] !== undefined );
+        }
+        
+        iterator.first = origValues[ 0 ];
+              iterator.diff = (iterator.count === origValues.length);
+       
+        
+        if ( result === true ) {
+            
+
+
             
             if ( byRef === true || iterator.expr[ VAR.IS_REF ] === true ) {
                 value[ VAR.REF ]( origValues[ index ] );
@@ -163,7 +178,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
                 value[ COMPILER.VARIABLE_VALUE ] = clonedValues[ iterator.count ][ COMPILER.VARIABLE_VALUE ];
             }
             if ( key instanceof PHP.VM.Variable ) {
-                if (iterator.expr[ VAR.IS_REF ] === true ) {
+                if (byRef === true || iterator.expr[ VAR.IS_REF ] === true ) {
                     key[ COMPILER.VARIABLE_VALUE ] = origKeys[ index ];
                 } else {
                     key[ COMPILER.VARIABLE_VALUE ] = clonedKeys[ index ];

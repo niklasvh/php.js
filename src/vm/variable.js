@@ -351,7 +351,7 @@ PHP.VM.Variable = function( arg ) {
         
     }.bind( this ); // something strange going on with context in node.js?? iterators_2.phpt
     
-    
+    this.rand = Math.random();
     setValue.call( this, arg );
     
     this[ COMPILER.VARIABLE_CLONE ] = function() {
