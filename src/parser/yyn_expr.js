@@ -596,6 +596,15 @@ PHP.Parser.prototype.Node_Expr_BitwiseOr = function() {
 
 };
 
+PHP.Parser.prototype.Node_Expr_BitwiseNot = function() {
+    return {
+        type: "Node_Expr_BitwiseNot",
+        expr: arguments[ 0 ],
+        attributes: arguments[ 1 ]
+    };  
+
+};
+
 PHP.Parser.prototype.Node_Expr_BooleanNot = function() {
     return {
         type: "Node_Expr_BooleanNot",

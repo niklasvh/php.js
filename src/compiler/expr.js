@@ -130,6 +130,8 @@ PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
     var src = this.CTX + "list( " + this.source(action.expr);
 
     var args = [];
+    
+    console.log( action );
 
     action.assignList.forEach(function( item ){
         src += ", " + this.source(item) ;

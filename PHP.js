@@ -314,6 +314,7 @@ COMPILER.source = function( action ) {
     }
      
     if ( Array.isArray( action )) {
+        console.log( action );
         return this[ action[0].type ]( action[0] );
     }
   
@@ -676,6 +677,8 @@ PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
     var src = this.CTX + "list( " + this.source(action.expr);
 
     var args = [];
+    
+    console.log( action );
 
     action.assignList.forEach(function( item ){
         src += ", " + this.source(item) ;
@@ -1838,6 +1841,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
 PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionName, args ) {
     var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype,
     func_num_args = "func_num_args",
     message = "():  Called from the global scope - no function context",
     func_get_arg = "func_get_arg",
@@ -1863,6 +1867,16 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
         return new PHP.VM.Variable( args.length - 2 );
 
     } else if ( functionName === func_get_arg ) {
+
+        if ( !this[ COMPILER.SIGNATURE ]( Array.prototype.slice.call(arguments,2 ), func_get_arg, 1, [ VARIABLE.INT ] ) ) {
+            return new PHP.VM.Variable( false );
+        }
+        
+        if ( arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] < 0 ) {
+            this[ PHP.Compiler.prototype.ERROR ]( func_get_arg + "():  The argument number should be >= 0", PHP.Constants.E_WARNING, true );
+            return new PHP.VM.Variable( false ); 
+        }
+   
 
         if ( args[ arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] + 2 ] === undefined ) {
             this[ PHP.Compiler.prototype.ERROR ]( func_get_arg + "():  Argument " + arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] + " not passed to function", PHP.Constants.E_CORE_WARNING, true );
@@ -4406,11 +4420,14 @@ PHP.Modules.prototype.echo = function() {
         
         if (arg instanceof PHP.VM.VariableProto) {
             var value = arg[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
+            
             if ( arg[ VARIABLE.TYPE ] === VARIABLE.FLOAT ) {
                 this.$ob( value.toString().replace(/\./, this.$locale.decimal_point ) );
+             } else if ( arg[ VARIABLE.TYPE ] === VARIABLE.BOOL && value != 1 ) { 
+                 return;
             } else if ( arg[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
                 
-                    this.$ob( value );
+                this.$ob( value );
                 
             }
             

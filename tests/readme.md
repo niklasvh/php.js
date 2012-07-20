@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 535 out of 672 (79.6%)
+Passed 538 out of 672 (80.1%)
 
 Failed tests:
 
@@ -84,8 +84,6 @@ Failed tests:
  - tests/php/lang/foreachLoopObjects.004.phpt
  - tests/php/lang/foreachLoopObjects.005.phpt
  - tests/php/lang/foreachLoopObjects.006.phpt
- - tests/php/lang/func_get_args.003.phpt
- - tests/php/lang/func_get_arg_variation.phpt
  - tests/php/lang/passByReference_004.phpt
  - tests/php/lang/passByReference_005.phpt
  - tests/php/lang/passByReference_006.phpt
@@ -124,7 +122,6 @@ Failed tests:
  - tests/php/output/ob_start_basic_unerasable_005.phpt
  - tests/php/output/ob_start_callbacks.phpt
  - tests/php/output/ob_start_error_005.phpt
- - tests/php/run-test/test003.phpt
  - tests/php/run-test/test005.phpt
  - tests/php/run-test/test006.phpt
  - tests/php/run-test/test007.phpt

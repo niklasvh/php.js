@@ -55,7 +55,7 @@ PHP_Tests.prototype.runTest = function( li ) {
             throw new Error( engine.error );
         }
                     
-        var expect = ((test.EXPECT === undefined) ? test.EXPECTF : test.EXPECT ).trim(),
+        var expect = ((test.EXPECT === undefined) ? (( test.EXPECTF ===  undefined ) ? test.EXPECTREGEX  : test.EXPECTF) : test.EXPECT ).trim(),
         output = engine.vm.OUTPUT_BUFFER.replace(/\n/g, "\r\n").trim(),
         expectResult;
                     
@@ -67,7 +67,15 @@ PHP_Tests.prototype.runTest = function( li ) {
 
       
         // http://qa.php.net/phpt_details.php#expectf_section
-        if (test.EXPECT === undefined ) {
+        
+        var re;
+        
+        if ( test.EXPECTREGEX !== undefined ) {
+            re = new RegExp("^" + expect + "$", "i");
+                   
+            expectResult = re.test( output );
+            
+        } else if (test.EXPECT === undefined ) {
             var shouldBef = expect;
 
             shouldBef = shouldBef.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -77,7 +85,7 @@ PHP_Tests.prototype.runTest = function( li ) {
             shouldBef = shouldBef.replace(/\%S/g,".*?");
                
              
-            var re = new RegExp("^" + shouldBef + "$", "i");
+            re = new RegExp("^" + shouldBef + "$", "i");
                    
             expectResult = re.test( output );
                         

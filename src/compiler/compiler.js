@@ -74,6 +74,7 @@ COMPILER.source = function( action ) {
     }
      
     if ( Array.isArray( action )) {
+        console.log( action );
         return this[ action[0].type ]( action[0] );
     }
   

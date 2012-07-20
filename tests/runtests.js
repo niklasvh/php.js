@@ -102,7 +102,7 @@ function runTest ( file, complete ) {
            
             engine = new PHP( test.FILE || test.FILEEOF, opts );
               
-            var expect = ((test.EXPECT === undefined) ? test.EXPECTF : test.EXPECT ).trim(),
+            var expect = ((test.EXPECT === undefined) ? (( test.EXPECTF ===  undefined ) ? test.EXPECTREGEX  : test.EXPECTF) : test.EXPECT ).trim(),
             output = engine.vm.OUTPUT_BUFFER.replace(/\n/g, "\r\n").trim(),
             expectResult;
             
@@ -112,9 +112,14 @@ function runTest ( file, complete ) {
         
             expect = expect.replace(/\%u\|b\%/g, "");  // Matches a single 'u' in PHP6 test output where the PHP5 output from the same test hs no character in that position.            
 
-            
+            var re;
                     
-            if (test.EXPECT === undefined ) {
+            if ( test.EXPECTREGEX !== undefined ) {
+                re = new RegExp("^" + expect + "$", "i");
+                   
+                expectResult = re.test( output );
+            
+            } else if (test.EXPECT === undefined ) {
                 
                 var shouldBef = expect;
                 shouldBef = shouldBef.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -125,7 +130,7 @@ function runTest ( file, complete ) {
                 
 
                         
-                var re = new RegExp("^" + shouldBef + "$", "i");
+                re = new RegExp("^" + shouldBef + "$", "i");
                          
                 expectResult = re.test( output );
                         
