@@ -765,9 +765,15 @@ PHP.VM.Variable = function( arg ) {
                 } else if (this[ this.TYPE ] === this.STRING) {
                     if ( variable[ this.TYPE ] !== this.INT ) {
                         this.ENV[ COMPILER.ERROR ]("Illegal string offset '" + variable[ COMPILER.VARIABLE_VALUE ] + "'", PHP.Constants.E_WARNING, true );    
-                        return new PHP.VM.Variable();
+                        return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );
                     } else {
-                        return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ].substr( variable[ COMPILER.VARIABLE_VALUE ], 1 ));
+                        var ret = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ].substr( variable[ COMPILER.VARIABLE_VALUE ], 1 ));
+                        
+                        ret[ this.REGISTER_SETTER ] = function( value ) {
+                            this[ COMPILER.VARIABLE_VALUE ] = this[ COMPILER.VARIABLE_VALUE ].substr( 0, variable[ COMPILER.VARIABLE_VALUE ] ) + value + this[ COMPILER.VARIABLE_VALUE ].substr( 1 + variable[ COMPILER.VARIABLE_VALUE ]);
+                        }.bind( this );
+                        
+                        return ret;
                     }
                 }
               

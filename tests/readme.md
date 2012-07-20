@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 527 out of 672 (78.4%)
+Passed 529 out of 672 (78.7%)
 
 Failed tests:
 
@@ -36,7 +36,6 @@ Failed tests:
  - tests/php/lang/030.phpt
  - tests/php/lang/045.phpt
  - tests/php/lang/bison1.phpt
- - tests/php/lang/bug19943.phpt
  - tests/php/lang/bug20175.phpt
  - tests/php/lang/bug21094.phpt
  - tests/php/lang/bug21600.phpt
@@ -140,7 +139,6 @@ Failed tests:
  - tests/php/run-test/test010.phpt
  - tests/php/strings/001.phpt
  - tests/php/strings/004.phpt
- - tests/php/strings/bug22592.phpt
  - tests/php/strings/bug26703.phpt
  - tests/php/strings/offsets_chaining_3.phpt
  - tests/php/strings/offsets_chaining_4.phpt
