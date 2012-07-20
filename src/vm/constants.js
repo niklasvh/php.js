@@ -40,6 +40,10 @@ PHP.VM.Constants = function(  predefined, ENV ) {
         return variable;    
     };
     
+    methods[ COMPILER.CONSTANT_DEFINED ] = function( constantName ) {
+        return ( constants[ constantName ] === undefined  );
+    };
+    
     methods[ COMPILER.CONSTANT_SET ] = function( constantName, constantValue ) {
               
         if ( constantVariables[ constantName ] !== undefined ) {

@@ -350,6 +350,8 @@ COMPILER.CLASS_CONSTANT_GET = "$Class.ConstantGet";
 
 COMPILER.CONSTANT_SET = "set";
 
+COMPILER.CONSTANT_DEFINED = "defined";
+
 COMPILER.MAGIC_CONSTANTS = "$MConstants";
 
 COMPILER.ASSIGN = "_";
@@ -3499,6 +3501,16 @@ PHP.Modules.prototype.define = function( name, value, case_insensitive ) {
 * @website http://hertzen.com
  */
 
+PHP.Modules.prototype.defined = function( name ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    
+    variableName = name[ COMPILER.VARIABLE_VALUE ];
+    
+
+     return new PHP.VM.Variable( this.$Constants[ COMPILER.CONSTANT_DEFINED ]( variableName ) );
+  
+};
 
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -5257,6 +5269,58 @@ PHP.Modules.prototype.$empty = function( arg) {
         return new PHP.VM.Variable( arg );
     }
         
+
+
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 20.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.gettype = function( arg ) {
+
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+
+
+
+    var tmp = arg[ COMPILER.VARIABLE_VALUE ], // trigger get
+    type = "unknown type";
+    
+    switch ( arg[ VARIABLE.TYPE ]) {
+        
+        case VARIABLE.BOOL:
+            type = "boolean";
+            break;
+        case VARIABLE.INT:
+            type = "integer";
+            break;
+        case VARIABLE.FLOAT:
+            type = "double";
+            break;
+        case VARIABLE.STRING:
+            type =  "string";
+            break;
+        case VARIABLE.ARRAY:
+            type = "array";
+            break;
+        case VARIABLE.OBJECT:
+            type = "object";
+            break;
+        case VARIABLE.RESOURCE:
+            type = "resource";
+            break;
+        case VARIABLE.NULL:
+            type = "NULL";
+            break;
+                   
+               
+        
+    }
+        
+    return new PHP.VM.Variable( type );
 
 
 };
@@ -13692,6 +13756,10 @@ PHP.VM.Constants = function(  predefined, ENV ) {
         }
 
         return variable;    
+    };
+    
+    methods[ COMPILER.CONSTANT_DEFINED ] = function( constantName ) {
+        return ( constants[ constantName ] === undefined  );
     };
     
     methods[ COMPILER.CONSTANT_SET ] = function( constantName, constantValue ) {

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 514 out of 672 (76.5%)
+Passed 516 out of 672 (76.8%)
 
 Failed tests:
 
@@ -66,8 +66,6 @@ Failed tests:
  - tests/php/lang/bug26696.phpt
  - tests/php/lang/bug26866.phpt
  - tests/php/lang/bug26869.phpt
- - tests/php/lang/bug27354.phpt
- - tests/php/lang/bug27443.phpt
  - tests/php/lang/bug28213.phpt
  - tests/php/lang/bug30638.phpt
  - tests/php/lang/bug32828.phpt

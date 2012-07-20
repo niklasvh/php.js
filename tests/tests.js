@@ -72,6 +72,7 @@ PHP_Tests.prototype.runTest = function( li ) {
 
             shouldBef = shouldBef.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
             shouldBef = shouldBef.replace(/\%d/g,"\\d+");
+            shouldBef = shouldBef.replace(/\%i/g,"\\d+");
             shouldBef = shouldBef.replace(/\%s/g,".+");
             shouldBef = shouldBef.replace(/\%S/g,".*?");
                

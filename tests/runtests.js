@@ -119,6 +119,7 @@ function runTest ( file, complete ) {
                 var shouldBef = expect;
                 shouldBef = shouldBef.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
                 shouldBef = shouldBef.replace(/\%d/g,"\\d+");
+                shouldBef = shouldBef.replace(/\%i/g,"\\d+");
                 shouldBef = shouldBef.replace(/\%s/g,".+");
                 shouldBef = shouldBef.replace(/\%S/g,".*?");
                 

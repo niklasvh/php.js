@@ -133,6 +133,7 @@ var files = {
             variable: {
                 constants: "js",
                 empty: "js",
+                gettype: "js",
                 is_callable: "js",
                 is_float: "js",
                 is_null: "js",
