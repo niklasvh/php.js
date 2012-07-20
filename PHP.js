@@ -12050,6 +12050,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     
                 }
                 
+
               
             }
            
@@ -12100,13 +12101,17 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
                 console.log('static call ', methodName, proto);
                 
-                
+                if ( !checkType( proto[ methodTypePrefix + methodName ], STATIC ) && !/^(parent|self)$/i.test( methodClass ) && !inherits(ctx, proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ]) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
+                } 
                 
                 return methodToCall.call( this, $, methodCTX );
             }
             
             
-           
+            if ( !checkType( this[ methodTypePrefix + methodName ], STATIC ) && !/^(parent|self)$/i.test( methodClass ) && !inherits(ctx, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ]) ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
+            } 
            
             return this.callMethod.call( this, methodName, args );
             
