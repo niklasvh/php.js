@@ -433,7 +433,9 @@ PHP.VM.Variable = function( arg ) {
     this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
         var val;
         if (this[ this.TYPE ] === this.NULL ) {
-            this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
+            if ( this[ this.PROPERTY ] !== true ) {
+                this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
+            }
             this[ COMPILER.VARIABLE_VALUE ] = val = new (this.ENV.$Class.Get("stdClass"))( this );
         } else {
             val =  this[ COMPILER.VARIABLE_VALUE ];
