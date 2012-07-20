@@ -13181,6 +13181,8 @@ PHP.VM.Variable = function( arg ) {
                     if ( variable[ this.TYPE ] !== this.INT ) {
                         this.ENV[ COMPILER.ERROR ]("Illegal string offset '" + variable[ COMPILER.VARIABLE_VALUE ] + "'", PHP.Constants.E_WARNING, true );    
                         return new PHP.VM.Variable();
+                    } else {
+                        return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ].substr( variable[ COMPILER.VARIABLE_VALUE ], 1 ));
                     }
                 }
               
