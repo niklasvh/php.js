@@ -72,7 +72,11 @@ COMPILER.source = function( action ) {
     } else if ( action.type === "Node_Name" ) {
         return this.getName( action );
     }
-    
+     
+    if ( Array.isArray( action )) {
+        return this[ action[0].type ]( action[0] );
+    }
+  
     return this[ action.type ]( action );
 };
 

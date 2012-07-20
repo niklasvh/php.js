@@ -39,6 +39,8 @@ createFile('src/modules/output/constants.js', "Core", "PHP_OUTPUT_");
 
 createFile('src/modules/error/constants.js', "Core", "E_");
 
+//createFile('src/modules/tokenizer/constants.js', "tokenizer", "");
+
 createFile('src/modules/date/constants.js', "date", "");
 
 createFile('src/modules/variable/constants.js', "standard", "");

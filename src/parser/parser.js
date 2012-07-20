@@ -9,6 +9,7 @@
  * the work by Masato Bito and is in the PUBLIC DOMAIN.
  * Ported to JavaScript by Niklas von Hertzen
  */
+  
 
 PHP.Parser = function ( tokens, eval ) {
 
@@ -141,7 +142,7 @@ PHP.Parser = function ( tokens, eval ) {
             } else if (yyn !== this.YYUNEXPECTED ) {
                 /* reduce */
                 try {
-                    //    console.log('yyn' + yyn);
+              //      console.log('yyn' + yyn);
                     this['yyn' + yyn](
                         PHP.Utils.Merge(attributeStack[this.stackPos - yylen[ yyn ] ], this.endAttributes)
                         //      + endAttributes
@@ -430,7 +431,7 @@ PHP.Parser.prototype.createTokenMap = function() {
     var tokenMap = {},
     name,
     i;
-
+    var T_DOUBLE_COLON = T_PAAMAYIM_NEKUDOTAYIM;
     // 256 is the minimum possible token number, as everything below
     // it is an ASCII value
     for ( i = 256; i < 1000; ++i ) {

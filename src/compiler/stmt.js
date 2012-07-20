@@ -151,9 +151,10 @@ PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
     }
     
     src += "; "
-    if ( !Array.isArray(action.loop) || action.loop.length !== 1 ) { // change
+ 
+   // if ( !Array.isArray(action.loop) || action.loop.length !== 1 ) { // change
         src += this.source( action.loop ) + "." + this.VARIABLE_VALUE;
-    }
+   // }
     src += " ) {\n";
     
     src += this.stmts( action.stmts );
@@ -266,7 +267,7 @@ PHP.Compiler.prototype.Node_Stmt_Break = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
-   
+  
     var src = this.CTX +  action.name + " = Function.prototype.bind.apply( function( " + this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.FUNCTION_GLOBAL + "  ) {\n";
     
     src += this.VARIABLE + " = " + this.VARIABLE + "(["
@@ -397,7 +398,7 @@ PHP.Compiler.prototype.Node_Stmt_If = function( action ) {
         src += this.source( Elseif) + "\n";
     }, this);
    
-    
+
     if ( action.Else !== null ) {
         src += "} else {\n";
         

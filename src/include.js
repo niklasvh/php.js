@@ -130,7 +130,7 @@ var files = {
             },
             tokenizer: {
                 constants: "js",
-                internal: "js",
+            //    internal: "js",
                 token_get_all: "js",
                 token_name: "js"
             },
@@ -153,9 +153,13 @@ var files = {
         parser: {
             lexer: "js",
             parser: "js",
-            data: "js",
+            yyn: "js",
+            yyn_stmt: "js",
+            yyn_expr: "js",
+            yyn_scalar: "js",
+       //     data: "js",
             ini: "js",
-            actions: "js",
+         //   actions: "js",
             rawpost: "js"
         },
         vm: {
