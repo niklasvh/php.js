@@ -2967,7 +2967,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
         origValues = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
         origKeys = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
         len = ( byRef === true || iterator.expr[ VAR.IS_REF ] === true ) ? origValues.length : iterator.len,
-        pointer = (( byRef === true ) ? expr[ COMPILER.VARIABLE_VALUE ] : iterator.clone )[ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
+        pointer = (( byRef === true || iterator.expr[ VAR.IS_REF ] === true) ? expr[ COMPILER.VARIABLE_VALUE ] : iterator.clone )[ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
      
      
         // clean unset elements off array
