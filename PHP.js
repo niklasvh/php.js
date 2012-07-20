@@ -2913,7 +2913,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
                     keys.forEach( function( key ){
                         if ( key.substring(0, classProperty.length ) === classProperty) {
                             var name = key.substring( classProperty.length );
-                            console.log( name, objectValue );
+                         
                             if (((objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] & PHP.VM.Class.PUBLIC) === PHP.VM.Class.PUBLIC) || objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] === undefined) {
 
                                 items.push( name );
@@ -4353,8 +4353,8 @@ PHP.Modules.prototype.echo = function() {
         
         if (arg instanceof PHP.VM.VariableProto) {
             var value = arg[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
-            if ( arg[ VARIABLE.TYPE ] !== VARIABLE.FLOAT ) {
-                this.$ob( value.replace(/\./, this.$locale.decimal_point ) );
+            if ( arg[ VARIABLE.TYPE ] === VARIABLE.FLOAT ) {
+                this.$ob( value.toString().replace(/\./, this.$locale.decimal_point ) );
             } else if ( arg[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
                 
                     this.$ob( value );
@@ -12846,7 +12846,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.SMALLER ] = function( com
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.GREATER ] = function( compareTo ) {
     
     var COMPILER = PHP.Compiler.prototype;
-    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) > ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+    return new PHP.VM.Variable( (this[ this.CAST_DOUBLE ][ COMPILER.VARIABLE_VALUE ]) > ( compareTo[ this.CAST_DOUBLE ][ COMPILER.VARIABLE_VALUE ]) );
 }; 
  
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_OR ] = function( compareTo ) { 
@@ -13105,21 +13105,28 @@ PHP.VM.Variable = function( arg ) {
             
             var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
             
-            if ( this[ this.TYPE ] === this.INT ) {
-                if ( value === 0 ) {
+            switch( this[ this.TYPE ]) {
+                case this.INT:
+                    if ( value === 0 ) {
+                        return new PHP.VM.Variable( false );
+                    } else {
+                        return new PHP.VM.Variable( true );
+                    }
+                    break;
+                    
+                case this.STRING:
+                    if ( value.length === 0 || value === "0" ) {
+                        return new PHP.VM.Variable( false );
+                    } else {
+                        return new PHP.VM.Variable( true );
+                    }
+                    break;
+                    
+                case this.NULL:
                     return new PHP.VM.Variable( false );
-                } else {
-                    return new PHP.VM.Variable( true );
-                }
-            } else if ( this[ this.TYPE ] === this.STRING ) {
-                if ( value.length === 0 || value === "0") {
-                    return new PHP.VM.Variable( false );
-                } else {
-                    return new PHP.VM.Variable( true );
-                }
-            } else if ( this[ this.TYPE ] === this.NULL ) {
-                return new PHP.VM.Variable( false );
+                    break;
             }
+
             
             return this;
         }
@@ -13143,6 +13150,13 @@ PHP.VM.Variable = function( arg ) {
                 case this.FLOAT:
                     return new PHP.VM.Variable( Math.floor( value ) ); 
                     break;
+                case this.STRING:
+                    if (isNaN( parseInt(value, 10))) {
+                        return new PHP.VM.Variable( 0 ); 
+                    } else {
+                        return new PHP.VM.Variable( parseInt(value, 10) );
+                    }
+                    break;
                     
                 default:
                     return this;
@@ -13158,7 +13172,8 @@ PHP.VM.Variable = function( arg ) {
         get : function(){
             // http://www.php.net/manual/en/language.types.integer.php
             
-            var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+            var value = this[ COMPILER.VARIABLE_VALUE ], // trigger get, incase there is POST_MOD
+            ret;
             
             
             switch ( this[ this.TYPE ] ) {
@@ -13168,8 +13183,20 @@ PHP.VM.Variable = function( arg ) {
                     break;
                     
                 case this.INT:
-                    this[ this.TYPE ] = this.FLOAT;
-                    return this;
+                    
+                    ret =  new PHP.VM.Variable( parseFloat(value) );
+                    ret[ this.TYPE ] = this.FLOAT;
+                    return ret;
+                    break;
+                case this.STRING:
+                    if (isNaN( parseFloat(value) ) ) {
+                        ret = new PHP.VM.Variable( 0.0 ); 
+                       
+                    } else {
+                        ret =  new PHP.VM.Variable( parseFloat(value) );
+                    }
+                    ret[ this.TYPE ] = this.FLOAT;
+                    return ret;
                     break;
                     
                 default:
