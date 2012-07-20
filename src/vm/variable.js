@@ -235,6 +235,12 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.SMALLER_OR_EQUAL ] = func
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) <= ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
 }; 
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.GREATER_OR_EQUAL ] = function( compareTo ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) >= ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+}; 
+
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.SMALLER ] = function( compareTo ) {
     
     var COMPILER = PHP.Compiler.prototype;

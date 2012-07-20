@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 512 out of 672 (76.2%)
+Passed 513 out of 672 (76.3%)
 
 Failed tests:
 
@@ -85,7 +85,6 @@ Failed tests:
  - tests/php/lang/engine_assignExecutionOrder_006.phpt
  - tests/php/lang/engine_assignExecutionOrder_007.phpt
  - tests/php/lang/engine_assignExecutionOrder_008.phpt
- - tests/php/lang/engine_assignExecutionOrder_009.phpt
  - tests/php/lang/error_2_exception_001.phpt
  - tests/php/lang/foreachLoop.006.phpt
  - tests/php/lang/foreachLoop.013.phpt
