@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 533 out of 672 (79.3%)
+Passed 534 out of 672 (79.5%)
 
 Failed tests:
 
@@ -67,7 +67,6 @@ Failed tests:
  - tests/php/lang/bug45392.phpt
  - tests/php/lang/catchable_error_002.phpt
  - tests/php/lang/each_binary_safety.phpt
- - tests/php/lang/engine_assignExecutionOrder_001.phpt
  - tests/php/lang/engine_assignExecutionOrder_002.phpt
  - tests/php/lang/engine_assignExecutionOrder_003.phpt
  - tests/php/lang/engine_assignExecutionOrder_004.phpt

@@ -997,10 +997,19 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
 
-    if ( action.variable.name !== "this" ) {
-        return this.source( action.variable ) + "." + this.CLASS_PROPERTY_GET + '( this, "' + this.source( action.name ) + '" )';
+    var classParts = "";
+    
+    if ( typeof action.name === "string" ) {
+        classParts += '"' +  this.source( action.name ) + '"';
     } else {
-        return this.source( action.variable ) + "." + this.CLASS_PROPERTY_GET + '( ctx, "' + this.source( action.name ) + '" )';
+        classParts +=  this.source( action.name ) + "." +  this.VARIABLE_VALUE;
+    }
+
+
+    if ( action.variable.name !== "this" ) {
+        return this.source( action.variable ) + "." + this.CLASS_PROPERTY_GET + '( this, ' + classParts + ' )';
+    } else {
+        return this.source( action.variable ) + "." + this.CLASS_PROPERTY_GET + '( ctx, ' + classParts + ' )';
     }
 
 };
@@ -1062,6 +1071,17 @@ PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
     var src = "",
     classPart;
     
+
+    var actionParts = "";
+    
+    if ( typeof action.name === "string" ) {
+        actionParts += '"' +  this.source( action.name ) + '"';
+    } else {
+        actionParts +=  this.source( action.name ) + "." +  this.VARIABLE_VALUE;
+    }
+    
+    
+    
     if (action.Class.type === "Node_Name") {
         classPart = '"' + this.source(action.Class) +'"';
     } else {
@@ -1069,9 +1089,9 @@ PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
     }
     
     if (/^(parent|self)$/i.test( action.Class.parts )) {
-        src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', "' + action.name + '"';
+        src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     } else {
-        src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', "' + action.name + '"';
+        src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     }
 
     src += ")";
