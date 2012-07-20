@@ -33,9 +33,12 @@ function template( type ) {
 
                 var src = "/* automatically built from " + file + "*/\n";
                 
-                src += "PHP.VM.Class.Predefined." + file.replace(".php","") + " = function( ENV, $$ ) {\n" + compiler.src + "\n};";
+                src += "PHP.VM.Class.Predefined." + file.replace(".php","") + " = function( ENV, $$ ) {\n" + compiler.src
+                    
+                src +=  '\nENV.$Class.Get( "DateTime").prototype.Native = true;'
+                src += "\n};";
             
-
+                
                 fs.writeFile('src/predefined/' + type +'/' + file.replace(".php",".js") , src, function (err) {
                     if (err) throw err;
                     log(file.replace(".php",".js") + " compiled");

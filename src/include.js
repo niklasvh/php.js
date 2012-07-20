@@ -50,6 +50,8 @@ var files = {
                 require_once: "js"
             },
             date: {
+                constants: "js",
+                date_default_timezone_set: "js",
                 mktime: "js",
                 time: "js"
             },
@@ -167,6 +169,7 @@ var files = {
         },
         predefined: {
             classes: {
+                DateTime: "js",
                 Exception: "js",
                 ReflectionClass: "js",
                 ReflectionException: "js",

@@ -6,4 +6,5 @@ ENV.$Class.New( "ArrayObject", 0, {Implements: ["IteratorAggregate", "Traversabl
 .Variable( "pointer", 4, $$(0) )
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };

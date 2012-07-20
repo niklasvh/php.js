@@ -2157,7 +2157,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                         new PHP.VM.Variable( level ),
                         new PHP.VM.Variable( msg ),
                         new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
-                        new PHP.VM.Variable( 1 )
+                        new PHP.VM.Variable( 1 ),
+                        this.array([])
                         );
                     
                 } else {
@@ -3229,7 +3230,34 @@ PHP.Modules.prototype.include = function() {
         this.$include.apply(this, arguments);
     }
     
-};/* 
+};/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
+PHP.Constants.DATE_ATOM = "Y-m-d\\TH:i:sP";
+PHP.Constants.DATE_COOKIE = "l, d-M-y H:i:s T";
+PHP.Constants.DATE_ISO8601 = "Y-m-d\\TH:i:sO";
+PHP.Constants.DATE_RFC822 = "D, d M y H:i:s O";
+PHP.Constants.DATE_RFC850 = "l, d-M-y H:i:s T";
+PHP.Constants.DATE_RFC1036 = "D, d M y H:i:s O";
+PHP.Constants.DATE_RFC1123 = "D, d M Y H:i:s O";
+PHP.Constants.DATE_RFC2822 = "D, d M Y H:i:s O";
+PHP.Constants.DATE_RFC3339 = "Y-m-d\\TH:i:sP";
+PHP.Constants.DATE_RSS = "D, d M Y H:i:s O";
+PHP.Constants.DATE_W3C = "Y-m-d\\TH:i:sP";
+PHP.Constants.SUNFUNCS_RET_TIMESTAMP = 0;
+PHP.Constants.SUNFUNCS_RET_STRING = 1;
+PHP.Constants.SUNFUNCS_RET_DOUBLE = 2;
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 20.7.2012 
+* @website http://hertzen.com
+ */
+
+PHP.Modules.prototype.date_default_timezone_set = function() {
+    // todo add functionality
+    return new PHP.VM.Variable( true );
+};
+
+
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 3.7.2012 
 * @website http://hertzen.com
@@ -12852,8 +12880,22 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.NOT_IDENTICAL ] = functio
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compareTo ) {
     
-    var COMPILER = PHP.Compiler.prototype;
-    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) == ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+    var COMPILER = PHP.Compiler.prototype,
+    first = this,
+    second = compareTo,
+    cast;
+    
+    if ( first[ this.TYPE ] === this.OBJECT && second[ this.TYPE ] === this.OBJECT ) {
+        cast = (first[ COMPILER.VARIABLE_VALUE ].Native === true || second[ COMPILER.VARIABLE_VALUE ].Native === true);
+        if ( cast ) {
+            first = first[ this.CAST_INT ];
+             second = second[ this.CAST_INT ];
+        }
+    } 
+    
+
+    
+    return new PHP.VM.Variable( (first[ COMPILER.VARIABLE_VALUE ]) == ( second[ COMPILER.VARIABLE_VALUE ]) );
 };
  
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.SMALLER_OR_EQUAL ] = function( compareTo ) {
@@ -13187,6 +13229,10 @@ PHP.VM.Variable = function( arg ) {
                     } else {
                         return new PHP.VM.Variable( parseInt(value, 10) );
                     }
+                    break;
+                case this.OBJECT:
+                    this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to int", PHP.Constants.E_NOTICE, true ); 
+                    return new PHP.VM.Variable();
                     break;
                     
                 default:
@@ -14015,7 +14061,60 @@ PHP.VM.Constants = function(  predefined, ENV ) {
 
 // manually defined constants
 
-PHP.Constants.PHP_BINARY = "/bin/php";/* automatically built from Exception.php*/
+PHP.Constants.PHP_BINARY = "/bin/php";/* automatically built from DateTime.php*/
+PHP.VM.Class.Predefined.DateTime = function( ENV, $$ ) {
+ENV.$Class.New( "DateTime", 0, {}, function( M, $, $$ ){
+ M.Constant("ATOM", $$("Y-m-d\\TH:i:sP"))
+.Constant("COOKIE", $$("l, d-M-y H:i:s T"))
+.Constant("ISO8601", $$("Y-m-d\\TH:i:sO"))
+.Constant("RFC822", $$("D, d M y H:i:s O"))
+.Constant("RFC850", $$("l, d-M-y H:i:s T"))
+.Constant("RFC1036", $$("D, d M y H:i:s O"))
+.Constant("RFC1123", $$("D, d M Y H:i:s O"))
+.Constant("RFC2822", $$("D, d M Y H:i:s O"))
+.Constant("RFC3339", $$("Y-m-d\\TH:i:sP"))
+.Constant("RSS", $$("D, d M Y H:i:s O"))
+.Constant("W3C", $$("Y-m-d\\TH:i:sP"))
+.Method( "__construct", 1, [{name:"time", d: $$("now")}, {name:"timezone", d: $$(null), p: "DateTimeZone"}], function( $, ctx, $Static ) {
+})
+.Method( "add", 1, [{name:"interval", p: "DateInterval"}], function( $, ctx, $Static ) {
+})
+.Method( "createFromFormat", 9, [{name:"format", p: "string"}, {name:"time", p: "string"}, {name:"timezone", p: "DateTimeZone"}], function( $, ctx, $Static ) {
+})
+.Method( "diff", 1, [{name:"datetime2", p: "DateTime"}, {name:"absolute", d: $$(false)}], function( $, ctx, $Static ) {
+})
+.Method( "format", 1, [{name:"format"}], function( $, ctx, $Static ) {
+})
+.Method( "getLastErrors", 9, [], function( $, ctx, $Static ) {
+})
+.Method( "getOffset", 1, [], function( $, ctx, $Static ) {
+})
+.Method( "getTimestamp", 1, [], function( $, ctx, $Static ) {
+})
+.Method( "getTimezone", 1, [], function( $, ctx, $Static ) {
+})
+.Method( "modify", 1, [{name:"modify"}], function( $, ctx, $Static ) {
+})
+.Method( "__set_state", 9, [{name:"array", p: "array"}], function( $, ctx, $Static ) {
+})
+.Method( "setDate", 1, [{name:"year"}, {name:"month"}, {name:"day"}], function( $, ctx, $Static ) {
+})
+.Method( "setISODate", 1, [{name:"year"}, {name:"week"}, {name:"day", d: $$(1)}], function( $, ctx, $Static ) {
+})
+.Method( "setTime", 1, [{name:"hour"}, {name:"minute"}, {name:"second", d: $$(0)}], function( $, ctx, $Static ) {
+})
+.Method( "setTimestamp", 1, [{name:"unixtimestamp"}], function( $, ctx, $Static ) {
+})
+.Method( "setTimezone", 1, [{name:"timezone", p: "DateTimeZone"}], function( $, ctx, $Static ) {
+})
+.Method( "sub", 1, [{name:"interval", p: "DateInterval"}], function( $, ctx, $Static ) {
+})
+.Method( "__wakeup", 1, [], function( $, ctx, $Static ) {
+})
+.Create()});
+
+ENV.$Class.Get( "DateTime").prototype.Native = true;
+};/* automatically built from Exception.php*/
 PHP.VM.Class.Predefined.Exception = function( ENV, $$ ) {
 ENV.$Class.New( "Exception", 0, {}, function( M, $, $$ ){
  M.Variable( "message", 2 )
@@ -14047,6 +14146,7 @@ return ENV.array([{v:ENV.array([{v:$$("Error2Exception"), k:$$("function")}])}, 
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from ReflectionClass.php*/
 PHP.VM.Class.Predefined.ReflectionClass = function( ENV, $$ ) {
 ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $, $$ ){
@@ -14081,11 +14181,13 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Co
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from ReflectionException.php*/
 PHP.VM.Class.Predefined.ReflectionException = function( ENV, $$ ) {
 ENV.$Class.New( "ReflectionException", 0, {Extends: "Exception"}, function( M, $, $$ ){
  M.Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from ReflectionMethod.php*/
 PHP.VM.Class.Predefined.ReflectionMethod = function( ENV, $$ ) {
 ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $, $$ ){
@@ -14110,6 +14212,7 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from ReflectionProperty.php*/
 PHP.VM.Class.Predefined.ReflectionProperty = function( ENV, $$ ) {
 ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $, $$ ){
@@ -14130,16 +14233,19 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from stdClass.php*/
 PHP.VM.Class.Predefined.stdClass = function( ENV, $$ ) {
 ENV.$Class.New( "stdClass", 0, {}, function( M, $, $$ ){
  M.Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from Traversable.php*/
 PHP.VM.Class.Predefined.Traversable = function( ENV, $$ ) {
 ENV.$Class.INew( "Traversable", [], function( M, $, $$ ){
  M.Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from ArrayAccess.php*/
 PHP.VM.Class.Predefined.ArrayAccess = function( ENV, $$ ) {
 ENV.$Class.INew( "ArrayAccess", [], function( M, $, $$ ){
@@ -14153,6 +14259,7 @@ ENV.$Class.INew( "ArrayAccess", [], function( M, $, $$ ){
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from Iterator.php*/
 PHP.VM.Class.Predefined.Iterator = function( ENV, $$ ) {
 ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $, $$ ){
@@ -14168,6 +14275,7 @@ ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $, $$ ){
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from IteratorAggregate.php*/
 PHP.VM.Class.Predefined.IteratorAggregate = function( ENV, $$ ) {
 ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $, $$ ){
@@ -14175,6 +14283,7 @@ ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $, $$ ){
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* automatically built from Reflector.php*/
 PHP.VM.Class.Predefined.Reflector = function( ENV, $$ ) {
 ENV.$Class.INew( "Reflector", [], function( M, $, $$ ){
@@ -14184,6 +14293,7 @@ ENV.$Class.INew( "Reflector", [], function( M, $, $$ ){
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 17.7.2012 

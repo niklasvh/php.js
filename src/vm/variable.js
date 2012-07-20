@@ -225,8 +225,22 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.NOT_IDENTICAL ] = functio
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compareTo ) {
     
-    var COMPILER = PHP.Compiler.prototype;
-    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) == ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
+    var COMPILER = PHP.Compiler.prototype,
+    first = this,
+    second = compareTo,
+    cast;
+    
+    if ( first[ this.TYPE ] === this.OBJECT && second[ this.TYPE ] === this.OBJECT ) {
+        cast = (first[ COMPILER.VARIABLE_VALUE ].Native === true || second[ COMPILER.VARIABLE_VALUE ].Native === true);
+        if ( cast ) {
+            first = first[ this.CAST_INT ];
+             second = second[ this.CAST_INT ];
+        }
+    } 
+    
+
+    
+    return new PHP.VM.Variable( (first[ COMPILER.VARIABLE_VALUE ]) == ( second[ COMPILER.VARIABLE_VALUE ]) );
 };
  
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.SMALLER_OR_EQUAL ] = function( compareTo ) {
@@ -560,6 +574,10 @@ PHP.VM.Variable = function( arg ) {
                     } else {
                         return new PHP.VM.Variable( parseInt(value, 10) );
                     }
+                    break;
+                case this.OBJECT:
+                    this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to int", PHP.Constants.E_NOTICE, true ); 
+                    return new PHP.VM.Variable();
                     break;
                     
                 default:

@@ -13,4 +13,5 @@ ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $, $$ ){
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };

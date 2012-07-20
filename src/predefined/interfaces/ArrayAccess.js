@@ -11,4 +11,5 @@ ENV.$Class.INew( "ArrayAccess", [], function( M, $, $$ ){
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };

@@ -463,7 +463,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                         new PHP.VM.Variable( level ),
                         new PHP.VM.Variable( msg ),
                         new PHP.VM.Variable( $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ] ),
-                        new PHP.VM.Variable( 1 )
+                        new PHP.VM.Variable( 1 ),
+                        this.array([])
                         );
                     
                 } else {

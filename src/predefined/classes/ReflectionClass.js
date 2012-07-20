@@ -32,4 +32,5 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Co
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };

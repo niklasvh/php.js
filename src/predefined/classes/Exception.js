@@ -30,4 +30,5 @@ return ENV.array([{v:ENV.array([{v:$$("Error2Exception"), k:$$("function")}])}, 
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };

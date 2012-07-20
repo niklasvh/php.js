@@ -18,4 +18,5 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };

@@ -7,4 +7,5 @@ ENV.$Class.INew( "Serializable", [], function( M, $, $$ ){
 })
 .Create()});
 
+ENV.$Class.Get( "DateTime").prototype.Native = true;
 };
