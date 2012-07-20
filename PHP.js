@@ -3289,7 +3289,7 @@ PHP.Constants.E_ALL = 32767;
  */
 
 PHP.Modules.prototype.trigger_error = function( msg, level ) {
-          this[ PHP.Compiler.prototype.ERROR ]( msg.$, level.$ || PHP.Constants.E_ERROR  , true );    
+          this[ PHP.Compiler.prototype.ERROR ]( msg.$, ( level !== undefined ) ? level.$ : PHP.Constants.E_ERROR  , true );    
  //   throw new Error( "Fatal error: " + msg.$ );
     
 };/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
@@ -3996,7 +3996,7 @@ PHP.Modules.prototype.flush = function() {
         if (output_callback !== undefined ) {
             var fail = false,
             splitClassVar;
-            if ( ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY ) ) {
+            if ( ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY  && output_callback[ VARIABLE.TYPE ] !== VARIABLE.LAMBDA ) ) {
                 this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): no array or string given", PHP.Constants.E_WARNING, true ); 
                 fail = true;
 
@@ -4035,7 +4035,7 @@ PHP.Modules.prototype.flush = function() {
                     this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): function '" + output_callback[ COMPILER.VARIABLE_VALUE ] + "' not found or invalid function name", PHP.Constants.E_WARNING, true ); 
                     fail = true;
                 }
-            }
+            } 
             
             if ( fail ) {
                 this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to create buffer", PHP.Constants.E_CORE_NOTICE, true );
@@ -5586,16 +5586,16 @@ PHP.Modules.prototype.print_r = function() {
             
             keys.forEach(function( key, index ){
                 str += $INDENT( indent + 4 ) + "[";
-
-                str += key;
-                
+                if ( key instanceof PHP.VM.Variable) {
+                    str += key[ COMPILER.VARIABLE_VALUE ]; // constants
+                } else {
+                    str += key;
+                }
                 str += "] => ";
 
-                str += $dump( values[ index ], indent + 8 );
+                str += $dump( values[ index ], indent + 8 ) + "\n";
                 
-                if ( values[ index ][ VAR.TYPE] === VAR.ARRAY ) {
-                    str += "\n";
-                }
+
                 
             }, this);
             
@@ -5608,7 +5608,7 @@ PHP.Modules.prototype.print_r = function() {
                 classObj = argument;
             }
             str += classObj[ COMPILER.CLASS_NAME ] + " Object\n";
-            str += $INDENT( indent ) + "(";
+            str += $INDENT( indent ) + "(\n";
       
       
             var added = false,
@@ -5621,15 +5621,14 @@ PHP.Modules.prototype.print_r = function() {
                 
             
                 if (item.substring(0, PROPERTY.length) === PROPERTY) {
-                    if ( added === false ) {
-                        str += "\n";
-                    }
-                    added = true;
+                    
+                   
                     if ( classObj.hasOwnProperty( item )) {
                         definedItems.push( item );
                         str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length );
                         str += '] => ';
                         str += $dump( classObj[ item ], indent + 8 );
+                        str += "\n";
                     }
                     //  props.push( item );
                   
@@ -5642,43 +5641,44 @@ PHP.Modules.prototype.print_r = function() {
                             if ((Object.getPrototypeOf( parent )[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PROPERTY.length ) ] & PRIVATE) === PRIVATE) {
                                 str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + ':' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +':private] => ';
                                 str += $dump( parent[ item ], indent + 8 );
+                                str += "\n";
                             } else if ((Object.getPrototypeOf( parent )[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PROPERTY.length ) ] & PROTECTED) === PROTECTED && definedItems.indexOf( item ) === -1) {
                                 str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + ':' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +':protected] => ';
                                 str += $dump( parent[ item ], indent + 8 );
+                                str += "\n";
                                 definedItems.push( item );
                             } else if ( definedItems.indexOf( item ) === -1 ) {
                                 str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + '] => ';
                                 str += $dump( parent[ item ], indent + 8 );
+                                str += "\n";
                                 definedItems.push( item );
                             }
                         }
                         parent = Object.getPrototypeOf( parent );
                     } while( parent instanceof PHP.VM.ClassPrototype);
                     
-                    if ( classObj[ item ][ VAR.TYPE ] === VAR.ARRAY ) {
-                        str += "\n";
-                    }
+                 
+              
+                    
                 }
             }
             str += tmp;
             
-            if ( added === false ) {
-                str += "\n";
-            }
+
           
  
             str += $INDENT( indent ) + ")\n";
             
         } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
-            str += $INDENT( indent ) + "NULL\n";  
+            str += $INDENT( indent ) + "NULL";  
         } else if( argument[ VAR.TYPE ] === VAR.STRING ) {
             
             var value = argument[ COMPILER.VARIABLE_VALUE ];
-            str += value + '\n';  
+            str += value;  
         } else if( argument[ VAR.TYPE ] === VAR.INT ) {
             
             var value = argument[ COMPILER.VARIABLE_VALUE ];
-            str += value + '\n';  
+            str += value;  
             
         } else {
             console.log( argument );

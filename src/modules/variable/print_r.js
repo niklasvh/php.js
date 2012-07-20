@@ -33,16 +33,16 @@ PHP.Modules.prototype.print_r = function() {
             
             keys.forEach(function( key, index ){
                 str += $INDENT( indent + 4 ) + "[";
-
-                str += key;
-                
+                if ( key instanceof PHP.VM.Variable) {
+                    str += key[ COMPILER.VARIABLE_VALUE ]; // constants
+                } else {
+                    str += key;
+                }
                 str += "] => ";
 
-                str += $dump( values[ index ], indent + 8 );
+                str += $dump( values[ index ], indent + 8 ) + "\n";
                 
-                if ( values[ index ][ VAR.TYPE] === VAR.ARRAY ) {
-                    str += "\n";
-                }
+
                 
             }, this);
             
@@ -55,7 +55,7 @@ PHP.Modules.prototype.print_r = function() {
                 classObj = argument;
             }
             str += classObj[ COMPILER.CLASS_NAME ] + " Object\n";
-            str += $INDENT( indent ) + "(";
+            str += $INDENT( indent ) + "(\n";
       
       
             var added = false,
@@ -68,15 +68,14 @@ PHP.Modules.prototype.print_r = function() {
                 
             
                 if (item.substring(0, PROPERTY.length) === PROPERTY) {
-                    if ( added === false ) {
-                        str += "\n";
-                    }
-                    added = true;
+                    
+                   
                     if ( classObj.hasOwnProperty( item )) {
                         definedItems.push( item );
                         str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length );
                         str += '] => ';
                         str += $dump( classObj[ item ], indent + 8 );
+                        str += "\n";
                     }
                     //  props.push( item );
                   
@@ -89,43 +88,44 @@ PHP.Modules.prototype.print_r = function() {
                             if ((Object.getPrototypeOf( parent )[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PROPERTY.length ) ] & PRIVATE) === PRIVATE) {
                                 str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + ':' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +':private] => ';
                                 str += $dump( parent[ item ], indent + 8 );
+                                str += "\n";
                             } else if ((Object.getPrototypeOf( parent )[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PROPERTY.length ) ] & PROTECTED) === PROTECTED && definedItems.indexOf( item ) === -1) {
                                 str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + ':' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +':protected] => ';
                                 str += $dump( parent[ item ], indent + 8 );
+                                str += "\n";
                                 definedItems.push( item );
                             } else if ( definedItems.indexOf( item ) === -1 ) {
                                 str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + '] => ';
                                 str += $dump( parent[ item ], indent + 8 );
+                                str += "\n";
                                 definedItems.push( item );
                             }
                         }
                         parent = Object.getPrototypeOf( parent );
                     } while( parent instanceof PHP.VM.ClassPrototype);
                     
-                    if ( classObj[ item ][ VAR.TYPE ] === VAR.ARRAY ) {
-                        str += "\n";
-                    }
+                 
+              
+                    
                 }
             }
             str += tmp;
             
-            if ( added === false ) {
-                str += "\n";
-            }
+
           
  
             str += $INDENT( indent ) + ")\n";
             
         } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
-            str += $INDENT( indent ) + "NULL\n";  
+            str += $INDENT( indent ) + "NULL";  
         } else if( argument[ VAR.TYPE ] === VAR.STRING ) {
             
             var value = argument[ COMPILER.VARIABLE_VALUE ];
-            str += value + '\n';  
+            str += value;  
         } else if( argument[ VAR.TYPE ] === VAR.INT ) {
             
             var value = argument[ COMPILER.VARIABLE_VALUE ];
-            str += value + '\n';  
+            str += value;  
             
         } else {
             console.log( argument );

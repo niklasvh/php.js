@@ -125,7 +125,7 @@
         if (output_callback !== undefined ) {
             var fail = false,
             splitClassVar;
-            if ( ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY ) ) {
+            if ( ( output_callback[ VARIABLE.TYPE ] !== VARIABLE.STRING && output_callback[ VARIABLE.TYPE ] !== VARIABLE.ARRAY  && output_callback[ VARIABLE.TYPE ] !== VARIABLE.LAMBDA ) ) {
                 this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): no array or string given", PHP.Constants.E_WARNING, true ); 
                 fail = true;
 
@@ -164,7 +164,7 @@
                     this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): function '" + output_callback[ COMPILER.VARIABLE_VALUE ] + "' not found or invalid function name", PHP.Constants.E_WARNING, true ); 
                     fail = true;
                 }
-            }
+            } 
             
             if ( fail ) {
                 this[ COMPILER.ERROR ]( FUNCTION_NAME + "(): failed to create buffer", PHP.Constants.E_CORE_NOTICE, true );
