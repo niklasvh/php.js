@@ -7,8 +7,15 @@
 
 var PHP = function( code, opts ) {
     
+    var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" ),
+    iniSet = opts.ini;
+    opts.ini = PHP.ini( iniContent );
+
+    Object.keys( iniSet ).forEach(function(key){
+        this[ key ] = iniSet[ key ];
+    }, opts.ini);
     
-    this.tokens = PHP.Lexer( code );
+    this.tokens = PHP.Lexer( code, opts.ini );
     try {
         this.AST = new PHP.Parser( this.tokens );
     } catch( e ) {
@@ -17,14 +24,8 @@ var PHP = function( code, opts ) {
         return this;
     }
     
-    var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" );
 
-    var iniSet = opts.ini;
-    opts.ini = PHP.ini( iniContent );
-    
-    Object.keys( iniSet ).forEach(function(key){
-        this[ key ] = iniSet[ key ];
-    }, opts.ini);
+
   
     
     var POST = opts.POST,

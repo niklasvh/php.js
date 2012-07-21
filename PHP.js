@@ -7,8 +7,15 @@
 
 var PHP = function( code, opts ) {
     
+    var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" ),
+    iniSet = opts.ini;
+    opts.ini = PHP.ini( iniContent );
+
+    Object.keys( iniSet ).forEach(function(key){
+        this[ key ] = iniSet[ key ];
+    }, opts.ini);
     
-    this.tokens = PHP.Lexer( code );
+    this.tokens = PHP.Lexer( code, opts.ini );
     try {
         this.AST = new PHP.Parser( this.tokens );
     } catch( e ) {
@@ -17,14 +24,8 @@ var PHP = function( code, opts ) {
         return this;
     }
     
-    var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" );
 
-    var iniSet = opts.ini;
-    opts.ini = PHP.ini( iniContent );
-    
-    Object.keys( iniSet ).forEach(function(key){
-        this[ key ] = iniSet[ key ];
-    }, opts.ini);
+
   
     
     var POST = opts.POST,
@@ -5864,7 +5865,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
     
     return new PHP.VM.Variable();
 
-};PHP.Lexer = function( src ) {
+};PHP.Lexer = function( src, ini ) {
 
 
     var heredoc,
@@ -5877,7 +5878,9 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
 
         return result;
     },
-
+    
+    openTag = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag) ) ? /(\<\?php\s|\<\?|\<\%)/i : /(\<\?php\s|<\?=)/i),
+    openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%)/i : /^(\<\?php\s|<\?=)/i),
     tokens = [
     {
         value: PHP.Constants.T_ABSTRACT,
@@ -6305,11 +6308,11 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
     },
     {
         value: PHP.Constants.T_OPEN_TAG_WITH_ECHO,
-        re: /^(\<\?=|\<%=)/i
+        re: /^(\<\?=|\<\%=)/i
     },
     {
         value: PHP.Constants.T_OPEN_TAG,
-        re: /^(\<\?php\s|\<\?|\<%)/i
+        re: openTagStart
     },
     {
         value: PHP.Constants.T_VARIABLE,
@@ -6471,7 +6474,10 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
         re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\'\$\~]/
     }];
 
+   
+    
 
+console.log(openTag);
     var results = [],
     line = 1,
     insidePHP = false,
@@ -6569,8 +6575,9 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
 
         } else {
 
-            var result = /(\<\?php\s|\<\?|\<%)/i.exec( src );
+            var result = openTag.exec( src );
             //console.log('sup', result, result.index);
+            console.log( src, result );
             if ( result !== null ) {
                 if ( result.index > 0 ) {
                     var resultString = src.substring(0, result.index);
@@ -6625,7 +6632,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
  */
   
 
-PHP.Parser = function ( tokens, eval ) {
+PHP.Parser = function ( preprocessedTokens, eval ) {
 
     var yybase = this.yybase,
     yydefault = this.yydefault,
@@ -6641,7 +6648,7 @@ PHP.Parser = function ( tokens, eval ) {
     translate = this.translate,
     yygdefault = this.yygdefault;
     
-    this.tokens = tokens;
+
     this.pos = -1;
     this.line = 1;
 
@@ -6650,7 +6657,26 @@ PHP.Parser = function ( tokens, eval ) {
     this.dropTokens = {};
     this.dropTokens[ T_WHITESPACE ] = 1;
     this.dropTokens[ T_OPEN_TAG ] = 1;
-
+    var tokens = [];
+    
+    // pre-process
+    preprocessedTokens.forEach( function( token, index ) {
+        if ( typeof token === "object" && token[ 0 ] === PHP.Constants.T_OPEN_TAG_WITH_ECHO) {
+            tokens.push([
+                PHP.Constants.T_OPEN_TAG, 
+                token[ 1 ],
+                token[ 2 ]
+                ]);
+            tokens.push([
+                PHP.Constants.T_ECHO, 
+                token[ 1 ],
+                token[ 2 ]
+                ]);    
+        } else {
+            tokens.push( token );
+        }
+    });
+    this.tokens = tokens;
 
     // We start off with no lookahead-token
     var tokenId = this.TOKEN_NONE;
@@ -6756,7 +6782,7 @@ PHP.Parser = function ( tokens, eval ) {
             } else if (yyn !== this.YYUNEXPECTED ) {
                 /* reduce */
                 try {
-              //      console.log('yyn' + yyn);
+                    //      console.log('yyn' + yyn);
                     this['yyn' + yyn](
                         PHP.Utils.Merge(attributeStack[this.stackPos - yylen[ yyn ] ], this.endAttributes)
                         //      + endAttributes

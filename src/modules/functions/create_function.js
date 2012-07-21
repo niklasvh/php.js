@@ -11,7 +11,7 @@ PHP.Modules.prototype.create_function = function( args, source ) {
     
     
     // tokenizer
-    var tokens = new PHP.Lexer( "<? " + source[ COMPILER.VARIABLE_VALUE ] );
+    var tokens = new PHP.Lexer( "<?php " + source[ COMPILER.VARIABLE_VALUE ] );
    
     // build ast tree
     

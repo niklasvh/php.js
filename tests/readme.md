@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 539 out of 672 (80.2%)
+Passed 542 out of 672 (80.7%)
 
 Failed tests:
 
@@ -100,9 +100,6 @@ Failed tests:
  - tests/php/lang/returnByReference.008.phpt
  - tests/php/lang/returnByReference.009.phpt
  - tests/php/lang/script_tag.phpt
- - tests/php/lang/short_tags.002.phpt
- - tests/php/lang/short_tags.003.phpt
- - tests/php/lang/short_tags.004.phpt
  - tests/php/lang/static_basic_001.phpt
  - tests/php/lang/static_basic_002.phpt
  - tests/php/lang/static_variation_001.phpt

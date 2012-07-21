@@ -1,4 +1,4 @@
-PHP.Lexer = function( src ) {
+PHP.Lexer = function( src, ini ) {
 
 
     var heredoc,
@@ -11,7 +11,9 @@ PHP.Lexer = function( src ) {
 
         return result;
     },
-
+    
+    openTag = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag) ) ? /(\<\?php\s|\<\?|\<\%)/i : /(\<\?php\s|<\?=)/i),
+    openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%)/i : /^(\<\?php\s|<\?=)/i),
     tokens = [
     {
         value: PHP.Constants.T_ABSTRACT,
@@ -439,11 +441,11 @@ PHP.Lexer = function( src ) {
     },
     {
         value: PHP.Constants.T_OPEN_TAG_WITH_ECHO,
-        re: /^(\<\?=|\<%=)/i
+        re: /^(\<\?=|\<\%=)/i
     },
     {
         value: PHP.Constants.T_OPEN_TAG,
-        re: /^(\<\?php\s|\<\?|\<%)/i
+        re: openTagStart
     },
     {
         value: PHP.Constants.T_VARIABLE,
@@ -605,7 +607,10 @@ PHP.Lexer = function( src ) {
         re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\'\$\~]/
     }];
 
+   
+    
 
+console.log(openTag);
     var results = [],
     line = 1,
     insidePHP = false,
@@ -703,8 +708,9 @@ PHP.Lexer = function( src ) {
 
         } else {
 
-            var result = /(\<\?php\s|\<\?|\<%)/i.exec( src );
+            var result = openTag.exec( src );
             //console.log('sup', result, result.index);
+            console.log( src, result );
             if ( result !== null ) {
                 if ( result.index > 0 ) {
                     var resultString = src.substring(0, result.index);

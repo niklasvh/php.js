@@ -11,7 +11,7 @@
  */
   
 
-PHP.Parser = function ( tokens, eval ) {
+PHP.Parser = function ( preprocessedTokens, eval ) {
 
     var yybase = this.yybase,
     yydefault = this.yydefault,
@@ -27,7 +27,7 @@ PHP.Parser = function ( tokens, eval ) {
     translate = this.translate,
     yygdefault = this.yygdefault;
     
-    this.tokens = tokens;
+
     this.pos = -1;
     this.line = 1;
 
@@ -36,7 +36,26 @@ PHP.Parser = function ( tokens, eval ) {
     this.dropTokens = {};
     this.dropTokens[ T_WHITESPACE ] = 1;
     this.dropTokens[ T_OPEN_TAG ] = 1;
-
+    var tokens = [];
+    
+    // pre-process
+    preprocessedTokens.forEach( function( token, index ) {
+        if ( typeof token === "object" && token[ 0 ] === PHP.Constants.T_OPEN_TAG_WITH_ECHO) {
+            tokens.push([
+                PHP.Constants.T_OPEN_TAG, 
+                token[ 1 ],
+                token[ 2 ]
+                ]);
+            tokens.push([
+                PHP.Constants.T_ECHO, 
+                token[ 1 ],
+                token[ 2 ]
+                ]);    
+        } else {
+            tokens.push( token );
+        }
+    });
+    this.tokens = tokens;
 
     // We start off with no lookahead-token
     var tokenId = this.TOKEN_NONE;
@@ -142,7 +161,7 @@ PHP.Parser = function ( tokens, eval ) {
             } else if (yyn !== this.YYUNEXPECTED ) {
                 /* reduce */
                 try {
-              //      console.log('yyn' + yyn);
+                    //      console.log('yyn' + yyn);
                     this['yyn' + yyn](
                         PHP.Utils.Merge(attributeStack[this.stackPos - yylen[ yyn ] ], this.endAttributes)
                         //      + endAttributes

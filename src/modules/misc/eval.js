@@ -15,7 +15,7 @@ PHP.Modules.prototype.eval = function( $, code ) {
         
 
     // tokenizer
-    var tokens = new PHP.Lexer( "<?" + source );
+    var tokens = new PHP.Lexer( "<?php " + source );
    
     // build ast tree
     
