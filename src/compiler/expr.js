@@ -214,11 +214,11 @@ PHP.Compiler.prototype.Node_Expr_BitwiseOr = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_BitwiseAnd = function( action ) {
-    return this.source( action.left )  + "." + this.VARIABLE_VALUE + " & " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
+    return this.CREATE_VARIABLE + "(" + this.source( action.left )  + "." + this.VARIABLE_VALUE + " & " + this.source( action.right ) + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_BitwiseNot = function( action ) {
-    return " ~ " + this.source( action.expr ) + "." + this.VARIABLE_VALUE;
+    return this.CREATE_VARIABLE + "(" + "~" + this.source( action.expr ) + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Div = function( action ) {

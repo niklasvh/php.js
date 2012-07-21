@@ -506,8 +506,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             break;
                         case C.E_CORE_NOTICE:
                         case C.E_NOTICE:
-                            this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
-                            return;
+                            if (checkType("E_NOTICE")) {
+                                this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
+                                return;
+                            }
                             break;
                         case C.E_STRICT:
                             if (checkType("E_STRICT")) {

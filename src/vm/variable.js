@@ -489,7 +489,7 @@ PHP.VM.Variable = function( arg ) {
                     return returning;
                 } else {
  
-                    this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_CORE_NOTICE, true );    
+                    this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_NOTICE, true );    
                 }
             }
             if ( this[ this.REFERRING ] === undefined ) {

@@ -761,11 +761,11 @@ PHP.Compiler.prototype.Node_Expr_BitwiseOr = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_BitwiseAnd = function( action ) {
-    return this.source( action.left )  + "." + this.VARIABLE_VALUE + " & " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
+    return this.CREATE_VARIABLE + "(" + this.source( action.left )  + "." + this.VARIABLE_VALUE + " & " + this.source( action.right ) + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_BitwiseNot = function( action ) {
-    return " ~ " + this.source( action.expr ) + "." + this.VARIABLE_VALUE;
+    return this.CREATE_VARIABLE + "(" + "~" + this.source( action.expr ) + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Div = function( action ) {
@@ -2228,8 +2228,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             break;
                         case C.E_CORE_NOTICE:
                         case C.E_NOTICE:
-                            this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
-                            return;
+                            if (checkType("E_NOTICE")) {
+                                this.echo( new PHP.VM.Variable("\nNotice: " + msg + lineAppend + "\n"));
+                                return;
+                            }
                             break;
                         case C.E_STRICT:
                             if (checkType("E_STRICT")) {
@@ -10472,6 +10474,15 @@ PHP.Parser.prototype.Node_Expr_BitwiseOr = function() {
 
 };
 
+PHP.Parser.prototype.Node_Expr_BitwiseNot = function() {
+    return {
+        type: "Node_Expr_BitwiseNot",
+        expr: arguments[ 0 ],
+        attributes: arguments[ 1 ]
+    };  
+
+};
+
 PHP.Parser.prototype.Node_Expr_BooleanNot = function() {
     return {
         type: "Node_Expr_BooleanNot",
@@ -13063,7 +13074,7 @@ PHP.VM.Variable = function( arg ) {
                     return returning;
                 } else {
  
-                    this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_CORE_NOTICE, true );    
+                    this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_NOTICE, true );    
                 }
             }
             if ( this[ this.REFERRING ] === undefined ) {
