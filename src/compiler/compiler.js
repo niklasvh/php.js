@@ -44,7 +44,7 @@ COMPILER.stmts = function( stmts, main ) {
         }
         src += this.source( stmt );
         
-        if ( main !== true && /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
+        if (  /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
             // trigger POST_MOD
             src += "." + this.VARIABLE_VALUE;
         }

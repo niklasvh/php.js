@@ -338,10 +338,10 @@ PHP.VM.Variable = function( arg ) {
          
                 }
                 this[ this.DEFINED ] = true;
-         
+
                 // is variable a reference
                 if ( this[ this.REFERRING ] !== undefined ) {
-            
+                           
                     this[ this.REFERRING ][ COMPILER.VARIABLE_VALUE ] = newValue;
                 } else {
        
@@ -495,7 +495,13 @@ PHP.VM.Variable = function( arg ) {
             if ( this[ this.REFERRING ] === undefined ) {
                 returning = value;
             } else { 
-                this[ this.TYPE ] = $this[ this.TYPE ];
+                var referLoop = $this;
+                
+                while( referLoop[ this.REFERRING ] !== undefined ) {
+                    referLoop = referLoop[ this.REFERRING ];
+                }
+                
+                this[ this.TYPE ] = referLoop[ this.TYPE ];
                 returning = $this[ COMPILER.VARIABLE_VALUE ];
             }
             

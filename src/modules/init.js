@@ -17,7 +17,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
     // initializer
     args.push( function( args, values ) {
-        console.log('sup');
+
         handler = PHP.VM.VariableHandler( ENV );
         var vals = Array.prototype.slice.call( values, 2 );
 

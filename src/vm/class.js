@@ -964,7 +964,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                             
                             callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? ++value[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
                         }
-                     
+                        if ( value === undefined ) {
+                            return new PHP.VM.Variable();
+                        }
                         return value;
                 
                     }

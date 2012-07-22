@@ -332,7 +332,7 @@ COMPILER.stmts = function( stmts, main ) {
         }
         src += this.source( stmt );
         
-        if ( main !== true && /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
+        if (  /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
             // trigger POST_MOD
             src += "." + this.VARIABLE_VALUE;
         }
@@ -1791,7 +1791,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
     // initializer
     args.push( function( args, values ) {
-        console.log('sup');
+
         handler = PHP.VM.VariableHandler( ENV );
         var vals = Array.prototype.slice.call( values, 2 );
 
@@ -5722,7 +5722,7 @@ PHP.Modules.prototype.var_dump = function() {
     indent = 0,
     COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype;
-    
+    console.log( "var_dump");
     var $dump = function( argument, indent ) {
      
         var str = "",
@@ -12252,7 +12252,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                             
                             callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? ++value[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
                         }
-                     
+                        if ( value === undefined ) {
+                            return new PHP.VM.Variable();
+                        }
                         return value;
                 
                     }
@@ -12983,10 +12985,10 @@ PHP.VM.Variable = function( arg ) {
          
                 }
                 this[ this.DEFINED ] = true;
-         
+
                 // is variable a reference
                 if ( this[ this.REFERRING ] !== undefined ) {
-            
+                           
                     this[ this.REFERRING ][ COMPILER.VARIABLE_VALUE ] = newValue;
                 } else {
        
@@ -13140,7 +13142,13 @@ PHP.VM.Variable = function( arg ) {
             if ( this[ this.REFERRING ] === undefined ) {
                 returning = value;
             } else { 
-                this[ this.TYPE ] = $this[ this.TYPE ];
+                var referLoop = $this;
+                
+                while( referLoop[ this.REFERRING ] !== undefined ) {
+                    referLoop = referLoop[ this.REFERRING ];
+                }
+                
+                this[ this.TYPE ] = referLoop[ this.TYPE ];
                 returning = $this[ COMPILER.VARIABLE_VALUE ];
             }
             
