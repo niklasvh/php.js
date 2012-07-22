@@ -26,21 +26,18 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
 
-
-
-            // check that we aren't passing a constant for arg which is defined byRef
-            if ( argObject[ COMPILER.PARAM_BYREF ] === true &&
-                (
-                    vals[ index ][ VARIABLE.CLASS_CONSTANT ] === true
-                    || vals[ index ][ VARIABLE.CONSTANT ] === true
-                    || vals[ index ][ COMPILER.NAV ] === true
-
-                    )
-                ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );
-            }
-
             if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
+
+                // check that we aren't passing a constant for arg which is defined byRef
+                if (   vals[ index ][ VARIABLE.CLASS_CONSTANT ] === true || vals[ index ][ VARIABLE.CONSTANT ] === true || vals[ index ][ COMPILER.NAV ] === true ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );
+                }
+
+
+                // check that we aren't passing a function return value
+                if (   vals[ index ][ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
+                }
 
                 if (vals[ index ][ VARIABLE.DEFINED ] !== true ) {
                     // trigger setter
@@ -103,6 +100,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
     message = "():  Called from the global scope - no function context",
     func_get_arg = "func_get_arg",
     func_get_args = "func_get_args",
+    ret,
     item = PHP.VM.Array.arrayItem;
 
     if ( /^func_(get_args?|num_args)$/.test( functionName )) {
@@ -153,14 +151,21 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
         return this.array( props );
     } else if ( typeof functionName === "function" ) {
         // anonymous lambda function
-        
-        return functionName.apply( this, Array.prototype.slice.call( arguments, 2 ) );
- 
+        ret = functionName.apply( this, Array.prototype.slice.call( arguments, 2 ) );
+
     } else if ( this[ functionName ] === undefined ) {
         this[ PHP.Compiler.prototype.ERROR ]( "Call to undefined function " + functionName + "()", PHP.Constants.E_ERROR, true );
+    } else {
+        ret = this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) ); 
     }
-    return this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) );
 
+
+
+    if ( ret instanceof PHP.VM.Variable ) {
+        ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
+    }
+
+    return ret;
 };
 
 PHP.Modules.prototype[ PHP.Compiler.prototype.TYPE_CHECK ] = function( variable, propertyType, propertyDefault, index, name ) {

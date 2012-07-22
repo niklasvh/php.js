@@ -965,11 +965,16 @@ PHP.VM.Variable.prototype.OBJECT = 6;
 PHP.VM.Variable.prototype.RESOURCE = 7;
 PHP.VM.Variable.prototype.LAMBDA = 8;
 
+// variable types
+PHP.VM.Variable.prototype.FUNCTION = 0;
+
 PHP.VM.Variable.prototype.OVERLOADING = "$Overloading";
 
 PHP.VM.Variable.prototype.OVERLOADED = "$Overloaded";
 
 PHP.VM.Variable.prototype.TYPE = "type";
+
+PHP.VM.Variable.prototype.VARIABLE_TYPE = "vtype";
 
 PHP.VM.Variable.prototype.PROPERTY = "$Property";
 
