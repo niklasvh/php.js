@@ -4,7 +4,7 @@
 * @website http://hertzen.com
  */
 
-PHP.Modules.prototype.$include = function( $, file ) {
+PHP.Modules.prototype.$include = function( $, $Static, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
     filename = file[ COMPILER.VARIABLE_VALUE ];
@@ -39,13 +39,13 @@ PHP.Modules.prototype.$include = function( $, file ) {
    
     console.log( compiler.src );
     // execture code in current context ($)
-    var exec = new Function( "$$", "$", "ENV", compiler.src  );
+    var exec = new Function( "$$", "$", "ENV", "$Static", compiler.src  );
     
     this[ COMPILER.FILE_PATH ] = PHP.Utils.Path( loaded_file );
     
     exec.call(this, function( arg ) {
         return new PHP.VM.Variable( arg );
-    }, $, this);
+    }, $, this, $Static);
     /*
      this needs to be fixed
     console.log("changing back");

@@ -5,7 +5,7 @@
  */
 
 
-PHP.Modules.prototype.eval = function( $, code ) {
+PHP.Modules.prototype.eval = function( $, $Static, code ) {
     
 
     
@@ -34,11 +34,11 @@ PHP.Modules.prototype.eval = function( $, code ) {
     
     
         // execture code in current context ($)
-        var exec = new Function( "$$", "$", "ENV", compiler.src  );
+        var exec = new Function( "$$", "$", "ENV", "$Static",  compiler.src  );
         this.EVALING = true;
         exec.call(this, function( arg ) {
             return new PHP.VM.Variable( arg );
-        }, $, this);
+        }, $, this, $Static);
         this.EVALING = undefined;
         
     } else {

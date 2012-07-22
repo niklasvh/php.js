@@ -11,6 +11,7 @@ PHP.VM = function( src, opts ) {
         
         return item;
     },
+    COMPILER = PHP.Compiler.prototype,
     ENV = this;
     
     this.ENV = ENV;
@@ -219,8 +220,11 @@ PHP.VM = function( src, opts ) {
     $('_ENV').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("E") !== -1 ) ? {} : {} ).$;
     
 
-
-
+    var staticHandler = {}, staticVars = {};
+    
+    PHP.Utils.StaticHandler( staticHandler, staticVars, $, $ );
+ 
+    this.$Static = staticHandler;
     
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
@@ -230,14 +234,14 @@ PHP.VM = function( src, opts ) {
         if ( false ) {
     
   
-            var exec = new Function( "$$", "$", "ENV", src  );
-            exec.call(this, $$, $, ENV);
+            var exec = new Function( "$$", "$", "ENV", "$Static", src  );
+            exec.call(this, $$, $, ENV, staticHandler);
     
      
         } else {
             try {
-                var exec = new Function( "$$", "$", "ENV",  src  );
-                exec.call(this, $$, $, ENV);
+                var exec = new Function( "$$", "$", "ENV", "$Static", src  );
+                exec.call(this, $$, $, ENV, staticHandler);
                 this.$obflush.call( ENV );  
                 this.$shutdown.call( ENV );
           

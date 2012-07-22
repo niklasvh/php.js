@@ -9,6 +9,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     handler,
+    staticHandler = {},
     $GLOBAL = this[ COMPILER.GLOBAL ],
     __FILE__ = "$__FILE__",
     staticVars = {}; // static variable storage
@@ -16,13 +17,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
     // initializer
     args.push( function( args, values ) {
+        console.log('sup');
         handler = PHP.VM.VariableHandler( ENV );
         var vals = Array.prototype.slice.call( values, 2 );
 
 
-        Object.keys( staticVars ).forEach( function( key ){
-            handler( key, staticVars[ key ] );
-        });
 
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
@@ -81,34 +80,14 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
         handler( "$__FUNCTION__" )[ COMPILER.VARIABLE_VALUE ] = functionName;
 
 
+        // static handler, the messed up ordering of things is needed due to js execution order
+        PHP.Utils.StaticHandler( staticHandler, staticVars,  handler, ENV[ COMPILER.GLOBAL ] );
+
+        
+
+
         return handler;
     } );
-
-    // static handler
-    var staticHandler = {};
-    staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
-
-        if ( staticVars[ name ] !== undefined ) {
-            // already defined
-            return staticHandler;
-        }
-        // store it to storage for this func
-        staticVars[ name ] = def;
-
-        // assign it to current running context as well
-        handler( name, def );
-
-        return staticHandler;
-    };
-
-    // global handler
-    staticHandler[ COMPILER.FUNCTION_GLOBAL ] = function( vars ) {
-        vars.forEach(function( varName ){
-      
-            handler( varName, ENV[ COMPILER.GLOBAL ]( varName ) )
-        });
-    };
-
 
     args.push( staticHandler );
 

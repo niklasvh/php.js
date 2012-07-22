@@ -103,7 +103,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
         src += '"' + this.getName( action.func ) + '", arguments';
 
         if (this.getName( action.func ) === "eval") {
-            src += ", $"
+            src += ", $, $Static"
         // args.push("$");
         }
 
@@ -377,15 +377,19 @@ PHP.Compiler.prototype.Node_Expr_Cast_Double = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
-    return  this.CTX + "include( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
+    return  this.CTX + "include( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
 };
 
 PHP.Compiler.prototype.Node_Expr_IncludeOnce = function( action ) {
-    return  this.CTX + "include_once( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
+    return  this.CTX + "include_once( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
+};
+
+PHP.Compiler.prototype.Node_Expr_Require = function( action ) {
+    return  this.CTX + "require( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
 };
 
 PHP.Compiler.prototype.Node_Expr_RequireOnce = function( action ) {
-    return  this.CTX + "require_once( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
+    return  this.CTX + "require_once( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
 };
 
 PHP.Compiler.prototype.Node_Expr_New = function( action ) {

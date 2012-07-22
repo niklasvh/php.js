@@ -1,4 +1,4 @@
-PHP.Modules.prototype.include_once = function( $, file ) {
+PHP.Modules.prototype.include_once = function( $, $Static, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
     filename = file[ COMPILER.VARIABLE_VALUE ];

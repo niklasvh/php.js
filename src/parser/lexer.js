@@ -582,7 +582,7 @@ PHP.Lexer = function( src, ini ) {
                 }
 
                 return undefined;
-            //   console.log( result );
+            
             } else {
                 result = result.replace(/\n/g,"\\n").replace(/\r/g,"");
             }
@@ -610,7 +610,7 @@ PHP.Lexer = function( src, ini ) {
    
     
 
-console.log(openTag);
+
     var results = [],
     line = 1,
     insidePHP = false,
@@ -697,7 +697,7 @@ console.log(openTag);
                         }
 
                         src = src.substring(result[ 0 ].length);
-                        //  console.log(result);
+
                         return true;
                     }
                     return false;
@@ -709,8 +709,8 @@ console.log(openTag);
         } else {
 
             var result = openTag.exec( src );
-            //console.log('sup', result, result.index);
-            console.log( src, result );
+
+
             if ( result !== null ) {
                 if ( result.index > 0 ) {
                     var resultString = src.substring(0, result.index);

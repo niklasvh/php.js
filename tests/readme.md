@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 542 out of 672 (80.7%)
+Passed 547 out of 672 (81.4%)
 
 Failed tests:
 
@@ -47,7 +47,6 @@ Failed tests:
  - tests/php/lang/bug23489.phpt
  - tests/php/lang/bug23584.phpt
  - tests/php/lang/bug24054.phpt
- - tests/php/lang/bug24396.phpt
  - tests/php/lang/bug24403.phpt
  - tests/php/lang/bug24640.phpt
  - tests/php/lang/bug24652.phpt
@@ -100,10 +99,6 @@ Failed tests:
  - tests/php/lang/returnByReference.008.phpt
  - tests/php/lang/returnByReference.009.phpt
  - tests/php/lang/script_tag.phpt
- - tests/php/lang/static_basic_001.phpt
- - tests/php/lang/static_basic_002.phpt
- - tests/php/lang/static_variation_001.phpt
- - tests/php/lang/static_variation_002.phpt
  - tests/php/lang/type_hints_003.phpt
  - tests/php/output/bug46897.phpt
  - tests/php/output/bug60768.phpt

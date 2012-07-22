@@ -118,6 +118,53 @@ PHP.Utils.Path = function( path ) {
     return path;
 };
 
+PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+   
+    staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
+
+        if ( staticVars[ name ] === undefined ) {
+            // store it to storage for this variable
+            staticVars[ name ] = {
+                def: def[ COMPILER.VARIABLE_VALUE ],
+                val: def
+            };
+            
+            // assign it to current running context as well
+            handler( name, def );
+        
+        } else {
+            if ( def [ COMPILER.VARIABLE_VALUE ] === staticVars[ name ].def ) {
+                handler( name, staticVars[ name ].val );
+            } else {
+                staticVars[ name ] = {
+                    def: def[ COMPILER.VARIABLE_VALUE ],
+                    val: def
+                };
+                handler( name, def );
+            }   
+        }
+
+
+        return staticHandler;
+
+
+    };  
+
+
+    // global handler
+    staticHandler[ COMPILER.FUNCTION_GLOBAL ] = function( vars ) {
+        vars.forEach(function( varName ){
+      
+            handler( varName, $Global( varName ) )
+        });
+    };
+    
+    return staticHandler;
+    
+};
+
 PHP.Utils.TokenName = function( token ) {
     var constants = ["T_INCLUDE","T_INCLUDE_ONCE","T_EVAL","T_REQUIRE","T_REQUIRE_ONCE","T_LOGICAL_OR","T_LOGICAL_XOR","T_LOGICAL_AND","T_PRINT","T_PLUS_EQUAL","T_MINUS_EQUAL","T_MUL_EQUAL","T_DIV_EQUAL","T_CONCAT_EQUAL","T_MOD_EQUAL","T_AND_EQUAL","T_OR_EQUAL","T_XOR_EQUAL","T_SL_EQUAL","T_SR_EQUAL","T_BOOLEAN_OR","T_BOOLEAN_AND","T_IS_EQUAL","T_IS_NOT_EQUAL","T_IS_IDENTICAL","T_IS_NOT_IDENTICAL","T_IS_SMALLER_OR_EQUAL","T_IS_GREATER_OR_EQUAL","T_SL","T_SR","T_INSTANCEOF","T_INC","T_DEC","T_INT_CAST","T_DOUBLE_CAST","T_STRING_CAST","T_ARRAY_CAST","T_OBJECT_CAST","T_BOOL_CAST","T_UNSET_CAST","T_NEW","T_CLONE","T_EXIT","T_IF","T_ELSEIF","T_ELSE","T_ENDIF","T_LNUMBER","T_DNUMBER","T_STRING","T_STRING_VARNAME","T_VARIABLE","T_NUM_STRING","T_INLINE_HTML","T_CHARACTER","T_BAD_CHARACTER","T_ENCAPSED_AND_WHITESPACE","T_CONSTANT_ENCAPSED_STRING","T_ECHO","T_DO","T_WHILE","T_ENDWHILE","T_FOR","T_ENDFOR","T_FOREACH","T_ENDFOREACH","T_DECLARE","T_ENDDECLARE","T_AS","T_SWITCH","T_ENDSWITCH","T_CASE","T_DEFAULT","T_BREAK","T_CONTINUE","T_GOTO","T_FUNCTION","T_CONST","T_RETURN","T_TRY","T_CATCH","T_THROW","T_USE","T_INSTEADOF","T_GLOBAL","T_STATIC","T_ABSTRACT","T_FINAL","T_PRIVATE","T_PROTECTED","T_PUBLIC","T_VAR","T_UNSET","T_ISSET","T_EMPTY","T_HALT_COMPILER","T_CLASS","T_TRAIT","T_INTERFACE","T_EXTENDS","T_IMPLEMENTS","T_OBJECT_OPERATOR","T_DOUBLE_ARROW","T_LIST","T_ARRAY","T_CALLABLE","T_CLASS_C","T_TRAIT_C","T_METHOD_C","T_FUNC_C","T_LINE","T_FILE","T_COMMENT","T_DOC_COMMENT","T_OPEN_TAG","T_OPEN_TAG_WITH_ECHO","T_CLOSE_TAG","T_WHITESPACE","T_START_HEREDOC","T_END_HEREDOC","T_DOLLAR_OPEN_CURLY_BRACES","T_CURLY_OPEN","T_PAAMAYIM_NEKUDOTAYIM","T_DOUBLE_COLON","T_NAMESPACE","T_NS_C","T_DIR","T_NS_SEPARATOR"];
     var current = "UNKNOWN";
@@ -651,7 +698,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
         src += '"' + this.getName( action.func ) + '", arguments';
 
         if (this.getName( action.func ) === "eval") {
-            src += ", $"
+            src += ", $, $Static"
         // args.push("$");
         }
 
@@ -925,15 +972,19 @@ PHP.Compiler.prototype.Node_Expr_Cast_Double = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
-    return  this.CTX + "include( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
+    return  this.CTX + "include( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
 };
 
 PHP.Compiler.prototype.Node_Expr_IncludeOnce = function( action ) {
-    return  this.CTX + "include_once( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
+    return  this.CTX + "include_once( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
+};
+
+PHP.Compiler.prototype.Node_Expr_Require = function( action ) {
+    return  this.CTX + "require( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
 };
 
 PHP.Compiler.prototype.Node_Expr_RequireOnce = function( action ) {
-    return  this.CTX + "require_once( " +this.VARIABLE + ", " + this.source( action.expr ) + " )";
+    return  this.CTX + "require_once( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
 };
 
 PHP.Compiler.prototype.Node_Expr_New = function( action ) {
@@ -1732,6 +1783,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     handler,
+    staticHandler = {},
     $GLOBAL = this[ COMPILER.GLOBAL ],
     __FILE__ = "$__FILE__",
     staticVars = {}; // static variable storage
@@ -1739,13 +1791,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
     // initializer
     args.push( function( args, values ) {
+        console.log('sup');
         handler = PHP.VM.VariableHandler( ENV );
         var vals = Array.prototype.slice.call( values, 2 );
 
 
-        Object.keys( staticVars ).forEach( function( key ){
-            handler( key, staticVars[ key ] );
-        });
 
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
@@ -1804,34 +1854,14 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
         handler( "$__FUNCTION__" )[ COMPILER.VARIABLE_VALUE ] = functionName;
 
 
+        // static handler, the messed up ordering of things is needed due to js execution order
+        PHP.Utils.StaticHandler( staticHandler, staticVars,  handler, ENV[ COMPILER.GLOBAL ] );
+
+        
+
+
         return handler;
     } );
-
-    // static handler
-    var staticHandler = {};
-    staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
-
-        if ( staticVars[ name ] !== undefined ) {
-            // already defined
-            return staticHandler;
-        }
-        // store it to storage for this func
-        staticVars[ name ] = def;
-
-        // assign it to current running context as well
-        handler( name, def );
-
-        return staticHandler;
-    };
-
-    // global handler
-    staticHandler[ COMPILER.FUNCTION_GLOBAL ] = function( vars ) {
-        vars.forEach(function( varName ){
-      
-            handler( varName, ENV[ COMPILER.GLOBAL ]( varName ) )
-        });
-    };
-
 
     args.push( staticHandler );
 
@@ -3188,7 +3218,7 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
 * @website http://hertzen.com
  */
 
-PHP.Modules.prototype.$include = function( $, file ) {
+PHP.Modules.prototype.$include = function( $, $Static, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
     filename = file[ COMPILER.VARIABLE_VALUE ];
@@ -3223,13 +3253,13 @@ PHP.Modules.prototype.$include = function( $, file ) {
    
     console.log( compiler.src );
     // execture code in current context ($)
-    var exec = new Function( "$$", "$", "ENV", compiler.src  );
+    var exec = new Function( "$$", "$", "ENV", "$Static", compiler.src  );
     
     this[ COMPILER.FILE_PATH ] = PHP.Utils.Path( loaded_file );
     
     exec.call(this, function( arg ) {
         return new PHP.VM.Variable( arg );
-    }, $, this);
+    }, $, this, $Static);
     /*
      this needs to be fixed
     console.log("changing back");
@@ -3240,7 +3270,7 @@ PHP.Modules.prototype.$include = function( $, file ) {
 
 PHP.Modules.prototype.include = function() {
     this.$include.apply(this, arguments);
-};PHP.Modules.prototype.include_once = function( $, file ) {
+};PHP.Modules.prototype.include_once = function( $, $Static, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
     filename = file[ COMPILER.VARIABLE_VALUE ];
@@ -3257,7 +3287,7 @@ PHP.Modules.prototype.include = function() {
     
 };PHP.Modules.prototype.require = function() {
     this.$include.apply(this, arguments);
-};PHP.Modules.prototype.require_once = function( $, file ) {
+};PHP.Modules.prototype.require_once = function( $, $Static, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
     filename = file[ COMPILER.VARIABLE_VALUE ];
@@ -3568,7 +3598,7 @@ PHP.Modules.prototype.create_function = function( args, source ) {
     
     
     // tokenizer
-    var tokens = new PHP.Lexer( "<? " + source[ COMPILER.VARIABLE_VALUE ] );
+    var tokens = new PHP.Lexer( "<?php " + source[ COMPILER.VARIABLE_VALUE ] );
    
     // build ast tree
     
@@ -3705,7 +3735,7 @@ PHP.Modules.prototype.defined = function( name ) {
  */
 
 
-PHP.Modules.prototype.eval = function( $, code ) {
+PHP.Modules.prototype.eval = function( $, $Static, code ) {
     
 
     
@@ -3715,7 +3745,7 @@ PHP.Modules.prototype.eval = function( $, code ) {
         
 
     // tokenizer
-    var tokens = new PHP.Lexer( "<?" + source );
+    var tokens = new PHP.Lexer( "<?php " + source );
    
     // build ast tree
     
@@ -3734,11 +3764,11 @@ PHP.Modules.prototype.eval = function( $, code ) {
     
     
         // execture code in current context ($)
-        var exec = new Function( "$$", "$", "ENV", compiler.src  );
+        var exec = new Function( "$$", "$", "ENV", "$Static",  compiler.src  );
         this.EVALING = true;
         exec.call(this, function( arg ) {
             return new PHP.VM.Variable( arg );
-        }, $, this);
+        }, $, this, $Static);
         this.EVALING = undefined;
         
     } else {
@@ -6449,7 +6479,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                 }
 
                 return undefined;
-            //   console.log( result );
+            
             } else {
                 result = result.replace(/\n/g,"\\n").replace(/\r/g,"");
             }
@@ -6477,7 +6507,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
    
     
 
-console.log(openTag);
+
     var results = [],
     line = 1,
     insidePHP = false,
@@ -6564,7 +6594,7 @@ console.log(openTag);
                         }
 
                         src = src.substring(result[ 0 ].length);
-                        //  console.log(result);
+
                         return true;
                     }
                     return false;
@@ -6576,8 +6606,8 @@ console.log(openTag);
         } else {
 
             var result = openTag.exec( src );
-            //console.log('sup', result, result.index);
-            console.log( src, result );
+
+
             if ( result !== null ) {
                 if ( result.index > 0 ) {
                     var resultString = src.substring(0, result.index);
@@ -11006,6 +11036,7 @@ PHP.VM = function( src, opts ) {
         
         return item;
     },
+    COMPILER = PHP.Compiler.prototype,
     ENV = this;
     
     this.ENV = ENV;
@@ -11214,8 +11245,11 @@ PHP.VM = function( src, opts ) {
     $('_ENV').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("E") !== -1 ) ? {} : {} ).$;
     
 
-
-
+    var staticHandler = {}, staticVars = {};
+    
+    PHP.Utils.StaticHandler( staticHandler, staticVars, $, $ );
+ 
+    this.$Static = staticHandler;
     
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
@@ -11225,14 +11259,14 @@ PHP.VM = function( src, opts ) {
         if ( false ) {
     
   
-            var exec = new Function( "$$", "$", "ENV", src  );
-            exec.call(this, $$, $, ENV);
+            var exec = new Function( "$$", "$", "ENV", "$Static", src  );
+            exec.call(this, $$, $, ENV, staticHandler);
     
      
         } else {
             try {
-                var exec = new Function( "$$", "$", "ENV",  src  );
-                exec.call(this, $$, $, ENV);
+                var exec = new Function( "$$", "$", "ENV", "$Static", src  );
+                exec.call(this, $$, $, ENV, staticHandler);
                 this.$obflush.call( ENV );  
                 this.$shutdown.call( ENV );
           
