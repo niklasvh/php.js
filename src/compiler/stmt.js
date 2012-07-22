@@ -471,13 +471,16 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
        
         
         
-        
         if (prop.def !== null) {
             obj += ", " + this.PROPERTY_DEFAULT  + ": " + this.source( prop.def )
         }
         
         if (prop.Type !== null ) {
             obj += ", " +  this.PROPERTY_TYPE + ': "' + this.source( prop.Type ) + '"'
+        }
+        
+        if (prop.byRef === true) {
+            obj += ", " +  this.PARAM_BYREF + ': true'
         }
         
         obj += "}";

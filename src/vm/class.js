@@ -49,7 +49,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         argumentObj = this[ methodArgumentPrefix + methodName ];
 
         if ( Array.isArray(argumentObj) ) {
-            argumentObj.forEach( function( arg, index ) {
+            argumentObj.forEach( function( argObject, index  ) {
+                
+                
+                var arg = $( argObject.name );
+            
+                PHP.Utils.ArgumentHandler( ENV, arg, argObject, args[ index ], index, className + "::" + realName );
+           /*
                 
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
@@ -77,7 +83,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ COMPILER.TYPE_CHECK ]( $( arg.name ), arg[ COMPILER.PROPERTY_TYPE ], arg[ COMPILER.PROPERTY_DEFAULT ], index, className + "::" + realName );
                 }   
                 
-
+*/
                 
 
             });

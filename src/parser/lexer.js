@@ -12,8 +12,8 @@ PHP.Lexer = function( src, ini ) {
         return result;
     },
     
-    openTag = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag) ) ? /(\<\?php\s|\<\?|\<\%)/i : /(\<\?php\s|<\?=)/i),
-    openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%)/i : /^(\<\?php\s|<\?=)/i),
+    openTag = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag) ) ? /(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
+    openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /^(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
     tokens = [
     {
         value: PHP.Constants.T_ABSTRACT,
@@ -165,7 +165,7 @@ PHP.Lexer = function( src, ini ) {
     },
     {
         value: PHP.Constants.T_CLOSE_TAG,
-        re: /^(\?\>|\%\>)\s?\s?/,
+        re: /^(\?\>|\%\>|\<\/script\>)\s?\s?/i,
         func: function( result ) {
             insidePHP = false;
             return result;

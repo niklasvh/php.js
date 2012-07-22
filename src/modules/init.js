@@ -25,49 +25,16 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
-
-            if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
-
-                // check that we aren't passing a constant for arg which is defined byRef
-                if (   vals[ index ][ VARIABLE.CLASS_CONSTANT ] === true || vals[ index ][ VARIABLE.CONSTANT ] === true || vals[ index ][ COMPILER.NAV ] === true ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );
-                }
-
-
-                // check that we aren't passing a function return value
-                if (   vals[ index ][ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
-                }
-
-                if (vals[ index ][ VARIABLE.DEFINED ] !== true ) {
-                    // trigger setter
-                    vals[ index ][ COMPILER.VARIABLE_VALUE ] = null;
-                }
-
-                arg[ VARIABLE.REF ]( vals[ index ] );
-            } else {
-                if ( vals[ index ] !== undefined ) {
-                    arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
-                } else {
-                    if ( argObject[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
-                        arg[ COMPILER.VARIABLE_VALUE ] = argObject[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
-                    } else {
-                        arg[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
-                    }
-                }
-            }
-
+            
+            PHP.Utils.ArgumentHandler( ENV, arg, argObject, vals[index], index, functionName );
+            
             // redefine item in arguments object, to be used by func_get_arg(s)
+            
             if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
                 values[ index + 2 ] = arg;
             } else {
                 values[ index + 2 ] = new PHP.VM.Variable( arg[ COMPILER.VARIABLE_VALUE ] );
             }
-
-            if ( argObject[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
-                ENV[ COMPILER.TYPE_CHECK ]( arg, argObject[ COMPILER.PROPERTY_TYPE ], argObject[ COMPILER.PROPERTY_DEFAULT ], index, functionName );
-            }
-
         });
         
         // magic constants

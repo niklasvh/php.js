@@ -118,6 +118,56 @@ PHP.Utils.Path = function( path ) {
     return path;
 };
 
+PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functionName ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+
+    if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
+
+        // check that we aren't passing a constant for arg which is defined byRef
+        if (   value[ VARIABLE.CLASS_CONSTANT ] === true || value[ VARIABLE.CONSTANT ] === true || value[ COMPILER.NAV ] === true ) {
+            ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );
+        }
+
+
+        // check that we aren't passing a function return value
+        if (   value[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION ) {
+            ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
+        }
+
+        if (value[ VARIABLE.DEFINED ] !== true ) {
+            // trigger setter
+            value[ COMPILER.VARIABLE_VALUE ] = null;
+        }
+
+        arg[ VARIABLE.REF ]( value );
+    } else {
+        
+        if ( value !== undefined ) {
+            
+            if ( value instanceof PHP.VM.VariableProto) {
+                arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.VARIABLE_VALUE ];
+            } else {
+                arg[ COMPILER.VARIABLE_VALUE ] = value;
+            }
+            
+   
+        } else {
+            if ( argObject[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
+                arg[ COMPILER.VARIABLE_VALUE ] = argObject[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
+            } else {
+                arg[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+            }
+        }
+    }
+
+
+
+    if ( argObject[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
+        ENV[ COMPILER.TYPE_CHECK ]( arg, argObject[ COMPILER.PROPERTY_TYPE ], argObject[ COMPILER.PROPERTY_DEFAULT ], index, functionName );
+    }
+};
+
 PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global ) {
     
     var COMPILER = PHP.Compiler.prototype;
@@ -1654,13 +1704,16 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
        
         
         
-        
         if (prop.def !== null) {
             obj += ", " + this.PROPERTY_DEFAULT  + ": " + this.source( prop.def )
         }
         
         if (prop.Type !== null ) {
             obj += ", " +  this.PROPERTY_TYPE + ': "' + this.source( prop.Type ) + '"'
+        }
+        
+        if (prop.byRef === true) {
+            obj += ", " +  this.PARAM_BYREF + ': true'
         }
         
         obj += "}";
@@ -1799,49 +1852,16 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
-
-            if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
-
-                // check that we aren't passing a constant for arg which is defined byRef
-                if (   vals[ index ][ VARIABLE.CLASS_CONSTANT ] === true || vals[ index ][ VARIABLE.CONSTANT ] === true || vals[ index ][ COMPILER.NAV ] === true ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );
-                }
-
-
-                // check that we aren't passing a function return value
-                if (   vals[ index ][ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
-                }
-
-                if (vals[ index ][ VARIABLE.DEFINED ] !== true ) {
-                    // trigger setter
-                    vals[ index ][ COMPILER.VARIABLE_VALUE ] = null;
-                }
-
-                arg[ VARIABLE.REF ]( vals[ index ] );
-            } else {
-                if ( vals[ index ] !== undefined ) {
-                    arg[ COMPILER.VARIABLE_VALUE ] = vals[ index ][ COMPILER.VARIABLE_VALUE ];
-                } else {
-                    if ( argObject[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
-                        arg[ COMPILER.VARIABLE_VALUE ] = argObject[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
-                    } else {
-                        arg[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
-                    }
-                }
-            }
-
+            
+            PHP.Utils.ArgumentHandler( ENV, arg, argObject, vals[index], index, functionName );
+            
             // redefine item in arguments object, to be used by func_get_arg(s)
+            
             if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
                 values[ index + 2 ] = arg;
             } else {
                 values[ index + 2 ] = new PHP.VM.Variable( arg[ COMPILER.VARIABLE_VALUE ] );
             }
-
-            if ( argObject[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
-                ENV[ COMPILER.TYPE_CHECK ]( arg, argObject[ COMPILER.PROPERTY_TYPE ], argObject[ COMPILER.PROPERTY_DEFAULT ], index, functionName );
-            }
-
         });
         
         // magic constants
@@ -5914,8 +5934,8 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
         return result;
     },
     
-    openTag = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag) ) ? /(\<\?php\s|\<\?|\<\%)/i : /(\<\?php\s|<\?=)/i),
-    openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%)/i : /^(\<\?php\s|<\?=)/i),
+    openTag = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag) ) ? /(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
+    openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /^(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
     tokens = [
     {
         value: PHP.Constants.T_ABSTRACT,
@@ -6067,7 +6087,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
     },
     {
         value: PHP.Constants.T_CLOSE_TAG,
-        re: /^(\?\>|\%\>)\s?\s?/,
+        re: /^(\?\>|\%\>|\<\/script\>)\s?\s?/i,
         func: function( result ) {
             insidePHP = false;
             return result;
@@ -11342,7 +11362,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         argumentObj = this[ methodArgumentPrefix + methodName ];
 
         if ( Array.isArray(argumentObj) ) {
-            argumentObj.forEach( function( arg, index ) {
+            argumentObj.forEach( function( argObject, index  ) {
+                
+                
+                var arg = $( argObject.name );
+            
+                PHP.Utils.ArgumentHandler( ENV, arg, argObject, args[ index ], index, className + "::" + realName );
+           /*
                 
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
@@ -11370,7 +11396,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ COMPILER.TYPE_CHECK ]( $( arg.name ), arg[ COMPILER.PROPERTY_TYPE ], arg[ COMPILER.PROPERTY_DEFAULT ], index, className + "::" + realName );
                 }   
                 
-
+*/
                 
 
             });
@@ -12886,7 +12912,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compa
         cast = (first[ COMPILER.VARIABLE_VALUE ].Native === true || second[ COMPILER.VARIABLE_VALUE ].Native === true);
         if ( cast ) {
             first = first[ this.CAST_INT ];
-             second = second[ this.CAST_INT ];
+            second = second[ this.CAST_INT ];
         }
     } 
     
@@ -13087,24 +13113,29 @@ PHP.VM.Variable = function( arg ) {
 
    
     this[ PHP.Compiler.prototype.UNSET ] = function() {
-        console.log("unsetting", this);
+        
         setValue( null );
-        this[ this.DEFINED ] = false;
-        console.log( this );
+        this[ this.DEFINED ] = this[ this.NAME ];
+        
         if ( this[ this.REFERRING ] !== undefined ) {
             this [ this.REFERRING ]( PHP.Compiler.prototype.UNSET );
         }
     };
     // property get proxy
     this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
-        var val;
-        if (this[ this.TYPE ] === this.NULL ) {
-            if ( this[ this.PROPERTY ] !== true ) {
+        var val, $this = this;
+        console.log( this );
+        if ( this[ this.REFERRING ] !== undefined ) {
+            $this = this [ this.REFERRING ];
+        }
+        
+        if ($this[ this.TYPE ] === this.NULL ) {
+            if ( $this[ this.PROPERTY ] !== true ) {
                 this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
             }
-            this[ COMPILER.VARIABLE_VALUE ] = val = new (this.ENV.$Class.Get("stdClass"))( this );
+            $this[ COMPILER.VARIABLE_VALUE ] = val = new (this.ENV.$Class.Get("stdClass"))( this );
         } else {
-            val =  this[ COMPILER.VARIABLE_VALUE ];
+            val =  $this[ COMPILER.VARIABLE_VALUE ];
         }
         return val[ COMPILER.CLASS_PROPERTY_GET ].apply( val, arguments );
     };
@@ -13347,7 +13378,15 @@ PHP.VM.Variable = function( arg ) {
         var $this = this;
         
         if ( this[ this.REFERRING ] !== undefined ) {
-            $this = this[ this.REFERRING ];
+       
+            var referLoop = $this;
+                
+            while( referLoop[ this.REFERRING ] !== undefined ) {
+                referLoop = referLoop[ this.REFERRING ];
+            }
+            
+            $this = referLoop;
+            
         }
         
         if ( $this[ this.TYPE ] !== this.ARRAY ) {

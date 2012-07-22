@@ -118,6 +118,56 @@ PHP.Utils.Path = function( path ) {
     return path;
 };
 
+PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functionName ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+
+    if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
+
+        // check that we aren't passing a constant for arg which is defined byRef
+        if (   value[ VARIABLE.CLASS_CONSTANT ] === true || value[ VARIABLE.CONSTANT ] === true || value[ COMPILER.NAV ] === true ) {
+            ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );
+        }
+
+
+        // check that we aren't passing a function return value
+        if (   value[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION ) {
+            ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
+        }
+
+        if (value[ VARIABLE.DEFINED ] !== true ) {
+            // trigger setter
+            value[ COMPILER.VARIABLE_VALUE ] = null;
+        }
+
+        arg[ VARIABLE.REF ]( value );
+    } else {
+        
+        if ( value !== undefined ) {
+            
+            if ( value instanceof PHP.VM.VariableProto) {
+                arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.VARIABLE_VALUE ];
+            } else {
+                arg[ COMPILER.VARIABLE_VALUE ] = value;
+            }
+            
+   
+        } else {
+            if ( argObject[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
+                arg[ COMPILER.VARIABLE_VALUE ] = argObject[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
+            } else {
+                arg[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
+            }
+        }
+    }
+
+
+
+    if ( argObject[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
+        ENV[ COMPILER.TYPE_CHECK ]( arg, argObject[ COMPILER.PROPERTY_TYPE ], argObject[ COMPILER.PROPERTY_DEFAULT ], index, functionName );
+    }
+};
+
 PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global ) {
     
     var COMPILER = PHP.Compiler.prototype;

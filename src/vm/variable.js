@@ -234,7 +234,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compa
         cast = (first[ COMPILER.VARIABLE_VALUE ].Native === true || second[ COMPILER.VARIABLE_VALUE ].Native === true);
         if ( cast ) {
             first = first[ this.CAST_INT ];
-             second = second[ this.CAST_INT ];
+            second = second[ this.CAST_INT ];
         }
     } 
     
@@ -435,24 +435,29 @@ PHP.VM.Variable = function( arg ) {
 
    
     this[ PHP.Compiler.prototype.UNSET ] = function() {
-        console.log("unsetting", this);
+        
         setValue( null );
-        this[ this.DEFINED ] = false;
-        console.log( this );
+        this[ this.DEFINED ] = this[ this.NAME ];
+        
         if ( this[ this.REFERRING ] !== undefined ) {
             this [ this.REFERRING ]( PHP.Compiler.prototype.UNSET );
         }
     };
     // property get proxy
     this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
-        var val;
-        if (this[ this.TYPE ] === this.NULL ) {
-            if ( this[ this.PROPERTY ] !== true ) {
+        var val, $this = this;
+        console.log( this );
+        if ( this[ this.REFERRING ] !== undefined ) {
+            $this = this [ this.REFERRING ];
+        }
+        
+        if ($this[ this.TYPE ] === this.NULL ) {
+            if ( $this[ this.PROPERTY ] !== true ) {
                 this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
             }
-            this[ COMPILER.VARIABLE_VALUE ] = val = new (this.ENV.$Class.Get("stdClass"))( this );
+            $this[ COMPILER.VARIABLE_VALUE ] = val = new (this.ENV.$Class.Get("stdClass"))( this );
         } else {
-            val =  this[ COMPILER.VARIABLE_VALUE ];
+            val =  $this[ COMPILER.VARIABLE_VALUE ];
         }
         return val[ COMPILER.CLASS_PROPERTY_GET ].apply( val, arguments );
     };
@@ -695,7 +700,15 @@ PHP.VM.Variable = function( arg ) {
         var $this = this;
         
         if ( this[ this.REFERRING ] !== undefined ) {
-            $this = this[ this.REFERRING ];
+       
+            var referLoop = $this;
+                
+            while( referLoop[ this.REFERRING ] !== undefined ) {
+                referLoop = referLoop[ this.REFERRING ];
+            }
+            
+            $this = referLoop;
+            
         }
         
         if ( $this[ this.TYPE ] !== this.ARRAY ) {

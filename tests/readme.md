@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 549 out of 672 (81.7%)
+Passed 551 out of 672 (82%)
 
 Failed tests:
 
@@ -11,7 +11,6 @@ Failed tests:
  - tests/php/classes/bug26737.phpt
  - tests/php/classes/bug27468.phpt
  - tests/php/classes/bug27504.phpt
- - tests/php/classes/destructor_and_globals.phpt
  - tests/php/classes/implicit_instantiation_001.phpt
  - tests/php/classes/inheritance_007.phpt
  - tests/php/classes/interface_constant_inheritance_001.phpt
@@ -96,7 +95,6 @@ Failed tests:
  - tests/php/lang/returnByReference.007.phpt
  - tests/php/lang/returnByReference.008.phpt
  - tests/php/lang/returnByReference.009.phpt
- - tests/php/lang/script_tag.phpt
  - tests/php/lang/type_hints_003.phpt
  - tests/php/output/bug46897.phpt
  - tests/php/output/bug60768.phpt
