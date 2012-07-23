@@ -3,7 +3,7 @@
 * @created 30.6.2012
 * @website http://hertzen.com
  */
-PHP.Modules.prototype.$foreachInit = function( expr ) {
+PHP.Modules.prototype.$foreachInit = function( expr, ctx ) {
 
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
@@ -42,7 +42,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
                 Class:iterator
             };
         } else {
-            // public members in object
+            //  members in object
 
             var classProperty = PHP.VM.Class.PROPERTY;
 
@@ -50,22 +50,34 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
                 expr: expr,
                 pointer: 0,
                 keys:  (function( objectValue ) {
-                    var keys = Object.keys ( objectValue ),
-                    items = [];
+                    var items = [],
 
-                    keys.forEach( function( key ){
+                    needReorder = false;
+                    for (var key in objectValue) {
+                    
                         if ( key.substring(0, classProperty.length ) === classProperty) {
+                                
                             var name = key.substring( classProperty.length );
-                         
-                            if (((objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] & PHP.VM.Class.PUBLIC) === PHP.VM.Class.PUBLIC) || objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] === undefined) {
-
+                            
+                            if (PHP.Utils.Visible.call( this, name, objectValue, ctx )) {
                                 items.push( name );
                             }
-                        }
-                    });
 
+                        }
+                        
+                         if (((objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] & PHP.VM.Class.PUBLIC) === PHP.VM.Class.PUBLIC) || objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] === undefined) {
+
+                           
+                        } else {
+                             needReorder = true;
+                        }
+                    }
+                    if ( needReorder ) {
+                       items.sort(); 
+                    }
+                    
                     return items;
-                })( objectValue )
+                }.bind(this))( objectValue )
 
             };
 

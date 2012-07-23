@@ -222,7 +222,7 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     
     if ( action.expr.type === "Node_Expr_Array" && action.byRef === true ) {
-        console.log( action );
+      
         if (action.keyVar === null) {
             this.FATAL_ERROR = "syntax error, unexpected '&' in " + this.file + " on line " + action.attributes.startLine;
             this.ERROR_TYPE = PHP.Constants.E_PARSE;
@@ -233,7 +233,7 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     }
     
     var count = ++this.FOREACH_COUNT;
-    var src = "var iterator" + count + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
+    var src = "var iterator" + count + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ", " + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ");\n";
     src += "while(" + this.CTX + 'foreach( iterator' + count + ', ' + action.byRef + ", " + this.source( action.valueVar );
 
     if (action.keyVar !== null) {

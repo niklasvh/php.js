@@ -118,6 +118,60 @@ PHP.Utils.Path = function( path ) {
     return path;
 };
 
+PHP.Utils.Visible = function( name, objectValue, ctx ) {
+    
+    // helper function for checking whether variable/method is of type
+    function checkType( name, type) {
+        var value = objectValue[ PROPERTY_TYPE + name ];
+        if (value === undefined) {
+            return true;
+        }
+        
+        if ( type === "PUBLIC") {
+            return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]) || (value  === PHP.VM.Class.STATIC);
+        } else {
+            return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]);
+        }
+        
+    }
+    
+    function hasProperty( proto, prop ) {
+        while( proto !== undefined &&  proto[ PHP.VM.Class.PROPERTY + prop ] !== undefined ) {
+            proto = Object.getPrototypeOf( proto );
+        }
+        
+        return proto;
+     
+    }
+    
+    var COMPILER = PHP.Compiler.prototype,
+    PROPERTY_TYPE = PHP.VM.Class.PROPERTY_TYPE,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    if ( (ctx instanceof PHP.VM.ClassPrototype) && objectValue[ COMPILER.CLASS_NAME ] === ctx[ COMPILER.CLASS_NAME ] ) {
+        return true;                       
+    } else {
+                        
+        if ( (ctx instanceof PHP.VM.ClassPrototype) && this.$Class.Inherits( objectValue, ctx[ COMPILER.CLASS_NAME ] ) && checkType( name, "PROTECTED")) {
+                                   
+            return true;
+        } else  if ( (ctx instanceof PHP.VM.ClassPrototype) && this.$Class.Inherits( objectValue, ctx[ COMPILER.CLASS_NAME ] ) && checkType( name, "PRIVATE")) {
+            
+            if (hasProperty( ctx, name ) ===  ctx) {
+                return true;
+            }
+        
+            
+        } else if (checkType(name, "PUBLIC")) {
+
+            return true;
+        }
+    }
+    
+    return false;
+    
+};
+
 PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functionName ) {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;

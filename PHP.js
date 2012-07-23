@@ -118,6 +118,60 @@ PHP.Utils.Path = function( path ) {
     return path;
 };
 
+PHP.Utils.Visible = function( name, objectValue, ctx ) {
+    
+    // helper function for checking whether variable/method is of type
+    function checkType( name, type) {
+        var value = objectValue[ PROPERTY_TYPE + name ];
+        if (value === undefined) {
+            return true;
+        }
+        
+        if ( type === "PUBLIC") {
+            return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]) || (value  === PHP.VM.Class.STATIC);
+        } else {
+            return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]);
+        }
+        
+    }
+    
+    function hasProperty( proto, prop ) {
+        while( proto !== undefined &&  proto[ PHP.VM.Class.PROPERTY + prop ] !== undefined ) {
+            proto = Object.getPrototypeOf( proto );
+        }
+        
+        return proto;
+     
+    }
+    
+    var COMPILER = PHP.Compiler.prototype,
+    PROPERTY_TYPE = PHP.VM.Class.PROPERTY_TYPE,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    if ( (ctx instanceof PHP.VM.ClassPrototype) && objectValue[ COMPILER.CLASS_NAME ] === ctx[ COMPILER.CLASS_NAME ] ) {
+        return true;                       
+    } else {
+                        
+        if ( (ctx instanceof PHP.VM.ClassPrototype) && this.$Class.Inherits( objectValue, ctx[ COMPILER.CLASS_NAME ] ) && checkType( name, "PROTECTED")) {
+                                   
+            return true;
+        } else  if ( (ctx instanceof PHP.VM.ClassPrototype) && this.$Class.Inherits( objectValue, ctx[ COMPILER.CLASS_NAME ] ) && checkType( name, "PRIVATE")) {
+            
+            if (hasProperty( ctx, name ) ===  ctx) {
+                return true;
+            }
+        
+            
+        } else if (checkType(name, "PUBLIC")) {
+
+            return true;
+        }
+    }
+    
+    return false;
+    
+};
+
 PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functionName ) {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
@@ -1495,7 +1549,7 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     
     if ( action.expr.type === "Node_Expr_Array" && action.byRef === true ) {
-        console.log( action );
+      
         if (action.keyVar === null) {
             this.FATAL_ERROR = "syntax error, unexpected '&' in " + this.file + " on line " + action.attributes.startLine;
             this.ERROR_TYPE = PHP.Constants.E_PARSE;
@@ -1506,7 +1560,7 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
     }
     
     var count = ++this.FOREACH_COUNT;
-    var src = "var iterator" + count + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ");\n";
+    var src = "var iterator" + count + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ", " + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ");\n";
     src += "while(" + this.CTX + 'foreach( iterator' + count + ', ' + action.byRef + ", " + this.source( action.valueVar );
 
     if (action.keyVar !== null) {
@@ -3015,7 +3069,7 @@ PHP.Modules.prototype.method_exists = function( object, method ) {
 * @created 30.6.2012
 * @website http://hertzen.com
  */
-PHP.Modules.prototype.$foreachInit = function( expr ) {
+PHP.Modules.prototype.$foreachInit = function( expr, ctx ) {
 
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype,
@@ -3054,7 +3108,7 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
                 Class:iterator
             };
         } else {
-            // public members in object
+            //  members in object
 
             var classProperty = PHP.VM.Class.PROPERTY;
 
@@ -3062,22 +3116,34 @@ PHP.Modules.prototype.$foreachInit = function( expr ) {
                 expr: expr,
                 pointer: 0,
                 keys:  (function( objectValue ) {
-                    var keys = Object.keys ( objectValue ),
-                    items = [];
+                    var items = [],
 
-                    keys.forEach( function( key ){
+                    needReorder = false;
+                    for (var key in objectValue) {
+                    
                         if ( key.substring(0, classProperty.length ) === classProperty) {
+                                
                             var name = key.substring( classProperty.length );
-                         
-                            if (((objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] & PHP.VM.Class.PUBLIC) === PHP.VM.Class.PUBLIC) || objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] === undefined) {
-
+                            
+                            if (PHP.Utils.Visible.call( this, name, objectValue, ctx )) {
                                 items.push( name );
                             }
-                        }
-                    });
 
+                        }
+                        
+                         if (((objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] & PHP.VM.Class.PUBLIC) === PHP.VM.Class.PUBLIC) || objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] === undefined) {
+
+                           
+                        } else {
+                             needReorder = true;
+                        }
+                    }
+                    if ( needReorder ) {
+                       items.sort(); 
+                    }
+                    
                     return items;
-                })( objectValue )
+                }.bind(this))( objectValue )
 
             };
 
