@@ -246,7 +246,15 @@ PHP.VM = function( src, opts ) {
                 this.$shutdown.call( ENV );
           
             } catch( e ) {
-        
+                var C = PHP.Constants;
+                if ( e instanceof PHP.Halt) {
+                    switch (e.level) {
+                        case C.E_ERROR:
+                            this.$ob( "\nFatal error: " + e.msg + e.lineAppend + "\n");
+                            break;
+                    }
+                
+                }
                 console.log("Caught: ", e.message, e);
                 console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
         

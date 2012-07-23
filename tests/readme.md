@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 551 out of 672 (82%)
+Passed 552 out of 672 (82.1%)
 
 Failed tests:
 
@@ -18,7 +18,6 @@ Failed tests:
  - tests/php/classes/interface_constant_inheritance_003.phpt
  - tests/php/classes/new_001.phpt
  - tests/php/classes/property_recreate_protected.phpt
- - tests/php/classes/serialize_001.phpt
  - tests/php/classes/static_properties_004.phpt
  - tests/php/classes/static_properties_undeclared_isset.phpt
  - tests/php/classes/tostring_001.phpt

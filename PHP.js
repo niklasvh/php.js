@@ -333,8 +333,11 @@ PHP.Utils.QueryString = function( str ) {
  */
 
 
-PHP.Halt = function( level ) {
+PHP.Halt = function( msg, level, lineAppend  ) {
     
+    this.msg = msg;
+    this.level = level;
+    this.lineAppend = lineAppend;
     
 };
 PHP.Compiler = function( AST, file ) {
@@ -2174,12 +2177,19 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
                 
                 var classObj = variable[ COMPILER.VARIABLE_VALUE ];
-            
-                if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1  ) {
+         
+                if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1   ) {
                     $( name, variable );
                     caught = true;
                     func();
                 }
+            } else if ( variable instanceof PHP.Halt && /^Exception$/i.test( type )) {
+                console.log( variable, type );
+                 
+                
+                $( name, new (this.$Class.Get( "Exception"  ))( this, new PHP.VM.Variable( variable.msg )  ) );
+                caught = true;
+                func();
             }
             return methods;
 
@@ -2259,9 +2269,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                 } else {
                     switch ( level ) {
                         case C.E_ERROR:
-                            this[ COMPILER.DISPLAY_HANDLER ] = false;
-                            this.$ob( "\nFatal error: " + msg + lineAppend + "\n");
-                            throw new PHP.Halt( level );
+                            this[ COMPILER.DISPLAY_HANDLER ] = false; 
+                            throw new PHP.Halt( msg, level, lineAppend );
                             return;
                             break;
                         case C.E_RECOVERABLE_ERROR:
@@ -4695,6 +4704,18 @@ PHP.Modules.prototype.str_repeat = function( input, multiplier ) {
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 22.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.str_replace = function( str ) {
+    var VARIABLE = PHP.VM.Variable.prototype,
+    COMPILER = PHP.Compiler.prototype;
+    
+    return new PHP.VM.Variable( str[ COMPILER.VARIABLE_VALUE ].toLowerCase() );
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
  */
@@ -5720,6 +5741,136 @@ PHP.Modules.prototype.print_r = function() {
     console.log( arguments );
     */
 };/* 
+ * @author Niklas von Hertzen <niklas at hertzen.com>
+ * @created 22.7.2012 
+ * @website http://hertzen.com
+ */
+PHP.Modules.prototype.serialize = function( valueObj ) {
+
+    var COMPILER = PHP.Compiler.prototype,
+    serialize = "serialize",
+    VARIABLE = PHP.VM.Variable.prototype;
+
+    var item,
+    str = "",
+    func = function( item ) {
+        var val  = item[ COMPILER.VARIABLE_VALUE ],
+        str = "";
+
+        switch( item[ VARIABLE.TYPE ] ) {
+            
+            case VARIABLE.NULL:
+                str += "N;";
+                break;
+            
+            case VARIABLE.STRING:
+                
+                str += val.length + ":{" + val + "}";
+                
+                
+                break;
+            default:
+                console.log( val );
+        }
+        
+        return str;
+        
+    }.bind( this ),
+    value = valueObj[ COMPILER.VARIABLE_VALUE ];
+
+    // serializable interface
+    if( (value[ PHP.VM.Class.METHOD + serialize] ) !== undefined ) {
+        item = value[ COMPILER.METHOD_CALL ]( this, serialize );
+        
+    }
+    
+    if ( item[ VARIABLE.TYPE] !== VARIABLE.NULL && item[ VARIABLE.TYPE] !== VARIABLE.STRING  ) {
+           this.ENV[ COMPILER.ERROR ](value[ COMPILER.CLASS_NAME ] + "::" + serialize + "() must return a string or NULL", PHP.Constants.E_ERROR, true );   
+           return new PHP.VM.Variable();
+    }
+    
+    
+    if ( item[ VARIABLE.TYPE] !== VARIABLE.NULL ) {
+        str += "C:" + value[ COMPILER.CLASS_NAME ].length + ':"' + value[ COMPILER.CLASS_NAME ] + '":' + func( item );
+    } else {
+        str += "N;"
+    }
+
+   
+    return new PHP.VM.Variable( str );
+        
+
+
+};
+
+
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 22.7.2012 
+* @website http://hertzen.com
+ */
+PHP.Modules.prototype.unserialize = function( valueObj ) {
+
+    var COMPILER = PHP.Compiler.prototype,
+    unserialize = "unserialize",
+    VARIABLE = PHP.VM.Variable.prototype;
+
+
+    var value =  valueObj[ COMPILER.VARIABLE_VALUE ],
+    parts = value.split(":");
+    
+    
+    var item, pos, len, val;
+    
+    switch( parts[ 0 ]) {
+        case "C":
+            
+            item = new (this.$Class.Get( parts[ 2 ].substring(1, parts[ 2 ].length - 1 ) ))( true );
+            pos = 6 + parts[ 1 ].length + (parts[ 1 ]-0);
+            
+            break;
+        case "N;":
+            item = null;
+            pos = 2;
+            break;
+    }
+    
+
+    
+    value = value.substring( pos );
+    
+    while( value.length > 0 ) {
+       var pos = value.indexOf(":");
+       if (pos !== -1) {
+           len = value.substring( 0, pos );
+       } else {
+           break;
+       }
+       value = value.substring( len.length + 1 );
+       val = value.substr( 1, len  );
+       value = value.substring( val.length + 2);
+     
+        
+        
+    }
+    
+
+
+    if(  item !== null && (item[ PHP.VM.Class.METHOD + unserialize] ) !== undefined ) {
+        item[ COMPILER.METHOD_CALL ]( this, unserialize, new PHP.VM.Variable( val ) );
+            
+    }
+    
+
+
+    return new PHP.VM.Variable( item );
+        
+
+
+};
+
+
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 1.7.2012 
 * @website http://hertzen.com
@@ -11296,7 +11447,15 @@ PHP.VM = function( src, opts ) {
                 this.$shutdown.call( ENV );
           
             } catch( e ) {
-        
+                var C = PHP.Constants;
+                if ( e instanceof PHP.Halt) {
+                    switch (e.level) {
+                        case C.E_ERROR:
+                            this.$ob( "\nFatal error: " + e.msg + e.lineAppend + "\n");
+                            break;
+                    }
+                
+                }
                 console.log("Caught: ", e.message, e);
                 console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
         
@@ -13124,7 +13283,7 @@ PHP.VM.Variable = function( arg ) {
     // property get proxy
     this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
         var val, $this = this;
-        console.log( this );
+    
         if ( this[ this.REFERRING ] !== undefined ) {
             $this = this [ this.REFERRING ];
         }
@@ -13344,7 +13503,7 @@ PHP.VM.Variable = function( arg ) {
                      
             }
             else if (this[ this.TYPE ] === this.BOOL) {
-                return new PHP.VM.Variable( ( value ) ? "1" : "0" );
+                return new PHP.VM.Variable( ( value ) ? "1" : "" );
             } else if (this[ this.TYPE ] === this.INT) {
                 return new PHP.VM.Variable(  value + "" );
             } else if (this[ this.TYPE ] === this.NULL) {
@@ -14337,6 +14496,16 @@ ENV.$Class.INew( "Reflector", [], function( M, $, $$ ){
  M.Method( "export", 25, [], function( $, ctx, $Static ) {
 })
 .Method( "__toString", 17, [], function( $, ctx, $Static ) {
+})
+.Create()});
+
+ENV.$Class.Get( "DateTime").prototype.Native = true;
+};/* automatically built from Serializable.php*/
+PHP.VM.Class.Predefined.Serializable = function( ENV, $$ ) {
+ENV.$Class.INew( "Serializable", [], function( M, $, $$ ){
+ M.Method( "serialize", 17, [], function( $, ctx, $Static ) {
+})
+.Method( "unserialize", 17, [{name:"serialized"}], function( $, ctx, $Static ) {
 })
 .Create()});
 

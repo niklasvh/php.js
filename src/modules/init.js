@@ -347,12 +347,19 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
                 
                 var classObj = variable[ COMPILER.VARIABLE_VALUE ];
-            
-                if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1  ) {
+         
+                if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1   ) {
                     $( name, variable );
                     caught = true;
                     func();
                 }
+            } else if ( variable instanceof PHP.Halt && /^Exception$/i.test( type )) {
+                console.log( variable, type );
+                 
+                
+                $( name, new (this.$Class.Get( "Exception"  ))( this, new PHP.VM.Variable( variable.msg )  ) );
+                caught = true;
+                func();
             }
             return methods;
 
@@ -432,9 +439,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                 } else {
                     switch ( level ) {
                         case C.E_ERROR:
-                            this[ COMPILER.DISPLAY_HANDLER ] = false;
-                            this.$ob( "\nFatal error: " + msg + lineAppend + "\n");
-                            throw new PHP.Halt( level );
+                            this[ COMPILER.DISPLAY_HANDLER ] = false; 
+                            throw new PHP.Halt( msg, level, lineAppend );
                             return;
                             break;
                         case C.E_RECOVERABLE_ERROR:

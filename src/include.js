@@ -122,6 +122,7 @@ var files = {
                 printf: "js",
                 setlocale: "js",
                 str_repeat: "js",
+                str_replace: "js",
                 str_rot13: "js",
                 strlen: "js",
                 strncmp: "js",
@@ -144,6 +145,8 @@ var files = {
                 is_string: "js",
                 isset: "js",
                 print_r: "js",
+                serialize: "js",
+                unserialize: "js",
                 unset: "js",
                 var_dump: "js",
                 var_export: "js"
@@ -186,7 +189,8 @@ var files = {
                 ArrayAccess: "js",
                 Iterator: "js",
                 IteratorAggregate: "js",
-                Reflector: "js"
+                Reflector: "js",
+                Serializable: "js"
             
             }
         }

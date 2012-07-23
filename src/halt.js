@@ -5,7 +5,10 @@
  */
 
 
-PHP.Halt = function( level ) {
+PHP.Halt = function( msg, level, lineAppend  ) {
     
+    this.msg = msg;
+    this.level = level;
+    this.lineAppend = lineAppend;
     
 };

@@ -446,7 +446,7 @@ PHP.VM.Variable = function( arg ) {
     // property get proxy
     this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
         var val, $this = this;
-        console.log( this );
+    
         if ( this[ this.REFERRING ] !== undefined ) {
             $this = this [ this.REFERRING ];
         }
@@ -666,7 +666,7 @@ PHP.VM.Variable = function( arg ) {
                      
             }
             else if (this[ this.TYPE ] === this.BOOL) {
-                return new PHP.VM.Variable( ( value ) ? "1" : "0" );
+                return new PHP.VM.Variable( ( value ) ? "1" : "" );
             } else if (this[ this.TYPE ] === this.INT) {
                 return new PHP.VM.Variable(  value + "" );
             } else if (this[ this.TYPE ] === this.NULL) {
