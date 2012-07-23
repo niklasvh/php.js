@@ -695,8 +695,15 @@ PHP.VM.Variable = function( arg ) {
                 // class
                 // check for __toString();
            
+           
+           
                 if ( typeof value[PHP.VM.Class.METHOD + __toString.toLowerCase() ] === "function" ) {
+                    try {
                     var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
+                    } catch( e ) {
+                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must not throw an exception", PHP.Constants.E_ERROR, true, false, true );    
+                        return new PHP.VM.Variable("");
+                    }
                     if (val[ this.TYPE ] !==  this.STRING) {
                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
                         return new PHP.VM.Variable("");
@@ -706,7 +713,10 @@ PHP.VM.Variable = function( arg ) {
                 //  return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
                 } else {
                     this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to string", PHP.Constants.E_RECOVERABLE_ERROR, true );    
-                    return new PHP.VM.Variable("")
+                    
+
+                    
+                    return new PHP.VM.Variable("");
                 }
                      
             }

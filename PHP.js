@@ -333,11 +333,12 @@ PHP.Utils.QueryString = function( str ) {
  */
 
 
-PHP.Halt = function( msg, level, lineAppend  ) {
+PHP.Halt = function( msg, level, lineAppend, catchable  ) {
     
     this.msg = msg;
     this.level = level;
     this.lineAppend = lineAppend;
+    this.catchable = catchable;
     
 };
 PHP.Compiler = function( AST, file ) {
@@ -2220,12 +2221,15 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     func();
                 }
             } else if ( variable instanceof PHP.Halt && /^Exception$/i.test( type )) {
-                console.log( variable, type );
-                 
                 
-                $( name, new (this.$Class.Get( "Exception"  ))( this, new PHP.VM.Variable( variable.msg )  ) );
-                caught = true;
-                func();
+                if ( variable.catchable !== true ) {
+                
+                    $( name, new (this.$Class.Get( "Exception"  ))( this, new PHP.VM.Variable( variable.msg )  ) );
+                    caught = true;
+                    func();
+                } else {
+                    throw variable;
+                }
             }
             return methods;
 
@@ -2254,7 +2258,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         errorHandler = error_handler;
     };
 
-    MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend, strict ) {
+    MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend, strict, catchable ) {
 
         var C = PHP.Constants,
         $GLOBAL = this[ COMPILER.GLOBAL ],
@@ -2306,7 +2310,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     switch ( level ) {
                         case C.E_ERROR:
                             this[ COMPILER.DISPLAY_HANDLER ] = false; 
-                            throw new PHP.Halt( msg, level, lineAppend );
+                            throw new PHP.Halt( msg, level, lineAppend, catchable );
                             return;
                             break;
                         case C.E_RECOVERABLE_ERROR:
@@ -4736,13 +4740,22 @@ PHP.Modules.prototype.printf = function( format ) {
         
     if (format instanceof PHP.VM.VariableProto) {
         
+        
+
+        
         var value = format[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
+        
+                if (format[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ] === "stdClass") {
+            this.ENV[ COMPILER.ERROR ]("Object of class stdClass to string conversion", PHP.Constants.E_NOTICE, true );    
+            value = "Object";
+        } 
+        
         if ( format[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
             
             
             // todo fix to make more specific
             Array.prototype.slice.call( arguments, 1 ).forEach( function( item ) {
-               value = value.replace(/%./, item[ COMPILER.VARIABLE_VALUE ] );
+                value = value.replace(/%./, item[ COMPILER.VARIABLE_VALUE ] );
             });
             this.$ob( value );
                 
@@ -13861,8 +13874,15 @@ PHP.VM.Variable = function( arg ) {
                 // class
                 // check for __toString();
            
+           
+           
                 if ( typeof value[PHP.VM.Class.METHOD + __toString.toLowerCase() ] === "function" ) {
+                    try {
                     var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
+                    } catch( e ) {
+                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must not throw an exception", PHP.Constants.E_ERROR, true, false, true );    
+                        return new PHP.VM.Variable("");
+                    }
                     if (val[ this.TYPE ] !==  this.STRING) {
                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
                         return new PHP.VM.Variable("");
@@ -13872,7 +13892,10 @@ PHP.VM.Variable = function( arg ) {
                 //  return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
                 } else {
                     this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to string", PHP.Constants.E_RECOVERABLE_ERROR, true );    
-                    return new PHP.VM.Variable("")
+                    
+
+                    
+                    return new PHP.VM.Variable("");
                 }
                      
             }

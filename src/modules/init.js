@@ -354,12 +354,15 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     func();
                 }
             } else if ( variable instanceof PHP.Halt && /^Exception$/i.test( type )) {
-                console.log( variable, type );
-                 
                 
-                $( name, new (this.$Class.Get( "Exception"  ))( this, new PHP.VM.Variable( variable.msg )  ) );
-                caught = true;
-                func();
+                if ( variable.catchable !== true ) {
+                
+                    $( name, new (this.$Class.Get( "Exception"  ))( this, new PHP.VM.Variable( variable.msg )  ) );
+                    caught = true;
+                    func();
+                } else {
+                    throw variable;
+                }
             }
             return methods;
 
@@ -388,7 +391,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         errorHandler = error_handler;
     };
 
-    MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend, strict ) {
+    MODULES[ COMPILER.ERROR ] = function( msg, level, lineAppend, strict, catchable ) {
 
         var C = PHP.Constants,
         $GLOBAL = this[ COMPILER.GLOBAL ],
@@ -440,7 +443,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                     switch ( level ) {
                         case C.E_ERROR:
                             this[ COMPILER.DISPLAY_HANDLER ] = false; 
-                            throw new PHP.Halt( msg, level, lineAppend );
+                            throw new PHP.Halt( msg, level, lineAppend, catchable );
                             return;
                             break;
                         case C.E_RECOVERABLE_ERROR:
