@@ -182,6 +182,7 @@ var files = {
                 ReflectionException: "js",
                 ReflectionMethod: "js",
                 ReflectionProperty: "js",
+                __PHP_Incomplete_Class: "js",
                 stdClass: "js"
             },
             interfaces: {
