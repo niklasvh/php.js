@@ -67,10 +67,11 @@ PHP.Compiler.prototype.Node_Expr_AssignDiv = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
-    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " += " + this.source( action.expr );
+    var src = this.source( action.variable ) + "." + this.ASSIGN_CONCAT + "(" + this.source( action.expr ) + ")";
+    /*
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
-    }
+    }*/
     return src;
 };
 

@@ -473,6 +473,8 @@ COMPILER.ASSIGN_PLUS = "_Plus";
 
 COMPILER.ASSIGN_MINUS = "_Minus";
 
+COMPILER.ASSIGN_CONCAT = "_Concat";
+
 COMPILER.NEG = "$Neg";
 
 COMPILER.ADD = "$Add";
@@ -722,10 +724,11 @@ PHP.Compiler.prototype.Node_Expr_AssignDiv = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
-    var src = this.source( action.variable ) + "." + this.VARIABLE_VALUE + " += " + this.source( action.expr );
+    var src = this.source( action.variable ) + "." + this.ASSIGN_CONCAT + "(" + this.source( action.expr ) + ")";
+    /*
     if (!/Node_Expr_(Plus|Mul|Div|Minus|BitwiseOr|BitwiseAnd)/.test(action.expr.type)) {
         src += "." + this.VARIABLE_VALUE;
-    }
+    }*/
     return src;
 };
 
@@ -13150,6 +13153,23 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( comb
     return new PHP.VM.Variable( this[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ] + "" + combinedVariable[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ] );
 };
 
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_CONCAT ] = function( combinedVariable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    this.NO_ERROR = true;
+    
+    var val = this[ COMPILER.VARIABLE_VALUE ]; // trigger get
+    
+    if ( this[ this.TYPE ] === this.NULL ) {
+        this[ COMPILER.VARIABLE_VALUE ] = "" + combinedVariable[ COMPILER.VARIABLE_VALUE ];
+    } else {
+        this[ COMPILER.VARIABLE_VALUE ] = val + "" + combinedVariable[ COMPILER.VARIABLE_VALUE ];
+    }
+    this.NO_ERROR = false;
+    return this;
+};
+
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_PLUS ] = function( combinedVariable ) {
     
     var COMPILER = PHP.Compiler.prototype,
@@ -13331,7 +13351,7 @@ PHP.VM.Variable = function( arg ) {
                             return ( variable[ PHP.VM.Class.KILLED ] === true );
                         })) {
                             // all variable instances have been killed, can safely destruct
-                            console.log( this.TMPCTX );
+                       
                             value[ COMPILER.CLASS_DESTRUCT ]( this.TMPCTX );
                         }
                         
@@ -13383,6 +13403,7 @@ PHP.VM.Variable = function( arg ) {
     }.bind( this ); // something strange going on with context in node.js?? iterators_2.phpt
     
     this.rand = Math.random();
+    this.NO_ERROR = false;
     setValue.call( this, arg );
     
     this[ COMPILER.VARIABLE_CLONE ] = function() {
@@ -13433,7 +13454,14 @@ PHP.VM.Variable = function( arg ) {
     };
 
     this[ COMPILER.POST_INC ] = function() {
+        this.NO_ERROR = true;
         var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
+        
+        if (this[ this.DEFINED ] !== true) {
+            this[ COMPILER.VARIABLE_VALUE ] = 0;
+        }
+        
+        this.NO_ERROR = false;
         POST_MOD++;
         this.POST_MOD = POST_MOD;
         return this;
@@ -13463,16 +13491,29 @@ PHP.VM.Variable = function( arg ) {
     // property get proxy
     this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
         var val, $this = this;
-    
+        
         if ( this[ this.REFERRING ] !== undefined ) {
             $this = this [ this.REFERRING ];
         }
         
-        if ($this[ this.TYPE ] === this.NULL ) {
-            if ( $this[ this.PROPERTY ] !== true ) {
-                this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
+        if ($this[ this.TYPE ] !== this.OBJECT){
+            
+             val = new (this.ENV.$Class.Get("stdClass"))( this );
+            
+            if ($this[ this.TYPE ] === this.NULL || 
+                ($this[ this.TYPE ] === this.BOOL && $this[ COMPILER.VARIABLE_VALUE ] === false) || 
+                ($this[ this.TYPE ] === this.STRING && $this[ COMPILER.VARIABLE_VALUE ].length === 0)
+                ) {
+                if ( $this[ this.PROPERTY ] !== true ) {
+                    this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
+                }
+                $this[ COMPILER.VARIABLE_VALUE ] = val;
+            } else {
+                this.ENV[ COMPILER.ERROR ]("Attempt to assign property of non-object", PHP.Constants.E_WARNING, true );
+                
+                
             }
-            $this[ COMPILER.VARIABLE_VALUE ] = val = new (this.ENV.$Class.Get("stdClass"))( this );
+           
         } else {
             val =  $this[ COMPILER.VARIABLE_VALUE ];
         }
@@ -13510,8 +13551,9 @@ PHP.VM.Variable = function( arg ) {
                     
                     return returning;
                 } else {
- 
-                    this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_NOTICE, true );    
+                    if (this.NO_ERROR !==  true ) {
+                        this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_NOTICE, true );    
+                    }    
                 }
             }
             if ( this[ this.REFERRING ] === undefined ) {
