@@ -83,7 +83,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ COMPILER.TYPE_CHECK ]( $( arg.name ), arg[ COMPILER.PROPERTY_TYPE ], arg[ COMPILER.PROPERTY_DEFAULT ], index, className + "::" + realName );
                 }   
                 
-*/
+                 */
                 
 
             });
@@ -191,7 +191,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             var callConstruct = function( $this, name, args, ctx ) {
                 /*
            console.log( this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ], name, checkType( this[ methodTypePrefix + name ], PRIVATE ));
-                */
+                 */
                 
                 if ( checkType( $this[ methodTypePrefix + name ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + $this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ] + "::" + name + "() from invalid context", PHP.Constants.E_ERROR, true );
@@ -285,22 +285,21 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
          */ 
         methods [ COMPILER.CLASS_CONSTANT ] = function( constantName, constantValue ) {
             
-            if (  Class.prototype[ PHP.VM.Class.CONSTANT + className  + "$" + constantName] !== undefined ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redefine class constant " + className + "::" + constantName, PHP.Constants.E_ERROR, true );    
-            }
-            
-            
             if ( classType === PHP.VM.Class.INTERFACE ) {
-                
                 Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){            
                     if (ENV.$Class.Get( interfaceName ).prototype[ PHP.VM.Class.CONSTANT + constantName ] !== undefined ) {
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot inherit previously-inherited or override constant " + constantName + " from interface " + interfaceName, PHP.Constants.E_ERROR, true );    
                     }
                   
                 }, this);
-               
+
+            }
+        
+            if (  Class.prototype[ PHP.VM.Class.CONSTANT + className  + "$" + constantName] !== undefined ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redefine class constant " + className + "::" + constantName, PHP.Constants.E_ERROR, true );    
             }
             
+     
             
             if ( undefinedConstants[ className + "::" + constantName] !== undefined ) {
                 
@@ -380,7 +379,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 Object.defineProperty( Class.prototype,  propertyPrefix + propertyName, {
                     value: propertyDefault
                 });
-                */
+                 */
                 Object.defineProperty( Class.prototype,  PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName, {
                     value: propertyDefault
                 });
@@ -590,6 +589,29 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                   
                         var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;
                         Object.keys( interfaceProto ).forEach(function( item ){
+                            
+
+                            
+                            
+                            if ( item.substring( 0, PHP.VM.Class.CONSTANT.length ) === PHP.VM.Class.CONSTANT ) {
+                                
+                                if ( Class.prototype[ item ] !== undefined ) {
+                                    Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName2 ){    
+                                        if ( interfaceName2 === interfaceName ) {
+                                            if (ENV.$Class.Get( interfaceName2 ).prototype[ item ] !== undefined ) {
+                                                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot inherit previously-inherited or override constant " + item.substring( PHP.VM.Class.CONSTANT.length ) + " from interface " + interfaceName2, PHP.Constants.E_ERROR, true );    
+                                            }
+                                        }
+                                    }, this);
+                                }
+                                
+                                methods [ COMPILER.CLASS_CONSTANT ]( item.substring( PHP.VM.Class.CONSTANT.length ), interfaceProto[ item ] );
+                            }
+                            
+
+
+
+                            // method checks
                             if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
                         
                                 var methodName = item.substring( methodPrefix.length ),
