@@ -76,7 +76,9 @@ PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
-
+    if ( action.refVar.type === "Node_Expr_New") {
+        this.DEPRECATED.push(["Assigning the return value of new by reference is deprecated", action.attributes.startLine]);
+    }
     var src = this.source( action.variable ) + "." + PHP.VM.Variable.prototype.REF + "(" + this.source( action.refVar ) + ")";
     console.log( action );
     return src;

@@ -5,6 +5,8 @@ PHP.Compiler = function( AST, file ) {
     this.src = "";
     this.FOREACH_COUNT = 0;
     
+    this.DEPRECATED = [];
+    
     this.src += this.stmts( AST, true );
     
     /*
@@ -18,6 +20,14 @@ PHP.Compiler = function( AST, file ) {
     if ( this.FATAL_ERROR !== undefined ) {
         this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", ' +((  this.ERROR_TYPE === undefined ) ? "PHP.Constants.E_ERROR" : this.ERROR_TYPE ) + ');';
     }
+    var tmp = "";
+    this.DEPRECATED.forEach(function( error ){
+        
+      tmp +=   'this[ PHP.Compiler.prototype.ERROR ]("' + error[ 0 ] + ' in ' + this.file + ' on line ' + error[ 1 ] + '", PHP.Constants.E_DEPRECATED);';
+    
+    }, this);
+    
+    this.src = tmp + this.src;
     
     this.INSIDE_METHOD = false;
 

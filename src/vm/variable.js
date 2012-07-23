@@ -410,6 +410,11 @@ PHP.VM.Variable = function( arg ) {
     };
     
     this [ this.REF ] = function( variable ) {
+       
+        if ( this[ this.REFERRING ] !== undefined ) {
+             console.log( variable );
+        }
+        
         this[ this.REFERRING ] = variable;
         this[ this.DEFINED ] = true;
         

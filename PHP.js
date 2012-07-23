@@ -346,6 +346,8 @@ PHP.Compiler = function( AST, file ) {
     this.src = "";
     this.FOREACH_COUNT = 0;
     
+    this.DEPRECATED = [];
+    
     this.src += this.stmts( AST, true );
     
     /*
@@ -359,6 +361,14 @@ PHP.Compiler = function( AST, file ) {
     if ( this.FATAL_ERROR !== undefined ) {
         this.src = 'this[ PHP.Compiler.prototype.ERROR ]("' + this.FATAL_ERROR + '", ' +((  this.ERROR_TYPE === undefined ) ? "PHP.Constants.E_ERROR" : this.ERROR_TYPE ) + ');';
     }
+    var tmp = "";
+    this.DEPRECATED.forEach(function( error ){
+        
+      tmp +=   'this[ PHP.Compiler.prototype.ERROR ]("' + error[ 0 ] + ' in ' + this.file + ' on line ' + error[ 1 ] + '", PHP.Constants.E_DEPRECATED);';
+    
+    }, this);
+    
+    this.src = tmp + this.src;
     
     this.INSIDE_METHOD = false;
 
@@ -733,7 +743,9 @@ PHP.Compiler.prototype.Node_Expr_AssignConcat = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
-
+    if ( action.refVar.type === "Node_Expr_New") {
+        this.DEPRECATED.push(["Assigning the return value of new by reference is deprecated", action.attributes.startLine]);
+    }
     var src = this.source( action.variable ) + "." + PHP.VM.Variable.prototype.REF + "(" + this.source( action.refVar ) + ")";
     console.log( action );
     return src;
@@ -2318,6 +2330,14 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             }
                             return;
                             break;
+                        case C.E_DEPRECATED:
+                            if (checkType("E_DEPRECATED")) {
+                                this.echo( new PHP.VM.Variable("\Deprecated: " + msg + lineAppend + "\n"));
+                                return;
+                            }
+
+                            break;
+                            
                         default:
                             this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + lineAppend + "\n"));
                             return;
@@ -6083,7 +6103,7 @@ PHP.Modules.prototype.var_dump = function() {
     VAR = PHP.VM.Variable.prototype;
     
     var $dump = function( argument, indent ) {
-     
+     console.log( argument );
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ],
         ARG_TYPE = argument[ VAR.TYPE ]; // trigger get for undefined
@@ -9162,7 +9182,7 @@ var T_NS_SEPARATOR = 380;
     };
 
     PHP.Parser.prototype.yyn179 = function ( attributes ) {
-         this.yyval = this.Node_Expr_Assign(this.yyastk[ this.stackPos-(4-1) ], this.yyastk[ this.stackPos-(4-4) ], attributes); 
+         this.yyval = this.Node_Expr_AssignRef(this.yyastk[ this.stackPos-(4-1) ], this.yyastk[ this.stackPos-(4-4) ], attributes); 
     };
 
     PHP.Parser.prototype.yyn180 = function ( attributes ) {
@@ -13469,6 +13489,11 @@ PHP.VM.Variable = function( arg ) {
     };
     
     this [ this.REF ] = function( variable ) {
+       
+        if ( this[ this.REFERRING ] !== undefined ) {
+             console.log( variable );
+        }
+        
         this[ this.REFERRING ] = variable;
         this[ this.DEFINED ] = true;
         

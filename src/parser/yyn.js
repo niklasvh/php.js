@@ -1613,7 +1613,7 @@ var T_NS_SEPARATOR = 380;
     };
 
     PHP.Parser.prototype.yyn179 = function ( attributes ) {
-         this.yyval = this.Node_Expr_Assign(this.yyastk[ this.stackPos-(4-1) ], this.yyastk[ this.stackPos-(4-4) ], attributes); 
+         this.yyval = this.Node_Expr_AssignRef(this.yyastk[ this.stackPos-(4-1) ], this.yyastk[ this.stackPos-(4-4) ], attributes); 
     };
 
     PHP.Parser.prototype.yyn180 = function ( attributes ) {
