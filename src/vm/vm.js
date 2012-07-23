@@ -134,6 +134,7 @@ PHP.VM = function( src, opts ) {
 
                     
                 } else {
+                    
                     return methods.Get(  className, state )[ COMPILER.CLASS_CONSTANT_FETCH ]( state, constantName );
                 }
                 

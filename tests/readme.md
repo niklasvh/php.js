@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 556 out of 671 (82.9%)
+Passed 557 out of 671 (83%)
 
 Failed tests:
 
@@ -8,7 +8,6 @@ Failed tests:
  - tests/php/basic/023.phpt
  - tests/php/basic/bug20539.phpt
  - tests/php/classes/inheritance_007.phpt
- - tests/php/classes/interface_constant_inheritance_001.phpt
  - tests/php/classes/interface_constant_inheritance_002.phpt
  - tests/php/classes/interface_constant_inheritance_003.phpt
  - tests/php/classes/new_001.phpt

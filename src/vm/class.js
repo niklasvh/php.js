@@ -55,7 +55,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 var arg = $( argObject.name );
             
                 PHP.Utils.ArgumentHandler( ENV, arg, argObject, args[ index ], index, className + "::" + realName );
-           /*
+            /*
                 
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
@@ -287,6 +287,18 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             if (  Class.prototype[ PHP.VM.Class.CONSTANT + className  + "$" + constantName] !== undefined ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redefine class constant " + className + "::" + constantName, PHP.Constants.E_ERROR, true );    
+            }
+            
+            
+            if ( classType === PHP.VM.Class.INTERFACE ) {
+                
+                Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){            
+                    if (ENV.$Class.Get( interfaceName ).prototype[ PHP.VM.Class.CONSTANT + constantName ] !== undefined ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot inherit previously-inherited or override constant " + constantName + " from interface " + interfaceName, PHP.Constants.E_ERROR, true );    
+                    }
+                  
+                }, this);
+               
             }
             
             
@@ -674,10 +686,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " must implement interface Traversable as part of either Iterator or IteratorAggregate", PHP.Constants.E_ERROR, true );
             } 
             
+
+            
             if ( interfaces.indexOf( interfaceName ) === -1 ) {
                 // only add interface if it isn't present already
                 interfaces.push( interfaceName );
             }
+            
+            
         }
         
         if (opts.Implements !== undefined || classType === PHP.VM.Class.INTERFACE) {
