@@ -5,13 +5,12 @@
  */
 
 ( function( MODULES ){
-    MODULES.set_time_limit = function( varname, newvalue ) {
+    MODULES.set_time_limit = function(  newvalue ) {
         
         var COMPILER = PHP.Compiler.prototype;
     
-        setTimeout(function(){
-            console.log('sup');
-            this[ COMPILER.ERROR ]( "Maximum execution time of 1 second exceeded", PHP.Constants.E_CORE, true ); 
-        }.bind(this), 1000);
+    
+        this.$ini.max_execution_time = newvalue[ COMPILER.VARIABLE_VALUE ];
+     
     };
 })( PHP.Modules.prototype );

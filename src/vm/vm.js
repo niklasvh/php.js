@@ -231,7 +231,23 @@ PHP.VM = function( src, opts ) {
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
     });
     
+            
+                ENV[ COMPILER.TIMER ] = function(){
+                    if ( Date.now() > this.start + (this.$ini.max_execution_time - 0)*1000) {
+                        
+                        this.$obflush.call( ENV );  
+                        this.$shutdown.call( ENV );
+                        
+                        throw Error;
+                        throw Error;
+                        throw Error;
+                        throw Error;
+                    }
+                }.bind(this);
+    
     this.Run = function() {
+        this.start = Date.now();
+        
         if ( false ) {
     
   
@@ -241,6 +257,8 @@ PHP.VM = function( src, opts ) {
      
         } else {
             try {
+
+                
                 var exec = new Function( "$$", "$", "ENV", "$Static", src  );
                 exec.call(this, $$, $, ENV, staticHandler);
                 this.$obflush.call( ENV );  

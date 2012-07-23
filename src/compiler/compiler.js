@@ -91,7 +91,6 @@ COMPILER.source = function( action ) {
     }
      
     if ( Array.isArray( action )) {
-        console.log( action );
         return this[ action[0].type ]( action[0] );
     }
   
@@ -105,6 +104,8 @@ COMPILER.NAV = "$NaV"; // not a variable;
 COMPILER.FILESYSTEM = "$FS";
 
 COMPILER.RESOURCES = "\π";
+
+COMPILER.TIMER = "$Timer";
 
 COMPILER.ENV = "ENV";
 

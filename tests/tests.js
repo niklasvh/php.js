@@ -135,7 +135,8 @@ PHP_Tests.prototype.buildTest = function( path, callback ) {
             SERVER: {
                 SCRIPT_FILENAME: path.substring(0, path.length - 1)
             //    SCRIPT_FILENAME: "%s"
-            }
+            },
+            files: files
         };
                     
         

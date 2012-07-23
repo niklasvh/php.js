@@ -51,22 +51,57 @@ var PHP = function( code, opts ) {
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
-    this.vm = new PHP.VM( this.compiler.src, opts );
+
+    if ( false ) {
+        var thread = new Worker("thread.js");
+    
+        thread.postMessage({
+            type: "import", 
+            content: opts.files
+        });
+        
+        thread.postMessage({
+            type: "run",
+            content: [this.compiler.src, opts]
+        })
+        
+        setTimeout(function(){
+            thread.postMessage({
+                type: "stop"
+            })
+        }, opts.ini.max_execution_time);
+        
+        
+        thread.addEventListener('message', function(e) {
+            switch( e.data.type ) {
+                case "complete":
+                    this.vm = e.data.content;
+                    complete(this);
+                    break;
+                    default:
+                console.log(e.data);
+            }
+            
+        }, false);
+    
+    } else {
+    
+        this.vm = new PHP.VM( this.compiler.src, opts );
     
     
-    if (RAW_POST !== undefined ) {
-        RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
-    }
+        if (RAW_POST !== undefined ) {
+            RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
+        }
     
-    /*
+        /*
     if (rawError !== undefined ) {
         this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING ); 
     }
            */
-    
-    this.vm.Run();
-    
-    
+
+        this.vm.Run();
+        
+    }
     
    
     

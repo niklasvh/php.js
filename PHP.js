@@ -51,22 +51,57 @@ var PHP = function( code, opts ) {
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
     console.log(this.compiler.src);
-    this.vm = new PHP.VM( this.compiler.src, opts );
+
+    if ( false ) {
+        var thread = new Worker("thread.js");
+    
+        thread.postMessage({
+            type: "import", 
+            content: opts.files
+        });
+        
+        thread.postMessage({
+            type: "run",
+            content: [this.compiler.src, opts]
+        })
+        
+        setTimeout(function(){
+            thread.postMessage({
+                type: "stop"
+            })
+        }, opts.ini.max_execution_time);
+        
+        
+        thread.addEventListener('message', function(e) {
+            switch( e.data.type ) {
+                case "complete":
+                    this.vm = e.data.content;
+                    complete(this);
+                    break;
+                    default:
+                console.log(e.data);
+            }
+            
+        }, false);
+    
+    } else {
+    
+        this.vm = new PHP.VM( this.compiler.src, opts );
     
     
-    if (RAW_POST !== undefined ) {
-        RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
-    }
+        if (RAW_POST !== undefined ) {
+            RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
+        }
     
-    /*
+        /*
     if (rawError !== undefined ) {
         this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING ); 
     }
            */
-    
-    this.vm.Run();
-    
-    
+
+        this.vm.Run();
+        
+    }
     
    
     
@@ -494,7 +529,6 @@ COMPILER.source = function( action ) {
     }
      
     if ( Array.isArray( action )) {
-        console.log( action );
         return this[ action[0].type ]( action[0] );
     }
   
@@ -508,6 +542,8 @@ COMPILER.NAV = "$NaV"; // not a variable;
 COMPILER.FILESYSTEM = "$FS";
 
 COMPILER.RESOURCES = "\π";
+
+COMPILER.TIMER = "$Timer";
 
 COMPILER.ENV = "ENV";
 
@@ -1500,10 +1536,15 @@ PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
     
     src += "; "
  
-   // if ( !Array.isArray(action.loop) || action.loop.length !== 1 ) { // change
+    // if ( !Array.isArray(action.loop) || action.loop.length !== 1 ) { // change
+   
+    if ( action.loop.length > 0 ) {
         src += this.source( action.loop ) + "." + this.VARIABLE_VALUE;
-   // }
-    src += " ) {\n";
+    }
+    // }
+    src += " ) { ";
+    
+    src += this.CTX + this.TIMER + "();\n";
     
     src += this.stmts( action.stmts );
     
@@ -4176,14 +4217,13 @@ PHP.Modules.prototype.getenv = function( name ) {
  */
 
 ( function( MODULES ){
-    MODULES.set_time_limit = function( varname, newvalue ) {
+    MODULES.set_time_limit = function(  newvalue ) {
         
         var COMPILER = PHP.Compiler.prototype;
     
-        setTimeout(function(){
-            console.log('sup');
-            this[ COMPILER.ERROR ]( "Maximum execution time of 1 second exceeded", PHP.Constants.E_CORE, true ); 
-        }.bind(this), 1000);
+    
+        this.$ini.max_execution_time = newvalue[ COMPILER.VARIABLE_VALUE ];
+     
     };
 })( PHP.Modules.prototype );
 /* 
@@ -11818,7 +11858,23 @@ PHP.VM = function( src, opts ) {
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
     });
     
+            
+                ENV[ COMPILER.TIMER ] = function(){
+                    if ( Date.now() > this.start + (this.$ini.max_execution_time - 0)*1000) {
+                        
+                        this.$obflush.call( ENV );  
+                        this.$shutdown.call( ENV );
+                        
+                        throw Error;
+                        throw Error;
+                        throw Error;
+                        throw Error;
+                    }
+                }.bind(this);
+    
     this.Run = function() {
+        this.start = Date.now();
+        
         if ( false ) {
     
   
@@ -11828,6 +11884,8 @@ PHP.VM = function( src, opts ) {
      
         } else {
             try {
+
+                
                 var exec = new Function( "$$", "$", "ENV", "$Static", src  );
                 exec.call(this, $$, $, ENV, staticHandler);
                 this.$obflush.call( ENV );  

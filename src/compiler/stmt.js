@@ -152,10 +152,15 @@ PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
     
     src += "; "
  
-   // if ( !Array.isArray(action.loop) || action.loop.length !== 1 ) { // change
+    // if ( !Array.isArray(action.loop) || action.loop.length !== 1 ) { // change
+   
+    if ( action.loop.length > 0 ) {
         src += this.source( action.loop ) + "." + this.VARIABLE_VALUE;
-   // }
-    src += " ) {\n";
+    }
+    // }
+    src += " ) { ";
+    
+    src += this.CTX + this.TIMER + "();\n";
     
     src += this.stmts( action.stmts );
     

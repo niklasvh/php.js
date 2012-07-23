@@ -32,7 +32,7 @@ http.createServer(function (req, res) {
     var urlParse = url.parse(req.url, true);
 
 
-    if (urlParse.path.substring(0,5) === "/cfg/" || urlParse.path.substring(0,5) === "/src/" || urlParse.path.substring(0,10) === "/adapters/" || urlParse.path.substring(0,7).toLowerCase() === "/tests/") {
+    if (urlParse.path === "/thread.js" || urlParse.path.substring(0,5) === "/cfg/" || urlParse.path.substring(0,5) === "/src/" || urlParse.path.substring(0,10) === "/adapters/" || urlParse.path.substring(0,7).toLowerCase() === "/tests/") {
         res.writeHead(200, {
             'Content-Type': 'application/javascript'
         });
