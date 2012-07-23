@@ -122,13 +122,15 @@ var files = {
                 print: "js",
                 printf: "js",
                 setlocale: "js",
+                sprintf: "js",
                 str_repeat: "js",
                 str_replace: "js",
                 str_rot13: "js",
                 strlen: "js",
                 strncmp: "js",
                 strtolower: "js",
-                strtoupper: "js"
+                strtoupper: "js",
+                trim: "js"
             },
             tokenizer: {
                 constants: "js",

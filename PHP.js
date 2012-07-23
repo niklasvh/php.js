@@ -4802,6 +4802,39 @@ PHP.Modules.prototype.setlocale = function( category ) {
     
 };/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 23.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.sprintf = function( format ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+ 
+        
+    if (format instanceof PHP.VM.VariableProto) {
+        
+        var value = format[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
+        if ( format[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
+            
+            console.log( value );
+            // todo fix to make more specific
+            Array.prototype.slice.call( arguments, 1 ).forEach( function( item ) {
+               value = value.replace(/%./, item[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ] );
+            });
+            
+            return new PHP.VM.Variable( value );
+          
+                
+        }
+            
+    } 
+        
+
+    
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 18.7.2012 
 * @website http://hertzen.com
  */
@@ -4915,6 +4948,25 @@ PHP.Modules.prototype.strtoupper = function( str ) {
     COMPILER = PHP.Compiler.prototype;
     
     return new PHP.VM.Variable( str[ COMPILER.VARIABLE_VALUE ].toUpperCase() );
+};/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 23.7.2012 
+* @website http://hertzen.com
+ */
+
+
+
+PHP.Modules.prototype.trim = function( variable ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    if ( variable[ VARIABLE.TYPE ] !== VARIABLE.STRING ) {
+        variable = variable[ VARIABLE.CAST_STRING ];
+    }
+    console.log( variable );
+    return new PHP.VM.Variable( variable[ COMPILER.VARIABLE_VALUE ].toString().trim() );
+    
+    
 };
 
 
@@ -13526,7 +13578,7 @@ PHP.VM.Variable = function( arg ) {
     this [ this.REF ] = function( variable ) {
        
         if ( this[ this.REFERRING ] !== undefined ) {
-             console.log( variable );
+            console.log( variable );
         }
         
         this[ this.REFERRING ] = variable;
@@ -13597,7 +13649,7 @@ PHP.VM.Variable = function( arg ) {
         
         if ($this[ this.TYPE ] !== this.OBJECT){
             
-             val = new (this.ENV.$Class.Get("stdClass"))( this );
+            val = new (this.ENV.$Class.Get("stdClass"))( this );
             
             if ($this[ this.TYPE ] === this.NULL || 
                 ($this[ this.TYPE ] === this.BOOL && $this[ COMPILER.VARIABLE_VALUE ] === false) || 
@@ -13808,13 +13860,14 @@ PHP.VM.Variable = function( arg ) {
             if ( value instanceof PHP.VM.ClassPrototype && value[ COMPILER.CLASS_NAME ] !== PHP.VM.Array.prototype.CLASS_NAME  ) {
                 // class
                 // check for __toString();
-                
-                if ( typeof value[PHP.VM.Class.METHOD + __toString ] === "function" ) {
+           
+                if ( typeof value[PHP.VM.Class.METHOD + __toString.toLowerCase() ] === "function" ) {
                     var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
                     if (val[ this.TYPE ] !==  this.STRING) {
                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
                         return new PHP.VM.Variable("");
                     }
+                    val[ this.VARIABLE_TYPE ] = this.FUNCTION;
                     return val;
                 //  return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
                 } else {
@@ -13926,6 +13979,10 @@ PHP.VM.Variable = function( arg ) {
                 
                 var $this = this;
                 
+                if ( variable instanceof PHP.VM.Variable && variable[ this.TYPE ] === this.OBJECT ) {
+                    this.ENV[ COMPILER.ERROR ]("Illegal offset type", PHP.Constants.E_WARNING, true );    
+                    return new PHP.VM.Variable();
+                }
                 
                 if ( typeof this[this.REGISTER_GETTER ] === "function" ) {
                     var returned = this[ this.REGISTER_GETTER ]();
