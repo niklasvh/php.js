@@ -387,6 +387,11 @@ PHP.VM.Variable = function( arg ) {
     setValue.call( this, arg );
     
     this[ COMPILER.VARIABLE_CLONE ] = function() {
+        var variable;
+        
+        if ( this[ this.IS_REF ]) {
+             return this;
+         }
         
         switch( this[ this.TYPE ] ) {
             case this.NULL:
@@ -394,18 +399,25 @@ PHP.VM.Variable = function( arg ) {
             case this.INT:
             case this.FLOAT:
             case this.STRING:
-                return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );               
+                 variable = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );               
                 break;
             case this.OBJECT:
             case this.RESOURCE:
                 return this;
             case this.ARRAY:
-                return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  ) )
+                variable = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  ) )
                 break;
             default:
                 console.log("Unknown variable type cloned");
                 return this;
         }
+       
+         variable[ this.REFERRING ] = this[ this.REFERRING ];
+         
+        
+        
+        
+        return variable;
         
     };
     

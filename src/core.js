@@ -200,7 +200,14 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
         if ( value !== undefined ) {
             
             if ( value instanceof PHP.VM.VariableProto) {
-                arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.VARIABLE_VALUE ];
+              
+                if ( value[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+                    // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
+                    arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
+              
+                } else {
+                    arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.VARIABLE_VALUE ];
+                }
             } else {
                 arg[ COMPILER.VARIABLE_VALUE ] = value;
             }

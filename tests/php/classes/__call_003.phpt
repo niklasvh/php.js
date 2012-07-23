@@ -28,6 +28,6 @@ array(1) {
 }
 array(1) {
   [0]=>
-  &string(7) "changed"
+  %Sstring(7) "changed"
 }
 

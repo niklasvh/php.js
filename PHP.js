@@ -200,7 +200,14 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
         if ( value !== undefined ) {
             
             if ( value instanceof PHP.VM.VariableProto) {
-                arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.VARIABLE_VALUE ];
+              
+                if ( value[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
+                    // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
+                    arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
+              
+                } else {
+                    arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.VARIABLE_VALUE ];
+                }
             } else {
                 arg[ COMPILER.VARIABLE_VALUE ] = value;
             }
@@ -13632,6 +13639,11 @@ PHP.VM.Variable = function( arg ) {
     setValue.call( this, arg );
     
     this[ COMPILER.VARIABLE_CLONE ] = function() {
+        var variable;
+        
+        if ( this[ this.IS_REF ]) {
+             return this;
+         }
         
         switch( this[ this.TYPE ] ) {
             case this.NULL:
@@ -13639,18 +13651,25 @@ PHP.VM.Variable = function( arg ) {
             case this.INT:
             case this.FLOAT:
             case this.STRING:
-                return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );               
+                 variable = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );               
                 break;
             case this.OBJECT:
             case this.RESOURCE:
                 return this;
             case this.ARRAY:
-                return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  ) )
+                variable = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  ) )
                 break;
             default:
                 console.log("Unknown variable type cloned");
                 return this;
         }
+       
+         variable[ this.REFERRING ] = this[ this.REFERRING ];
+         
+        
+        
+        
+        return variable;
         
     };
     
