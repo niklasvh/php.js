@@ -1150,9 +1150,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         if (!(ctx instanceof PHP.VM.ClassPrototype) && checkType( this[ propertyTypePrefix + propertyName ], PRIVATE )) {
                             ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access private property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
                         } 
+                        
+                        if (checkType( this[ propertyTypePrefix + propertyName ], PROTECTED ) && ctx instanceof PHP.VM.ClassPrototype) {
+                            // no change?
+                        } else {
+                             Object.getPrototypeOf(this)[ propertyTypePrefix + propertyName ] = 1;
+                        }
                     
-                    
-                        Object.getPrototypeOf(this)[ propertyTypePrefix + propertyName ] = 1;
+                       
                     }
                 
                     if ( ctx instanceof PHP.VM.ClassPrototype && this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] !== undefined ) {
@@ -1167,9 +1172,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
                 if ( this[ propertyPrefix + propertyName ] !== undefined ) {
                     ret = checkPermissions( propertyPrefix );
+                    console.log( this[ propertyTypePrefix + propertyName ], propertyName, ctx );
                     if (ret !== undefined ) {
                         return ret;
                     }
+             
                 }
                 
                 if ( checkType( this[ propertyTypePrefix + propertyName ], STATIC ) ) {

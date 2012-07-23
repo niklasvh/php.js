@@ -13,7 +13,7 @@ PHP.Modules.prototype.var_dump = function() {
     VAR = PHP.VM.Variable.prototype;
     
     var $dump = function( argument, indent ) {
-     console.log( argument );
+     
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ],
         ARG_TYPE = argument[ VAR.TYPE ]; // trigger get for undefined
@@ -66,7 +66,7 @@ PHP.Modules.prototype.var_dump = function() {
             if( ARG_TYPE === VAR.OBJECT ) {
                 argument = value;
             }
-
+console.log( argument );
             str += "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
             
            
