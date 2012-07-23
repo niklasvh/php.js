@@ -4159,8 +4159,9 @@ PHP.Modules.prototype.assert = function( assertion ) {
 
 
 PHP.Modules.prototype.ini_get = function( varname ) {
-    var old = this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ];
-    
+    var COMPILER = PHP.Compiler.prototype,
+    old = this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ];
+   
     if (old === undefined ) {
         return new PHP.VM.Variable( false );
     } else {
@@ -4172,11 +4173,30 @@ PHP.Modules.prototype.ini_get = function( varname ) {
 };
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
+* @created 15.7.2012 
+* @website http://hertzen.com
+ */
+
+
+PHP.Modules.prototype.ini_restore = function( varname ) {
+  var COMPILER = PHP.Compiler.prototype;
+    this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ] = Object.getPrototypeOf(this.$ini)[ varname[ COMPILER.VARIABLE_VALUE ] ];
+    
+
+    return new PHP.VM.Variable();
+    
+    
+    
+  
+};
+/* 
+* @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 5.7.2012 
 * @website http://hertzen.com
  */
 
 PHP.Modules.prototype.ini_set = PHP.Modules.prototype.ini_alter = function( varname, newvalue ) {
+      var COMPILER = PHP.Compiler.prototype;
     var old = this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ];
     
     this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ] = newvalue[ COMPILER.VARIABLE_VALUE ];

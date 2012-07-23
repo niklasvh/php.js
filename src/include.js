@@ -95,6 +95,7 @@ var files = {
             options: {
                 assert: "js",
                 ini_get: "js",
+                ini_restore: "js",
                 ini_set: "js",
                 getenv: "js",
                 set_time_limit: "js",

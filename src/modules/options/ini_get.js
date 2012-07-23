@@ -6,8 +6,9 @@
 
 
 PHP.Modules.prototype.ini_get = function( varname ) {
-    var old = this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ];
-    
+    var COMPILER = PHP.Compiler.prototype,
+    old = this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ];
+   
     if (old === undefined ) {
         return new PHP.VM.Variable( false );
     } else {

@@ -5,6 +5,7 @@
  */
 
 PHP.Modules.prototype.ini_set = PHP.Modules.prototype.ini_alter = function( varname, newvalue ) {
+      var COMPILER = PHP.Compiler.prototype;
     var old = this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ];
     
     this.$ini[ varname[ COMPILER.VARIABLE_VALUE ] ] = newvalue[ COMPILER.VARIABLE_VALUE ];
