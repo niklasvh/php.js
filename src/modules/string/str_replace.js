@@ -5,9 +5,11 @@
  */
 
 
-PHP.Modules.prototype.str_replace = function( str ) {
+PHP.Modules.prototype.str_replace = function( search, replace, subject ) {
     var VARIABLE = PHP.VM.Variable.prototype,
     COMPILER = PHP.Compiler.prototype;
     
-    return new PHP.VM.Variable( str[ COMPILER.VARIABLE_VALUE ].toLowerCase() );
+    var re = new RegExp( search[ COMPILER.VARIABLE_VALUE ], "g");
+    console.log( re );
+    return new PHP.VM.Variable( subject[ COMPILER.VARIABLE_VALUE ].replace( re, replace[ COMPILER.VARIABLE_VALUE ] ) );
 };
