@@ -170,6 +170,12 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
                 args.push(  this.source( arg.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_ISSET + '( this, "' + this.source( arg.name ) + '" )');
           
                 break;
+                
+            case "Node_Expr_StaticPropertyFetch":
+               
+                args.push(  this.Node_Expr_StaticPropertyFetch( arg, undefined, true ));
+          
+                break;
             default:
                 args.push( this.source( arg) );
         }
@@ -541,7 +547,7 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
 };
 
-PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action, ref ) {
+PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action, ref, isset ) {
 
     var src = "",
     extra = "",
@@ -568,10 +574,14 @@ PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action, ref ) {
         extra = ", true";
     } 
     
+
+    
+    
+    
     if (/^(parent|self)$/i.test( action.Class.parts )) {
-        src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
+        src += "this." + (( isset === true ) ? this.CLASS_STATIC_PROPERTY_ISSET : this.STATIC_PROPERTY_GET  ) + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     } else {
-        src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
+        src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + (( isset === true ) ? this.CLASS_STATIC_PROPERTY_ISSET : this.STATIC_PROPERTY_GET  ) + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     }
 
     

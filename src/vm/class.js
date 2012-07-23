@@ -956,6 +956,39 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
         };
         
+        
+        Class.prototype[ COMPILER.CLASS_STATIC_PROPERTY_ISSET ] = function( ctx, propertyClass, propertyName ) {
+            
+            var methodCTX;
+            if ( /^self$/i.test( propertyClass ) ) {
+                methodCTX = ctx;
+            } else if ( /^parent$/i.test( propertyClass )) {
+                methodCTX = Object.getPrototypeOf( ctx );
+            } else {
+                methodCTX = this;
+            }
+ 
+            if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] === undefined ) {
+                return false;
+            }
+ 
+
+
+            
+            if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ] !== undefined ) {
+                return true;
+            }
+            
+            if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] !== undefined ) {
+
+                return true;
+            }
+            
+            return false;
+            
+            
+        };
+        
         Class.prototype[ COMPILER.CLASS_CONSTANT_FETCH ] = function( ctx, constantName ) {
             if ( this[ PHP.VM.Class.CONSTANT + constantName ] === undefined && DECLARED === true ) {  
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Undefined class constant '" + constantName + "'", PHP.Constants.E_ERROR, true ); 

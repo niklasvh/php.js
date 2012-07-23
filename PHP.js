@@ -649,6 +649,8 @@ COMPILER.CLASS_PROPERTY_GET = "$Prop";
 
 COMPILER.CLASS_PROPERTY_ISSET = "$PropIsset";
 
+COMPILER.CLASS_STATIC_PROPERTY_ISSET = "$SPropIsset";
+
 COMPILER.STATIC_PROPERTY_GET = "$SProp";
 
 COMPILER.CLASS_METHOD = "Method";
@@ -897,6 +899,12 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
             case "Node_Expr_PropertyFetch":
                 
                 args.push(  this.source( arg.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_ISSET + '( this, "' + this.source( arg.name ) + '" )');
+          
+                break;
+                
+            case "Node_Expr_StaticPropertyFetch":
+               
+                args.push(  this.Node_Expr_StaticPropertyFetch( arg, undefined, true ));
           
                 break;
             default:
@@ -1270,7 +1278,7 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
 };
 
-PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action, ref ) {
+PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action, ref, isset ) {
 
     var src = "",
     extra = "",
@@ -1297,10 +1305,14 @@ PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action, ref ) {
         extra = ", true";
     } 
     
+
+    
+    
+    
     if (/^(parent|self)$/i.test( action.Class.parts )) {
-        src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
+        src += "this." + (( isset === true ) ? this.CLASS_STATIC_PROPERTY_ISSET : this.STATIC_PROPERTY_GET  ) + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     } else {
-        src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
+        src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + (( isset === true ) ? this.CLASS_STATIC_PROPERTY_ISSET : this.STATIC_PROPERTY_GET  ) + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     }
 
     
@@ -12780,6 +12792,39 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
         //      return methodCTX[ propertyPrefix + propertyName ];
         }
+            
+            
+        };
+        
+        
+        Class.prototype[ COMPILER.CLASS_STATIC_PROPERTY_ISSET ] = function( ctx, propertyClass, propertyName ) {
+            
+            var methodCTX;
+            if ( /^self$/i.test( propertyClass ) ) {
+                methodCTX = ctx;
+            } else if ( /^parent$/i.test( propertyClass )) {
+                methodCTX = Object.getPrototypeOf( ctx );
+            } else {
+                methodCTX = this;
+            }
+ 
+            if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] === undefined ) {
+                return false;
+            }
+ 
+
+
+            
+            if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ] !== undefined ) {
+                return true;
+            }
+            
+            if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] !== undefined ) {
+
+                return true;
+            }
+            
+            return false;
             
             
         };
