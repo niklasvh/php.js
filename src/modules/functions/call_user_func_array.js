@@ -29,6 +29,13 @@ PHP.Modules.prototype.call_user_func_array = function( callback ) {
         // method call
         if ( methodParts.length === 1 ) {
             args = [ this, methodName].concat( Array.prototype.slice.call( arguments, 1 ) );
+            
+            if ((Class[ "$£" + methodName] & PHP.VM.Class.PRIVATE) === PHP.VM.Class.PRIVATE) {
+                    this[ COMPILER.ERROR ]( "call_user_func_array() expects parameter 1 to be a valid callback, cannot access private method " + Class[ COMPILER.CLASS_NAME ] + "::"+ methodName + "()", PHP.Constants.E_WARNING, true );
+            
+            }
+            
+            
             return Class[ COMPILER.METHOD_CALL ].apply( Class, args );
         } else {
             args = [ this, methodParts[ 0 ], methodParts[ 1 ] ].concat( Array.prototype.slice.call( arguments, 1 ) );
