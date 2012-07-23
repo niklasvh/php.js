@@ -1557,7 +1557,9 @@ PHP.Compiler.prototype.Node_Stmt_While = function( action ) {
 
     var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
     
-    src += "while( " + this.source( action.cond ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n";
+    src += "while( " + this.source( action.cond ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {"; 
+    
+    src += this.CTX + this.TIMER + "(); \n";
     
     src += this.stmts( action.stmts );
     
@@ -11878,19 +11880,25 @@ PHP.VM = function( src, opts ) {
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
     });
     
+    var shutdown = false;
+    ENV[ COMPILER.TIMER ] = function(){
+        if ( Date.now() > this.start + (this.$ini.max_execution_time - 0)*1000) {
             
-                ENV[ COMPILER.TIMER ] = function(){
-                    if ( Date.now() > this.start + (this.$ini.max_execution_time - 0)*1000) {
-                        
-                        this.$obflush.call( ENV );  
-                        this.$shutdown.call( ENV );
-                        
-                        throw Error;
-                        throw Error;
-                        throw Error;
-                        throw Error;
-                    }
-                }.bind(this);
+            if (this.$ini.display_errors != 0) {
+                this.$ob( "\nFatal error: Maximum execution time of " + this.$ini.max_execution_time + " second exceeded in " + $('$__FILE__').$ + " on line 1\n");
+              
+            }
+            if (shutdown === false ){ 
+                shutdown = true;
+                this.$obflush.call( ENV );  
+                this.$shutdown.call( ENV );
+            }
+            throw Error;
+            throw Error;
+            throw Error;
+            throw Error;
+        }
+    }.bind(this);
     
     this.Run = function() {
         this.start = Date.now();
@@ -11908,8 +11916,11 @@ PHP.VM = function( src, opts ) {
                 
                 var exec = new Function( "$$", "$", "ENV", "$Static", src  );
                 exec.call(this, $$, $, ENV, staticHandler);
-                this.$obflush.call( ENV );  
-                this.$shutdown.call( ENV );
+                if (shutdown === false ){ 
+                    shutdown = true;
+                    this.$obflush.call( ENV );  
+                    this.$shutdown.call( ENV );
+                }
           
             } catch( e ) {
                 var C = PHP.Constants;

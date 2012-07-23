@@ -173,7 +173,9 @@ PHP.Compiler.prototype.Node_Stmt_While = function( action ) {
 
     var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
     
-    src += "while( " + this.source( action.cond ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n";
+    src += "while( " + this.source( action.cond ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {"; 
+    
+    src += this.CTX + this.TIMER + "(); \n";
     
     src += this.stmts( action.stmts );
     
