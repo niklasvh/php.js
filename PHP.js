@@ -746,7 +746,15 @@ PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
     if ( action.refVar.type === "Node_Expr_New") {
         this.DEPRECATED.push(["Assigning the return value of new by reference is deprecated", action.attributes.startLine]);
     }
-    var src = this.source( action.variable ) + "." + PHP.VM.Variable.prototype.REF + "(" + this.source( action.refVar ) + ")";
+    
+    
+    var src = "";
+    if (action.variable.type === "Node_Expr_StaticPropertyFetch") {
+        src +=  this.Node_Expr_StaticPropertyFetch( action.variable, true );
+    } else {
+        src += this.source( action.variable );
+    }
+    src += "." + PHP.VM.Variable.prototype.REF + "(" + this.source( action.refVar ) + ")";
     console.log( action );
     return src;
 };
@@ -1200,9 +1208,10 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
 };
 
-PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
+PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action, ref ) {
 
     var src = "",
+    extra = "",
     classPart;
     
 
@@ -1222,13 +1231,18 @@ PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action ) {
         classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
     }
     
+    if ( ref === true) {
+        extra = ", true";
+    } 
+    
     if (/^(parent|self)$/i.test( action.Class.parts )) {
         src += "this." + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     } else {
         src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + this.STATIC_PROPERTY_GET + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     }
 
-    src += ")";
+    
+    src += extra + ")";
 
     return src;
 
@@ -12594,7 +12608,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
  
         };
         
-        Class.prototype[ COMPILER.STATIC_PROPERTY_GET ] = function( ctx, propertyClass, propertyName ) {
+        Class.prototype[ COMPILER.STATIC_PROPERTY_GET ] = function( ctx, propertyClass, propertyName, ref ) {
             
             var methodCTX;
             if ( /^self$/i.test( propertyClass ) ) {
@@ -12604,9 +12618,21 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             } else {
                 methodCTX = this;
             }
-            
+ 
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] === undefined ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access to undeclared static property: " + methodCTX[ COMPILER.CLASS_NAME ] + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
+            }
+ 
+ 
+            if ( ref === true && !methodCTX.hasOwnProperty( PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName )) {
+                methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ] = new PHP.VM.Variable();
+                return methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ];
+            }
+            
+
+            
+            if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ] !== undefined ) {
+                return methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ];
             }
             
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] !== undefined ) {
@@ -12828,9 +12854,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         } 
                         
                         if (checkType( this[ propertyTypePrefix + propertyName ], PROTECTED ) && ctx instanceof PHP.VM.ClassPrototype) {
-                            // no change?
+                        // no change?
                         } else {
-                             Object.getPrototypeOf(this)[ propertyTypePrefix + propertyName ] = 1;
+                            Object.getPrototypeOf(this)[ propertyTypePrefix + propertyName ] = 1;
                         }
                     
                        
@@ -12848,7 +12874,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 
                 if ( this[ propertyPrefix + propertyName ] !== undefined ) {
                     ret = checkPermissions( propertyPrefix );
-                    console.log( this[ propertyTypePrefix + propertyName ], propertyName, ctx );
+                
                     if (ret !== undefined ) {
                         return ret;
                     }
@@ -13061,6 +13087,8 @@ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY = "_£$";
 PHP.VM.Class.CLASS_PROPERTY = "_£";
 
 PHP.VM.Class.CLASS_STATIC_PROPERTY = "$_";
+
+PHP.VM.Class.CLASS_STATIC_PROPERTY_REF = "Ö";
 
 PHP.VM.Class.INTERFACES = "$Interfaces";
 

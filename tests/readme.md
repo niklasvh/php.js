@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 561 out of 671 (83.6%)
+Passed 562 out of 671 (83.8%)
 
 Failed tests:
 
@@ -8,7 +8,6 @@ Failed tests:
  - tests/php/basic/023.phpt
  - tests/php/basic/bug20539.phpt
  - tests/php/classes/inheritance_007.phpt
- - tests/php/classes/static_properties_004.phpt
  - tests/php/classes/static_properties_undeclared_isset.phpt
  - tests/php/classes/tostring_001.phpt
  - tests/php/classes/tostring_002.phpt
