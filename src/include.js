@@ -71,6 +71,7 @@ var files = {
             },
             functions: {
                 call_user_func: "js",
+                call_user_func_array: "js",
                 create_function: "js",
                 function_exists: "js"
             },

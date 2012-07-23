@@ -44,6 +44,13 @@ COMPILER.stmts = function( stmts, main ) {
         }
         src += this.source( stmt );
         
+        
+        if ( stmt.type === "Node_Expr_New") {
+            // init class without assign, call destruct ( this might not be valid in all cases )
+            src += "." + this.UNSET + "()";
+            
+        }
+        
         if (  /^Node_Expr_Post(Inc|Dec)$/.test( stmt.type ) ) {
             // trigger POST_MOD
             src += "." + this.VARIABLE_VALUE;
