@@ -3609,7 +3609,7 @@ PHP.Constants.E_ALL = 32767;
  */
 
 PHP.Modules.prototype.trigger_error = function( msg, level ) {
-          this[ PHP.Compiler.prototype.ERROR ]( msg.$, ( level !== undefined ) ? level.$ : PHP.Constants.E_ERROR  , true );    
+          this[ PHP.Compiler.prototype.ERROR ]( msg.$, ( level !== undefined ) ? level.$ : PHP.Constants.E_USER_NOTICE  , true );    
  //   throw new Error( "Fatal error: " + msg.$ );
     
 };/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
@@ -11893,6 +11893,8 @@ PHP.VM = function( src, opts ) {
                 this.$obflush.call( ENV );  
                 this.$shutdown.call( ENV );
             }
+            
+            // we aint killing it always with a single throw?? todo examine why
             throw Error;
             throw Error;
             throw Error;
