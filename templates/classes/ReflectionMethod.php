@@ -12,7 +12,7 @@ class ReflectionMethod {
     public $name;
     public $class;
 
-    function __construct($class, $name = null) {
+    public function __construct($class, $name = null) {
 
         //   if ( !is_string($name)) {
 
@@ -20,11 +20,16 @@ class ReflectionMethod {
         if (count($parts) > 1) {
             $class = $parts[0];
             $name = $parts[1];
+      
         }
 
         if (!class_exists($class)) {
             throw new ReflectionException("Class " . $class . " does not exist ");
         }
+        
+        $this->name = $name;
+        
+        $this->class = $class;
 
         //   }
     }

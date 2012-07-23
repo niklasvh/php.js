@@ -21,7 +21,27 @@ class ReflectionClass {
             }
         }
     }
-
+    
+    public function getMethods() {
+        $methods =  get_class_methods( $this->name );
+        $arr = array();
+        
+        foreach($methods as $methodName) {
+            
+            // todo make this recurssive
+            $parent = get_parent_class( $this->name );
+            
+            if ( method_exists($parent, $methodName)) {
+                $arr[] = new ReflectionMethod( $parent, $methodName );
+            } else {
+            $arr[] = new ReflectionMethod( $this->name, $methodName );
+           
+            }
+        }
+        
+        return $arr;
+    }
+    
     public function getProperty($name) {
         $parts = explode("::", $name);
         

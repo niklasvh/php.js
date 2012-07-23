@@ -1,13 +1,12 @@
 ### Test results ###
 
-Passed 569 out of 671 (84.8%)
+Passed 570 out of 671 (84.9%)
 
 Failed tests:
 
  - tests/php/basic/022.phpt
  - tests/php/basic/023.phpt
  - tests/php/basic/bug20539.phpt
- - tests/php/classes/inheritance_007.phpt
  - tests/php/func/004.phpt
  - tests/php/func/005a.phpt
  - tests/php/func/007.phpt

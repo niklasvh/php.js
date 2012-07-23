@@ -15,6 +15,8 @@ $("name")._($("parts").$Dim( this, $$(1) ));
 if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
+$("this").$Prop( ctx, "name" )._($("name"));
+$("this").$Prop( ctx, "class" )._($("class"));
 })
 .Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx, $Static ) {
 })

@@ -6,9 +6,18 @@
 
 
 PHP.Modules.prototype.method_exists = function( object, method ) {
-    var COMPILER = PHP.Compiler.prototype;
+    var VARIABLE = PHP.VM.Variable.prototype,
+    COMPILER = PHP.Compiler.prototype;
+    
+    if ( object instanceof PHP.VM.Variable && object[ VARIABLE.TYPE ] === VARIABLE.STRING) {
+        object = this.$Class.Get( object[ COMPILER.VARIABLE_VALUE ]).prototype;
+    }
     
     if ( object instanceof PHP.VM.Variable ) {
+        if (object[ VARIABLE.TYPE ] === VARIABLE.STRING) {
+            object = this.$Class.Get( object[ COMPILER.VARIABLE_VALUE ]).prototype;
+        }
+        
         return new PHP.VM.Variable( (object[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ].toLowerCase()] ) !== undefined );
     } else {
         return new PHP.VM.Variable( (object[ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ].toLowerCase()] ) !== undefined ); 

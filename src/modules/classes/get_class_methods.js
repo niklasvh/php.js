@@ -15,25 +15,24 @@ PHP.Modules.prototype.get_class_methods = function( object ) {
     items = [],
     classObj,
     index = 0;
-    
+
     if ( object[ VARIABLE.TYPE ] === VARIABLE.STRING ) {
         classObj = this.$Class.Get( object[ COMPILER.VARIABLE_VALUE ]).prototype;
     } else if ( object[ VARIABLE.TYPE ] === VARIABLE.OBJECT ) {
         classObj =  object[ COMPILER.VARIABLE_VALUE ];
     }
-     var item = PHP.VM.Array.arrayItem;
+    var item = PHP.VM.Array.arrayItem;
        
     
 
-    
-    Object.keys( classObj ).forEach( function( key ) {
+    for ( var key in classObj )  {
         if ( key.substring(0, prefix.length ) === prefix ) {
             var name = key.substring( prefix.length );
             
             
             items.push( item( index++, classObj[ PHP.VM.Class.METHOD_REALNAME + name ]) );
         }
-    });
+    }
 
     return this.array( items );
     

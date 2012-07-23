@@ -15,6 +15,20 @@ $("this").$Prop( ctx, "name" )._($("argument"));
 };
 };
 })
+.Method( "getMethods", 1, [], function( $, ctx, $Static ) {
+$("methods")._((ENV.$F("get_class_methods", arguments, $("this").$Prop( ctx, "name" ))));
+$("arr")._(ENV.array([]));
+var iterator1 = ENV.$foreachInit($("methods"), ctx);
+while(ENV.foreach( iterator1, false, $("methodName"))) {
+$("parent")._((ENV.$F("get_parent_class", arguments, $("this").$Prop( ctx, "name" ))));
+if ( ((ENV.$F("method_exists", arguments, $("parent"), $("methodName")))).$Bool.$) {
+$("arr").$Dim( this, undefined )._($$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parent"), $("methodName") )));
+} else {
+$("arr").$Dim( this, undefined )._($$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("this").$Prop( ctx, "name" ), $("methodName") )));
+};
+} ENV.$foreachEnd( iterator1 );
+return $("arr");
+})
 .Method( "getProperty", 1, [{name:"name"}], function( $, ctx, $Static ) {
 $("parts")._((ENV.$F("explode", arguments, $$("::"), $("name"))));
 if ( ((ENV.$F("count", arguments, $("parts"))).$Greater($$(1))).$Bool.$) {
