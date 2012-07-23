@@ -23,7 +23,7 @@ PHP.Compiler = function( AST, file ) {
     var tmp = "";
     this.DEPRECATED.forEach(function( error ){
         
-      tmp +=   'this[ PHP.Compiler.prototype.ERROR ]("' + error[ 0 ] + ' in ' + this.file + ' on line ' + error[ 1 ] + '", PHP.Constants.E_DEPRECATED);';
+        tmp +=   'this[ PHP.Compiler.prototype.ERROR ]("' + error[ 0 ] + ' in ' + this.file + ' on line ' + error[ 1 ] + '", PHP.Constants.E_DEPRECATED);';
     
     }, this);
     
@@ -292,8 +292,10 @@ COMPILER.fixString =  function( result ) {
 
     
     if ( result.match(/^("|')/) === null) {
-        result = '"' + result.replace(/([^"\\]*(?:\\.[^"\\]*)*)"/g, '$1\\"') + '"';
+        result = '"' + result + '"';
     }
+    
+
     
     if (result.match(/\r\n/) !== null) {
         var quote = result.substring(0, 1);

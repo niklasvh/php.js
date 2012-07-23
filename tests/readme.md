@@ -1,13 +1,12 @@
 ### Test results ###
 
-Passed 570 out of 671 (84.9%)
+Passed 571 out of 671 (85.1%)
 
 Failed tests:
 
  - tests/php/basic/022.phpt
  - tests/php/basic/023.phpt
  - tests/php/basic/bug20539.phpt
- - tests/php/func/004.phpt
  - tests/php/func/005a.phpt
  - tests/php/func/007.phpt
  - tests/php/func/010.phpt
