@@ -39,85 +39,85 @@ var_dump($c);
 ---( $c->boolFalse )---
   --> Attempting implicit conversion to object using increment...
 
-Warning: Creating default object from empty value in %s on line 18
+Warning: Creating default object from empty value in %s on line %d
 
   --> Attempting implicit conversion to object using assignment...
 
-Warning: Creating default object from empty value in %s on line 22
+Warning: Creating default object from empty value in %s on line %d
 
   --> Attempting implicit conversion to object using combined assignment...
 
-Warning: Creating default object from empty value in %s on line 26
+Warning: Creating default object from empty value in %s on line %d
 
 
 ---( $c->emptyString )---
   --> Attempting implicit conversion to object using increment...
 
-Warning: Creating default object from empty value in %s on line 18
+Warning: Creating default object from empty value in %s on line %d
 
   --> Attempting implicit conversion to object using assignment...
 
-Warning: Creating default object from empty value in %s on line 22
+Warning: Creating default object from empty value in %s on line %d
 
   --> Attempting implicit conversion to object using combined assignment...
 
-Warning: Creating default object from empty value in %s on line 26
+Warning: Creating default object from empty value in %s on line %d
 
 
 ---( $c->null )---
   --> Attempting implicit conversion to object using increment...
 
-Warning: Creating default object from empty value in %s on line 18
+Warning: Creating default object from empty value in %s on line %d
 
   --> Attempting implicit conversion to object using assignment...
 
-Warning: Creating default object from empty value in %s on line 22
+Warning: Creating default object from empty value in %s on line %d
 
   --> Attempting implicit conversion to object using combined assignment...
 
-Warning: Creating default object from empty value in %s on line 26
+Warning: Creating default object from empty value in %s on line %d
 
 
 ---( $c->boolTrue )---
   --> Attempting implicit conversion to object using increment...
 
-Warning: Attempt to %s property of non-object in %s on line 18
+Warning: Attempt to %s property of non-object in %s on line %d
 
   --> Attempting implicit conversion to object using assignment...
 
-Warning: Attempt to assign property of non-object in %s on line 22
+Warning: Attempt to assign property of non-object in %s on line %d
 
   --> Attempting implicit conversion to object using combined assignment...
 
-Warning: Attempt to assign property of non-object in %s on line 26
+Warning: Attempt to assign property of non-object in %s on line %d
 
 
 ---( $c->nonEmptyString )---
   --> Attempting implicit conversion to object using increment...
 
-Warning: Attempt to %s property of non-object in %s on line 18
+Warning: Attempt to %s property of non-object in %s on line %d
 
   --> Attempting implicit conversion to object using assignment...
 
-Warning: Attempt to assign property of non-object in %s on line 22
+Warning: Attempt to assign property of non-object in %s on line %d
 
   --> Attempting implicit conversion to object using combined assignment...
 
-Warning: Attempt to assign property of non-object in %s on line 26
+Warning: Attempt to assign property of non-object in %s on line %d
 
 
 ---( $c->intZero )---
   --> Attempting implicit conversion to object using increment...
 
-Warning: Attempt to %s property of non-object in %s on line 18
+Warning: Attempt to %s property of non-object in %s on line %d
 
   --> Attempting implicit conversion to object using assignment...
 
-Warning: Attempt to assign property of non-object in %s on line 22
+Warning: Attempt to assign property of non-object in %s on line %d
 
   --> Attempting implicit conversion to object using combined assignment...
 
-Warning: Attempt to assign property of non-object in %s on line 26
+Warning: Attempt to assign property of non-object in %s on line %d
 
 
 
