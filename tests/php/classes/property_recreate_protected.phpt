@@ -50,4 +50,4 @@ object(D)#%d (1) {
 
 Unset a protected property, and attempt to recreate it outside of scope (expected failure):
 
-Fatal error: Cannot access protected property %s::$p in %s on line 32
+Fatal error: Cannot access protected property %s::$p in %s on line %d
