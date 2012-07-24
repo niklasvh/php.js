@@ -50,6 +50,9 @@ echo "Hello world!";
                 <h3>Result</h3>
                 <pre><code id="result"></code></pre>
 
+                <h3>Code</h3>
+                <pre><code id="result_code"></code></pre>
+                
             </section>
             <footer>
                 <div class="profile">
@@ -83,6 +86,7 @@ echo "Hello world!";
         <script>
         
             var content = document.getElementById("code"),
+            result_code = document.getElementById("result_code"),
             result = document.getElementById("result");
             document.getElementById("run").addEventListener("click", function(e){
                 e.preventDefault();
@@ -105,7 +109,7 @@ echo "Hello world!";
                 engine = new PHP( content.value , opts );
                 console.log( engine );
                 result.innerHTML = engine.vm.OUTPUT_BUFFER;
-                
+                result_code.innerHTML = engine.compiler.src;
             }, false);
         </script>
     </body>
