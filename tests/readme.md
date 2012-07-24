@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 602 out of 670 (89.9%)
+Passed 603 out of 670 (90%)
 
 Failed tests:
 
@@ -38,7 +38,6 @@ Failed tests:
  - tests/php/lang/foreachLoop.006.phpt
  - tests/php/lang/foreachLoop.016.phpt
  - tests/php/lang/foreachLoopIteratorAggregate.002.phpt
- - tests/php/lang/foreachLoopIteratorAggregate.003.phpt
  - tests/php/lang/foreachLoopObjects.002.phpt
  - tests/php/lang/foreachLoopObjects.003.phpt
  - tests/php/lang/foreachLoopObjects.004.phpt

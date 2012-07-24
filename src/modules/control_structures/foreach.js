@@ -31,9 +31,10 @@ PHP.Modules.prototype.$foreachInit = function( expr, ctx ) {
 
             var iterator = objectValue;
 
-            if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1 ) {
-                iterator = objectValue[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
+            while( iterator[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1  ) {
+                iterator = iterator[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
             }
+           
 
             iterator[ COMPILER.METHOD_CALL ]( this, "rewind" );
 
