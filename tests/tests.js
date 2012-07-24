@@ -80,10 +80,13 @@ PHP_Tests.prototype.runTest = function( li ) {
 
             shouldBef = shouldBef.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
             shouldBef = shouldBef.replace(/\%d/g,"\\d+");
-            shouldBef = shouldBef.replace(/\%i/g,"\\d+");
+            shouldBef = shouldBef.replace(/\%i/g,"(\\+|\\-)?\\d+");
             shouldBef = shouldBef.replace(/\%s/g,".+");
+            shouldBef = shouldBef.replace(/\%c/g,".");
             shouldBef = shouldBef.replace(/\%S/g,".*?");
-               
+            shouldBef = shouldBef.replace(/\%x/g,"[0-9a-fA-F]+");   
+            shouldBef = shouldBef.replace(/\%f/g,"[-+]?[0-9]*\\.?[0-9]*");   
+            
              
             re = new RegExp("^" + shouldBef + "$", "i");
                    

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 592 out of 670 (88.4%)
+Passed 593 out of 670 (88.5%)
 
 Failed tests:
 
@@ -67,7 +67,6 @@ Failed tests:
  - tests/php/output/ob_start_callbacks.phpt
  - tests/php/output/ob_start_error_005.phpt
  - tests/php/run-test/test005.phpt
- - tests/php/run-test/test006.phpt
  - tests/php/run-test/test007.phpt
  - tests/php/run-test/test008.phpt
  - tests/php/run-test/test008a.phpt

@@ -13752,7 +13752,13 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MUL ] = function( combine
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.DIV ] = function( combinedVariable ) {
     
     var COMPILER = PHP.Compiler.prototype;
-    return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) / ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
+    
+    var val = (this[ COMPILER.VARIABLE_VALUE ] - 0) / ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 );
+    if ( val === Number.POSITIVE_INFINITY ) {
+              this.ENV[ COMPILER.ERROR ]("Division by zero", PHP.Constants.E_WARNING, true );
+              return new PHP.VM.Variable( );
+    }
+    return new PHP.VM.Variable( val );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MOD ] = function( combinedVariable ) {
