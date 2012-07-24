@@ -423,10 +423,13 @@ PHP.VM.Variable = function( arg ) {
     
     this [ this.REF ] = function( variable ) {
        
-        if ( this[ this.REFERRING ] !== undefined ) {
-            console.log( variable );
+       
+
+              
+        if ( variable [ this.VARIABLE_TYPE ] === this.FUNCTION  ) {
+              this.ENV[ COMPILER.ERROR ]("Only variables should be assigned by reference", PHP.Constants.E_STRICT, true );
+            return this;
         }
-        
         this[ this.REFERRING ] = variable;
         this[ this.DEFINED ] = true;
         

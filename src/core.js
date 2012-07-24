@@ -222,6 +222,7 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
         // check that we aren't passing a function return value
         if (   value[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION ) {
             ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
+            value[ VARIABLE.VARIABLE_TYPE ] = undefined;
         }
 
         if (value[ VARIABLE.DEFINED ] !== true ) {

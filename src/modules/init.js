@@ -4,7 +4,7 @@
  * @website http://hertzen.com
  */
 
-PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV, functionName ) {
+PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV, functionName, funcByRef ) {
     var args = [ null ], // undefined context for bind
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
@@ -14,7 +14,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     __FILE__ = "$__FILE__",
     staticVars = {}; // static variable storage
 
-
+    ENV.FUNCTION_REFS[ functionName ] = funcByRef;
+    
     // initializer
     args.push( function( args, values ) {
 
@@ -127,11 +128,14 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
     }
 
 
-
-    if ( ret instanceof PHP.VM.Variable ) {
-        ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
+    if ( ret instanceof PHP.VM.Variable) {
+        if ( this.FUNCTION_REFS[ functionName ] !== true) {
+            
+            ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
+        } else {
+            ret[ VARIABLE.VARIABLE_TYPE ] = undefined;
+        }
     }
-
     return ret;
 };
 
@@ -448,10 +452,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             break;
                         case C.E_RECOVERABLE_ERROR:
                             this[ COMPILER.DISPLAY_HANDLER ] = false;
-                        //    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
+                            //    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
                      
                             throw new PHP.Halt( msg, level, lineAppend, catchable );
-                         //   throw new PHP.Halt( level );
+                            //   throw new PHP.Halt( level );
                             return;
                             break;
 

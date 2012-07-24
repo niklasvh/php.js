@@ -176,7 +176,7 @@ PHP.VM = function( src, opts ) {
     ENV.$Array = new PHP.VM.Array( ENV );
     var variables_order = this.$ini.variables_order;
     
-       
+    this.FUNCTION_REFS = {};   
     
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( opts.SERVER.SCRIPT_FILENAME );

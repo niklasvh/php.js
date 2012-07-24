@@ -222,6 +222,7 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
         // check that we aren't passing a function return value
         if (   value[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION ) {
             ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
+            value[ VARIABLE.VARIABLE_TYPE ] = undefined;
         }
 
         if (value[ VARIABLE.DEFINED ] !== true ) {
@@ -926,6 +927,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
             } else {
                 src += ", undefined"
             }
+            src += ", ENV";
         // args.push("$");
         }
 
@@ -1735,7 +1737,7 @@ PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
     
     
     
-    src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ')( this, "' + action.name + '"  ))';
+    src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ')( ENV, "' + action.name + '", ' + action.byRef + '  ))';
 
     
     return src;  
@@ -2031,7 +2033,7 @@ PHP.Compiler.prototype.Node_Scalar_DirConst = function( action ) {
  * @website http://hertzen.com
  */
 
-PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV, functionName ) {
+PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV, functionName, funcByRef ) {
     var args = [ null ], // undefined context for bind
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
@@ -2041,7 +2043,8 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     __FILE__ = "$__FILE__",
     staticVars = {}; // static variable storage
 
-
+    ENV.FUNCTION_REFS[ functionName ] = funcByRef;
+    
     // initializer
     args.push( function( args, values ) {
 
@@ -2154,11 +2157,14 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
     }
 
 
-
-    if ( ret instanceof PHP.VM.Variable ) {
-        ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
+    if ( ret instanceof PHP.VM.Variable) {
+        if ( this.FUNCTION_REFS[ functionName ] !== true) {
+            
+            ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
+        } else {
+            ret[ VARIABLE.VARIABLE_TYPE ] = undefined;
+        }
     }
-
     return ret;
 };
 
@@ -2475,10 +2481,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             break;
                         case C.E_RECOVERABLE_ERROR:
                             this[ COMPILER.DISPLAY_HANDLER ] = false;
-                        //    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
+                            //    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
                      
                             throw new PHP.Halt( msg, level, lineAppend, catchable );
-                         //   throw new PHP.Halt( level );
+                            //   throw new PHP.Halt( level );
                             return;
                             break;
 
@@ -4074,7 +4080,7 @@ PHP.Modules.prototype.defined = function( name ) {
  */
 
 
-PHP.Modules.prototype.eval = function( $, $Static, $this, ctx , code) {
+PHP.Modules.prototype.eval = function( $, $Static, $this, ctx, ENV, code) {
     
 
     
@@ -4105,11 +4111,11 @@ PHP.Modules.prototype.eval = function( $, $Static, $this, ctx , code) {
      console.log( compiler.src );
 
         // execture code in current context ($)
-        var exec = new Function( "$$", "$", "ENV", "$Static", "ctx",  "console.log(this);" + compiler.src  );
+        var exec = new Function( "$$", "$", "ENV", "$Static", "ctx",  compiler.src  );
         this.EVALING = true;
         var ret = exec.call($this, function( arg ) {
             return new PHP.VM.Variable( arg );
-        }, $, this, $Static, ctx);
+        }, $, ENV, $Static, ctx);
        
         this.EVALING = undefined;
         return ret;
@@ -11872,7 +11878,7 @@ PHP.VM = function( src, opts ) {
     ENV.$Array = new PHP.VM.Array( ENV );
     var variables_order = this.$ini.variables_order;
     
-       
+    this.FUNCTION_REFS = {};   
     
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( opts.SERVER.SCRIPT_FILENAME );
@@ -13880,10 +13886,13 @@ PHP.VM.Variable = function( arg ) {
     
     this [ this.REF ] = function( variable ) {
        
-        if ( this[ this.REFERRING ] !== undefined ) {
-            console.log( variable );
+       
+
+              
+        if ( variable [ this.VARIABLE_TYPE ] === this.FUNCTION  ) {
+              this.ENV[ COMPILER.ERROR ]("Only variables should be assigned by reference", PHP.Constants.E_STRICT, true );
+            return this;
         }
-        
         this[ this.REFERRING ] = variable;
         this[ this.DEFINED ] = true;
         

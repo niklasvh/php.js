@@ -145,6 +145,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
             } else {
                 src += ", undefined"
             }
+            src += ", ENV";
         // args.push("$");
         }
 
