@@ -2,7 +2,11 @@
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
 
-    return this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )";
+
+    var src = "";
+    src += this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )";
+    
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
@@ -114,7 +118,13 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
         src += '"' + this.getName( action.func ) + '", arguments';
 
         if (this.getName( action.func ) === "eval") {
-            src += ", $, $Static"
+            src += ", $, $Static, this";
+            
+            if (this.INSIDE_METHOD ) {
+                src += ", ctx";
+            } else {
+                src += ", undefined"
+            }
         // args.push("$");
         }
 

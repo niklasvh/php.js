@@ -437,14 +437,18 @@ PHP.Halt = function( msg, level, lineAppend, catchable  ) {
     this.catchable = catchable;
     
 };
-PHP.Compiler = function( AST, file ) {
+PHP.Compiler = function( AST, file, opts ) {
     
     this.file = file;
     this.src = "";
     this.FOREACH_COUNT = 0;
-    
+    opts = opts || {};
+ 
+    this.FUNC_NUM = 0;
+    this.dimVars = "";
     this.DEPRECATED = [];
-    
+    this.INSIDE_METHOD = (opts.INSIDE_METHOD !== undefined ) ? opts.INSIDE_METHOD  : false;
+        
     this.src += this.stmts( AST, true );
     
     /*
@@ -467,7 +471,7 @@ PHP.Compiler = function( AST, file ) {
     
     this.src = tmp + this.src;
     
-    this.INSIDE_METHOD = false;
+
 
 };
 
@@ -771,7 +775,11 @@ COMPILER.fixString =  function( result ) {
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
 
-    return this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )";
+
+    var src = "";
+    src += this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )";
+    
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
@@ -883,7 +891,13 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
         src += '"' + this.getName( action.func ) + '", arguments';
 
         if (this.getName( action.func ) === "eval") {
-            src += ", $, $Static"
+            src += ", $, $Static, this";
+            
+            if (this.INSIDE_METHOD ) {
+                src += ", ctx";
+            } else {
+                src += ", undefined"
+            }
         // args.push("$");
         }
 
@@ -4030,7 +4044,7 @@ PHP.Modules.prototype.defined = function( name ) {
  */
 
 
-PHP.Modules.prototype.eval = function( $, $Static, code ) {
+PHP.Modules.prototype.eval = function( $, $Static, $this, ctx , code) {
     
 
     
@@ -4049,23 +4063,26 @@ PHP.Modules.prototype.eval = function( $, $Static, code ) {
     if ( Array.isArray(AST) ) {
         
     
-  
+
         // compile tree into JS
-        var compiler = new PHP.Compiler( AST );
+        var compiler = new PHP.Compiler( AST, undefined, {
+            INSIDE_METHOD: ( ctx !== undefined) ? true : false
+        } );
    
     
 
     
-    
-    
+     console.log( compiler.src );
+
         // execture code in current context ($)
-        var exec = new Function( "$$", "$", "ENV", "$Static",  compiler.src  );
+        var exec = new Function( "$$", "$", "ENV", "$Static", "ctx",  "console.log(this);" + compiler.src  );
         this.EVALING = true;
-        exec.call(this, function( arg ) {
+        var ret = exec.call($this, function( arg ) {
             return new PHP.VM.Variable( arg );
-        }, $, this, $Static);
+        }, $, this, $Static, ctx);
+       
         this.EVALING = undefined;
-        
+        return ret;
     } else {
         
                 this[ COMPILER.ERROR ]( "syntax error, unexpected $end in " + 

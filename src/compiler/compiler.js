@@ -1,12 +1,16 @@
 
-PHP.Compiler = function( AST, file ) {
+PHP.Compiler = function( AST, file, opts ) {
     
     this.file = file;
     this.src = "";
     this.FOREACH_COUNT = 0;
-    
+    opts = opts || {};
+ 
+    this.FUNC_NUM = 0;
+    this.dimVars = "";
     this.DEPRECATED = [];
-    
+    this.INSIDE_METHOD = (opts.INSIDE_METHOD !== undefined ) ? opts.INSIDE_METHOD  : false;
+        
     this.src += this.stmts( AST, true );
     
     /*
@@ -29,7 +33,7 @@ PHP.Compiler = function( AST, file ) {
     
     this.src = tmp + this.src;
     
-    this.INSIDE_METHOD = false;
+
 
 };
 

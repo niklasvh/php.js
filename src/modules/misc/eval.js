@@ -5,7 +5,7 @@
  */
 
 
-PHP.Modules.prototype.eval = function( $, $Static, code ) {
+PHP.Modules.prototype.eval = function( $, $Static, $this, ctx , code) {
     
 
     
@@ -24,23 +24,26 @@ PHP.Modules.prototype.eval = function( $, $Static, code ) {
     if ( Array.isArray(AST) ) {
         
     
-  
+
         // compile tree into JS
-        var compiler = new PHP.Compiler( AST );
+        var compiler = new PHP.Compiler( AST, undefined, {
+            INSIDE_METHOD: ( ctx !== undefined) ? true : false
+        } );
    
     
 
     
-    
-    
+     console.log( compiler.src );
+
         // execture code in current context ($)
-        var exec = new Function( "$$", "$", "ENV", "$Static",  compiler.src  );
+        var exec = new Function( "$$", "$", "ENV", "$Static", "ctx",  "console.log(this);" + compiler.src  );
         this.EVALING = true;
-        exec.call(this, function( arg ) {
+        var ret = exec.call($this, function( arg ) {
             return new PHP.VM.Variable( arg );
-        }, $, this, $Static);
+        }, $, this, $Static, ctx);
+       
         this.EVALING = undefined;
-        
+        return ret;
     } else {
         
                 this[ COMPILER.ERROR ]( "syntax error, unexpected $end in " + 
