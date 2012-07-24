@@ -808,8 +808,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             }
             
-            return (( value === undefined ) ? new PHP.VM.Variable() : value);
-            
+            value = (( value === undefined ) ? new PHP.VM.Variable() : value);
+            if (className !== "ArrayObject") {
+                PHP.Utils.CheckRef.call( ENV, value, this[ methodByRef  + methodName ] );
+            }
+            return value;
            
               
         };

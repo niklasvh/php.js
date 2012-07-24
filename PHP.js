@@ -320,7 +320,7 @@ PHP.Utils.CheckRef = function( ret, byRef ) {
         if ( byRef !== true) {
             
             ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
-        } else {
+        } else if (byRef === true){
             if (ret[ VARIABLE.REFERRING] === undefined && ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE) {
                 this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
             }
@@ -12840,8 +12840,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             }
             
-            return (( value === undefined ) ? new PHP.VM.Variable() : value);
-            
+            value = (( value === undefined ) ? new PHP.VM.Variable() : value);
+            if (className !== "ArrayObject") {
+                PHP.Utils.CheckRef.call( ENV, value, this[ methodByRef  + methodName ] );
+            }
+            return value;
            
               
         };
