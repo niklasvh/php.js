@@ -7,7 +7,7 @@
 
         <link rel="stylesheet" href="stylesheets/styles.css">
         <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-       
+
         <script src="javascripts/scale.fix.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
         <meta name="author" content="Niklas von Hertzen">
@@ -38,41 +38,18 @@
                 <h3>Console</h3>
 
                 <p><a href="index.html">Go back</a></p>
-                
+
                 <h3>PHP Code</h3>
-                <textarea id="code" style="width:100%;height:200px;"></textarea>
-                
+                <textarea id="code" style="width:100%;height:200px;">&lt;?php
+// insert code here                
+echo "Hello world!";          
+
+      
+?&gt;</textarea>
+                <a href="#" id="run">Run code</a>
                 <h3>Result</h3>
                 <div id="result"></div>
-                
-                   <p>The code can be directly run in your browser, meaning you can <strong>execute php code straight out of your browser</strong>! It can also be run on node.js, but strongly recommend not to due to potential security issues.</p>
-                
-                                   <h4>Some examples</h4>
-                <ul>
-                    <li><a href="">Lamba functions</a></li>
-                    <li><a href="">Magic methods</a></li>
-                </ul>
-                   
-                   
-                <h3>Usage</h3>
-                <pre><code>var engine = new PHP ('&lt;?php echo "Hello world!"; ?&gt;');
-console.log( engine.vm.OUTPUT_BUFFER); // the outputted buffer from the script</code></pre>
 
-                <p>The code is by default run synchronously so the output will be immidiately readable upon the engine finishing execution. Alternatively, the VM can be set to run under a web worker as well, in which case a callback function will need to be provided.</p>
-             
-
-                
-                <h3>Status</h3>
-
-                <p>I took a test driven approach to developing this library, which means that I have been mostly focusing on getting the php unit tests (which PHP uses itself) to work correctly. 
-                    If a certain functionality hasn't been a part of the base unit tests (<a href="https://github.com/niklasvh/php.js/tree/master/tests">around 670 in total</a>), it most likely won't work or only works partially. Additionally, only a fraction of module functions have been implemented, and even for the ones that have been, many of them are only partially implemented (i.e. signature checks haven't really been implemented to any functions, although user created functions support them). 
-                However, additional functions can easily be added, as they can be written in PHP and have them compiled into JavaScript.</p>
-                <p>The current status of the passing tests can be seen <a href="https://github.com/niklasvh/php.js/blob/master/tests/readme.md">here</a>. I'll be the first admit that there are still <strong>a lot of bugs</strong>, but considering the complexity of the language, it is well on its way.</p> 
-
-
-                <h3>Questions & Comments</h3>
-
-                <p>If you encounter a bug, please feel free to post it on <a href="https://github.com/niklasvh/php.js/issues">GitHub</a>. For questions or comments, you can contact me at Twitter <a href="https://twitter.com/niklasvh">@niklasvh</a> or <a href="https://plus.google.com/115030581977322198102/posts">Google Plus</a></p>
             </section>
             <footer>
                 <div class="profile">
@@ -100,6 +77,35 @@ console.log( engine.vm.OUTPUT_BUFFER); // the outputted buffer from the script</
                 po.src = 'https://apis.google.com/js/plusone.js';
                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
             })();
+        </script>
+        <script src="PHP.min.js"></script>
+        <script src="adapters/filesystem/xhr.js"></script>
+        <script>
+            console.log(PHP);
+            var content = document.getElementById("code"),
+            result = document.getElementById("result");
+            document.getElementById("run").addEventListener("click", function(e){
+                e.preventDefault();
+                var loc = window.location;
+                console.log( loc );
+                var engine = {},
+                path = loc.pathname,
+                opts = {
+                    SERVER: {
+                        SCRIPT_FILENAME: path.substring(0, path.length - 1)
+                        //    SCRIPT_FILENAME: "%s"
+                    }
+                };
+                    
+  
+                    
+                opts.filesystem = new PHP.Adapters.XHRFileSystem();
+                    
+          
+                engine = new PHP( content.value , opts );
+                result.innerHTML = engine.vm.OUTPUT_BUFFER;
+                
+            }, false);
         </script>
     </body>
 </html>
