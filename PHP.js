@@ -14099,8 +14099,8 @@ PHP.VM.Variable = function( arg ) {
     };
     
     this[ COMPILER.NEG ] = function() {
-        this[ COMPILER.VARIABLE_VALUE ] = -this[ COMPILER.VARIABLE_VALUE ];
-        return this;
+      //  this[ COMPILER.VARIABLE_VALUE ] = -this[ COMPILER.VARIABLE_VALUE ];
+        return new PHP.VM.Variable(-this[ COMPILER.VARIABLE_VALUE ]);
     };
     
     this[ COMPILER.PRE_INC ] = function() {
