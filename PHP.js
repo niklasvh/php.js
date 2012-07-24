@@ -2164,6 +2164,9 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
             
             ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
         } else {
+            if (ret[ VARIABLE.REFERRING] === undefined && ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE) {
+                this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
+            }
             ret[ VARIABLE.VARIABLE_TYPE ] = undefined;
         }
     }
@@ -13873,6 +13876,11 @@ PHP.VM.Variable = function( arg ) {
     this.NO_ERROR = false;
     setValue.call( this, arg );
     
+    
+    if (this[ this.TYPE ] === this.INT) {
+        this[ this.VARIABLE_TYPE ] = this.NEW_VARIABLE;
+    }
+    
     this[ COMPILER.VARIABLE_CLONE ] = function() {
         var variable;
         
@@ -13916,7 +13924,7 @@ PHP.VM.Variable = function( arg ) {
         }
         if ( variable [ this.VARIABLE_TYPE ] === this.FUNCTION  ) {
             this.ENV[ COMPILER.ERROR ]("Only variables should be assigned by reference", PHP.Constants.E_STRICT, true );
-            
+            this[ COMPILER.ASSIGN ]( variable );
             return this;
         }
         
@@ -14547,6 +14555,8 @@ PHP.VM.Variable.prototype.LAMBDA = 8;
 
 // variable types
 PHP.VM.Variable.prototype.FUNCTION = 0;
+
+PHP.VM.Variable.prototype.NEW_VARIABLE = 1;
 
 PHP.VM.Variable.prototype.OVERLOADING = "$Overloading";
 

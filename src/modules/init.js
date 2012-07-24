@@ -135,6 +135,9 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
             
             ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
         } else {
+            if (ret[ VARIABLE.REFERRING] === undefined && ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE) {
+                this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
+            }
             ret[ VARIABLE.VARIABLE_TYPE ] = undefined;
         }
     }
