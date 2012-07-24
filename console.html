@@ -26,7 +26,7 @@
                     <li><a class="buttons github" href="https://github.com/niklasvh/php.js">View On GitHub</a></li>
                 </ul>
 
-                <p class="header">                        
+                <p class="header">
 
                     <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://phpjs.hertzen.com/"  data-count="horizontal" data-via="niklasvh">Tweet</a>
                 <g:plusone size="medium" annotation="inline" href="http://phpjs.hertzen.com/" width="250"></g:plusone>
@@ -41,10 +41,10 @@
 
                 <h3>PHP Code</h3>
                 <textarea id="code" style="width:100%;height:200px;">&lt;?php
-// insert code here                
-echo "Hello world!";          
+// insert code here
+echo "Hello world!";
 
-      
+
 ?&gt;</textarea>
                 <a href="#" id="run">Run code</a>
                 <h3>Result</h3>
@@ -70,9 +70,9 @@ echo "Hello world!";
         <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
         <script>
 
-            // google analytics         
-            var _gaq = _gaq || [];_gaq.push(['_setAccount', 'UA-188600-10']);_gaq.push(['_trackPageview']);(function() {var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);})();   
-            // twitter         
+            // google analytics
+            var _gaq = _gaq || [];_gaq.push(['_setAccount', 'UA-188600-10']);_gaq.push(['_trackPageview']);(function() {var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);})();
+            // twitter
                 !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
             // google plus
             (function() {
@@ -83,16 +83,18 @@ echo "Hello world!";
         </script>
         <script src="PHP.min.js"></script>
         <script src="adapters/filesystem/xhr.js"></script>
+        <div id="scripts"></div>
         <script>
-        
+
             var content = document.getElementById("code"),
             loc = window.location,
             gist,
             result_code = document.getElementById("result_code"),
-            result = document.getElementById("result");
-            document.getElementById("run").addEventListener("click", function(e){
-                e.preventDefault();
-                
+            run = function(e){
+                if ( e !== undefined ){
+                    e.preventDefault();
+                }
+
                 var engine = {},
                 path = loc.pathname,
                 opts = {
@@ -100,36 +102,41 @@ echo "Hello world!";
                         SCRIPT_FILENAME: path.substring(0, path.length - 1)
                     }
                 };
-                    
-  
-                    
+
+
+
                 opts.filesystem = new PHP.Adapters.XHRFileSystem();
-                    
-          
-                engine = new PHP( content.value , opts );
+
+
+                engine = new PHP( content.value.replace(/\n/g,"\r\n") , opts );
                 console.log( engine );
-                result.innerHTML = engine.vm.OUTPUT_BUFFER.replace(/</g,"&gt;").replace(/>/g,"&lt;");
-                result_code.innerHTML = engine.compiler.src.replace(/</g,"&gt;").replace(/>/g,"&lt;");
-            }, false);
-            
-            console.log(loc);
-            if ((gist = loc.search.match(/gist=(\d+)/)) !== null) {
-                
-                var request = new XMLHttpRequest();  
-                request.open('GET', 'https://api.github.com/gists/' +  gist[ 1 ], true);  
-                request.onload = function( e ){
-                    console.log(JSON.parse(e.responseText));
-                };
-                request.send(); 
-                 
-  
-                if (request.status === 200) {  
-                    console.log(request.responseText);  
-                }  
-                gist[1]
+                result.innerHTML = engine.vm.OUTPUT_BUFFER.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                result_code.innerHTML = engine.compiler.src.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+            },
+            result = document.getElementById("result");
+            document.getElementById("run").addEventListener("click", run, false);
+
+
+
+            function loadgist( json) {
+                if (json.data.files !== undefined ) {
+                    console.log(Object.keys(json.data.files));
+                    content.value = json.data.files[Object.keys(json.data.files)[0]].content;
+                    run();
+                }
+                console.log( json );
             }
-           
-            
+            if ((gist = loc.search.match(/gist=(\d+)/)) !== null) {
+
+                var script = document.createElement("script");
+                script.src = "https://api.github.com/gists/" + gist[ 1 ] + "?callback=loadgist";
+                document.getElementById("scripts").appendChild( script );
+
+
+
+            }
+
+
         </script>
     </body>
 </html>
