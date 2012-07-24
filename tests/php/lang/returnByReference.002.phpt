@@ -24,6 +24,6 @@ var_dump($a); //expecting "changed"
 ?>
 --EXPECTF--
 
-Strict Standards: Only variables should be assigned by reference in %s on line 13
+Strict Standards: Only variables should be assigned by reference in %s on line %d
 string(8) "original"
 string(7) "changed"
