@@ -24,7 +24,7 @@ $("parent")._((ENV.$F("get_parent_class", arguments, $("this").$Prop( ctx, "name
 if ( ((ENV.$F("method_exists", arguments, $("parent"), $("methodName")))).$Bool.$) {
 $("arr").$Dim( this, undefined )._($$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parent"), $("methodName") )));
 } else {
-$("arr").$Dim( this, undefined )._($$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("this").$Prop( ctx, "name" ), $("methodName") )));
+$("arr").$Dim( this, undefined )._($$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("this").$Prop( ctx, "name", true ), $("methodName") )));
 };
 } ENV.$foreachEnd( iterator1 );
 return $("arr");

@@ -12,6 +12,12 @@ PHP.Modules.prototype.array_shift = function( array ) {
     CLASS_PROPERTY = PHP.VM.Class.PROPERTY;
     
 
+    if ( array[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION  ) {
+        this.ENV[ COMPILER.ERROR ]("Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
+
+    }
+    
+    
     var value = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].shift(),
     key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].shift();
    

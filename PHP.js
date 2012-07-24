@@ -1066,7 +1066,7 @@ PHP.Compiler.prototype.Node_Expr_UnaryMinus = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_BitwiseOr = function( action ) {
-    return this.source( action.left ) + "." + this.VARIABLE_VALUE + " | " + this.source( action.right ) + "." + this.VARIABLE_VALUE;
+    return this.CREATE_VARIABLE + "(" + this.source( action.left )  + "." + this.VARIABLE_VALUE + " | " + this.source( action.right ) + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_BitwiseAnd = function( action ) {
@@ -2765,6 +2765,12 @@ PHP.Modules.prototype.array_shift = function( array ) {
     CLASS_PROPERTY = PHP.VM.Class.PROPERTY;
     
 
+    if ( array[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION  ) {
+        this.ENV[ COMPILER.ERROR ]("Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
+
+    }
+    
+    
     var value = array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ].shift(),
     key =  array[ COMPILER.VARIABLE_VALUE ][ CLASS_PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].shift();
    
@@ -15191,7 +15197,7 @@ $("parent")._((ENV.$F("get_parent_class", arguments, $("this").$Prop( ctx, "name
 if ( ((ENV.$F("method_exists", arguments, $("parent"), $("methodName")))).$Bool.$) {
 $("arr").$Dim( this, undefined )._($$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parent"), $("methodName") )));
 } else {
-$("arr").$Dim( this, undefined )._($$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("this").$Prop( ctx, "name" ), $("methodName") )));
+$("arr").$Dim( this, undefined )._($$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("this").$Prop( ctx, "name", true ), $("methodName") )));
 };
 } ENV.$foreachEnd( iterator1 );
 return $("arr");
