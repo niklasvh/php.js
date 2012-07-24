@@ -381,7 +381,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 });
                  */
                 Object.defineProperty( Class.prototype,  PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName, {
-                    value: propertyDefault
+                    value: propertyDefault || new PHP.VM.Variable(null)
                 });
                 
                 
@@ -946,7 +946,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         };
         
         Class.prototype[ COMPILER.STATIC_PROPERTY_GET ] = function( ctx, propertyClass, propertyName, ref ) {
-            
+       
             var methodCTX;
             if ( /^self$/i.test( propertyClass ) ) {
                 methodCTX = ctx;
@@ -955,7 +955,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             } else {
                 methodCTX = this;
             }
- 
+    
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] === undefined ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access to undeclared static property: " + methodCTX[ COMPILER.CLASS_NAME ] + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
             }

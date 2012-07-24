@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 598 out of 670 (89.3%)
+Passed 599 out of 670 (89.4%)
 
 Failed tests:
 
@@ -36,7 +36,6 @@ Failed tests:
  - tests/php/lang/bug45392.phpt
  - tests/php/lang/each_binary_safety.phpt
  - tests/php/lang/engine_assignExecutionOrder_004.phpt
- - tests/php/lang/engine_assignExecutionOrder_008.phpt
  - tests/php/lang/foreachLoop.006.phpt
  - tests/php/lang/foreachLoop.016.phpt
  - tests/php/lang/foreachLoopIterator.001.phpt

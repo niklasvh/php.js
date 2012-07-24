@@ -23,8 +23,15 @@ PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
         part = this.source( action.dim );
     }
 
-    var src = "";
-    src += this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + part + " )";
+    var src = "", variable;
+    
+    if ( action.variable.type === "Node_Expr_PropertyFetch") {
+        variable = this.Node_Expr_PropertyFetch( action.variable, true );
+    } else {
+        variable = this.source( action.variable );
+    }
+    
+    src += variable + "."  + this.DIM_FETCH + '( this, ' + part + " )";
     
     return src;
 };
