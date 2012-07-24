@@ -321,7 +321,7 @@ PHP.Utils.CheckRef = function( ret, byRef ) {
             
             ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
         } else if (byRef === true){
-          console.log(ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE, ret[ VARIABLE.VARIABLE_TYPE ], ret[ COMPILER.VARIABLE_VALUE ]);
+       
             if (ret[ VARIABLE.REFERRING] === undefined && (ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE || ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION )) {
                  
                this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
@@ -2178,7 +2178,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
     } else {
         ret = this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) ); 
     }
-console.log( functionName );
+
     PHP.Utils.CheckRef.call( this, ret, this.FUNCTION_REFS[ functionName ] );
                 
 
@@ -12149,7 +12149,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         staticVars = {},
         props = {},
         
-        callMethod = function( methodName, args ) {
+        callMethod = function( methodName, args, variablesCallback ) {
             
             //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             
@@ -12192,6 +12192,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 });
             };
             
+            if (variablesCallback !== undefined ) {
+                variablesCallback();
+            }
             
             return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], staticHandler );
         };
@@ -12953,11 +12956,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             }
             
             
-            if ( !checkType( this[ methodTypePrefix + methodName ], STATIC ) && !/^(parent|self)$/i.test( methodClass ) && !inherits(ctx, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ]) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
-            } 
+          
+            ret = this.callMethod.call( this, methodName, args, function(){
+                if ( !checkType( this[ methodTypePrefix + methodName ], STATIC ) && !/^(parent|self)$/i.test( methodClass ) && !inherits(ctx, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ]) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
+                } 
            
-            ret = this.callMethod.call( this, methodName, args );
+            }.bind(this));
+            
            
             PHP.Utils.CheckRef.call( ENV, ret, this[ methodByRef  + methodName ] );
                 

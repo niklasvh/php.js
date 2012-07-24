@@ -115,7 +115,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         staticVars = {},
         props = {},
         
-        callMethod = function( methodName, args ) {
+        callMethod = function( methodName, args, variablesCallback ) {
             
             //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
             
@@ -158,6 +158,9 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 });
             };
             
+            if (variablesCallback !== undefined ) {
+                variablesCallback();
+            }
             
             return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], staticHandler );
         };
@@ -919,11 +922,14 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             }
             
             
-            if ( !checkType( this[ methodTypePrefix + methodName ], STATIC ) && !/^(parent|self)$/i.test( methodClass ) && !inherits(ctx, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ]) ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
-            } 
+          
+            ret = this.callMethod.call( this, methodName, args, function(){
+                if ( !checkType( this[ methodTypePrefix + methodName ], STATIC ) && !/^(parent|self)$/i.test( methodClass ) && !inherits(ctx, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ]) ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
+                } 
            
-            ret = this.callMethod.call( this, methodName, args );
+            }.bind(this));
+            
            
             PHP.Utils.CheckRef.call( ENV, ret, this[ methodByRef  + methodName ] );
                 
