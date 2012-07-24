@@ -224,7 +224,7 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
             ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
             value[ VARIABLE.VARIABLE_TYPE ] = undefined;
             value = new PHP.VM.Variable( value[ COMPILER.VARIABLE_VALUE ] );
-               console.log(value[ VARIABLE.REFERRING ], VARIABLE.REFERRING, value[ VARIABLE.IS_REF ] );
+            
         }
 
         if (value[ VARIABLE.DEFINED ] !== true ) {
@@ -12545,6 +12545,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access type for interface method " + className + "::" + realName + "() must be omitted", PHP.Constants.E_ERROR, true );
             }
            
+            // Default value for parameters with a class type hint can only be NULL
+            methodProps.forEach(function( prop ){
+                if ( prop[ COMPILER.PROPERTY_TYPE ] !== undefined && prop[ COMPILER.PROPERTY_DEFAULT ] instanceof PHP.VM.Variable && !/^(string|array)$/i.test(prop[ COMPILER.PROPERTY_TYPE ]) && prop[ COMPILER.PROPERTY_DEFAULT ][ VARIABLE.TYPE] !== VARIABLE.NULL ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Default value for parameters with a class type hint can only be NULL", PHP.Constants.E_ERROR, true );
+                }
+            }, this);
+
             
             // __call
             if ( methodName === __call  ) { 

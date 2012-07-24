@@ -470,6 +470,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access type for interface method " + className + "::" + realName + "() must be omitted", PHP.Constants.E_ERROR, true );
             }
            
+            // Default value for parameters with a class type hint can only be NULL
+            methodProps.forEach(function( prop ){
+                if ( prop[ COMPILER.PROPERTY_TYPE ] !== undefined && prop[ COMPILER.PROPERTY_DEFAULT ] instanceof PHP.VM.Variable && !/^(string|array)$/i.test(prop[ COMPILER.PROPERTY_TYPE ]) && prop[ COMPILER.PROPERTY_DEFAULT ][ VARIABLE.TYPE] !== VARIABLE.NULL ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Default value for parameters with a class type hint can only be NULL", PHP.Constants.E_ERROR, true );
+                }
+            }, this);
+
             
             // __call
             if ( methodName === __call  ) { 
