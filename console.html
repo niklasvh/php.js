@@ -103,6 +103,7 @@ echo "Hello world!";
                     
           
                 engine = new PHP( content.value , opts );
+                console.log( engine );
                 result.innerHTML = engine.vm.OUTPUT_BUFFER;
                 
             }, false);
