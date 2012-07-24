@@ -116,9 +116,9 @@ L=100 M=200 N=300
 O= and P=
 10 20 40 50 60 70 80
 
-Notice: Undefined offset: 1 in %s on line %d
+Notice: Undefined offset: %d in %s on line %d
 
-Notice: Undefined offset: 0 in %s on line %d
+Notice: Undefined offset: %d in %s on line %d
 Y=,Z=
 
 Notice: Undefined offset: 1 in %s on line %d
