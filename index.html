@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="stylesheets/pygment_trac.css">
         <script src="javascripts/scale.fix.js"></script>
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <meta name="author" content="Niklas von Hertzen">
         <!--[if lt IE 9]>
         <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
@@ -20,8 +21,7 @@
                 <p class="header"></p>
 
                 <ul>
-                    <li class="download"><a class="buttons" href="https://github.com/niklasvh/php.js/zipball/master">Download ZIP</a></li>
-                    <li class="download"><a class="buttons" href="https://github.com/niklasvh/php.js/tarball/master">Download TAR</a></li>
+                    <li class="download"><a class="buttons" href="console.html">Console</a></li>
                     <li><a class="buttons github" href="https://github.com/niklasvh/php.js">View On GitHub</a></li>
                 </ul>
 
@@ -36,33 +36,50 @@
             <section>
                 <h3>php.js - PHP VM with JavaScript</h3>
 
-                <p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+                <p>
+                    This library reads PHP code and transforms it into JavaScript code which can be run in the PHP VM in this library, resulting in same results as with PHP.
+It starts by tokenizing the PHP code into tokens, which it then uses to build an AST tree. Once the tree has been constructed, the script compiles it into JavaScript that can be interpreted by the VM and then executes it. Any additional unconverted code that gets executed within the VM, such as eval or lambda functions will go through the same process before being executed. 
+                </p>
+                   <p>The code can be directly run in your browser, meaning you can <strong>execute php code straight out of your browser</strong>! It can also be run on node.js, but strongly recommend not to due to potential security issues.</p>
+                
+                                   <h4>Some examples</h4>
+                <ul>
+                    <li><a href="">Lamba functions</a></li>
+                    <li><a href="">Magic methods</a></li>
+                </ul>
+                   
+                   
+                <h3>Usage</h3>
+                <pre><code>var engine = new PHP ('&lt;?php echo "Hello world!"; ?&gt;');
+console.log( engine.vm.OUTPUT_BUFFER); // the outputted buffer from the script</code></pre>
 
-                <pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
+                <p>The code is by default run synchronously so the output will be immidiately readable upon the engine finishing execution. Alternatively, the VM can be set to run under a web worker as well, in which case a callback function will need to be provided.</p>
+             
 
-                <p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+                
+                <h3>Status</h3>
 
-                <h3>Designer Templates</h3>
+                <p>I took a test driven approach to developing this library, which means that I have been mostly focusing on getting the php unit tests (which PHP uses itself) to work correctly. 
+                    If a certain functionality hasn't been a part of the base unit tests (<a href="https://github.com/niklasvh/php.js/tree/master/tests">around 670 in total</a>), it most likely won't work or only works partially. Additionally, only a fraction of module functions have been implemented, and even for the ones that have been, many of them are only partially implemented (i.e. signature checks haven't really been implemented to any functions, although user created functions support them). 
+                However, additional functions can easily be added, as they can be written in PHP and have them compiled into JavaScript.</p>
+                <p>The current status of the passing tests can be seen <a href="https://github.com/niklasvh/php.js/blob/master/tests/readme.md">here</a>. I'll be the first admit that there are still <strong>a lot of bugs</strong>, but considering the complexity of the language, it is well on its way.</p> 
 
-                <p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
 
-                <h3>Rather Drive Stick?</h3>
+                <h3>Questions & Comments</h3>
 
-                <p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-                <h3>Authors and Contributors</h3>
-
-                <p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-                <h3>Support or Contact</h3>
-
-                <p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+                <p>If you encounter a bug, please feel free to post it on <a href="https://github.com/niklasvh/php.js/issues">GitHub</a>. For questions or comments, you can contact me at Twitter <a href="https://twitter.com/niklasvh">@niklasvh</a> or <a href="https://plus.google.com/115030581977322198102/posts">Google Plus</a></p>
             </section>
             <footer>
-                <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+                <div class="profile">
+                    <h3>Niklas von Hertzen</h3>
+                    <a href="https://twitter.com/niklasvh"><img src="http://experiments.hertzen.com/base/img/twitter.png" alt="Twitter" /></a>
+                    <a href="https://plus.google.com/115030581977322198102/posts"><img src="http://experiments.hertzen.com/base/img/google-plus-black.png" alt="Google+" /></a>
+                    <a href="https://facebook.com/vonhertzen"><img src="http://experiments.hertzen.com/base/img/facebook.png" alt="Facebook" /></a>
+                    <a href="https://github.com/niklasvh"><img src="http://experiments.hertzen.com/base/img/github.png" alt="Github" /></a>
+                    <a href="http://fi.linkedin.com/pub/niklas-von-hertzen/16/522/5ab"><img src="http://experiments.hertzen.com/base/img/linkedin.png" alt="LinkedIn" /></a>
+                </div>
+
+                <p style="font-size:10px;"><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
             </footer>
         </div>
         <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
