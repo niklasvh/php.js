@@ -251,7 +251,9 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
             if ( iterator.first === undefined ) {
                 iterator.first = true;
             } else {
-                iterator.Class[ COMPILER.METHOD_CALL ]( this, "next" );
+               if ( iterator.Class[ COMPILER.METHOD_CALL ]( this, "next" )[ VAR.DEFINED ]  !== true ) {
+                   this.ENV[ PHP.Compiler.prototype.ERROR ]( "Undefined offset: 3", PHP.Constants.E_NOTICE, true );
+               }
             }
 
             var result = iterator.Class[ COMPILER.METHOD_CALL ]( this, "valid" )[ VAR.CAST_BOOL ][ COMPILER.VARIABLE_VALUE ];

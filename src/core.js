@@ -269,7 +269,8 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
 
 PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global ) {
     
-    var COMPILER = PHP.Compiler.prototype;
+    var COMPILER = PHP.Compiler.prototype,
+     VARIABLE = PHP.VM.Variable.prototype;
    
     staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
 
@@ -305,8 +306,9 @@ PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global 
     // global handler
     staticHandler[ COMPILER.FUNCTION_GLOBAL ] = function( vars ) {
         vars.forEach(function( varName ){
-      
-            handler( varName, $Global( varName ) )
+            var val = $Global( varName );
+            val[ VARIABLE.DEFINED ] = true;
+            handler( varName, val )
         });
     };
     

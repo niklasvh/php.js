@@ -133,7 +133,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             });
             
             // static handler
+            
             var staticHandler = {};
+            PHP.Utils.StaticHandler.call( this, staticHandler, staticVars, $, ENV[ COMPILER.GLOBAL ] );
+            /*
             staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
                 
                 if ( staticVars[ methodName ][ name ] !== undefined ) {
@@ -157,7 +160,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     $( varName, ENV[ COMPILER.GLOBAL ]( varName ) )
                 });
             };
-            
+            */
             if (variablesCallback !== undefined ) {
                 variablesCallback();
             }

@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 600 out of 670 (89.6%)
+Passed 602 out of 670 (89.9%)
 
 Failed tests:
 
@@ -37,8 +37,6 @@ Failed tests:
  - tests/php/lang/each_binary_safety.phpt
  - tests/php/lang/foreachLoop.006.phpt
  - tests/php/lang/foreachLoop.016.phpt
- - tests/php/lang/foreachLoopIterator.001.phpt
- - tests/php/lang/foreachLoopIteratorAggregate.001.phpt
  - tests/php/lang/foreachLoopIteratorAggregate.002.phpt
  - tests/php/lang/foreachLoopIteratorAggregate.003.phpt
  - tests/php/lang/foreachLoopObjects.002.phpt

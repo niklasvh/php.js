@@ -269,7 +269,8 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
 
 PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global ) {
     
-    var COMPILER = PHP.Compiler.prototype;
+    var COMPILER = PHP.Compiler.prototype,
+     VARIABLE = PHP.VM.Variable.prototype;
    
     staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
 
@@ -305,8 +306,9 @@ PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global 
     // global handler
     staticHandler[ COMPILER.FUNCTION_GLOBAL ] = function( vars ) {
         vars.forEach(function( varName ){
-      
-            handler( varName, $Global( varName ) )
+            var val = $Global( varName );
+            val[ VARIABLE.DEFINED ] = true;
+            handler( varName, val )
         });
     };
     
@@ -1512,7 +1514,7 @@ PHP.Compiler.prototype.Node_Expr_Clone = function( action ) {
 };
 PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
     
-    console.log( action );
+   
     action.stmts.forEach(function( stmt ){
         if ( stmt.type === "Node_Stmt_ClassMethod" && stmt.stmts !== null) {
             this.FATAL_ERROR = "Interface function " + action.name + "::" + stmt.name + "() cannot contain body {} on line " + action.attributes.startLine;  
@@ -1775,7 +1777,7 @@ PHP.Compiler.prototype.Node_Stmt_Continue = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Break = function( action ) {
-    console.log( action );
+  
     var src = "break"
     
     if (action.num !== null) {
@@ -1833,7 +1835,7 @@ PHP.Compiler.prototype.Node_Stmt_Static = function( action ) {
         src += this.source( variable );
     }, this);
 
-    console.log( action );
+  
     return src;  
 };
 
@@ -1856,13 +1858,13 @@ PHP.Compiler.prototype.Node_Stmt_StaticVar = function( action ) {
     // todo fix
     var src = "." + this.FUNCTION_STATIC_SET + '("' + action.name + '", ' + (( action.def === null) ? "new PHP.VM.Variable()" : this.source( action.def )) + ")";
 
-    console.log( action );
+
     return src;  
 };
 
 PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
     var src = "";
-    console.log( action );
+   
     action.props.forEach(function( prop ){
        
         src += "." + this.CLASS_PROPERTY + '( "' + prop.name + '", ' + action.Type;
@@ -1959,7 +1961,7 @@ PHP.Compiler.prototype.Node_Stmt_TryCatch = function( action ) {
     
     src += ";\n }"
 
-    console.log( action );
+    
     this.source( action.expr ); 
     return src;
 };
@@ -1974,7 +1976,7 @@ PHP.Compiler.prototype.Node_Stmt_Catch = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
 
-  console.log( action );
+ 
 
     this.INSIDE_METHOD = true;
     var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', [';
@@ -3534,7 +3536,9 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
             if ( iterator.first === undefined ) {
                 iterator.first = true;
             } else {
-                iterator.Class[ COMPILER.METHOD_CALL ]( this, "next" );
+               if ( iterator.Class[ COMPILER.METHOD_CALL ]( this, "next" )[ VAR.DEFINED ]  !== true ) {
+                   this.ENV[ PHP.Compiler.prototype.ERROR ]( "Undefined offset: 3", PHP.Constants.E_NOTICE, true );
+               }
             }
 
             var result = iterator.Class[ COMPILER.METHOD_CALL ]( this, "valid" )[ VAR.CAST_BOOL ][ COMPILER.VARIABLE_VALUE ];
@@ -12293,7 +12297,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             });
             
             // static handler
+            
             var staticHandler = {};
+            PHP.Utils.StaticHandler.call( this, staticHandler, staticVars, $, ENV[ COMPILER.GLOBAL ] );
+            /*
             staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
                 
                 if ( staticVars[ methodName ][ name ] !== undefined ) {
@@ -12317,7 +12324,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     $( varName, ENV[ COMPILER.GLOBAL ]( varName ) )
                 });
             };
-            
+            */
             if (variablesCallback !== undefined ) {
                 variablesCallback();
             }
