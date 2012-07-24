@@ -241,6 +241,17 @@ PHP.Parser.prototype.Node_Expr_Equal = function() {
   
 };
 
+PHP.Parser.prototype.Node_Expr_NotEqual = function() {
+   
+    return {
+        type: "Node_Expr_NotEqual",
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };  
+  
+};
+
 
 PHP.Parser.prototype.Node_Expr_Identical = function() {
    

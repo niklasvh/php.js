@@ -979,17 +979,28 @@ PHP.Compiler.prototype.Node_Expr_Exit = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
    
-    var src = this.CTX + "list( " + this.source(action.expr);
+    var src = this.CTX + "list( ";
 
-    var args = [];
-    
-    console.log( action );
+   
 
-    action.assignList.forEach(function( item ){
-        src += ", " + this.source(item) ;
-    }, this);
 
-    src += " )";
+    var addList = function( assignList ) {
+        var first = "";
+        assignList.forEach(function( item ){
+            if (Array.isArray( item )) {
+                src += first + " [";
+                addList( item );
+                src += "]";
+                
+            } else {
+                src += first + " " + this.source(item) ;
+            }
+            first = ", ";
+        }, this);
+
+    }.bind(this);
+    addList( action.assignList );
+    src += ", " + this.source(action.expr) + " )";
 
     return src;
 };
@@ -2964,20 +2975,30 @@ PHP.Modules.prototype.key = function( array ) {
 
 
 
-PHP.Modules.prototype.list = function( array ) {
+PHP.Modules.prototype.list = function() {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
-    ARRAY = PHP.VM.Array.prototype;
+    ARRAY = PHP.VM.Array.prototype,
+    array = Array.prototype.pop.call(arguments);
         
     if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
         var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
         values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
        
-        Array.prototype.slice.call( arguments, 1 ).forEach(function( variable, index ){
+        Array.prototype.slice.call( arguments, 0 ).forEach(function( variable, index ){
             if ( variable instanceof PHP.VM.Variable ) {
-                variable[ COMPILER.VARIABLE_VALUE ] = values[ index ][ COMPILER.VARIABLE_VALUE ];
+                if ( values[ index ] !== undefined ) {
+                    variable[ COMPILER.VARIABLE_VALUE ] = values[ index ][ COMPILER.VARIABLE_VALUE ];
+                } else {
+                    this.ENV[ COMPILER.ERROR ]("Undefined offset: " + index, PHP.Constants.E_NOTICE, true );
+                    variable[ COMPILER.VARIABLE_VALUE ] = new PHP.VM.Variable();
+                }
+            } else if ( Array.isArray( variable )) {
+                console.log(index, values[ index ][ COMPILER.VARIABLE_VALUE ],  [ values[ index ] ].concat( variable ), values[ index ]);
+                this.list.apply( this, variable.concat(values[ index ]) );
+                console.log( variable );
             }
-        });
+        }, this);
         
         
         return array;
@@ -2987,7 +3008,7 @@ PHP.Modules.prototype.list = function( array ) {
     } 
     
     // fill with null
-    Array.prototype.slice.call( arguments, 1 ).forEach(function( variable ){
+    Array.prototype.slice.call( arguments, 0 ).forEach(function( variable ){
         if ( variable instanceof PHP.VM.Variable ) {
             variable[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
         }
@@ -10585,7 +10606,7 @@ PHP.Parser.prototype.Node_Stmt_Switch = function() {
 };
 
 PHP.Parser.prototype.Node_Stmt_Else = function() {
-    console.log( arguments );
+   
     return {
         type: "Node_Stmt_Else",
         stmts: arguments[ 0 ],
@@ -10908,6 +10929,17 @@ PHP.Parser.prototype.Node_Expr_Equal = function() {
    
     return {
         type: "Node_Expr_Equal",
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };  
+  
+};
+
+PHP.Parser.prototype.Node_Expr_NotEqual = function() {
+   
+    return {
+        type: "Node_Expr_NotEqual",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]

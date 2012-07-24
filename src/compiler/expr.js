@@ -174,17 +174,28 @@ PHP.Compiler.prototype.Node_Expr_Exit = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
    
-    var src = this.CTX + "list( " + this.source(action.expr);
+    var src = this.CTX + "list( ";
 
-    var args = [];
-    
-    console.log( action );
+   
 
-    action.assignList.forEach(function( item ){
-        src += ", " + this.source(item) ;
-    }, this);
 
-    src += " )";
+    var addList = function( assignList ) {
+        var first = "";
+        assignList.forEach(function( item ){
+            if (Array.isArray( item )) {
+                src += first + " [";
+                addList( item );
+                src += "]";
+                
+            } else {
+                src += first + " " + this.source(item) ;
+            }
+            first = ", ";
+        }, this);
+
+    }.bind(this);
+    addList( action.assignList );
+    src += ", " + this.source(action.expr) + " )";
 
     return src;
 };

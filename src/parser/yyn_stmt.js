@@ -223,7 +223,7 @@ PHP.Parser.prototype.Node_Stmt_Switch = function() {
 };
 
 PHP.Parser.prototype.Node_Stmt_Else = function() {
-    console.log( arguments );
+   
     return {
         type: "Node_Stmt_Else",
         stmts: arguments[ 0 ],

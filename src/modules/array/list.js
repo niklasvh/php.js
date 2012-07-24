@@ -7,20 +7,30 @@
 
 
 
-PHP.Modules.prototype.list = function( array ) {
+PHP.Modules.prototype.list = function() {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
-    ARRAY = PHP.VM.Array.prototype;
+    ARRAY = PHP.VM.Array.prototype,
+    array = Array.prototype.pop.call(arguments);
         
     if ( array [ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
         var pointer = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.POINTER],
         values = array[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
        
-        Array.prototype.slice.call( arguments, 1 ).forEach(function( variable, index ){
+        Array.prototype.slice.call( arguments, 0 ).forEach(function( variable, index ){
             if ( variable instanceof PHP.VM.Variable ) {
-                variable[ COMPILER.VARIABLE_VALUE ] = values[ index ][ COMPILER.VARIABLE_VALUE ];
+                if ( values[ index ] !== undefined ) {
+                    variable[ COMPILER.VARIABLE_VALUE ] = values[ index ][ COMPILER.VARIABLE_VALUE ];
+                } else {
+                    this.ENV[ COMPILER.ERROR ]("Undefined offset: " + index, PHP.Constants.E_NOTICE, true );
+                    variable[ COMPILER.VARIABLE_VALUE ] = new PHP.VM.Variable();
+                }
+            } else if ( Array.isArray( variable )) {
+                console.log(index, values[ index ][ COMPILER.VARIABLE_VALUE ],  [ values[ index ] ].concat( variable ), values[ index ]);
+                this.list.apply( this, variable.concat(values[ index ]) );
+                console.log( variable );
             }
-        });
+        }, this);
         
         
         return array;
@@ -30,7 +40,7 @@ PHP.Modules.prototype.list = function( array ) {
     } 
     
     // fill with null
-    Array.prototype.slice.call( arguments, 1 ).forEach(function( variable ){
+    Array.prototype.slice.call( arguments, 0 ).forEach(function( variable ){
         if ( variable instanceof PHP.VM.Variable ) {
             variable[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
         }
