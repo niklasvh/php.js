@@ -20,15 +20,18 @@ PHP.Modules.prototype.print_r = function() {
     }
     
     var $dump = function( argument, indent ) {
-        var str = "";
-        if ( argument[ VAR.TYPE ] === VAR.ARRAY ) {
+        var str = "",
+        value = argument[ COMPILER.VARIABLE_VALUE ],
+        ARG_TYPE = argument[ VAR.TYPE ]; // trigger get for undefined
+        
+        if ( ARG_TYPE === VAR.ARRAY ) {
             str += "Array\n";
             str += $INDENT( indent ) + "(";
-            var values = argument[ COMPILER.VARIABLE_VALUE ][ PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
-            var keys = argument[ COMPILER.VARIABLE_VALUE ][ PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
+            var values = value[ PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
+            var keys = value[ PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
             
            
-       
+       console.log( values );
             str += "\n";
             
             keys.forEach(function( key, index ){
@@ -47,10 +50,10 @@ PHP.Modules.prototype.print_r = function() {
             }, this);
             
             str += $INDENT( indent ) + ")\n";
-        } else if( argument[ VAR.TYPE ] === VAR.OBJECT || argument instanceof PHP.VM.ClassPrototype) { 
+        } else if( ARG_TYPE === VAR.OBJECT || argument instanceof PHP.VM.ClassPrototype) { 
             var classObj;
             if (argument instanceof PHP.VM.Variable ){
-                classObj = argument[ COMPILER.VARIABLE_VALUE ];
+                classObj = value;
             } else {
                 classObj = argument;
             }
@@ -116,15 +119,15 @@ PHP.Modules.prototype.print_r = function() {
  
             str += $INDENT( indent ) + ")\n";
             
-        } else if( argument[ VAR.TYPE ] === VAR.NULL ) {
+        } else if( ARG_TYPE === VAR.NULL ) {
             str += $INDENT( indent ) + "NULL";  
-        } else if( argument[ VAR.TYPE ] === VAR.STRING ) {
+        } else if( ARG_TYPE === VAR.STRING ) {
             
-            var value = argument[ COMPILER.VARIABLE_VALUE ];
+   
             str += value;  
-        } else if( argument[ VAR.TYPE ] === VAR.INT ) {
+        } else if( ARG_TYPE === VAR.INT ) {
             
-            var value = argument[ COMPILER.VARIABLE_VALUE ];
+         
             str += value;  
             
         } else {

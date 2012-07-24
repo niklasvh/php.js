@@ -487,7 +487,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             break;
                         case C.E_DEPRECATED:
                             if (checkType("E_DEPRECATED")) {
-                                this.echo( new PHP.VM.Variable("\Deprecated: " + msg + lineAppend + "\n"));
+                                this.echo( new PHP.VM.Variable("\nDeprecated: " + msg + lineAppend + "\n"));
                                 return;
                             }
 

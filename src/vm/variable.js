@@ -196,8 +196,8 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.DIV ] = function( combine
     
     var val = (this[ COMPILER.VARIABLE_VALUE ] - 0) / ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 );
     if ( val === Number.POSITIVE_INFINITY ) {
-              this.ENV[ COMPILER.ERROR ]("Division by zero", PHP.Constants.E_WARNING, true );
-              return new PHP.VM.Variable( );
+        this.ENV[ COMPILER.ERROR ]("Division by zero", PHP.Constants.E_WARNING, true );
+        return new PHP.VM.Variable( );
     }
     return new PHP.VM.Variable( val );
 };
@@ -461,7 +461,11 @@ PHP.VM.Variable = function( arg ) {
         }
         
         var tmp = variable[ COMPILER.VARIABLE_VALUE ]; // trigger get
-       
+        
+        // call setter incase we need to complete array push transaction
+        if ( typeof this[this.REGISTER_SETTER ] === "function" ) {  
+            this[this.REGISTER_SETTER ]();
+        }
         
         this[ this.REFERRING ] = variable;
         this[ this.DEFINED ] = true;
@@ -472,7 +476,6 @@ PHP.VM.Variable = function( arg ) {
     };
     
     this[ COMPILER.NEG ] = function() {
-      //  this[ COMPILER.VARIABLE_VALUE ] = -this[ COMPILER.VARIABLE_VALUE ];
         return new PHP.VM.Variable(-this[ COMPILER.VARIABLE_VALUE ]);
     };
     
