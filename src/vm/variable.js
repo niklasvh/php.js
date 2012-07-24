@@ -243,7 +243,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.NOT_IDENTICAL ] = functio
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compareTo ) {
     
     var COMPILER = PHP.Compiler.prototype,
-       ARRAY = PHP.VM.Array.prototype,
+    ARRAY = PHP.VM.Array.prototype,
     first = this,
     second = compareTo,
     cast;
@@ -255,18 +255,18 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compa
             second = second[ this.CAST_INT ];
         }
     } else if ( first[ this.TYPE ] === this.ARRAY && second[ this.TYPE ] === this.ARRAY ) {
-       var firstVals = first[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
-       secondVals = second[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
+        var firstVals = first[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
+        secondVals = second[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
        
-       if (firstVals.length !== secondVals.length) {
-           return new PHP.VM.Variable( false ); 
-       }
+        if (firstVals.length !== secondVals.length) {
+            return new PHP.VM.Variable( false ); 
+        }
        
-       var result = firstVals.every(function( val,index ){
-           return (val[ COMPILER.VARIABLE_VALUE ] == secondVals[ index ][ COMPILER.VARIABLE_VALUE ]);
-       });
+        var result = firstVals.every(function( val,index ){
+            return (val[ COMPILER.VARIABLE_VALUE ] == secondVals[ index ][ COMPILER.VARIABLE_VALUE ]);
+        });
        
-       return new PHP.VM.Variable( result ); 
+        return new PHP.VM.Variable( result ); 
        
     }
     
@@ -405,8 +405,8 @@ PHP.VM.Variable = function( arg ) {
         var variable;
         
         if ( this[ this.IS_REF ]) {
-             return this;
-         }
+            return this;
+        }
         
         switch( this[ this.TYPE ] ) {
             case this.NULL:
@@ -414,7 +414,7 @@ PHP.VM.Variable = function( arg ) {
             case this.INT:
             case this.FLOAT:
             case this.STRING:
-                 variable = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );               
+                variable = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );               
                 break;
             case this.OBJECT:
             case this.RESOURCE:
@@ -427,7 +427,7 @@ PHP.VM.Variable = function( arg ) {
                 return this;
         }
        
-         variable[ this.REFERRING ] = this[ this.REFERRING ];
+        variable[ this.REFERRING ] = this[ this.REFERRING ];
          
         
         
@@ -438,9 +438,13 @@ PHP.VM.Variable = function( arg ) {
     
     this [ this.REF ] = function( variable ) {
        
- 
+        if (this === variable) {
+            /// hehehehehe referring yourself... results in thread lock
+            return this;
+        }
         if ( variable [ this.VARIABLE_TYPE ] === this.FUNCTION  ) {
-              this.ENV[ COMPILER.ERROR ]("Only variables should be assigned by reference", PHP.Constants.E_STRICT, true );
+            this.ENV[ COMPILER.ERROR ]("Only variables should be assigned by reference", PHP.Constants.E_STRICT, true );
+            
             return this;
         }
         
@@ -500,9 +504,9 @@ PHP.VM.Variable = function( arg ) {
         
         setValue( null );
         this[ this.DEFINED ] = this[ this.NAME ];
-        
+   
         if ( this[ this.REFERRING ] !== undefined ) {
-            this [ this.REFERRING ]( PHP.Compiler.prototype.UNSET );
+            this [ this.REFERRING ][ PHP.Compiler.prototype.UNSET ]();
         }
     };
     // property get proxy
@@ -516,7 +520,7 @@ PHP.VM.Variable = function( arg ) {
         if ($this[ this.TYPE ] !== this.OBJECT){
             
             val = new (this.ENV.$Class.Get("stdClass"))( this );
-               console.log("shit", this, $this[ this.TYPE ]);
+               
             if ($this[ this.TYPE ] === this.NULL || 
                 ($this[ this.TYPE ] === this.BOOL && $this[ COMPILER.VARIABLE_VALUE ] === false) || 
                 ($this[ this.TYPE ] === this.STRING && $this[ COMPILER.VARIABLE_VALUE ].length === 0)
@@ -731,9 +735,9 @@ PHP.VM.Variable = function( arg ) {
            
                 if ( typeof value[PHP.VM.Class.METHOD + __toString.toLowerCase() ] === "function" ) {
                     try {
-                    var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
+                        var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
                     } catch( e ) {
-                         this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must not throw an exception", PHP.Constants.E_ERROR, true, false, true );    
+                        this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must not throw an exception", PHP.Constants.E_ERROR, true, false, true );    
                         return new PHP.VM.Variable("");
                     }
                     if (val[ this.TYPE ] !==  this.STRING) {

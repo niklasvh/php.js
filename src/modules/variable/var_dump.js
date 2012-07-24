@@ -66,7 +66,7 @@ PHP.Modules.prototype.var_dump = function() {
             if( ARG_TYPE === VAR.OBJECT ) {
                 argument = value;
             }
-console.log( argument );
+
             str += "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
             
            

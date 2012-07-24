@@ -231,7 +231,16 @@ PHP.VM = function( src, opts ) {
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
     });
     
-    $('GLOBALS').$ = new (ENV.$Class.Get("__Globals"))( this );
+    //$('GLOBALS').$ = new (ENV.$Class.Get("__Globals"))( this );
+    
+    var obj = {};
+    
+    obj[ COMPILER.DIM_FETCH ] = function( ctx, variable ) {
+        console.log(variable[ COMPILER.VARIABLE_VALUE ]);
+        return $( variable[ COMPILER.VARIABLE_VALUE ] );
+    };
+    
+    $('GLOBALS', obj);
     
     var shutdown = false;
     ENV[ COMPILER.TIMER ] = function(){

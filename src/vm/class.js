@@ -88,12 +88,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
             });
         }
-        var obj = {};
-        obj[ COMPILER.DIM_FETCH ] = function( ctx, variable ) {
-            return ENV[ COMPILER.GLOBAL ]( variable[ COMPILER.VARIABLE_VALUE ] );
-        };
         
-        $("GLOBALS", obj);
+        $("GLOBALS", ENV[ COMPILER.GLOBAL ]( "GLOBALS" ));
         
         $("$__CLASS__")[ COMPILER.VARIABLE_VALUE ] = className;
         $("$__FUNCTION__")[ COMPILER.VARIABLE_VALUE ] = realName;
