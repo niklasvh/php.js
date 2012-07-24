@@ -10,6 +10,8 @@ PHP.Compiler = function( AST, file, opts ) {
     this.dimVars = "";
     this.tmpDimVars = "";
     this.DEPRECATED = [];
+    this.dimPrev = "";
+    
     this.INSIDE_METHOD = (opts.INSIDE_METHOD !== undefined ) ? opts.INSIDE_METHOD  : false;
         
     this.src += this.stmts( AST, true );

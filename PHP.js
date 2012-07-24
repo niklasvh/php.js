@@ -472,6 +472,8 @@ PHP.Compiler = function( AST, file, opts ) {
     this.dimVars = "";
     this.tmpDimVars = "";
     this.DEPRECATED = [];
+    this.dimPrev = "";
+    
     this.INSIDE_METHOD = (opts.INSIDE_METHOD !== undefined ) ? opts.INSIDE_METHOD  : false;
         
     this.src += this.stmts( AST, true );
@@ -808,18 +810,25 @@ COMPILER.fixString =  function( result ) {
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
    
     var part; 
-    if ( action.dim !== undefined &&  action.dim !== null && action.dim.type === "Node_Expr_FuncCall" ) {
+   
+    if ( action.dim !== undefined &&  action.dim !== null && (/^Node_Expr_(FuncCall|Plus)$/.test(action.dim.type) )) {
         
       
         var tmp ="var dim" + ++this.FUNC_NUM + " = " + this.CREATE_VARIABLE + "(" + this.source( action.dim ) + "." + this.VARIABLE_VALUE + ");";
-        
-        if (this.tmpDimVars.length === 0) {
-            this.tmpDimVars = tmp;
+
+     
+       
+        if (this.tmpDimVars.length === 0 ) {
+            this.tmpDimVars += tmp;
         } else {
-            this.dimVars += tmp + this.tmpDimVars;
+            if ( this.dimPrev ===  "Node_Expr_Plus" ) {
+                this.dimVars += this.tmpDimVars + tmp;
+            } else {
+                this.dimVars += tmp + this.tmpDimVars;
+            }
             this.tmpDimVars = "";
         }
-        
+        this.dimPrev = action.dim.type;
         
         
         
@@ -3001,9 +3010,7 @@ PHP.Modules.prototype.list = function() {
                     variable[ COMPILER.VARIABLE_VALUE ] = new PHP.VM.Variable();
                 }
             } else if ( Array.isArray( variable )) {
-                console.log(index, values[ index ][ COMPILER.VARIABLE_VALUE ],  [ values[ index ] ].concat( variable ), values[ index ]);
                 this.list.apply( this, variable.concat(values[ index ]) );
-                console.log( variable );
             }
         }, this);
         
@@ -13108,7 +13115,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             } else {
                 methodCTX = this;
             }
-      console.log( ctx, methodCTX, propertyName );
+    
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] === undefined ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access to undeclared static property: " + methodCTX[ COMPILER.CLASS_NAME ] + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
             }

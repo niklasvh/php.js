@@ -3,18 +3,25 @@
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
    
     var part; 
-    if ( action.dim !== undefined &&  action.dim !== null && action.dim.type === "Node_Expr_FuncCall" ) {
+   
+    if ( action.dim !== undefined &&  action.dim !== null && (/^Node_Expr_(FuncCall|Plus)$/.test(action.dim.type) )) {
         
       
         var tmp ="var dim" + ++this.FUNC_NUM + " = " + this.CREATE_VARIABLE + "(" + this.source( action.dim ) + "." + this.VARIABLE_VALUE + ");";
-        
-        if (this.tmpDimVars.length === 0) {
-            this.tmpDimVars = tmp;
+
+     
+       
+        if (this.tmpDimVars.length === 0 ) {
+            this.tmpDimVars += tmp;
         } else {
-            this.dimVars += tmp + this.tmpDimVars;
+            if ( this.dimPrev ===  "Node_Expr_Plus" ) {
+                this.dimVars += this.tmpDimVars + tmp;
+            } else {
+                this.dimVars += tmp + this.tmpDimVars;
+            }
             this.tmpDimVars = "";
         }
-        
+        this.dimPrev = action.dim.type;
         
         
         

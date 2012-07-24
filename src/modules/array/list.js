@@ -26,9 +26,7 @@ PHP.Modules.prototype.list = function() {
                     variable[ COMPILER.VARIABLE_VALUE ] = new PHP.VM.Variable();
                 }
             } else if ( Array.isArray( variable )) {
-                console.log(index, values[ index ][ COMPILER.VARIABLE_VALUE ],  [ values[ index ] ].concat( variable ), values[ index ]);
                 this.list.apply( this, variable.concat(values[ index ]) );
-                console.log( variable );
             }
         }, this);
         
