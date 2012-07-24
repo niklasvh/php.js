@@ -11,6 +11,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
     methodArgumentPrefix = "_$_",
     propertyPrefix = PHP.VM.Class.PROPERTY,
     methodTypePrefix = "$£",
+    methodByRef = "__byRef",
     propertyTypePrefix = PHP.VM.Class.PROPERTY_TYPE,
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
@@ -397,7 +398,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
          * Declare method
          */
 
-        methods [ COMPILER.CLASS_METHOD ] = function( realName, methodType, methodProps, methodFunc ) {
+        methods [ COMPILER.CLASS_METHOD ] = function( realName, methodType, methodProps, byRef, methodFunc ) {
             
             /*
              * signature checks
@@ -548,6 +549,10 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             
             Object.defineProperty( Class.prototype, methodTypePrefix + methodName, {
                 value: methodType 
+            });
+            
+            Object.defineProperty( Class.prototype, methodByRef  + methodName, {
+                value: byRef 
             });
             
             Object.defineProperty( Class.prototype, methodPrefix + methodName, {
@@ -814,6 +819,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         
         Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodClass, realName ) {
             var methodName = realName.toLowerCase();
+            var ret;
             var args = Array.prototype.slice.call( arguments, 3 );
 
             if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
@@ -901,7 +907,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
                 } 
                 
-                return methodToCall.call( this, $, methodCTX );
+                ret = methodToCall.call( this, $, methodCTX );
+                
+                
+                PHP.Utils.CheckRef.call( ENV, ret, methodCTX[ methodByRef  + methodName ] );
+                
+                return ret;
             }
             
             
@@ -909,8 +920,12 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
             } 
            
-            return this.callMethod.call( this, methodName, args );
-            
+            ret = this.callMethod.call( this, methodName, args );
+           
+            PHP.Utils.CheckRef.call( ENV, ret, this[ methodByRef  + methodName ] );
+                
+           
+            return ret;
  
         };
         

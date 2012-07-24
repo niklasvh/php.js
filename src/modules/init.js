@@ -129,18 +129,9 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
         ret = this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) ); 
     }
 
+    PHP.Utils.CheckRef.call( this, ret, this.FUNCTION_REFS[ functionName ] );
+                
 
-    if ( ret instanceof PHP.VM.Variable) {
-        if ( this.FUNCTION_REFS[ functionName ] !== true) {
-            
-            ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
-        } else {
-            if (ret[ VARIABLE.REFERRING] === undefined && ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE) {
-                this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
-            }
-            ret[ VARIABLE.VARIABLE_TYPE ] = undefined;
-        }
-    }
     return ret;
 };
 

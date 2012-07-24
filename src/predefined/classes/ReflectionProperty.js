@@ -7,14 +7,14 @@ ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $, $$ ){
 .Constant("IS_PRIVATE", $$(1024))
 .Variable( "name", 1 )
 .Variable( "class", 1 )
-.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx, $Static ) {
+.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], false, function( $, ctx, $Static ) {
 if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })
-.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx, $Static ) {
+.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], false, function( $, ctx, $Static ) {
 })
-.Method( "__toString", 1, [], function( $, ctx, $Static ) {
+.Method( "__toString", 1, [], false, function( $, ctx, $Static ) {
 })
 .Create()});
 

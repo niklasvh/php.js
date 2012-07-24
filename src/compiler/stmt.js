@@ -463,7 +463,7 @@ PHP.Compiler.prototype.Node_Stmt_Catch = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
 
-  
+  console.log( action );
 
     this.INSIDE_METHOD = true;
     var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', [';
@@ -496,7 +496,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
         
     }, this)   
         
-    src +=  props.join(", ")  + '], function( ' + this.VARIABLE + ', ctx, $Static ) {\n';
+    src +=  props.join(", ")  + '], ' + action.byRef + ', function( ' + this.VARIABLE + ', ctx, $Static ) {\n';
     
     if (action.stmts !== null ) {
         src += this.stmts( action.stmts );

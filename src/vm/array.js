@@ -30,7 +30,7 @@ PHP.VM.Array = function( ENV ) {
          */ 
         [ COMPILER.CLASS_METHOD ]( "__construct", PHP.VM.Class.PUBLIC, [{
             "name":"input"
-        }], function( $ ) {
+        }], false, function( $ ) {
             this[ COMPILER.CLASS_NAME ] = $this.CLASS_NAME;
                   
             var items = $('input')[ COMPILER.VARIABLE_VALUE ];
@@ -88,7 +88,7 @@ PHP.VM.Array = function( ENV ) {
          */
         [ COMPILER.CLASS_METHOD ]( "append", PHP.VM.Class.PUBLIC, [{
             "name":"value"
-        }], function( $ ) {
+        }], false, function( $ ) {
 
 
             var append = function( item ) {
@@ -120,7 +120,7 @@ PHP.VM.Array = function( ENV ) {
          */
         [ COMPILER.CLASS_METHOD ]( COMPILER.ARRAY_CLONE, PHP.VM.Class.PUBLIC, [{
             "name":"index"
-        }], function( $ ) {
+        }], false, function( $ ) {
             var newArr = new (ENV.$Class.Get("ArrayObject"))( ENV );
         
 
@@ -153,7 +153,7 @@ PHP.VM.Array = function( ENV ) {
          */ 
         [ COMPILER.CLASS_METHOD ]( "offsetUnset", PHP.VM.Class.PUBLIC, [{
             "name":"index"
-        }], function( $ ) {
+        }], false, function( $ ) {
         
             var value = $('index')[ COMPILER.VARIABLE_VALUE ];
             var keys = this.$Prop( this, $this.KEYS )[ COMPILER.VARIABLE_VALUE ],
@@ -173,7 +173,7 @@ PHP.VM.Array = function( ENV ) {
             
         })
         // remap keys
-        [ COMPILER.CLASS_METHOD ]( "remap", PHP.VM.Class.PRIVATE, [], function( $ ) {
+        [ COMPILER.CLASS_METHOD ]( "remap", PHP.VM.Class.PRIVATE, [], false, function( $ ) {
                      
             this[ CLASS.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ].forEach(function( key, index ){
                 // todo take into account other type of keys
@@ -190,7 +190,7 @@ PHP.VM.Array = function( ENV ) {
          */ 
         [ COMPILER.CLASS_METHOD ]( COMPILER.ARRAY_GET, PHP.VM.Class.PUBLIC, [{
             "name":"index"
-        }], function( $ ) {
+        }], false, function( $ ) {
          
             var index = -1,
             value = $('index')[ COMPILER.VARIABLE_VALUE ];

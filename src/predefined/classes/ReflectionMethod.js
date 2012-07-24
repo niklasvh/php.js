@@ -6,7 +6,7 @@ ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $, $$ ){
 .Constant("IS_FINAL", $$(64))
 .Variable( "name", 1 )
 .Variable( "class", 1 )
-.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], function( $, ctx, $Static ) {
+.Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], false, function( $, ctx, $Static ) {
 $("parts")._((ENV.$F("explode", arguments, $$("::"), $("class"))));
 if ( ((ENV.$F("count", arguments, $("parts"))).$Greater($$(1))).$Bool.$) {
 $("class")._($("parts").$Dim( this, $$(0) ));
@@ -18,9 +18,9 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat
 $("this").$Prop( ctx, "name" )._($("name"));
 $("this").$Prop( ctx, "class" )._($("class"));
 })
-.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], function( $, ctx, $Static ) {
+.Method( "export", 9, [{name:"argument"}, {name:"return", d: $$(false)}], false, function( $, ctx, $Static ) {
 })
-.Method( "__toString", 1, [], function( $, ctx, $Static ) {
+.Method( "__toString", 1, [], false, function( $, ctx, $Static ) {
 })
 .Create()});
 
