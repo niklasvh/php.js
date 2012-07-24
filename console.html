@@ -48,7 +48,7 @@ echo "Hello world!";
 ?&gt;</textarea>
                 <a href="#" id="run">Run code</a>
                 <h3>Result</h3>
-                <div id="result"></div>
+                <pre><code id="result"></code></pre>
 
             </section>
             <footer>
@@ -81,7 +81,7 @@ echo "Hello world!";
         <script src="PHP.min.js?13"></script>
         <script src="adapters/filesystem/xhr.js"></script>
         <script>
-            console.log(PHP);
+        
             var content = document.getElementById("code"),
             result = document.getElementById("result");
             document.getElementById("run").addEventListener("click", function(e){
