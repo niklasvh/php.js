@@ -782,7 +782,7 @@ COMPILER.fixString =  function( result ) {
 }
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
-    console.log( action );
+   
     var part; 
     if ( action.dim !== undefined &&  action.dim !== null && action.dim.type === "Node_Expr_FuncCall" ) {
         
@@ -2475,8 +2475,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             break;
                         case C.E_RECOVERABLE_ERROR:
                             this[ COMPILER.DISPLAY_HANDLER ] = false;
-                            this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
-                            throw new PHP.Halt( level );
+                        //    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
+                     
+                            throw new PHP.Halt( msg, level, lineAppend, catchable );
+                         //   throw new PHP.Halt( level );
                             return;
                             break;
 
@@ -11975,6 +11977,9 @@ PHP.VM = function( src, opts ) {
                     switch (e.level) {
                         case C.E_ERROR:
                             this.$ob( "\nFatal error: " + e.msg + e.lineAppend + "\n");
+                            break;
+                        case C.E_RECOVERABLE_ERROR:
+                            this.$ob( "\nCatchable fatal error: " + e.msg + e.lineAppend + "\n");
                             break;
                     }
                 

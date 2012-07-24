@@ -282,6 +282,9 @@ PHP.VM = function( src, opts ) {
                         case C.E_ERROR:
                             this.$ob( "\nFatal error: " + e.msg + e.lineAppend + "\n");
                             break;
+                        case C.E_RECOVERABLE_ERROR:
+                            this.$ob( "\nCatchable fatal error: " + e.msg + e.lineAppend + "\n");
+                            break;
                     }
                 
                 }

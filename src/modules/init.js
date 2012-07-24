@@ -448,8 +448,10 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             break;
                         case C.E_RECOVERABLE_ERROR:
                             this[ COMPILER.DISPLAY_HANDLER ] = false;
-                            this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
-                            throw new PHP.Halt( level );
+                        //    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
+                     
+                            throw new PHP.Halt( msg, level, lineAppend, catchable );
+                         //   throw new PHP.Halt( level );
                             return;
                             break;
 
