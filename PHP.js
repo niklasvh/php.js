@@ -460,6 +460,7 @@ PHP.Halt = function( msg, level, lineAppend, catchable  ) {
     this.msg = msg;
     this.level = level;
     this.lineAppend = lineAppend;
+    this.line = 1;
     this.catchable = catchable;
     
 };
@@ -3315,11 +3316,18 @@ PHP.Modules.prototype.$foreachInit = function( expr, ctx ) {
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
 
             var iterator = objectValue;
-
-            while( iterator[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1  ) {
-                iterator = iterator[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
-            }
+          
+            try {
+                while( (iterator instanceof PHP.VM.ClassPrototype) && iterator[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1  ) {
+                    iterator = iterator[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];  
+                }
+            }catch(e) {
            
+            }  
+            if ( !(iterator instanceof PHP.VM.ClassPrototype) || iterator[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1) {
+                this[ COMPILER.ERROR ]( "Objects returned by " + objectValue[ COMPILER.CLASS_NAME ] + "::getIterator() must be traversable or implement interface Iterator", PHP.Constants.E_ERROR, true );
+                return;
+            }
 
             iterator[ COMPILER.METHOD_CALL ]( this, "rewind" );
 
@@ -3351,15 +3359,15 @@ PHP.Modules.prototype.$foreachInit = function( expr, ctx ) {
 
                         }
                         
-                         if (((objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] & PHP.VM.Class.PUBLIC) === PHP.VM.Class.PUBLIC) || objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] === undefined) {
+                        if (((objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] & PHP.VM.Class.PUBLIC) === PHP.VM.Class.PUBLIC) || objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] === undefined) {
 
                            
                         } else {
-                             needReorder = true;
+                            needReorder = true;
                         }
                     }
                     if ( needReorder ) {
-                       items.sort(); 
+                        items.sort(); 
                     }
                     
                     return items;
@@ -3537,9 +3545,9 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
             if ( iterator.first === undefined ) {
                 iterator.first = true;
             } else {
-               if ( iterator.Class[ COMPILER.METHOD_CALL ]( this, "next" )[ VAR.DEFINED ]  !== true ) {
-                   this.ENV[ PHP.Compiler.prototype.ERROR ]( "Undefined offset: 3", PHP.Constants.E_NOTICE, true );
-               }
+                if ( iterator.Class[ COMPILER.METHOD_CALL ]( this, "next" )[ VAR.DEFINED ]  !== true ) {
+                    this.ENV[ PHP.Compiler.prototype.ERROR ]( "Undefined offset: 3", PHP.Constants.E_NOTICE, true );
+                }
             }
 
             var result = iterator.Class[ COMPILER.METHOD_CALL ]( this, "valid" )[ VAR.CAST_BOOL ][ COMPILER.VARIABLE_VALUE ];
@@ -15258,6 +15266,7 @@ ENV.$Class.New( "Exception", 0, {}, function( M, $, $$ ){
 .Variable( "line", 2 )
 .Method( "__construct", 1, [{name:"message", d: $$("")}, {name:"code", d: $$(0)}, {name:"previous", d: $$(null)}], false, function( $, ctx, $Static ) {
 $("this").$Prop( ctx, "message" )._($("message"));
+$("this").$Prop( ctx, "line" )._($$(1));
 })
 .Method( "getMessage", 33, [], false, function( $, ctx, $Static ) {
 return $("this").$Prop( ctx, "message" );
@@ -15269,6 +15278,7 @@ return $("this").$Prop( ctx, "message" );
 .Method( "getFile", 33, [], false, function( $, ctx, $Static ) {
 })
 .Method( "getLine", 33, [], false, function( $, ctx, $Static ) {
+return $("this").$Prop( ctx, "line" );
 })
 .Method( "getTrace", 33, [], false, function( $, ctx, $Static ) {
 return ENV.array([{v:ENV.array([{v:$$("Error2Exception"), k:$$("function")}]), k:undefined}, {v:ENV.array([{v:$$("fopen"), k:$$("function")}]), k:undefined}]);

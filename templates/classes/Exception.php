@@ -9,6 +9,7 @@ class Exception {
 
     public function __construct($message = "", $code = 0, $previous = NULL) {
         $this->message = $message;
+        $this->line = 1;
     }
 
     final public function getMessage() {
@@ -28,7 +29,7 @@ class Exception {
     }
 
     final public function getLine() {
-        
+        return $this->line;
     }
 
     final public function getTrace() {
