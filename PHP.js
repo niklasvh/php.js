@@ -460,7 +460,6 @@ PHP.Halt = function( msg, level, lineAppend, catchable  ) {
     this.msg = msg;
     this.level = level;
     this.lineAppend = lineAppend;
-    this.line = 1;
     this.catchable = catchable;
     
 };
@@ -11796,7 +11795,7 @@ PHP.RAWPost = function( content ) {
                 item.type = "";
                 errors.push(["No file uploaded in Unknown on line 0", PHP.Constants.E_NOTICE ]);
                 errors.push(["No file uploaded in Unknown on line 0", PHP.Constants.E_NOTICE ]);
-                errors.push(["Uploaded file size 0 - file [" + file.real + "=" + item.name + "] not saved in Unknown on line 0", PHP.Constants.E_WARNING, ]);
+                errors.push(["Uploaded file size 0 - file [" + file.real + "=" + item.name + "] not saved in Unknown on line 0", PHP.Constants.E_WARNING ]);
 
             });
           
