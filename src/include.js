@@ -135,7 +135,7 @@ var files = {
             },
             tokenizer: {
                 constants: "js",
-            //    internal: "js",
+                //    internal: "js",
                 token_get_all: "js",
                 token_name: "js"
             },
@@ -164,9 +164,9 @@ var files = {
             yyn_stmt: "js",
             yyn_expr: "js",
             yyn_scalar: "js",
-       //     data: "js",
+            //     data: "js",
             ini: "js",
-         //   actions: "js",
+            //   actions: "js",
             rawpost: "js"
         },
         vm: {
@@ -186,6 +186,7 @@ var files = {
                 ReflectionException: "js",
                 ReflectionMethod: "js",
                 ReflectionProperty: "js",
+                __Globals: ["ArrayAccess"],
                 __PHP_Incomplete_Class: "js",
                 stdClass: "js"
             },
@@ -210,15 +211,32 @@ if ( typeof document !== "undefined" ) {
     (function( d, files ){
 
         // files to include
-
+        var toAdd = {};
     
     
         function writeFile( path, obj ) {
             Object.keys( obj ).forEach(function( file ) {
                 if ( obj[ file ] === "js" ) {
                     d.write('<script src="' + path + file + '.js"></script>');
+                    
+                    if (toAdd[ file ] !== undefined ) {
+                        toAdd[ file ].forEach(function( item ){
+                            d.write('<script src="' + item + '.js"></script>');
+                        })
+                    }
+                    
+                } else if (Array.isArray(obj[ file ])){
+                    if (toAdd[  obj[ file ][0]] === undefined) {
+                        toAdd[  obj[ file ][0]] = [];
+                        
+                    }
+                
+                    toAdd[  obj[ file ][0]].push(path + file);
                 } else {
+                    
+
                     writeFile( path + file + "/", obj[ file ] );
+ 
                 }
             });
         }

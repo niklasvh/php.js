@@ -214,7 +214,7 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
     if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
 
         // check that we aren't passing a constant for arg which is defined byRef
-        if (   value[ VARIABLE.CLASS_CONSTANT ] === true || value[ VARIABLE.CONSTANT ] === true || value[ COMPILER.NAV ] === true ) {
+        if ( ENV.FUNCTION_REFS[ functionName ] !==  true && ( value[ VARIABLE.CLASS_CONSTANT ] === true || value[ VARIABLE.CONSTANT ] === true || value[ COMPILER.NAV ] === true) ) {
             ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables can be passed by reference", PHP.Constants.E_ERROR, true );
         }
 

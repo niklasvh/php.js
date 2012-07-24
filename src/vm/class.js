@@ -211,7 +211,7 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
           
             if ( ctx !== true ) {
                 // check if we are extending class, i.e. don't call constructors
-                if ( className !== "ArrayObject" ) {
+                if ( !/^(ArrayObject|__Globals)$/i.test( className ) ) {
                     Object.keys(undefinedConstants).forEach(function( itm ){
                         var parts = itm.split("::");
                         if (!this.$Class.Exists( parts[ 0 ])) {

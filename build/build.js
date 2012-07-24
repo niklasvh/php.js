@@ -9,17 +9,32 @@ var fs = require('fs');
 
 var files = require("../src/include.js");
 
-var content = "";
+var content = "", toAdd = {};
 
 function includeFiles( path, obj ) {
     
-
+    
     Object.keys( obj ).forEach(function( file ) {
         if ( obj[ file ] === "js" ) {
             
             content += fs.readFileSync( path + file + '.js', 'utf8') ;
         
-           
+            if (toAdd[ file ] !== undefined ) {
+      
+                toAdd[ file ].forEach(function( item ){
+                   
+                    content += fs.readFileSync( item + '.js', 'utf8') ;
+                      
+                })
+            }
+                               
+        } else if ( Array.isArray( obj[ file ] ) ) {
+            if (toAdd[ obj[ file ][ 0 ] ] === undefined) {
+                toAdd[ obj[ file ][ 0 ] ] = [];
+                        
+            }
+                
+            toAdd[obj[ file ][ 0 ] ].push(path + file);
         } else {
             includeFiles( path + file + "/", obj[ file ] );
         }

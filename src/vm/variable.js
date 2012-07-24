@@ -243,6 +243,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.NOT_IDENTICAL ] = functio
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compareTo ) {
     
     var COMPILER = PHP.Compiler.prototype,
+       ARRAY = PHP.VM.Array.prototype,
     first = this,
     second = compareTo,
     cast;
@@ -253,7 +254,21 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compa
             first = first[ this.CAST_INT ];
             second = second[ this.CAST_INT ];
         }
-    } 
+    } else if ( first[ this.TYPE ] === this.ARRAY && second[ this.TYPE ] === this.ARRAY ) {
+       var firstVals = first[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
+       secondVals = second[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
+       
+       if (firstVals.length !== secondVals.length) {
+           return new PHP.VM.Variable( false ); 
+       }
+       
+       var result = firstVals.every(function( val,index ){
+           return (val[ COMPILER.VARIABLE_VALUE ] == secondVals[ index ][ COMPILER.VARIABLE_VALUE ]);
+       });
+       
+       return new PHP.VM.Variable( result ); 
+       
+    }
     
 
     
@@ -423,13 +438,15 @@ PHP.VM.Variable = function( arg ) {
     
     this [ this.REF ] = function( variable ) {
        
-       
-
-              
+ 
         if ( variable [ this.VARIABLE_TYPE ] === this.FUNCTION  ) {
               this.ENV[ COMPILER.ERROR ]("Only variables should be assigned by reference", PHP.Constants.E_STRICT, true );
             return this;
         }
+        
+        var tmp = variable[ COMPILER.VARIABLE_VALUE ]; // trigger get
+       
+        
         this[ this.REFERRING ] = variable;
         this[ this.DEFINED ] = true;
         
@@ -491,7 +508,7 @@ PHP.VM.Variable = function( arg ) {
     // property get proxy
     this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
         var val, $this = this;
-        
+     
         if ( this[ this.REFERRING ] !== undefined ) {
             $this = this [ this.REFERRING ];
         }
@@ -499,7 +516,7 @@ PHP.VM.Variable = function( arg ) {
         if ($this[ this.TYPE ] !== this.OBJECT){
             
             val = new (this.ENV.$Class.Get("stdClass"))( this );
-            
+               console.log("shit", this, $this[ this.TYPE ]);
             if ($this[ this.TYPE ] === this.NULL || 
                 ($this[ this.TYPE ] === this.BOOL && $this[ COMPILER.VARIABLE_VALUE ] === false) || 
                 ($this[ this.TYPE ] === this.STRING && $this[ COMPILER.VARIABLE_VALUE ].length === 0)

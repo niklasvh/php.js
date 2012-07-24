@@ -231,6 +231,8 @@ PHP.VM = function( src, opts ) {
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
     });
     
+    $('GLOBALS').$ = new (ENV.$Class.Get("__Globals"))( this );
+    
     var shutdown = false;
     ENV[ COMPILER.TIMER ] = function(){
         if ( Date.now() > this.start + (this.$ini.max_execution_time - 0)*1000) {

@@ -100,7 +100,7 @@ function runTest ( file ) {
         //     var exec = new Function( "test", "opts", content + "return new PHP( PHP.Lexer(test.FILE), opts );" );
         //    engine = exec.call({}, test, opts);
         var log = console.log;
-     console.log = function() {};       
+         
              engine = new PHP( test.FILE, opts );
 
         
