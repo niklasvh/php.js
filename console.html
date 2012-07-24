@@ -36,7 +36,7 @@
             </header>
             <section>
                 <h3>Console</h3>
-
+                <p>Requires an ECMAScript 5 compliant browser.</p>
                 <p><a href="index.html">Go back</a></p>
 
                 <h3>PHP Code</h3>
@@ -52,7 +52,7 @@ echo "Hello world!";
 
                 <h3>Code</h3>
                 <pre><code id="result_code"></code></pre>
-                
+
             </section>
             <footer>
                 <div class="profile">
@@ -81,23 +81,23 @@ echo "Hello world!";
                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
             })();
         </script>
-        <script src="PHP.min.js?13"></script>
+        <script src="PHP.min.js"></script>
         <script src="adapters/filesystem/xhr.js"></script>
         <script>
         
             var content = document.getElementById("code"),
+            loc = window.location,
+            gist,
             result_code = document.getElementById("result_code"),
             result = document.getElementById("result");
             document.getElementById("run").addEventListener("click", function(e){
                 e.preventDefault();
-                var loc = window.location;
-                console.log( loc );
+                
                 var engine = {},
                 path = loc.pathname,
                 opts = {
                     SERVER: {
                         SCRIPT_FILENAME: path.substring(0, path.length - 1)
-                        //    SCRIPT_FILENAME: "%s"
                     }
                 };
                     
@@ -108,9 +108,28 @@ echo "Hello world!";
           
                 engine = new PHP( content.value , opts );
                 console.log( engine );
-                result.innerHTML = engine.vm.OUTPUT_BUFFER;
-                result_code.innerHTML = engine.compiler.src;
+                result.innerHTML = engine.vm.OUTPUT_BUFFER.replace(/</g,"&gt;").replace(/>/g,"&lt;");
+                result_code.innerHTML = engine.compiler.src.replace(/</g,"&gt;").replace(/>/g,"&lt;");
             }, false);
+            
+            console.log(loc);
+            if ((gist = loc.search.match(/gist=(\d+)/)) !== null) {
+                
+                var request = new XMLHttpRequest();  
+                request.open('GET', 'https://api.github.com/gists/' +  gist[ 1 ], true);  
+                request.onload = function( e ){
+                    console.log(JSON.parse(e.responseText));
+                };
+                request.send(); 
+                 
+  
+                if (request.status === 200) {  
+                    console.log(request.responseText);  
+                }  
+                gist[1]
+            }
+           
+            
         </script>
     </body>
 </html>
