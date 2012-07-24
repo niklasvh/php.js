@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 583 out of 670 (87%)
+Passed 587 out of 670 (87.6%)
 
 Failed tests:
 
@@ -57,10 +57,6 @@ Failed tests:
  - tests/php/lang/passByReference_009.phpt
  - tests/php/lang/passByReference_010.phpt
  - tests/php/lang/passByReference_012.phpt
- - tests/php/lang/returnByReference.006.phpt
- - tests/php/lang/returnByReference.007.phpt
- - tests/php/lang/returnByReference.008.phpt
- - tests/php/lang/returnByReference.009.phpt
  - tests/php/lang/type_hints_003.phpt
  - tests/php/output/bug46897.phpt
  - tests/php/output/bug60768.phpt

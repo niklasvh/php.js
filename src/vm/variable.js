@@ -67,7 +67,8 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
 
-
+    this[ VARIABLE.VARIABLE_TYPE ] = undefined;
+    
     if ( arguments.length > 1 ) {
         // chaining, todo make it work for unlimited vars
         this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];

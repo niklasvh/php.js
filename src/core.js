@@ -321,8 +321,10 @@ PHP.Utils.CheckRef = function( ret, byRef ) {
             
             ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
         } else if (byRef === true){
-            if (ret[ VARIABLE.REFERRING] === undefined && ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE) {
-                this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
+       
+            if (ret[ VARIABLE.REFERRING] === undefined && (ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE || ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION )) {
+                 
+               this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
             }
             ret[ VARIABLE.VARIABLE_TYPE ] = undefined;
         }

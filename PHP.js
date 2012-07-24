@@ -321,8 +321,10 @@ PHP.Utils.CheckRef = function( ret, byRef ) {
             
             ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
         } else if (byRef === true){
-            if (ret[ VARIABLE.REFERRING] === undefined && ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE) {
-                this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
+          console.log(ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE, ret[ VARIABLE.VARIABLE_TYPE ], ret[ COMPILER.VARIABLE_VALUE ]);
+            if (ret[ VARIABLE.REFERRING] === undefined && (ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE || ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION )) {
+                 
+               this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
             }
             ret[ VARIABLE.VARIABLE_TYPE ] = undefined;
         }
@@ -2176,7 +2178,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
     } else {
         ret = this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) ); 
     }
-
+console.log( functionName );
     PHP.Utils.CheckRef.call( this, ret, this.FUNCTION_REFS[ functionName ] );
                 
 
@@ -13570,7 +13572,8 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
 
-
+    this[ VARIABLE.VARIABLE_TYPE ] = undefined;
+    
     if ( arguments.length > 1 ) {
         // chaining, todo make it work for unlimited vars
         this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
