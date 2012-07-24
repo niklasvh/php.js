@@ -8,6 +8,7 @@ PHP.Compiler = function( AST, file, opts ) {
  
     this.FUNC_NUM = 0;
     this.dimVars = "";
+    this.tmpDimVars = "";
     this.DEPRECATED = [];
     this.INSIDE_METHOD = (opts.INSIDE_METHOD !== undefined ) ? opts.INSIDE_METHOD  : false;
         
@@ -56,8 +57,15 @@ COMPILER.stmts = function( stmts, main ) {
         if ( this.FATAL_ERROR !== undefined ) {
             return;
         }
-        src += this.source( stmt );
         
+        var tmp = this.source( stmt );
+        
+        if ( this.dimVars.length > 0 || this.tmpDimVars.length > 0 ) {
+            src +=  this.dimVars + this.tmpDimVars;
+            this.dimVars = this.tmpDimVars = "";
+        }   
+        
+        src += tmp;
         
         if ( stmt.type === "Node_Expr_New") {
             // init class without assign, call destruct ( this might not be valid in all cases )

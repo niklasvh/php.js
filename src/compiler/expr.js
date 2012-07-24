@@ -1,10 +1,30 @@
 
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
-
+   
+    var part; 
+    if ( action.dim !== undefined &&  action.dim !== null && action.dim.type === "Node_Expr_FuncCall" ) {
+        
+      
+        var tmp ="var dim" + ++this.FUNC_NUM + " = " + this.CREATE_VARIABLE + "(" + this.source( action.dim ) + "." + this.VARIABLE_VALUE + ");";
+        
+        if (this.tmpDimVars.length === 0) {
+            this.tmpDimVars = tmp;
+        } else {
+            this.dimVars += tmp + this.tmpDimVars;
+            this.tmpDimVars = "";
+        }
+        
+        
+        
+        
+        part = "dim" + this.FUNC_NUM;
+    } else {
+        part = this.source( action.dim );
+    }
 
     var src = "";
-    src += this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + this.source( action.dim ) + " )";
+    src += this.source( action.variable ) + "."  + this.DIM_FETCH + '( this, ' + part + " )";
     
     return src;
 };
@@ -19,7 +39,7 @@ PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
     var src = this.source( action.variable ) + "." + this.ASSIGN;
     if ( action.expr !== undefined ) {
         if ( action.expr.type !== "Node_Expr_Assign") {    
-            src += "(" + this.source( action.expr ) + ")";
+            src += "(" + this.source( action.expr ) + ")";   
         } else {
             src += "(" + this.source( action.expr.variable ) + ", " + this.source( action.expr.expr ) + ")";
         }
