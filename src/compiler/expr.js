@@ -152,7 +152,12 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
     }
 
     action.args.forEach(function( arg ){
-        src += ", " + this.source( arg.value );
+        if (arg.value.type === "Node_Expr_PropertyFetch") {
+            src += ", " + this.Node_Expr_PropertyFetch( arg.value, true );
+        } else {
+            src += ", " + this.source( arg.value );
+        }
+       
     //    args.push( this.source( arg.value ) );
     }, this);
 
@@ -455,8 +460,12 @@ PHP.Compiler.prototype.Node_Expr_New = function( action ) {
     src += this.CREATE_VARIABLE + '(new (' + this.CTX + this.CLASS_GET + '(' + classPart + '))( this';
 
     action.args.forEach(function( arg ) {
-
-        src += ", "  + this.source( arg.value );
+        if (arg.value.type === "Node_Expr_PropertyFetch") {
+            src += ", " + this.Node_Expr_PropertyFetch( arg.value, true );
+        } else {
+            src += ", " + this.source( arg.value );
+        }
+    //   src += ", "  + this.source( arg.value );
     }, this);
 
     src += " ))";
@@ -496,7 +505,14 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
     src += ', ' + classPart;
 
     action.args.forEach(function( arg ) {
-        src += ", " + this.source( arg.value );
+        
+        if (arg.value.type === "Node_Expr_PropertyFetch") {
+            src += ", " + this.Node_Expr_PropertyFetch( arg.value, true );
+        } else {
+            src += ", " + this.source( arg.value );
+        }
+        
+    // src += ", " + this.source( arg.value );
     }, this);
 
 
@@ -507,7 +523,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
 };
 
-PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
+PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action, funcCall ) {
 
     var classParts = "";
     
@@ -516,12 +532,22 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action ) {
     } else {
         classParts +=  this.source( action.name ) + "." +  this.VARIABLE_VALUE;
     }
-
+    var extra = "";
+    if ( funcCall === true ) {
+        extra = ", true";
+    }
+    
+    var variable;
+    if ( action.variable.type === "Node_Expr_PropertyFetch") {
+        variable = this.Node_Expr_PropertyFetch( action.variable, funcCall );
+    } else {
+        variable = this.source( action.variable );
+    }
 
     if ( action.variable.name !== "this" ) {
-        return this.source( action.variable ) + "." + this.CLASS_PROPERTY_GET + '( this, ' + classParts + ' )';
+        return variable + "." + this.CLASS_PROPERTY_GET + '( this, ' + classParts + extra + ' )';
     } else {
-        return this.source( action.variable ) + "." + this.CLASS_PROPERTY_GET + '( ctx, ' + classParts + ' )';
+        return variable + "." + this.CLASS_PROPERTY_GET + '( ctx, ' + classParts + extra + ' )';
     }
 
 };
@@ -569,7 +595,14 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
 
     action.args.forEach(function( arg ) {
-        src += ", " + this.source( arg.value );
+        
+        if (arg.value.type === "Node_Expr_PropertyFetch") {
+            src += ", " + this.Node_Expr_PropertyFetch( arg.value, true );
+        } else {
+            src += ", " + this.source( arg.value );
+        }
+        
+    //  src += ", " + this.source( arg.value );
     }, this);
 
     src += ")";

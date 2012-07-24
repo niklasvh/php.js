@@ -1,6 +1,6 @@
 ### Test results ###
 
-Passed 588 out of 670 (87.8%)
+Passed 589 out of 670 (87.9%)
 
 Failed tests:
 
@@ -51,7 +51,6 @@ Failed tests:
  - tests/php/lang/foreachLoopObjects.004.phpt
  - tests/php/lang/foreachLoopObjects.005.phpt
  - tests/php/lang/foreachLoopObjects.006.phpt
- - tests/php/lang/passByReference_006.phpt
  - tests/php/lang/passByReference_007.phpt
  - tests/php/lang/passByReference_009.phpt
  - tests/php/lang/passByReference_010.phpt

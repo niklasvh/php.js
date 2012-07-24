@@ -516,7 +516,7 @@ PHP.VM.Variable = function( arg ) {
         }
     };
     // property get proxy
-    this[ COMPILER.CLASS_PROPERTY_GET ] = function() {
+    this[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName, funcCall ) {
         var val, $this = this;
      
         if ( this[ this.REFERRING ] !== undefined ) {
@@ -531,8 +531,10 @@ PHP.VM.Variable = function( arg ) {
                 ($this[ this.TYPE ] === this.BOOL && $this[ COMPILER.VARIABLE_VALUE ] === false) || 
                 ($this[ this.TYPE ] === this.STRING && $this[ COMPILER.VARIABLE_VALUE ].length === 0)
                 ) {
-                if ( $this[ this.PROPERTY ] !== true ) {
-                    this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
+                if ( funcCall !== true ) {
+                    if ( $this[ this.PROPERTY ] !== true ) {
+                        this.ENV[ COMPILER.ERROR ]("Creating default object from empty value", PHP.Constants.E_WARNING, true );
+                    }
                 }
                 $this[ COMPILER.VARIABLE_VALUE ] = val;
             } else {

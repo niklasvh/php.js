@@ -16,11 +16,11 @@ $("this").$Prop( ctx, "name" )._($("argument"));
 };
 })
 .Method( "getMethods", 1, [], false, function( $, ctx, $Static ) {
-$("methods")._((ENV.$F("get_class_methods", arguments, $("this").$Prop( ctx, "name" ))));
+$("methods")._((ENV.$F("get_class_methods", arguments, $("this").$Prop( ctx, "name", true ))));
 $("arr")._(ENV.array([]));
 var iterator1 = ENV.$foreachInit($("methods"), ctx);
 while(ENV.foreach( iterator1, false, $("methodName"))) {
-$("parent")._((ENV.$F("get_parent_class", arguments, $("this").$Prop( ctx, "name" ))));
+$("parent")._((ENV.$F("get_parent_class", arguments, $("this").$Prop( ctx, "name", true ))));
 if ( ((ENV.$F("method_exists", arguments, $("parent"), $("methodName")))).$Bool.$) {
 $("arr").$Dim( this, undefined )._($$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parent"), $("methodName") )));
 } else {
