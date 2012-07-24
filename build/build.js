@@ -52,7 +52,7 @@ fs.writeFile('PHP.js', content, function (err) {
     var args = process.argv.splice(2);
     if ( args[ 0 ] === "all") {
         
-        fs.writeFile('build/tmp.js', "(function( window, undefined ) { " + content + " window.PHP = PHP; console.log( PHP );})( window );", function (err) {
+        fs.writeFile('build/tmp.js', "(function( window, undefined ) { " + content + " window.PHP = PHP; })( window );", function (err) {
             if (err) throw err;
        
             var compressor = require('node-minify');

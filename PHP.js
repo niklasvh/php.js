@@ -8,7 +8,7 @@
 var PHP = function( code, opts ) {
     
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" ),
-    iniSet = opts.ini;
+    iniSet = opts.ini || {};
     opts.ini = PHP.ini( iniContent );
 
     Object.keys( iniSet ).forEach(function(key){
