@@ -420,11 +420,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             lineAppend = "";
         }
         
-        if ( this.$ini.track_errors == 1 ) {
-            this[ COMPILER.GLOBAL ]("php_errormsg")[ COMPILER.VARIABLE_VALUE ] = msg;
+        if ( this.$ini.track_errors == 1 ||  this.$ini.track_errors == "On") {
+            $GLOBAL("php_errormsg")[ COMPILER.VARIABLE_VALUE ] = msg;
         }
 
-
+     
         if (reportingLevel !== 0) {
             if ( suppress === false ) {
                 if ( errorHandler !== undefined ) {
@@ -459,7 +459,9 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                         case C.E_CORE_WARNING:
                         case C.E_COMPILE_WARNING:
                         case C.E_USER_WARNING:
-                            this.echo( new PHP.VM.Variable("\nWarning: " + msg + lineAppend + "\n"));
+                            if (this.$ini.display_errors != 0 && this.$ini.display_errors != "Off") {
+                                this.echo( new PHP.VM.Variable("\nWarning: " + msg + lineAppend + "\n"));
+                            }
                             return;
                             break;
                         case C.E_PARSE:

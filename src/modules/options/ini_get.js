@@ -12,6 +12,10 @@ PHP.Modules.prototype.ini_get = function( varname ) {
     if (old === undefined ) {
         return new PHP.VM.Variable( false );
     } else {
+        
+        old = old.toString().replace(/^On$/i,"1");
+        old = old.toString().replace(/^Off$/i,"0");
+        
         return new PHP.VM.Variable( old + "" );
     }
     

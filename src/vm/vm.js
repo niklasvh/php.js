@@ -177,7 +177,7 @@ PHP.VM = function( src, opts ) {
     var variables_order = this.$ini.variables_order;
     
     this.FUNCTION_REFS = {};   
-    
+    $('php_errormsg').$ = new PHP.VM.Variable();
         
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( opts.SERVER.SCRIPT_FILENAME );
      
@@ -188,7 +188,35 @@ PHP.VM = function( src, opts ) {
     this.INPUT_BUFFER = opts.RAW_POST;
     
     // todo add error reporting level parser
-    this.error_reporting(new PHP.VM.Variable( (!isNaN( this.$ini.error_reporting - 0)) ? this.$ini.error_reporting : 32767));
+    
+    if (isNaN( this.$ini.error_reporting - 0)) {
+        var lvl = this.$ini.error_reporting;
+        ["E_ERROR",
+        "E_RECOVERABLE_ERROR",
+        "E_WARNING",
+        "E_PARSE" ,
+        "E_NOTICE" ,
+        "E_STRICT",
+        "E_DEPRECATED",
+        "E_CORE_ERROR",
+        "E_CORE_WARNING",
+        "E_COMPILE_ERROR",
+        "E_COMPILE_WARNING",
+        "E_USER_ERROR",
+        "E_USER_WARNING",
+        "E_USER_NOTICE",
+        "E_USER_DEPRECATED",
+        "E_ALL"].forEach(function( err ){
+            lvl = lvl.replace(err, PHP.Constants[ err ]);
+        });
+        this.$ini.error_reporting = eval(lvl);
+        
+       
+    }
+    this.error_reporting(new PHP.VM.Variable( this.$ini.error_reporting ));
+    
+    
+   
     
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
     $('$__DIR__').$ = ENV[ PHP.Compiler.prototype.FILE_PATH ];
@@ -239,6 +267,8 @@ PHP.VM = function( src, opts ) {
         console.log(variable[ COMPILER.VARIABLE_VALUE ]);
         return $( variable[ COMPILER.VARIABLE_VALUE ] );
     };
+    
+
     
     $('GLOBALS', obj);
     
