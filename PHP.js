@@ -4119,6 +4119,90 @@ PHP.Modules.prototype.dechex = function( variable ) {
     
     return new PHP.VM.Variable( parseInt( num, 10 ).toString( 16 ) );
 };/* 
+* @author Eric Lewis <elewis at boxy.co>
+* @created 25.7.2012 
+* @website www.boxy.co
+ */
+
+
+PHP.Modules.prototype.decbin = function( variable ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    var num = variable[ COMPILER.VARIABLE_VALUE ];
+    
+    return new PHP.VM.Variable( parseInt( num, 10 ).toString( 2 ) );
+};/* 
+* @author Eric Lewis <elewis at boxy.co>
+* @created 25.7.2012 
+* @website www.boxy.co
+ */
+
+
+PHP.Modules.prototype.log = function( variable ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    var num = variable[ COMPILER.VARIABLE_VALUE ];
+    
+    return new PHP.VM.Variable( Math.log(parseInt( num, 10 )) );
+};/* 
+* @author Eric Lewis <elewis at boxy.co>
+* @created 25.7.2012 
+* @website www.boxy.co
+ */
+
+
+PHP.Modules.prototype.log = function( variable ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    var num = variable[ COMPILER.VARIABLE_VALUE ];
+    
+    return new PHP.VM.Variable( Math.log(num) );
+};/* 
+* @author Eric Lewis <elewis at boxy.co>
+* @created 25.7.2012 
+* @website www.boxy.co
+ */
+
+
+PHP.Modules.prototype.log10 = function( variable ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    var num = variable[ COMPILER.VARIABLE_VALUE ];
+    
+    return new PHP.VM.Variable( Math.log(num) / 2.302585092994046 );
+};/* 
+* @author Eric Lewis <elewis at boxy.co>
+* @created 25.7.2012 
+* @website www.boxy.co
+ */
+
+
+PHP.Modules.prototype.floor = function( variable ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    var num = variable[ COMPILER.VARIABLE_VALUE ];
+    
+    return new PHP.VM.Variable( Math.floor(num) );
+};/* 
+* @author Eric Lewis <elewis at boxy.co>
+* @created 25.7.2012 
+* @website www.boxy.co
+ */
+
+
+PHP.Modules.prototype.sin = function( variable ) {
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    var num = variable[ COMPILER.VARIABLE_VALUE ];
+    
+    return new PHP.VM.Variable( Math.sin(num) );
+};/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 16.7.2012 
 * @website http://hertzen.com
@@ -5299,6 +5383,42 @@ PHP.Modules.prototype.trim = function( variable ) {
     }
     console.log( variable );
     return new PHP.VM.Variable( variable[ COMPILER.VARIABLE_VALUE ].toString().trim() );
+    
+    
+};/* 
+* @author Eric Lewis <elewis at boxy.co>
+* @created 26.7.2012 
+* @website www.boxy.co
+ */
+
+
+
+PHP.Modules.prototype.ucfirst = function( str ) {
+    var VARIABLE = PHP.VM.Variable.prototype,
+    COMPILER = PHP.Compiler.prototype;
+    
+    str[ COMPILER.VARIABLE_VALUE ] += '';
+    
+    var f = str[ COMPILER.VARIABLE_VALUE ].charAt(0).toUpperCase();
+        
+    return new PHP.VM.Variable( f + str[ COMPILER.VARIABLE_VALUE ].substr(1) );
+};/* 
+* @author Eric Lewis <elewis at boxy.co>
+* @created 26.7.2012 
+* @website www.boxy.co
+ */
+
+
+
+PHP.Modules.prototype.ucwords = function( str ) {
+    var VARIABLE = PHP.VM.Variable.prototype,
+    COMPILER = PHP.Compiler.prototype;
+    
+    str[ COMPILER.VARIABLE_VALUE ] += '';
+        
+    return new PHP.VM.Variable( ( str[ COMPILER.VARIABLE_VALUE ] ).replace(/^([a-z])|\s+([a-z])/g, function ($1) {
+        return $1.toUpperCase();
+    }) );
     
     
 };
