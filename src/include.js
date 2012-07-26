@@ -76,7 +76,8 @@ var files = {
                 function_exists: "js"
             },
             math: {
-                dechex: "js"  
+                dechex: "js",  
+                decbin: "js"  
             },
             misc: {
                 constant: "js",
@@ -131,7 +132,8 @@ var files = {
                 strncmp: "js",
                 strtolower: "js",
                 strtoupper: "js",
-                trim: "js"
+                trim: "js",
+                ucfirst: "js"
             },
             tokenizer: {
                 constants: "js",

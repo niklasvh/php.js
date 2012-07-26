@@ -7,13 +7,8 @@
             var exports = {};
         </script>
 
-        <script src="src/include.js"></script>
-
-        <script src="adapters/filesystem/xhr.js"></script>
-
-        <script src="src/lib/diff_match_patch.js"></script>
-
-        <script src="tests/tests.js"></script>
+        <script src="../PHP.js"></script>
+        <script src="../adapters/filesystem/xhr.js"></script>
 
         <style>
             body {
@@ -36,40 +31,30 @@
         </style>
 
         <script>
-           
-   
+           		loc = window.location;
+	        	var engine = {},
+                path = loc.pathname,
+                opts = {
+                    SERVER: {
+                        SCRIPT_FILENAME: path.substring(0, path.length - 1)
+                    }
+                };
+
+
+
+                opts.filesystem = new PHP.Adapters.XHRFileSystem();
+
+
+                engine = new PHP( "<?php  echo ucfirst('test'); ?>" , opts );
+                //console.log( engine );
+                
+                console.log( engine.vm.OUTPUT_BUFFER); // the outputted buffer from the script
+
 
             
         </script>
     </head>
     <body>
         <div id="tests"></div>
-        <script>
-            
-            var tests = ["ext/tokenizer","basic","func","lang","classes","strings","run-test","output"];
-            
-          
-            var el = document.getElementById("tests");
-            tests.forEach(function( file ){
-                var a = document.createElement("a");
-                a.href = "?pack=" + file;
-                a.innerHTML = file;
-                el.appendChild( a );
-                el.appendChild( document.createElement("br") );
-            });
-            
-            if (window.location.search.indexOf("?pack=") !== -1 ) {     
-                 new PHP_Tests( window.location.search.split("?pack=")[1], document.getElementById("tests") );
-            }
-          
-            //   new PHP_Tests( "ext/tokenizer", document.getElementById("tests") );
-            //   new PHP_Tests( "basic", document.getElementById("tests") );
-            //      new PHP_Tests( "func", document.getElementById("tests") );
-         //   new PHP_Tests( "lang", document.getElementById("tests") );
-            // new PHP_Tests( "classes", document.getElementById("tests") );
-            //   new PHP_Tests( "strings", document.getElementById("tests") );
-            //  new PHP_Tests( "output", document.getElementById("tests") );
-         
-        </script>
     </body>
 </html>

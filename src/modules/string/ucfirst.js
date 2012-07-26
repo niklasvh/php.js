@@ -13,6 +13,6 @@ PHP.Modules.prototype.ucfirst = function( str ) {
     str[ COMPILER.VARIABLE_VALUE ] += '';
     
     var f = str[ COMPILER.VARIABLE_VALUE ].charAt(0).toUpperCase();
-    
-    return new PHP.VM.Variable( f + str.substr(1) );
+        
+    return new PHP.VM.Variable( f + str[ COMPILER.VARIABLE_VALUE ].substr(1) );
 };
