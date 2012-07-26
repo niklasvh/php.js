@@ -12,9 +12,9 @@ PHP.Modules.prototype.ucwords = function( str ) {
     
     str[ COMPILER.VARIABLE_VALUE ] += '';
         
-    return ( str[ COMPILER.VARIABLE_VALUE ] ).replace(/^([a-z])|\s+([a-z])/g, function ($1) {
-        return new PHP.VM.Variable( $1.toUpperCase() );
-    });
+    return new PHP.VM.Variable( ( str[ COMPILER.VARIABLE_VALUE ] ).replace(/^([a-z])|\s+([a-z])/g, function ($1) {
+        return $1.toUpperCase();
+    }) );
     
     
 };

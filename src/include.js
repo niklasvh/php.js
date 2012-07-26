@@ -139,9 +139,7 @@ var files = {
                 strtolower: "js",
                 strtoupper: "js",
                 trim: "js",
-                ltrim: "js",
                 ucfirst: "js",
-                levenshtein: "js",
                 ucwords: "js"
             },
             tokenizer: {

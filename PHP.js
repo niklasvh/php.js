@@ -5387,27 +5387,6 @@ PHP.Modules.prototype.trim = function( variable ) {
     
 };/* 
 * @author Eric Lewis <elewis at boxy.co>
-* @created 25.7.2012 
-* @website www.boxy.co
- */
-
-
-PHP.Modules.prototype.ltrim = function( variable ) {
-    var COMPILER = PHP.Compiler.prototype,
-    VARIABLE = PHP.VM.Variable.prototype;
-    
-    if ( variable[ VARIABLE.TYPE ] !== VARIABLE.STRING ) {
-        variable = variable[ VARIABLE.CAST_STRING ];
-    }
-    
-    charlist = !charlist ? ' \\s\u00A0' : (charlist + '').replace(/([\[\]\(\)\.\?\/\*\{\}\+\$\^\:])/g, '$1');
-    var re = new RegExp('^[' + charlist + ']+', 'g');
-    
-    return new PHP.VM.Variable( (variable + '').replace(re, '') );
-    
-    
-};/* 
-* @author Eric Lewis <elewis at boxy.co>
 * @created 26.7.2012 
 * @website www.boxy.co
  */
@@ -5425,78 +5404,6 @@ PHP.Modules.prototype.ucfirst = function( str ) {
     return new PHP.VM.Variable( f + str[ COMPILER.VARIABLE_VALUE ].substr(1) );
 };/* 
 * @author Eric Lewis <elewis at boxy.co>
-* @created 25.7.2012 
-* @website www.boxy.co
- */
-
-
-PHP.Modules.prototype.levenshtein = function( s1, s2 ) {
-    var VARIABLE = PHP.VM.Variable.prototype,
-    COMPILER = PHP.Compiler.prototype;
-    
-    if (s1 == s2) {
-        return 0;
-    }
- 
-    var s1_len = s1.length;
-    var s2_len = s2.length;
-    if (s1_len === 0) {
-        return s2_len;
-    }
-    if (s2_len === 0) {
-        return s1_len;
-    }
- 
-    // BEGIN STATIC
-    var split = false;
-    try {
-        split = !('0')[0];
-    } catch (e) {
-        split = true; // Earlier IE may not support access by string index
-    }
-    // END STATIC
-    if (split) {
-        s1 = s1.split('');
-        s2 = s2.split('');
-    }
- 
-    var v0 = new Array(s1_len + 1);
-    var v1 = new Array(s1_len + 1);
- 
-    var s1_idx = 0,
-        s2_idx = 0,
-        cost = 0;
-    for (s1_idx = 0; s1_idx < s1_len + 1; s1_idx++) {
-        v0[s1_idx] = s1_idx;
-    }
-    var char_s1 = '',
-        char_s2 = '';
-    for (s2_idx = 1; s2_idx <= s2_len; s2_idx++) {
-        v1[0] = s2_idx;
-        char_s2 = s2[s2_idx - 1];
- 
-        for (s1_idx = 0; s1_idx < s1_len; s1_idx++) {
-            char_s1 = s1[s1_idx];
-            cost = (char_s1 == char_s2) ? 0 : 1;
-            var m_min = v0[s1_idx + 1] + 1;
-            var b = v1[s1_idx] + 1;
-            var c = v0[s1_idx] + cost;
-            if (b < m_min) {
-                m_min = b;
-            }
-            if (c < m_min) {
-                m_min = c;
-            }
-            v1[s1_idx + 1] = m_min;
-        }
-        var v_tmp = v0;
-        v0 = v1;
-        v1 = v_tmp;
-    }
-    
-    return v0[s1_len];
-};/* 
-* @author Eric Lewis <elewis at boxy.co>
 * @created 26.7.2012 
 * @website www.boxy.co
  */
@@ -5509,9 +5416,9 @@ PHP.Modules.prototype.ucwords = function( str ) {
     
     str[ COMPILER.VARIABLE_VALUE ] += '';
         
-    return ( str[ COMPILER.VARIABLE_VALUE ] ).replace(/^([a-z])|\s+([a-z])/g, function ($1) {
-        return new PHP.VM.Variable( $1.toUpperCase() );
-    });
+    return new PHP.VM.Variable( ( str[ COMPILER.VARIABLE_VALUE ] ).replace(/^([a-z])|\s+([a-z])/g, function ($1) {
+        return $1.toUpperCase();
+    }) );
     
     
 };
