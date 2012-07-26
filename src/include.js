@@ -77,7 +77,13 @@ var files = {
             },
             math: {
                 dechex: "js",  
-                decbin: "js"  
+                decbin: "js",  
+                decoct: "js",  
+                log: "js",  
+                log10: "js",  
+                floor: "js",  
+                sin: "js"  
+
             },
             misc: {
                 constant: "js",
@@ -133,7 +139,10 @@ var files = {
                 strtolower: "js",
                 strtoupper: "js",
                 trim: "js",
-                ucfirst: "js"
+                ltrim: "js",
+                ucfirst: "js",
+                levenshtein: "js",
+                ucwords: "js"
             },
             tokenizer: {
                 constants: "js",

@@ -45,7 +45,7 @@
                 opts.filesystem = new PHP.Adapters.XHRFileSystem();
 
 
-                engine = new PHP( "<?php  echo ucfirst('test'); ?>" , opts );
+                engine = new PHP( "<?php  echo 'test'; ?>" , opts );
                 //console.log( engine );
                 
                 console.log( engine.vm.OUTPUT_BUFFER); // the outputted buffer from the script
