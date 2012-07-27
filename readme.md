@@ -9,10 +9,10 @@ The code can be directly run in your browser, meaning you can execute php code s
 
 ## Some examples ##
 
- - <a href="http://phpjs.hertzen.com/console.html?gist=3171278">Magic methods</a> (<a href="console.html?gist=3171344">2</a>, <a href="console.html?gist=3171349">3</a>)
+ - <a href="http://phpjs.hertzen.com/console.html?gist=3171278">Magic methods</a> (<a href="http://phpjs.hertzen.com/console.html?gist=3171344">2</a>, <a href="http://phpjs.hertzen.com/console.html?gist=3171349">3</a>)
  - <a href="http://phpjs.hertzen.com/console.html?gist=3171392">ArrayAccess</a>
  - <a href="http://phpjs.hertzen.com/console.html?gist=3171359">Lamba functions</a>
- - <a href="http://phpjs.hertzen.com/console.html?gist=3171402">Engine execution orders</a> (<a href="console.html?gist=3171408">2</a>,<a href="console.html?gist=3171413">3</a>)
+ - <a href="http://phpjs.hertzen.com/console.html?gist=3171402">Engine execution orders</a> (<a href="http://phpjs.hertzen.com/console.html?gist=3171408">2</a>,<a href="http://phpjs.hertzen.com/console.html?gist=3171413">3</a>)
  - <a href="http://phpjs.hertzen.com/console.html?gist=3171432">foreach with references</a>
  - <a href="http://phpjs.hertzen.com/console.html?gist=3171462">tokenizer</a>
 
