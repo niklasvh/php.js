@@ -401,7 +401,7 @@ PHP.Parser.prototype.getNextToken = function( ) {
 
 
 
-            this.line += ((tmp = token[ 1 ].match(/\\n/g)) === null) ? 0 : tmp.length;
+            this.line += ((tmp = token[ 1 ].match(/\n/g)) === null) ? 0 : tmp.length;
 
             if (T_COMMENT === token[0]) {
 
