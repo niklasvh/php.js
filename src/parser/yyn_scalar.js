@@ -19,7 +19,6 @@ PHP.Parser.prototype.Scalar_DNumber_parse = function( a ) {
 PHP.Parser.prototype.Scalar_String_parseDocString = function() {
     
     return '"' + arguments[ 1 ].replace(/([^"\\]*(?:\\.[^"\\]*)*)"/g, '$1\\"') + '"';
-    return Array.prototype.join.call(arguments, "");  
 };
 
 
