@@ -587,6 +587,37 @@ PHP.Parser.prototype.Node_Expr_BooleanOr = function() {
 
 };
 
+PHP.Parser.prototype.Node_Expr_LogicalOr = function() {
+    return {
+        type: "Node_Expr_LogicalOr",
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };  
+
+};
+
+PHP.Parser.prototype.Node_Expr_LogicalAnd = function() {
+    return {
+        type: "Node_Expr_LogicalAnd",
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };  
+
+};
+
+
+PHP.Parser.prototype.Node_Expr_LogicalXor = function() {
+    return {
+        type: "Node_Expr_LogicalXor",
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };  
+
+};
+
 PHP.Parser.prototype.Node_Expr_BitwiseAnd = function() {
     return {
         type: "Node_Expr_BitwiseAnd",
@@ -628,12 +659,12 @@ PHP.Parser.prototype.Node_Expr_BooleanNot = function() {
 PHP.Parser.prototype.Node_Expr_BooleanAnd = function() {
     return {
         type: "Node_Expr_BooleanAnd",
-        expr: arguments[ 0 ],
-        attributes: arguments[ 1 ]
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
     };  
 
 };
-
 
 PHP.Parser.prototype.Node_Expr_Instanceof = function() {
    
