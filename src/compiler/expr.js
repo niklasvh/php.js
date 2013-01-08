@@ -454,6 +454,10 @@ PHP.Compiler.prototype.Node_Expr_Cast_Double = function( action ) {
     return  this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_DOUBLE;
 };
 
+PHP.Compiler.prototype.Node_Expr_Cast_Bool = function( action ) {
+    return  this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_BOOL;
+};
+
 PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
     return  this.CTX + "include( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
 };
