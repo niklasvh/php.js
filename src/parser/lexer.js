@@ -109,6 +109,18 @@ PHP.Lexer = function( src, ini ) {
                 re: /^instanceof(?=\s)/i
             },
             {
+                value: PHP.Constants.T_LOGICAL_OR,
+                re: /^or(?=\s)/i
+            },
+            {
+                value: PHP.Constants.T_LOGICAL_AND,
+                re: /^and(?=\s)/i
+            },
+            {
+                value: PHP.Constants.T_LOGICAL_XOR,
+                re: /^xor(?=\s)/i
+            },
+            {
                 value: PHP.Constants.T_BOOLEAN_AND,
                 re: /^&&/
             },

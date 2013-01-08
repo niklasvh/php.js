@@ -1159,12 +1159,28 @@ PHP.Compiler.prototype.Node_Expr_Identical = function( action ) {
     return this.source( action.left ) + "." + this.IDENTICAL + "(" + this.source( action.right ) + ")";
 };
 
+PHP.Compiler.prototype.Node_Expr_LogicalOr = function( action ) {
+    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " || " + this.source( action.right )  + "." +PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_LogicalAnd = function( action ) {
+    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " && " + this.source( action.right )  + "." +PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_LogicalXor = function( action ) {
+    return  this.CREATE_VARIABLE + "(" + "!" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " != " + "!" + this.source( action.right )  + "." +PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
+};
+
+PHP.Compiler.prototype.Node_Expr_BooleanOr = function( action ) {
+    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " || " + this.source( action.right )  + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
+};
+
 PHP.Compiler.prototype.Node_Expr_BooleanAnd = function( action ) {
-    return this.source( action.left ) + "." + this.BOOLEAN_AND + "(" + this.source( action.right ) + ")";
+    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " && " + this.source( action.right )  + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_BooleanNot = function( action ) {
-    return this.source( action.expr ) + "." + this.BOOLEAN_NOT + "()";
+    return this.CREATE_VARIABLE + "(" + "!" + this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {
@@ -1213,11 +1229,6 @@ PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
     
     return str;    
     
-};
-
-PHP.Compiler.prototype.Node_Expr_BooleanOr = function( action ) {
-
-    return  this.source( action.left ) + "." + this.BOOLEAN_OR + "(" + this.source( action.right ) + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Print = function( action ) {
@@ -6788,6 +6799,18 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                 re: /^instanceof(?=\s)/i
             },
             {
+                value: PHP.Constants.T_LOGICAL_OR,
+                re: /^or(?=\s)/i
+            },
+            {
+                value: PHP.Constants.T_LOGICAL_AND,
+                re: /^and(?=\s)/i
+            },
+            {
+                value: PHP.Constants.T_LOGICAL_XOR,
+                re: /^xor(?=\s)/i
+            },
+            {
                 value: PHP.Constants.T_BOOLEAN_AND,
                 re: /^&&/
             },
@@ -7842,7 +7865,7 @@ PHP.Parser.prototype.getNextToken = function( ) {
 
 
 
-            this.line += ((tmp = token[ 1 ].match(/\\n/g)) === null) ? 0 : tmp.length;
+            this.line += ((tmp = token[ 1 ].match(/\n/g)) === null) ? 0 : tmp.length;
 
             if (T_COMMENT === token[0]) {
 
@@ -11311,6 +11334,37 @@ PHP.Parser.prototype.Node_Expr_BooleanOr = function() {
 
 };
 
+PHP.Parser.prototype.Node_Expr_LogicalOr = function() {
+    return {
+        type: "Node_Expr_LogicalOr",
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };  
+
+};
+
+PHP.Parser.prototype.Node_Expr_LogicalAnd = function() {
+    return {
+        type: "Node_Expr_LogicalAnd",
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };  
+
+};
+
+
+PHP.Parser.prototype.Node_Expr_LogicalXor = function() {
+    return {
+        type: "Node_Expr_LogicalXor",
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };  
+
+};
+
 PHP.Parser.prototype.Node_Expr_BitwiseAnd = function() {
     return {
         type: "Node_Expr_BitwiseAnd",
@@ -11352,12 +11406,12 @@ PHP.Parser.prototype.Node_Expr_BooleanNot = function() {
 PHP.Parser.prototype.Node_Expr_BooleanAnd = function() {
     return {
         type: "Node_Expr_BooleanAnd",
-        expr: arguments[ 0 ],
-        attributes: arguments[ 1 ]
+        left: arguments[ 0 ],
+        right: arguments[ 1 ],
+        attributes: arguments[ 2 ]
     };  
 
 };
-
 
 PHP.Parser.prototype.Node_Expr_Instanceof = function() {
    
@@ -15304,7 +15358,7 @@ ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $, $$ ){
 .Variable( "class", 4 )
 .Method( "__construct", 1, [{name:"argument"}], false, function( $, ctx, $Static ) {
 if ( ((ENV.$F("is_string", arguments, $("argument")))).$Bool.$) {
-if ( ((ENV.$F("class_exists", arguments, $("argument"))).$Not()).$Bool.$) {
+if ( ($$(!(ENV.$F("class_exists", arguments, $("argument"))).$Bool.$)).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("argument")).$Concat($$(" does not exist ")) ));
 } else {
 $("this").$Prop( ctx, "name" )._($("argument"));
@@ -15332,7 +15386,7 @@ $$(new (ENV.$Class.Get("ReflectionMethod"))( this, $("parts").$Dim( this, $$(0) 
 };
 })
 .Method( "implementsInterface", 1, [{name:"interface"}], false, function( $, ctx, $Static ) {
-if ( ((ENV.$F("interface_exists", arguments, $("interface"))).$Not()).$Bool.$) {
+if ( ($$(!(ENV.$F("interface_exists", arguments, $("interface"))).$Bool.$)).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Concat($("interface")).$Concat($$(" does not exist ")) ));
 };
 })
@@ -15363,7 +15417,7 @@ if ( ((ENV.$F("count", arguments, $("parts"))).$Greater($$(1))).$Bool.$) {
 $("class")._($("parts").$Dim( this, $$(0) ));
 $("name")._($("parts").$Dim( this, $$(1) ));
 };
-if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
+if ( ($$(!(ENV.$F("class_exists", arguments, $("class"))).$Bool.$)).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 $("this").$Prop( ctx, "name" )._($("name"));
@@ -15386,7 +15440,7 @@ ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $, $$ ){
 .Variable( "name", 1 )
 .Variable( "class", 1 )
 .Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], false, function( $, ctx, $Static ) {
-if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
+if ( ($$(!(ENV.$F("class_exists", arguments, $("class"))).$Bool.$)).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })
