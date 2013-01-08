@@ -351,27 +351,27 @@ PHP.Compiler.prototype.Node_Expr_Identical = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_LogicalOr = function( action ) {
-    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + this.VARIABLE_VALUE + " || " + this.source( action.right )  + "." + this.VARIABLE_VALUE + ")";
+    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " || " + this.source( action.right )  + "." +PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_LogicalAnd = function( action ) {
-    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + this.VARIABLE_VALUE + " && " + this.source( action.right )  + "." + this.VARIABLE_VALUE + ")";
+    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " && " + this.source( action.right )  + "." +PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_LogicalXor = function( action ) {
-    return  this.CREATE_VARIABLE + "(" + "!" + this.source( action.left ) + "." + this.VARIABLE_VALUE + " != " + "!" + this.source( action.right )  + "." + this.VARIABLE_VALUE + ")";
+    return  this.CREATE_VARIABLE + "(" + "!" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " != " + "!" + this.source( action.right )  + "." +PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_BooleanOr = function( action ) {
-    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + this.VARIABLE_VALUE + " || " + this.source( action.right )  + "." + this.VARIABLE_VALUE + ")";
+    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " || " + this.source( action.right )  + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_BooleanAnd = function( action ) {
-    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + this.VARIABLE_VALUE + " && " + this.source( action.right )  + "." + this.VARIABLE_VALUE + ")";
+    return  this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + " && " + this.source( action.right )  + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_BooleanNot = function( action ) {
-    return this.source( action.expr ) + "." + this.BOOLEAN_NOT + "()";
+    return this.CREATE_VARIABLE + "(" + "!" + this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ")";
 };
 
 PHP.Compiler.prototype.Node_Expr_Smaller = function( action ) {

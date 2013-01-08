@@ -12,7 +12,7 @@ if ( ((ENV.$F("count", arguments, $("parts"))).$Greater($$(1))).$Bool.$) {
 $("class")._($("parts").$Dim( this, $$(0) ));
 $("name")._($("parts").$Dim( this, $$(1) ));
 };
-if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
+if ( ($$(!(ENV.$F("class_exists", arguments, $("class"))).$Bool.$)).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 $("this").$Prop( ctx, "name" )._($("name"));

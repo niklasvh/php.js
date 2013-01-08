@@ -8,7 +8,7 @@ ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $, $$ ){
 .Variable( "name", 1 )
 .Variable( "class", 1 )
 .Method( "__construct", 1, [{name:"class"}, {name:"name", d: $$(null)}], false, function( $, ctx, $Static ) {
-if ( ((ENV.$F("class_exists", arguments, $("class"))).$Not()).$Bool.$) {
+if ( ($$(!(ENV.$F("class_exists", arguments, $("class"))).$Bool.$)).$Bool.$) {
 throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat($("class")).$Concat($$(" does not exist ")) ));
 };
 })
