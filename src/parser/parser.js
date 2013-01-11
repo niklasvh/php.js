@@ -209,7 +209,6 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
             yyn = state - this.YYNLSTATES;
         }
     }
-    console.log(tokens);
 };
 
 PHP.ParseError = function( msg, line ) {
