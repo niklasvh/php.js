@@ -47,7 +47,6 @@ var PHP = function( code, opts ) {
 
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
-    console.log(this.compiler.src);
 
 /*    if ( false ) {
         var thread = new Worker("thread.js");
