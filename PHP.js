@@ -23,11 +23,8 @@ var PHP = function( code, opts ) {
         this.vm.OUTPUT_BUFFER = "Parse error: " + e.message + " in " + opts.SERVER.SCRIPT_FILENAME + " on line " + e.line;
         return this;
     }
-    
 
 
-  
-    
     var POST = opts.POST,
     RAW_POST = opts.RAW_POST,
     RAW = (RAW_POST !== undefined ) ? PHP.RAWPost( RAW_POST ) : {};
@@ -50,9 +47,8 @@ var PHP = function( code, opts ) {
 
     
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
-    console.log(this.compiler.src);
 
-    if ( false ) {
+/*    if ( false ) {
         var thread = new Worker("thread.js");
     
         thread.postMessage({
@@ -83,36 +79,28 @@ var PHP = function( code, opts ) {
             }
             
         }, false);
-    
-    } else {
-    
-        this.vm = new PHP.VM( this.compiler.src, opts );
-    
-    
-        if (RAW_POST !== undefined ) {
-            RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
-        }
-    
-        /*
+        return;
+    }*/
+
+    this.vm = new PHP.VM( this.compiler.src, opts );
+
+    if (RAW_POST !== undefined ) {
+        RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
+    }
+
+    /*
     if (rawError !== undefined ) {
         this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING ); 
     }
-           */
+   */
 
-        this.vm.Run();
-        
-    }
-    
-   
-    
+    this.vm.Run();
 };
 
 PHP.Constants = {};
 
 PHP.Modules = function() {
     this.OUTPUT_BUFFER = "";
-    
-
 };
 
 PHP.Adapters = {};
@@ -418,10 +406,8 @@ PHP.Utils.QueryString = function( str ) {
                 
                 
             };
-            
-            // 
-        
-        
+
+
             var arraySearch = key.match(/^(.*?)((\[[a-z+0-9_\-\[\]]*\])+)$/i);
 
             if ( arraySearch !== null ) {
@@ -446,9 +432,7 @@ PHP.Utils.QueryString = function( str ) {
    
     return items;
     
-    };
-    
-    /* 
+};/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 5.7.2012 
 * @website http://hertzen.com
@@ -7677,7 +7661,6 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
             yyn = state - this.YYNLSTATES;
         }
     }
-    console.log(tokens);
 };
 
 PHP.ParseError = function( msg, line ) {
