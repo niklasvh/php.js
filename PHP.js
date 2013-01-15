@@ -1274,6 +1274,10 @@ PHP.Compiler.prototype.Node_Expr_Cast_Double = function( action ) {
     return  this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_DOUBLE;
 };
 
+PHP.Compiler.prototype.Node_Expr_Cast_Bool = function( action ) {
+    return  this.source( action.expr ) + "." + PHP.VM.Variable.prototype.CAST_BOOL;
+};
+
 PHP.Compiler.prototype.Node_Expr_Include = function( action ) {
     return  this.CTX + "include( " +this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.source( action.expr ) + " )";
 };
@@ -11237,9 +11241,9 @@ PHP.Parser.prototype.Node_Expr_Exit = function() {
 };
 
 
-PHP.Parser.prototype.Node_Expr_Cast_Boolean = function() {
+PHP.Parser.prototype.Node_Expr_Cast_Bool = function() {
     return {
-        type: "Node_Expr_Cast_Boolean",
+        type: "Node_Expr_Cast_Bool",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
     };  
@@ -14347,6 +14351,7 @@ PHP.VM.Variable = function( arg ) {
             
             switch( this[ this.TYPE ]) {
                 case this.INT:
+                case this.FLOAT:
                     if ( value === 0 ) {
                         return new PHP.VM.Variable( false );
                     } else {
@@ -14361,7 +14366,19 @@ PHP.VM.Variable = function( arg ) {
                         return new PHP.VM.Variable( true );
                     }
                     break;
-                    
+
+                case this.ARRAY:
+                    if ( value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ].length === 0 ) {
+                        return new PHP.VM.Variable( false );
+                    } else {
+                        return new PHP.VM.Variable( true );
+                    }
+                    break;
+
+                case this.OBJECT:
+                    // TODO
+                    return new PHP.VM.Variable( true );
+
                 case this.NULL:
                     return new PHP.VM.Variable( false );
                     break;

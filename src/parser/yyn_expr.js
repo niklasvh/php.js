@@ -490,9 +490,9 @@ PHP.Parser.prototype.Node_Expr_Exit = function() {
 };
 
 
-PHP.Parser.prototype.Node_Expr_Cast_Boolean = function() {
+PHP.Parser.prototype.Node_Expr_Cast_Bool = function() {
     return {
-        type: "Node_Expr_Cast_Boolean",
+        type: "Node_Expr_Cast_Bool",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
     };  

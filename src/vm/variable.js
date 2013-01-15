@@ -633,6 +633,7 @@ PHP.VM.Variable = function( arg ) {
             
             switch( this[ this.TYPE ]) {
                 case this.INT:
+                case this.FLOAT:
                     if ( value === 0 ) {
                         return new PHP.VM.Variable( false );
                     } else {
@@ -647,7 +648,19 @@ PHP.VM.Variable = function( arg ) {
                         return new PHP.VM.Variable( true );
                     }
                     break;
-                    
+
+                case this.ARRAY:
+                    if ( value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ].length === 0 ) {
+                        return new PHP.VM.Variable( false );
+                    } else {
+                        return new PHP.VM.Variable( true );
+                    }
+                    break;
+
+                case this.OBJECT:
+                    // TODO
+                    return new PHP.VM.Variable( true );
+
                 case this.NULL:
                     return new PHP.VM.Variable( false );
                     break;
