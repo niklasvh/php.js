@@ -12,7 +12,7 @@ PHP.Lexer = function( src, ini ) {
         return result;
     },
     prev,
-    
+
     openTag = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag) ) ? /(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
         openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /^(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
             tokens = [
@@ -491,18 +491,18 @@ PHP.Lexer = function( src, ini ) {
                             match = result.match( /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\@\^\%\"\'\{\}]/ );
 
                             if ( match !== null ) {
-                       
+
                                 results.push( match[ 0 ] );
                                 result = result.substring( 1 );
 
                                 if ( curlyOpen > 0 && match[ 0 ] === "}") {
                                     curlyOpen--;
                                 }
-                        
+
                                 if ( match[ 0 ] === "[" ) {
                                     bracketOpen++;
                                 }
-                        
+
                                 if ( match[ 0 ] === "]" ) {
                                     bracketOpen--;
                                 }
@@ -522,11 +522,11 @@ PHP.Lexer = function( src, ini ) {
                                     ]);
 
                                 result = result.substring( match[ 0 ].length );
-                    
+
                                 match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
-                        
+
                                 if ( match !== null ) {
-                            
+
                                     results.push([
                                         parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10),
                                         match[ 1 ],
@@ -538,14 +538,14 @@ PHP.Lexer = function( src, ini ) {
                                         line
                                         ]);
                                     result = result.substring( match[ 0 ].length );
-                                } 
-                        
-                        
+                                }
+
+
                                 if ( result.match( /^\[/g ) !== null ) {
                                     continue;
                                 }
                             }
-                    
+
                             var re;
                             if ( curlyOpen > 0) {
                                 re = /^([^\\\$"{}\]]|\\.)+/g;
@@ -575,7 +575,7 @@ PHP.Lexer = function( src, ini ) {
                             }
 
                             if( result.match(/^{\$/) !== null ) {
-                       
+
                                 results.push([
                                     parseInt(PHP.Constants.T_CURLY_OPEN, 10),
                                     "{",
@@ -584,19 +584,18 @@ PHP.Lexer = function( src, ini ) {
                                 result = result.substring( 1 );
                                 curlyOpen++;
                             }
-                    
+
                             if (len === result.length) {
                                 //  nothing has been found yet
                                 if ((match =  result.match( /^(([^\\]|\\.)*?[^\\]\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)/g )) !== null) {
-                                    console.log( result, match, match[0], match[1] );
                                     return;
                                 }
                             }
-                    
+
                         }
 
                         return undefined;
-            
+
                     } else {
                         result = result.replace(/\n/g,"\\n").replace(/\r/g,"");
                     }
@@ -621,8 +620,8 @@ PHP.Lexer = function( src, ini ) {
                 re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\'\$\~]/
             }];
 
-   
-    
+
+
 
 
             var results = [],

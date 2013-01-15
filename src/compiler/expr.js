@@ -1,16 +1,16 @@
 
 
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
-   
-    var part; 
-   
+
+    var part;
+
     if ( action.dim !== undefined &&  action.dim !== null && (/^Node_Expr_(FuncCall|Plus)$/.test(action.dim.type) )) {
-        
-      
+
+
         var tmp ="var dim" + ++this.FUNC_NUM + " = " + this.CREATE_VARIABLE + "(" + this.source( action.dim ) + "." + this.VARIABLE_VALUE + ");";
 
-     
-       
+
+
         if (this.tmpDimVars.length === 0 ) {
             this.tmpDimVars += tmp;
         } else {
@@ -22,38 +22,38 @@ PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
             this.tmpDimVars = "";
         }
         this.dimPrev = action.dim.type;
-        
-        
-        
+
+
+
         part = "dim" + this.FUNC_NUM;
     } else {
         part = this.source( action.dim );
     }
 
     var src = "", variable;
-    
+
     if ( action.variable.type === "Node_Expr_PropertyFetch") {
         variable = this.Node_Expr_PropertyFetch( action.variable, true );
     } else {
         variable = this.source( action.variable );
     }
-    
+
     src += variable + "."  + this.DIM_FETCH + '( this, ' + part + " )";
-    
+
     return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
 
     if ( action.variable.type === "Node_Expr_Variable" && action.variable.name === "this") {
-        this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;  
+        this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;
     }
-    
-  
+
+
     var src = this.source( action.variable ) + "." + this.ASSIGN;
     if ( action.expr !== undefined ) {
-        if ( action.expr.type !== "Node_Expr_Assign") {    
-            src += "(" + this.source( action.expr ) + ")";   
+        if ( action.expr.type !== "Node_Expr_Assign") {
+            src += "(" + this.source( action.expr ) + ")";
         } else {
             src += "(" + this.source( action.expr.variable ) + ", " + this.source( action.expr.expr ) + ")";
         }
@@ -117,8 +117,8 @@ PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
     if ( action.refVar.type === "Node_Expr_New") {
         this.DEPRECATED.push(["Assigning the return value of new by reference is deprecated", action.attributes.startLine]);
     }
-    
-    
+
+
     var src = "";
     if (action.variable.type === "Node_Expr_StaticPropertyFetch") {
         src +=  this.Node_Expr_StaticPropertyFetch( action.variable, true );
@@ -126,7 +126,6 @@ PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
         src += this.source( action.variable );
     }
     src += "." + PHP.VM.Variable.prototype.REF + "(" + this.source( action.refVar ) + ")";
-    console.log( action );
     return src;
 };
 
@@ -144,7 +143,7 @@ PHP.Compiler.prototype.Node_Expr_ErrorSuppress = function( action ) {
 PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
     var src = "(" + this.CTX + this.FUNCTION + '(';
-    
+
 
     if ( action.func.type !== "Node_Name") {
         src +=  this.source( action.func ) + "." + this.VARIABLE_VALUE + ", arguments";
@@ -153,7 +152,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
         if (this.getName( action.func ) === "eval") {
             src += ", $, $Static, this";
-            
+
             if (this.INSIDE_METHOD ) {
                 src += ", ctx";
             } else {
@@ -171,7 +170,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
         } else {
             src += ", " + this.source( arg.value );
         }
-       
+
     //    args.push( this.source( arg.value ) );
     }, this);
 
@@ -187,10 +186,10 @@ PHP.Compiler.prototype.Node_Expr_Exit = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
-   
+
     var src = this.CTX + "list( ";
 
-   
+
 
 
     var addList = function( assignList ) {
@@ -200,7 +199,7 @@ PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
                 src += first + " [";
                 addList( item );
                 src += "]";
-                
+
             } else {
                 src += first + " " + this.source(item) ;
             }
@@ -222,26 +221,26 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
     action.variables.forEach(function( arg ){
 
         switch (arg.type) {
-            
+
             case "Node_Expr_ArrayDimFetch":
                 args.push( this.source( arg.variable ) + "."  + this.DIM_ISSET + '( this, ' + this.source( arg.dim ) + " )" );
                 break;
             case "Node_Expr_PropertyFetch":
-                
+
                 args.push(  this.source( arg.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_ISSET + '( this, "' + this.source( arg.name ) + '" )');
-          
+
                 break;
-                
+
             case "Node_Expr_StaticPropertyFetch":
-               
+
                 args.push(  this.Node_Expr_StaticPropertyFetch( arg, undefined, true ));
-          
+
                 break;
             default:
                 args.push( this.source( arg) );
         }
 
-        
+
     }, this);
 
     src += args.join(", ") + " )";
@@ -252,7 +251,6 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 PHP.Compiler.prototype.Node_Expr_Empty = function( action ) {
 
     var src = this.CTX + "$empty( ";
-    console.log(action);
     switch (action.variable.type) {
         case "Node_Expr_ArrayDimFetch":
             src += this.source( action.variable.variable ) + "."  + this.DIM_EMPTY + '( this, ' + this.source( action.variable.dim ) + " )";
@@ -266,8 +264,8 @@ PHP.Compiler.prototype.Node_Expr_Empty = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Instanceof = function( action ) {
-    
-    
+
+
     var classPart;
 
     if (action.right.type === "Node_Name") {
@@ -275,7 +273,7 @@ PHP.Compiler.prototype.Node_Expr_Instanceof = function( action ) {
     } else {
         classPart = this.source(action.right) + "." + this.VARIABLE_VALUE;
     }
-    
+
     return this.source( action.left ) + "." + this.INSTANCEOF + '('  + classPart + ')';
 };
 
@@ -304,7 +302,6 @@ PHP.Compiler.prototype.Node_Expr_Div = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Minus = function( action ) {
-    console.log( action );
     return this.source( action.left ) + "." + this.MINUS + "(" + this.source( action.right ) + ( /^Node_Expr_Post/.test( action.right.type ) ? ", true" : "" ) + ")";
 };
 
@@ -317,20 +314,20 @@ PHP.Compiler.prototype.Node_Expr_Mod = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
-    
+
     var str =  "";
-   
+
 
     if ( /^Node_Expr_((Static)?Property|ArrayDim)Fetch$/.test(action.left.type) ) {
         str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_DOUBLE + "." + this.VARIABLE_VALUE + ")";
     } else {
         str += this.source( action.left );
     }
-  
+
     str += "." + this.ADD + "(" + this.source( action.right ) + ")";
-    
-    return str;    
-    
+
+    return str;
+
 
 };
 
@@ -408,18 +405,18 @@ PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
     var str =  "";
-   
+
 
     if ( /^Node_Expr_((Static)?Property|ArrayDim)Fetch$/.test(action.left.type) )  {
         str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_STRING + "." + this.VARIABLE_VALUE + ")";
     } else {
         str += this.source( action.left );
     }
-  
+
     str += "." + this.CONCAT + "(" + this.source( action.right ) + ")";
-    
-    return str;    
-    
+
+    return str;
+
 };
 
 PHP.Compiler.prototype.Node_Expr_Print = function( action ) {
@@ -490,7 +487,7 @@ PHP.Compiler.prototype.Node_Expr_New = function( action ) {
 
     var classPart,
     src = "";
-    
+
     if (action.Class.type === "Node_Name") {
         classPart = '"' + this.source(action.Class) +'"';
     } else {
@@ -530,7 +527,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
     var classPart, src = "";
 
-    
+
     if (action.name.type === undefined) {
         classPart = '"' + action.name +'"';
     } else {
@@ -545,13 +542,13 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
     src += ', ' + classPart;
 
     action.args.forEach(function( arg ) {
-        
+
         if (arg.value.type === "Node_Expr_PropertyFetch") {
             src += ", " + this.Node_Expr_PropertyFetch( arg.value, true );
         } else {
             src += ", " + this.source( arg.value );
         }
-        
+
     // src += ", " + this.source( arg.value );
     }, this);
 
@@ -566,7 +563,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action, funcCall ) {
 
     var classParts = "";
-    
+
     if ( typeof action.name === "string" ) {
         classParts += '"' +  this.source( action.name ) + '"';
     } else {
@@ -576,7 +573,7 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action, funcCall ) {
     if ( funcCall === true ) {
         extra = ", true";
     }
-    
+
     var variable;
     if ( action.variable.type === "Node_Expr_PropertyFetch") {
         variable = this.Node_Expr_PropertyFetch( action.variable, funcCall );
@@ -595,7 +592,7 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action, funcCall ) {
 PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 
     var classPart;
-    
+
     if (action.Class.type === "Node_Name") {
         classPart = '"' + this.source(action.Class) +'"';
     } else {
@@ -611,22 +608,22 @@ PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
     var src = "";
-    
+
     var classPart,
     funcPart;
-    
+
     if (action.Class.type === "Node_Name") {
         classPart = '"' + this.source(action.Class) +'"';
     } else {
         classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
     }
-    
+
     if (typeof action.func === "string") {
         funcPart = '"' + this.source(action.func) + '"';
     } else {
         funcPart = this.source(action.func) + "." + this.VARIABLE_VALUE;
     }
-    
+
     if (/^(parent|self)$/i.test( action.Class.parts )) {
         src += "this." + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + funcPart;
     } else {
@@ -635,13 +632,13 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
 
     action.args.forEach(function( arg ) {
-        
+
         if (arg.value.type === "Node_Expr_PropertyFetch") {
             src += ", " + this.Node_Expr_PropertyFetch( arg.value, true );
         } else {
             src += ", " + this.source( arg.value );
         }
-        
+
     //  src += ", " + this.source( arg.value );
     }, this);
 
@@ -656,39 +653,39 @@ PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action, ref, is
     var src = "",
     extra = "",
     classPart;
-    
+
 
     var actionParts = "";
-    
+
     if ( typeof action.name === "string" ) {
         actionParts += '"' +  this.source( action.name ) + '"';
     } else {
         actionParts +=  this.source( action.name ) + "." +  this.VARIABLE_VALUE;
     }
-    
-    
-    
+
+
+
     if (action.Class.type === "Node_Name") {
         classPart = '"' + this.source(action.Class) +'"';
     } else {
         classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
     }
-    
+
     if ( ref === true) {
         extra = ", true";
-    } 
-    
+    }
 
-    
-    
-    
+
+
+
+
     if (/^(parent|self)$/i.test( action.Class.parts )) {
         src += "this." + (( isset === true ) ? this.CLASS_STATIC_PROPERTY_ISSET : this.STATIC_PROPERTY_GET  ) + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     } else {
         src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + (( isset === true ) ? this.CLASS_STATIC_PROPERTY_ISSET : this.STATIC_PROPERTY_GET  ) + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     }
 
-    
+
     src += extra + ")";
 
     return src;
@@ -712,7 +709,7 @@ PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Clone = function( action ) {
-    
+
     var src = "";
     src += this.source( action.expr ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_CLONE + "( this )";
     return src;

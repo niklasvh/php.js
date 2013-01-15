@@ -15,7 +15,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     staticVars = {}; // static variable storage
 
     ENV.FUNCTION_REFS[ functionName ] = funcByRef;
-    
+
     // initializer
     args.push( function( args, values ) {
 
@@ -26,20 +26,20 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
-            
+
             PHP.Utils.ArgumentHandler( ENV, arg, argObject, vals[index], index, functionName );
-            
+
             // redefine item in arguments object, to be used by func_get_arg(s)
-            
+
             if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
                 values[ index + 2 ] = arg;
             } else {
                 values[ index + 2 ] = new PHP.VM.Variable( arg[ COMPILER.VARIABLE_VALUE ] );
             }
         });
- 
+
         handler("GLOBALS", $GLOBAL( "GLOBALS") );
-        
+
         // magic constants
         handler( "$__FILE__" )[ COMPILER.VARIABLE_VALUE ] = $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ];
 
@@ -50,7 +50,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
         // static handler, the messed up ordering of things is needed due to js execution order
         PHP.Utils.StaticHandler( staticHandler, staticVars,  handler, ENV[ COMPILER.GLOBAL ] );
 
-        
+
 
 
         return handler;
@@ -96,12 +96,12 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
         if ( !this[ COMPILER.SIGNATURE ]( Array.prototype.slice.call(arguments,2 ), func_get_arg, 1, [ VARIABLE.INT ] ) ) {
             return new PHP.VM.Variable( false );
         }
-        
+
         if ( arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] < 0 ) {
             this[ PHP.Compiler.prototype.ERROR ]( func_get_arg + "():  The argument number should be >= 0", PHP.Constants.E_WARNING, true );
-            return new PHP.VM.Variable( false ); 
+            return new PHP.VM.Variable( false );
         }
-   
+
 
         if ( args[ arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] + 2 ] === undefined ) {
             this[ PHP.Compiler.prototype.ERROR ]( func_get_arg + "():  Argument " + arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] + " not passed to function", PHP.Constants.E_CORE_WARNING, true );
@@ -126,11 +126,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
     } else if ( this[ functionName ] === undefined ) {
         this[ PHP.Compiler.prototype.ERROR ]( "Call to undefined function " + functionName + "()", PHP.Constants.E_ERROR, true );
     } else {
-        ret = this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) ); 
+        ret = this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) );
     }
 
     PHP.Utils.CheckRef.call( this, ret, this.FUNCTION_REFS[ functionName ] );
-                
+
 
     return ret;
 };
@@ -304,18 +304,15 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     };
 
     MODULES.register_shutdown_function = function( func ) {
-        console.log("registering shutdown");
         shutdownFunc = func;
         shutdownParams = Array.prototype.slice.call( arguments, 1 );
     };
-    
+
     MODULES.$shutdown = function( ) {
-        
+
         this.$Class.Shutdown();
-        
-        console.log("shutting down");
+
         if ( shutdownFunc !== undefined ) {
-            console.log("yes");
             this.call_user_func.apply( this, [ shutdownFunc ].concat( arguments ) );
         }
     };
@@ -345,18 +342,18 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         methods[ COMPILER.CATCH ] = function( name, type, $, func ) {
             if ( caught ) return methods;
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
-                
+
                 var classObj = variable[ COMPILER.VARIABLE_VALUE ];
-         
+
                 if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1   ) {
                     $( name, variable );
                     caught = true;
                     func();
                 }
             } else if ( variable instanceof PHP.Halt && /^Exception$/i.test( type )) {
-                
+
                 if ( variable.catchable !== true ) {
-                
+
                     $( name, new (this.$Class.Get( "Exception"  ))( this, new PHP.VM.Variable( variable.msg )  ) );
                     caught = true;
                     func();
@@ -382,7 +379,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             ]);
 
     };
-    
+
     MODULES.error_reporting = function( level ) {
         reportingLevel = level[ COMPILER.VARIABLE_VALUE ];
     };
@@ -404,7 +401,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         };
 
         function checkType( type ) {
-            
+
             return ((reportingLevel & C[ type ]) === C[ type ]);
         }
 
@@ -419,17 +416,17 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         } else {
             lineAppend = "";
         }
-        
+
         if ( this.$ini.track_errors == 1 ||  this.$ini.track_errors == "On") {
             $GLOBAL("php_errormsg")[ COMPILER.VARIABLE_VALUE ] = msg;
         }
 
-     
+
         if (reportingLevel !== 0) {
             if ( suppress === false ) {
                 if ( errorHandler !== undefined ) {
-                   
-                        
+
+
                     this.call_user_func(
                         errorHandler,
                         new PHP.VM.Variable( level ),
@@ -438,18 +435,18 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                         new PHP.VM.Variable( 1 ),
                         this.array([])
                         );
-                    
+
                 } else {
                     switch ( level ) {
                         case C.E_ERROR:
-                            this[ COMPILER.DISPLAY_HANDLER ] = false; 
+                            this[ COMPILER.DISPLAY_HANDLER ] = false;
                             throw new PHP.Halt( msg, level, lineAppend, catchable );
                             return;
                             break;
                         case C.E_RECOVERABLE_ERROR:
                             this[ COMPILER.DISPLAY_HANDLER ] = false;
                             //    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
-                     
+
                             throw new PHP.Halt( msg, level, lineAppend, catchable );
                             //   throw new PHP.Halt( level );
                             return;
@@ -492,7 +489,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             }
 
                             break;
-                            
+
                         default:
                             this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + lineAppend + "\n"));
                             return;

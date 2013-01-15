@@ -1,12 +1,19 @@
-/* 
+/*
+  php.js 0.1.0 <http://phpjs.hertzen.com/>
+  Copyright (c) 2013 Niklas von Hertzen
+
+  Released under MIT License
+*/
+
+/*
  * @author Niklas von Hertzen <niklas at hertzen.com>
- * @created 15.6.2012 
+ * @created 15.6.2012
  * @website http://hertzen.com
  */
 
 
 var PHP = function( code, opts ) {
-    
+
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" ),
     iniSet = opts.ini || {};
     opts.ini = PHP.ini( iniContent );
@@ -14,7 +21,7 @@ var PHP = function( code, opts ) {
     Object.keys( iniSet ).forEach(function(key){
         this[ key ] = iniSet[ key ];
     }, opts.ini);
-    
+
     this.tokens = PHP.Lexer( code, opts.ini );
     try {
         this.AST = new PHP.Parser( this.tokens );
@@ -28,11 +35,11 @@ var PHP = function( code, opts ) {
     var POST = opts.POST,
     RAW_POST = opts.RAW_POST,
     RAW = (RAW_POST !== undefined ) ? PHP.RAWPost( RAW_POST ) : {};
-    
+
     opts.POST = ( POST !== undefined ) ? PHP.Utils.QueryString( POST ) : (RAW_POST !== undefined ) ? RAW.Post() : {};
     opts.RAW_POST = ( RAW_POST !== undefined ) ? RAW.Raw() : (POST !== undefined ) ? POST.trim() :  "";
     opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
-    
+
     opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.max_file_uploads, opts.ini.upload_tmp_dir ) : {};
     /*
     if (RAW_POST !== undefined ) {
@@ -43,31 +50,31 @@ var PHP = function( code, opts ) {
     if (RAW_POST !== undefined ) {
         RAW.WriteFiles( opts.filesystem.writeFileSync );
     }
-    
 
-    
+
+
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
 
 /*    if ( false ) {
         var thread = new Worker("thread.js");
-    
+
         thread.postMessage({
-            type: "import", 
+            type: "import",
             content: opts.files
         });
-        
+
         thread.postMessage({
             type: "run",
             content: [this.compiler.src, opts]
         })
-        
+
         setTimeout(function(){
             thread.postMessage({
                 type: "stop"
             })
         }, opts.ini.max_execution_time);
-        
-        
+
+
         thread.addEventListener('message', function(e) {
             switch( e.data.type ) {
                 case "complete":
@@ -77,7 +84,7 @@ var PHP = function( code, opts ) {
                 default:
                     console.log(e.data);
             }
-            
+
         }, false);
         return;
     }*/
@@ -90,7 +97,7 @@ var PHP = function( code, opts ) {
 
     /*
     if (rawError !== undefined ) {
-        this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING ); 
+        this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING );
     }
    */
 
@@ -109,7 +116,7 @@ PHP.Utils = {};
 
 
 PHP.Utils.$A = function( arr) {
-    return Array.prototype.slice.call( arr ); 
+    return Array.prototype.slice.call( arr );
 };
 
 PHP.Utils.ClassName = function( classVar ) {
@@ -120,79 +127,79 @@ PHP.Utils.ClassName = function( classVar ) {
             return classVar[ COMPILER.VARIABLE_VALUE ]
         } else {
             return classVar[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ];
-        } 
+        }
     }
-    
+
 };
 
 PHP.Utils.Merge = function(obj1, obj2) {
-    
+
     Object.keys( obj2 ).forEach(function( key ){
-        obj1[ key ] = obj2 [ key ]; 
+        obj1[ key ] = obj2 [ key ];
     });
-    
+
     return obj1;
 };
 
 PHP.Utils.Path = function( path ) {
-    
+
     path = path.substring(0, path.lastIndexOf("/"));
-    
+
     return path;
 };
 
 PHP.Utils.Visible = function( name, objectValue, ctx ) {
-    
+
     // helper function for checking whether variable/method is of type
     function checkType( name, type) {
         var value = objectValue[ PROPERTY_TYPE + name ];
         if (value === undefined) {
             return true;
         }
-        
+
         if ( type === "PUBLIC") {
             return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]) || (value  === PHP.VM.Class.STATIC);
         } else {
             return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]);
         }
-        
+
     }
-    
+
     function hasProperty( proto, prop ) {
         while( proto !== undefined &&  proto[ PHP.VM.Class.PROPERTY + prop ] !== undefined ) {
             proto = Object.getPrototypeOf( proto );
         }
-        
+
         return proto;
-     
+
     }
-    
+
     var COMPILER = PHP.Compiler.prototype,
     PROPERTY_TYPE = PHP.VM.Class.PROPERTY_TYPE,
     VARIABLE = PHP.VM.Variable.prototype;
-    
+
     if ( (ctx instanceof PHP.VM.ClassPrototype) && objectValue[ COMPILER.CLASS_NAME ] === ctx[ COMPILER.CLASS_NAME ] ) {
-        return true;                       
+        return true;
     } else {
-                        
+
         if ( (ctx instanceof PHP.VM.ClassPrototype) && this.$Class.Inherits( objectValue, ctx[ COMPILER.CLASS_NAME ] ) && checkType( name, "PROTECTED")) {
-                                   
+
             return true;
         } else  if ( (ctx instanceof PHP.VM.ClassPrototype) && this.$Class.Inherits( objectValue, ctx[ COMPILER.CLASS_NAME ] ) && checkType( name, "PRIVATE")) {
-            
+
             if (hasProperty( ctx, name ) ===  ctx) {
                 return true;
             }
-        
-            
+
+
         } else if (checkType(name, "PUBLIC")) {
 
             return true;
         }
     }
-    
+
     return false;
-    
+
 };
 
 PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functionName ) {
@@ -212,7 +219,7 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
             ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
             value[ VARIABLE.VARIABLE_TYPE ] = undefined;
             value = new PHP.VM.Variable( value[ COMPILER.VARIABLE_VALUE ] );
-            
+
         }
 
         if (value[ VARIABLE.DEFINED ] !== true ) {
@@ -222,23 +229,23 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
 
         arg[ VARIABLE.REF ]( value );
     } else {
-        
+
         if ( value !== undefined ) {
-            
+
             if ( value instanceof PHP.VM.VariableProto) {
-              
+
                 if ( value[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
                     // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
                     arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
-              
+
                 } else {
                     arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.VARIABLE_VALUE ];
                 }
             } else {
                 arg[ COMPILER.VARIABLE_VALUE ] = value;
             }
-            
-   
+
+
         } else {
             if ( argObject[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
                 arg[ COMPILER.VARIABLE_VALUE ] = argObject[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
@@ -256,10 +263,10 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
 };
 
 PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
      VARIABLE = PHP.VM.Variable.prototype;
-   
+
     staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
 
         if ( staticVars[ name ] === undefined ) {
@@ -268,10 +275,10 @@ PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global 
                 def: def[ COMPILER.VARIABLE_VALUE ],
                 val: def
             };
-            
+
             // assign it to current running context as well
             handler( name, def );
-        
+
         } else {
             if ( def [ COMPILER.VARIABLE_VALUE ] === staticVars[ name ].def ) {
                 handler( name, staticVars[ name ].val );
@@ -281,14 +288,14 @@ PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global 
                     val: def
                 };
                 handler( name, def );
-            }   
+            }
         }
 
 
         return staticHandler;
 
 
-    };  
+    };
 
 
     // global handler
@@ -299,29 +306,29 @@ PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global 
             handler( varName, val )
         });
     };
-    
+
     return staticHandler;
-    
+
 };
 
 PHP.Utils.CheckRef = function( ret, byRef ) {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
-    
+
     if ( ret instanceof PHP.VM.Variable) {
         if ( byRef !== true) {
-            
+
             ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
         } else if (byRef === true){
-       
+
             if (ret[ VARIABLE.REFERRING] === undefined && (ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE || ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION )) {
-                 
+
                this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
             }
             ret[ VARIABLE.VARIABLE_TYPE ] = undefined;
         }
     }
-    
+
 };
 
 
@@ -336,38 +343,38 @@ PHP.Utils.TokenName = function( token ) {
             return false;
         }
     });
-    
+
     return current;
 };
 
 PHP.Utils.Filesize = function( size ) {
-  
+
     if ( /^\d+M$/i.test( size )) {
         return (size.replace(/M/g,"") - 0) * 1024 * 1024;
     } else if ( /^\d+K$/i.test( size )) {
-        return (size.replace(/K/g,"") - 0) * 1024;    
+        return (size.replace(/K/g,"") - 0) * 1024;
     }
-    
+
     return size;
-    
+
 };
 
 PHP.Utils.QueryString = function( str ) {
     str = str.trim();
     var variables = str.split(/&/);
-    
+
     var items = {};
-    
+
     // going through each variable which have been split by &
     variables.forEach( function( variable ) {
-        
+
         var parts = variable.split(/=/),
             key = decodeURIComponent( parts[ 0 ] ),
             value = (parts.length > 1 ) ? decodeURIComponent( parts[ 1 ] ) : null,
-           
+
             arrayManager = function( item, parse, value ) {
-               
-                
+
+
                 var arraySearch = parse.match(/^\[([a-z0-9+_\-\[]*)\]/i);
                 //  console.log(item, parse, value, arraySearch);
                 if ( arraySearch !== null ) {
@@ -375,27 +382,27 @@ PHP.Utils.QueryString = function( str ) {
 
                     if ( key.length === 0 ) {
                         key = Object.keys(item).length;
-                       
-                    } 
+
+                    }
                     parse = parse.substring( arraySearch[ 0 ].length );
-                  
+
                     if ( parse.length > 0  ) {
                         if ( typeof item[ key ] !== "object" && item[ key ] !== null ) {
                             item[ key ] = {};
                         }
-                        
+
                         var ret = arrayManager( item[ key ], parse, value );
-                       
+
                         if ( ret !== undefined ) {
                             item[ key ] = ret;
                         }
-                       
+
                     } else {
- 
+
                         item[ key ] = ( value !== null) ? value.replace(/\+/g," ") : null;
                     }
-                    
-                    
+
+
                 } else {
                     if ( parse === "]") {
                         item = value;
@@ -403,8 +410,8 @@ PHP.Utils.QueryString = function( str ) {
                     }
 
                 }
-                
-                
+
+
             };
 
 
@@ -412,27 +419,28 @@ PHP.Utils.QueryString = function( str ) {
 
             if ( arraySearch !== null ) {
                 key =  arraySearch[ 1 ];
-                
-                
-                
+
+
+
                 if ( typeof items[ key ] !== "object" ) {
                     items[ key ] = {};
 
                 }
-                
+
                 arrayManager( items[ key ], arraySearch[ 2 ], value );
-                
+
 
             }
             else  {
                 items[ key ] = ( value !== null) ? value.replace(/\+/g," ") : null;
             }
-        
+
         }, this);
-   
+
     return items;
-    
-};/* 
+
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 5.7.2012 
 * @website http://hertzen.com
@@ -447,6 +455,7 @@ PHP.Halt = function( msg, level, lineAppend, catchable  ) {
     this.catchable = catchable;
     
 };
+
 PHP.Compiler = function( AST, file, opts ) {
     
     this.file = file;
@@ -793,17 +802,18 @@ COMPILER.fixString =  function( result ) {
 
 }
 
+
 PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
-   
-    var part; 
-   
+
+    var part;
+
     if ( action.dim !== undefined &&  action.dim !== null && (/^Node_Expr_(FuncCall|Plus)$/.test(action.dim.type) )) {
-        
-      
+
+
         var tmp ="var dim" + ++this.FUNC_NUM + " = " + this.CREATE_VARIABLE + "(" + this.source( action.dim ) + "." + this.VARIABLE_VALUE + ");";
 
-     
-       
+
+
         if (this.tmpDimVars.length === 0 ) {
             this.tmpDimVars += tmp;
         } else {
@@ -815,38 +825,38 @@ PHP.Compiler.prototype.Node_Expr_ArrayDimFetch = function( action ) {
             this.tmpDimVars = "";
         }
         this.dimPrev = action.dim.type;
-        
-        
-        
+
+
+
         part = "dim" + this.FUNC_NUM;
     } else {
         part = this.source( action.dim );
     }
 
     var src = "", variable;
-    
+
     if ( action.variable.type === "Node_Expr_PropertyFetch") {
         variable = this.Node_Expr_PropertyFetch( action.variable, true );
     } else {
         variable = this.source( action.variable );
     }
-    
+
     src += variable + "."  + this.DIM_FETCH + '( this, ' + part + " )";
-    
+
     return src;
 };
 
 PHP.Compiler.prototype.Node_Expr_Assign = function( action ) {
 
     if ( action.variable.type === "Node_Expr_Variable" && action.variable.name === "this") {
-        this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;  
+        this.FATAL_ERROR = "Cannot re-assign $this in " + this.file + " on line " + action.attributes.startLine;
     }
-    
-  
+
+
     var src = this.source( action.variable ) + "." + this.ASSIGN;
     if ( action.expr !== undefined ) {
-        if ( action.expr.type !== "Node_Expr_Assign") {    
-            src += "(" + this.source( action.expr ) + ")";   
+        if ( action.expr.type !== "Node_Expr_Assign") {
+            src += "(" + this.source( action.expr ) + ")";
         } else {
             src += "(" + this.source( action.expr.variable ) + ", " + this.source( action.expr.expr ) + ")";
         }
@@ -910,8 +920,8 @@ PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
     if ( action.refVar.type === "Node_Expr_New") {
         this.DEPRECATED.push(["Assigning the return value of new by reference is deprecated", action.attributes.startLine]);
     }
-    
-    
+
+
     var src = "";
     if (action.variable.type === "Node_Expr_StaticPropertyFetch") {
         src +=  this.Node_Expr_StaticPropertyFetch( action.variable, true );
@@ -919,7 +929,6 @@ PHP.Compiler.prototype.Node_Expr_AssignRef = function( action ) {
         src += this.source( action.variable );
     }
     src += "." + PHP.VM.Variable.prototype.REF + "(" + this.source( action.refVar ) + ")";
-    console.log( action );
     return src;
 };
 
@@ -937,7 +946,7 @@ PHP.Compiler.prototype.Node_Expr_ErrorSuppress = function( action ) {
 PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
     var src = "(" + this.CTX + this.FUNCTION + '(';
-    
+
 
     if ( action.func.type !== "Node_Name") {
         src +=  this.source( action.func ) + "." + this.VARIABLE_VALUE + ", arguments";
@@ -946,7 +955,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
 
         if (this.getName( action.func ) === "eval") {
             src += ", $, $Static, this";
-            
+
             if (this.INSIDE_METHOD ) {
                 src += ", ctx";
             } else {
@@ -964,7 +973,7 @@ PHP.Compiler.prototype.Node_Expr_FuncCall = function( action ) {
         } else {
             src += ", " + this.source( arg.value );
         }
-       
+
     //    args.push( this.source( arg.value ) );
     }, this);
 
@@ -980,10 +989,10 @@ PHP.Compiler.prototype.Node_Expr_Exit = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
-   
+
     var src = this.CTX + "list( ";
 
-   
+
 
 
     var addList = function( assignList ) {
@@ -993,7 +1002,7 @@ PHP.Compiler.prototype.Node_Expr_AssignList = function( action ) {
                 src += first + " [";
                 addList( item );
                 src += "]";
-                
+
             } else {
                 src += first + " " + this.source(item) ;
             }
@@ -1015,26 +1024,26 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
     action.variables.forEach(function( arg ){
 
         switch (arg.type) {
-            
+
             case "Node_Expr_ArrayDimFetch":
                 args.push( this.source( arg.variable ) + "."  + this.DIM_ISSET + '( this, ' + this.source( arg.dim ) + " )" );
                 break;
             case "Node_Expr_PropertyFetch":
-                
+
                 args.push(  this.source( arg.variable ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_PROPERTY_ISSET + '( this, "' + this.source( arg.name ) + '" )');
-          
+
                 break;
-                
+
             case "Node_Expr_StaticPropertyFetch":
-               
+
                 args.push(  this.Node_Expr_StaticPropertyFetch( arg, undefined, true ));
-          
+
                 break;
             default:
                 args.push( this.source( arg) );
         }
 
-        
+
     }, this);
 
     src += args.join(", ") + " )";
@@ -1045,7 +1054,6 @@ PHP.Compiler.prototype.Node_Expr_Isset = function( action ) {
 PHP.Compiler.prototype.Node_Expr_Empty = function( action ) {
 
     var src = this.CTX + "$empty( ";
-    console.log(action);
     switch (action.variable.type) {
         case "Node_Expr_ArrayDimFetch":
             src += this.source( action.variable.variable ) + "."  + this.DIM_EMPTY + '( this, ' + this.source( action.variable.dim ) + " )";
@@ -1059,8 +1067,8 @@ PHP.Compiler.prototype.Node_Expr_Empty = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Instanceof = function( action ) {
-    
-    
+
+
     var classPart;
 
     if (action.right.type === "Node_Name") {
@@ -1068,7 +1076,7 @@ PHP.Compiler.prototype.Node_Expr_Instanceof = function( action ) {
     } else {
         classPart = this.source(action.right) + "." + this.VARIABLE_VALUE;
     }
-    
+
     return this.source( action.left ) + "." + this.INSTANCEOF + '('  + classPart + ')';
 };
 
@@ -1097,7 +1105,6 @@ PHP.Compiler.prototype.Node_Expr_Div = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Minus = function( action ) {
-    console.log( action );
     return this.source( action.left ) + "." + this.MINUS + "(" + this.source( action.right ) + ( /^Node_Expr_Post/.test( action.right.type ) ? ", true" : "" ) + ")";
 };
 
@@ -1110,20 +1117,20 @@ PHP.Compiler.prototype.Node_Expr_Mod = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Plus = function( action ) {
-    
+
     var str =  "";
-   
+
 
     if ( /^Node_Expr_((Static)?Property|ArrayDim)Fetch$/.test(action.left.type) ) {
         str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_DOUBLE + "." + this.VARIABLE_VALUE + ")";
     } else {
         str += this.source( action.left );
     }
-  
+
     str += "." + this.ADD + "(" + this.source( action.right ) + ")";
-    
-    return str;    
-    
+
+    return str;
+
 
 };
 
@@ -1201,18 +1208,18 @@ PHP.Compiler.prototype.Node_Expr_PostDec = function( action ) {
 
 PHP.Compiler.prototype.Node_Expr_Concat = function( action ) {
     var str =  "";
-   
+
 
     if ( /^Node_Expr_((Static)?Property|ArrayDim)Fetch$/.test(action.left.type) )  {
         str += this.CREATE_VARIABLE + "(" + this.source( action.left ) + "." + PHP.VM.Variable.prototype.CAST_STRING + "." + this.VARIABLE_VALUE + ")";
     } else {
         str += this.source( action.left );
     }
-  
+
     str += "." + this.CONCAT + "(" + this.source( action.right ) + ")";
-    
-    return str;    
-    
+
+    return str;
+
 };
 
 PHP.Compiler.prototype.Node_Expr_Print = function( action ) {
@@ -1283,7 +1290,7 @@ PHP.Compiler.prototype.Node_Expr_New = function( action ) {
 
     var classPart,
     src = "";
-    
+
     if (action.Class.type === "Node_Name") {
         classPart = '"' + this.source(action.Class) +'"';
     } else {
@@ -1323,7 +1330,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 
     var classPart, src = "";
 
-    
+
     if (action.name.type === undefined) {
         classPart = '"' + action.name +'"';
     } else {
@@ -1338,13 +1345,13 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
     src += ', ' + classPart;
 
     action.args.forEach(function( arg ) {
-        
+
         if (arg.value.type === "Node_Expr_PropertyFetch") {
             src += ", " + this.Node_Expr_PropertyFetch( arg.value, true );
         } else {
             src += ", " + this.source( arg.value );
         }
-        
+
     // src += ", " + this.source( arg.value );
     }, this);
 
@@ -1359,7 +1366,7 @@ PHP.Compiler.prototype.Node_Expr_MethodCall = function( action ) {
 PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action, funcCall ) {
 
     var classParts = "";
-    
+
     if ( typeof action.name === "string" ) {
         classParts += '"' +  this.source( action.name ) + '"';
     } else {
@@ -1369,7 +1376,7 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action, funcCall ) {
     if ( funcCall === true ) {
         extra = ", true";
     }
-    
+
     var variable;
     if ( action.variable.type === "Node_Expr_PropertyFetch") {
         variable = this.Node_Expr_PropertyFetch( action.variable, funcCall );
@@ -1388,7 +1395,7 @@ PHP.Compiler.prototype.Node_Expr_PropertyFetch = function( action, funcCall ) {
 PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 
     var classPart;
-    
+
     if (action.Class.type === "Node_Name") {
         classPart = '"' + this.source(action.Class) +'"';
     } else {
@@ -1404,22 +1411,22 @@ PHP.Compiler.prototype.Node_Expr_ClassConstFetch = function( action ) {
 PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
     var src = "";
-    
+
     var classPart,
     funcPart;
-    
+
     if (action.Class.type === "Node_Name") {
         classPart = '"' + this.source(action.Class) +'"';
     } else {
         classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
     }
-    
+
     if (typeof action.func === "string") {
         funcPart = '"' + this.source(action.func) + '"';
     } else {
         funcPart = this.source(action.func) + "." + this.VARIABLE_VALUE;
     }
-    
+
     if (/^(parent|self)$/i.test( action.Class.parts )) {
         src += "this." + this.STATIC_CALL + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + funcPart;
     } else {
@@ -1428,13 +1435,13 @@ PHP.Compiler.prototype.Node_Expr_StaticCall = function( action ) {
 
 
     action.args.forEach(function( arg ) {
-        
+
         if (arg.value.type === "Node_Expr_PropertyFetch") {
             src += ", " + this.Node_Expr_PropertyFetch( arg.value, true );
         } else {
             src += ", " + this.source( arg.value );
         }
-        
+
     //  src += ", " + this.source( arg.value );
     }, this);
 
@@ -1449,39 +1456,39 @@ PHP.Compiler.prototype.Node_Expr_StaticPropertyFetch = function( action, ref, is
     var src = "",
     extra = "",
     classPart;
-    
+
 
     var actionParts = "";
-    
+
     if ( typeof action.name === "string" ) {
         actionParts += '"' +  this.source( action.name ) + '"';
     } else {
         actionParts +=  this.source( action.name ) + "." +  this.VARIABLE_VALUE;
     }
-    
-    
-    
+
+
+
     if (action.Class.type === "Node_Name") {
         classPart = '"' + this.source(action.Class) +'"';
     } else {
         classPart = this.source(action.Class) + "." + this.VARIABLE_VALUE;
     }
-    
+
     if ( ref === true) {
         extra = ", true";
-    } 
-    
+    }
 
-    
-    
-    
+
+
+
+
     if (/^(parent|self)$/i.test( action.Class.parts )) {
         src += "this." + (( isset === true ) ? this.CLASS_STATIC_PROPERTY_ISSET : this.STATIC_PROPERTY_GET  ) + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     } else {
         src += this.CTX + this.CLASS_GET + '(' + classPart + ', this).' + (( isset === true ) ? this.CLASS_STATIC_PROPERTY_ISSET : this.STATIC_PROPERTY_GET  ) + '( ' + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ', ' + classPart +', ' + actionParts;
     }
 
-    
+
     src += extra + ")";
 
     return src;
@@ -1505,127 +1512,122 @@ PHP.Compiler.prototype.Node_Expr_Array = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Expr_Clone = function( action ) {
-    
+
     var src = "";
     src += this.source( action.expr ) + "." + this.VARIABLE_VALUE + "." + this.CLASS_CLONE + "( this )";
     return src;
 
 };
 PHP.Compiler.prototype.Node_Stmt_Interface = function( action ) {
-    
-   
     action.stmts.forEach(function( stmt ){
         if ( stmt.type === "Node_Stmt_ClassMethod" && stmt.stmts !== null) {
-            this.FATAL_ERROR = "Interface function " + action.name + "::" + stmt.name + "() cannot contain body {} on line " + action.attributes.startLine;  
+            this.FATAL_ERROR = "Interface function " + action.name + "::" + stmt.name + "() cannot contain body {} on line " + action.attributes.startLine;
         }
-    }, this);   
-    
+    }, this);
+
     var src = this.CTX + this.INTERFACE_NEW + '( "' + action.name + '", [';
-    
+
     
     var ints = [];
-       
+
     function addInterface( interf ) {
-            
+
         interf.forEach( function( item ){
             if  (Array.isArray( item )) {
                 addInterface( item );
             } else {
-                  
+
                 ints.push( '"' + item.parts + '"' );
             }
         });
     }
-        
+
     addInterface( action.Extends );
     /*
         src += (Array.isArray(action.Implements[ 0 ]) ? action.Implements[ 0 ] : action.Implements ).map(function( item ){
-            
+
             return '"' + item.parts + '"';
-        }).join(", "); 
+        }).join(", ");
         */
-    src += ints.join(", "); 
-    
+    src += ints.join(", ");
+
     /*
     var exts = [];
-    
+
     action.Extends.forEach(function( ext ){
         exts.push( '"' + ext.parts + '"' );
     }, this);
-    
+
     src += exts.join(", ")
     */
     src += "], function( M, $, $$ ){\n M";
-    
+
     this.currentClass = action.name;
     action.stmts.forEach(function( stmt ) {
         src += this.source( stmt );
     }, this);
-    
-    
+
+
     src += "." + this.CLASS_DECLARE + '()})'
-    
-    
+
+
     return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_Class = function( action ) {
-    
-    //  console.log( action );
-    
     var src = this.CTX + this.CLASS_NEW + '( "' + action.name + '", ' + action.Type + ', {';
-    
+
     if ( action.Extends !== null ) {
         src += 'Extends: "' + this.source(action.Extends) + '"';
     }
-  
+
     if ( action.Implements.length > 0 ) {
         if ( action.Extends !== null ) {
             src += ", "
         }
-        
+
         // properly borken somewhere in the parser
         src += 'Implements: [';
-        
+
         var ints = [];
-       
+
         function addInterface( interf ) {
-            
+
             interf.forEach( function( item ){
                 if  (Array.isArray( item )) {
                     addInterface( item );
                 } else {
-                  
+
                     ints.push( '"' + item.parts + '"' );
                 }
             });
         }
-        
+
         addInterface( action.Implements );
         /*
         src += (Array.isArray(action.Implements[ 0 ]) ? action.Implements[ 0 ] : action.Implements ).map(function( item ){
-            
+
             return '"' + item.parts + '"';
-        }).join(", "); 
+        }).join(", ");
         */
-        src += ints.join(", "); 
+        src += ints.join(", ");
         src += "]";
     }
-    
+
     src += "}, function( M, $, $$ ){\n M";
-    
+
     this.currentClass = action.name;
     action.stmts.forEach(function( stmt ) {
         src += this.source( stmt );
     }, this);
-    
+
     src += "." + this.CLASS_DECLARE + '()'
-    
+
     src += "})"
-    
-    
-    
-    
+
+
+
+
     return src;
 };
 
@@ -1647,35 +1649,35 @@ PHP.Compiler.prototype.Node_Stmt_Echo = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
-    
+
     var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
-   
+
     src += "for( ";
-    
+
     if ( !Array.isArray(action.init) || action.init.length !== 0 ) {
         src += this.source( action.init );
     }
-    
+
     src += "; ";
-    
+
     if ( !Array.isArray(action.cond) || action.cond.length !== 0 ) {
         src += "(" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE;
     }
-    
+
     src += "; "
- 
+
     // if ( !Array.isArray(action.loop) || action.loop.length !== 1 ) { // change
-   
+
     if ( action.loop.length > 0 ) {
         src += this.source( action.loop ) + "." + this.VARIABLE_VALUE;
     }
     // }
     src += " ) { ";
-    
+
     src += this.CTX + this.TIMER + "();\n";
-    
+
     src += this.stmts( action.stmts );
-    
+
     src += "}";
 
     return src;
@@ -1684,13 +1686,13 @@ PHP.Compiler.prototype.Node_Stmt_For = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_While = function( action ) {
 
     var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
-    
-    src += "while( " + this.source( action.cond ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {"; 
-    
+
+    src += "while( " + this.source( action.cond ) + "." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {";
+
     src += this.CTX + this.TIMER + "(); \n";
-    
+
     src += this.stmts( action.stmts );
-    
+
     src += "}";
 
     return src;
@@ -1709,13 +1711,13 @@ PHP.Compiler.prototype.Node_Stmt_Do = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_Switch = function( action ) {
     var src = this.LABEL + this.LABEL_COUNT++ + ":\n";
     src += "switch(" + this.source( action.cond ) + "." + this.VARIABLE_VALUE+ ") {\n";
-    
+
     action.cases.forEach(function( item ){
         src += this.source( item ) + ";\n";
     }, this);
     src += "}";
-    
-    
+
+
     return src;
 };
 
@@ -1727,21 +1729,21 @@ PHP.Compiler.prototype.Node_Stmt_Case = function( action ) {
     } else {
         src += "case (" + this.source( action.cond ) + "." + this.VARIABLE_VALUE+ "):\n";
     }
-    
-   
+
+
     action.stmts.forEach(function( item ){
         src += this.source( item ) + ";\n";
     }, this);
-    
-    
-    
+
+
+
     return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
-    
+
     if ( action.expr.type === "Node_Expr_Array" && action.byRef === true ) {
-      
+
         if (action.keyVar === null) {
             this.FATAL_ERROR = "syntax error, unexpected '&' in " + this.file + " on line " + action.attributes.startLine;
             this.ERROR_TYPE = PHP.Constants.E_PARSE;
@@ -1750,7 +1752,7 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
         }
         return;
     }
-    
+
     var count = ++this.FOREACH_COUNT;
     var src = "var iterator" + count + " = " + this.CTX + "$foreachInit(" + this.source( action.expr ) + ", " + ( (this.INSIDE_METHOD === true) ? "ctx" : "this") + ");\n";
     src += "while(" + this.CTX + 'foreach( iterator' + count + ', ' + action.byRef + ", " + this.source( action.valueVar );
@@ -1759,9 +1761,9 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
         src += ', ' + this.source( action.keyVar );
     }
     src += ')) {\n'
-    
+
     src += this.stmts( action.stmts );
- 
+
     src += '} '
 
     src += this.CTX + "$foreachEnd( iterator" + count + " )";
@@ -1772,13 +1774,13 @@ PHP.Compiler.prototype.Node_Stmt_Foreach = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_Continue = function( action ) {
 
     var src = "continue";
-    return src;  
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_Break = function( action ) {
-  
+
     var src = "break"
-    
+
     if (action.num !== null) {
         src += " " + this.LABEL + (this.LABEL_COUNT - action.num.value );
     }
@@ -1786,45 +1788,45 @@ PHP.Compiler.prototype.Node_Stmt_Break = function( action ) {
 };
 
 PHP.Compiler.prototype.Node_Stmt_Function = function( action ) {
-  
+
     var src = this.CTX +  action.name + " = Function.prototype.bind.apply( function( " + this.VARIABLE + ", " + this.FUNCTION_STATIC + ", " + this.FUNCTION_GLOBAL + "  ) {\n";
-    
+
     src += this.VARIABLE + " = " + this.VARIABLE + "(["
     var params = [];
     ((action.params[ 0 ] === undefined || !Array.isArray( action.params[ 0 ] ) ) ? action.params : action.params[ 0 ]).forEach(function( param ){
-        
+
         if ( param.type === "Node_Param" ) {
             var item = '{' + this.PARAM_NAME +':"' + param.name + '"';
-            
+
             if ( param.byRef === true ) {
                 item += "," + this.PARAM_BYREF + ':true'
             }
-            
+
             if (param.def !== null) {
                 item += ", " + this.PROPERTY_DEFAULT  + ": " + this.source( param.def )
             }
-        
+
             if (param.Type !== null ) {
                 item += ", " +  this.PROPERTY_TYPE + ': "' + this.source( param.Type ) + '"'
             }
-        
-           
+
+
             item += '}'
             params.push( item );
         }
-        
+
     }, this);
-    
+
     src += params.join(", ") + "], arguments);\n"
-    
+
     src += this.stmts( action.stmts );
-    
-    
-    
+
+
+
     src += "}, (" + this.CTX + this.FUNCTION_HANDLER + ')( ENV, "' + action.name + '", ' + action.byRef + '  ))';
 
-    
-    return src;  
+
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_Static = function( action ) {
@@ -1834,8 +1836,8 @@ PHP.Compiler.prototype.Node_Stmt_Static = function( action ) {
         src += this.source( variable );
     }, this);
 
-  
-    return src;  
+
+    return src;
 };
 
 
@@ -1843,38 +1845,36 @@ PHP.Compiler.prototype.Node_Stmt_Global = function( action ) {
     // todo fix
     var src = this.FUNCTION_STATIC + "." + this.FUNCTION_GLOBAL + "([",
     vars = [];
-    
+
     action.vars.forEach( function( variable ){
         vars.push( '"' + variable.name + '"' );
-    
+
     }, this);
     src += vars.join(", ") + "])";
-    console.log( action );
-    return src;  
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_StaticVar = function( action ) {
     // todo fix
     var src = "." + this.FUNCTION_STATIC_SET + '("' + action.name + '", ' + (( action.def === null) ? "new PHP.VM.Variable()" : this.source( action.def )) + ")";
 
-
-    return src;  
+    return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_Property = function( action ) {
     var src = "";
-   
+
     action.props.forEach(function( prop ){
-       
+
         src += "." + this.CLASS_PROPERTY + '( "' + prop.name + '", ' + action.Type;
         if ( prop.def !== null ) {
             src += ', ' + this.source( prop.def );
         }
-        
+
         src += " )\n";
-        
+
     }, this);
-   
+
     return src;
 };
 
@@ -1884,68 +1884,68 @@ PHP.Compiler.prototype.Node_Stmt_Unset = function( action ) {
 
     action.variables.forEach(function( variable ){
         switch (variable.type) {
-            
+
             case "Node_Expr_ArrayDimFetch":
                 vars.push( this.source( variable.variable ) + "."  + this.DIM_UNSET + '( this, ' + this.source( variable.dim ) + " )" );
                 break;
             default:
                 vars.push( this.source( variable ) );
         }
-        
-     
+
+
     }, this);
-    
+
     src += vars.join(", ") + " )";
-    
+
     return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_InlineHTML = function( action ) {
     var src = this.CTX + '$ob("' + action.value.replace(/[\\"]/g, '\\$&').replace(/\n/g,"\\n").replace(/\r/g,"") + '")';
- 
+
     return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_If = function( action ) {
-    var src = "if ( (" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n"; 
-    
+    var src = "if ( (" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n";
+
     action.stmts.forEach(function( stmt ){
         src += this.source( stmt) + ";\n";
     }, this);
-    
+
     action.elseifs.forEach(function( Elseif ){
         src += this.source( Elseif) + "\n";
     }, this);
-   
+
 
     if ( action.Else !== null ) {
         src += "} else {\n";
-        
+
         action.Else.stmts.forEach(function( stmt ){
             src += this.source( stmt) + ";\n";
         }, this);
     }
-    
-    src += "}"
-    
 
-    
+    src += "}"
+
+
+
     return src;
 };
 
 PHP.Compiler.prototype.Node_Stmt_ElseIf = function( action ) {
-    var src = "} else if ( (" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n"; 
-    
+    var src = "} else if ( (" + this.source( action.cond ) + ")." + PHP.VM.Variable.prototype.CAST_BOOL + "." + this.VARIABLE_VALUE + ") {\n";
+
     action.stmts.forEach(function( stmt ){
         src += this.source( stmt) + ";\n";
     }, this);
-    
+
     return src;
 };
 
 
 PHP.Compiler.prototype.Node_Stmt_Throw = function( action ) {
-    var src = "throw " + this.source( action.expr ); 
+    var src = "throw " + this.source( action.expr );
     return src;
 };
 
@@ -1953,15 +1953,15 @@ PHP.Compiler.prototype.Node_Stmt_TryCatch = function( action ) {
     var src = "try {\n";
     src += this.stmts( action.stmts ) + "} catch( emAll ) {\n";
     src += this.CTX + this.EXCEPTION + '( emAll )';
-    
+
     action.catches.forEach(function( Catch ){
         src += this.source( Catch );
     }, this);
-    
+
     src += ";\n }"
 
-    
-    this.source( action.expr ); 
+
+    this.source( action.expr );
     return src;
 };
 
@@ -1970,50 +1970,50 @@ PHP.Compiler.prototype.Node_Stmt_Catch = function( action ) {
     src += this.stmts( action.stmts );
     src += "})"
     return src;
-    
+
 };
 
 PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
 
- 
+
 
     this.INSIDE_METHOD = true;
     var src = "." + this.CLASS_METHOD + '( "' + action.name + '", ' + action.Type + ', [';
     var props = [];
-    
-    
-    
+
+
+
     ((Array.isArray(action.params[ 0 ])) ? action.params[ 0 ] : action.params).forEach(function( prop ){
-        
-        
+
+
         var obj = '{name:"' + prop.name +'"';
-       
-        
-        
+
+
+
         if (prop.def !== null) {
             obj += ", " + this.PROPERTY_DEFAULT  + ": " + this.source( prop.def )
         }
-        
+
         if (prop.Type !== null ) {
             obj += ", " +  this.PROPERTY_TYPE + ': "' + this.source( prop.Type ) + '"'
         }
-        
+
         if (prop.byRef === true) {
             obj += ", " +  this.PARAM_BYREF + ': true'
         }
-        
+
         obj += "}";
-        
+
         props.push( obj );
-        
-    }, this)   
-        
+
+    }, this)
+
     src +=  props.join(", ")  + '], ' + action.byRef + ', function( ' + this.VARIABLE + ', ctx, $Static ) {\n';
-    
+
     if (action.stmts !== null ) {
         src += this.stmts( action.stmts );
     }
-    
+
     src += '})\n';
     this.INSIDE_METHOD = false;
     return src;
@@ -2021,7 +2021,7 @@ PHP.Compiler.prototype.Node_Stmt_ClassMethod = function( action ) {
 
 PHP.Compiler.prototype.Node_Stmt_ClassConst = function( action ) {
     var src = "";
-   
+
     ((Array.isArray( action.consts[ 0 ] )) ?  action.consts[ 0 ] : action.consts ).forEach(function( constant ){
         src += "." + this.CLASS_CONSTANT + '("' + constant.name + '", ' + this.source( constant.value ) + ")\n"
     }, this);
@@ -2032,7 +2032,8 @@ PHP.Compiler.prototype.Node_Stmt_ClassConst = function( action ) {
 PHP.Compiler.prototype.Node_Stmt_Return = function( action ) {
     return "return " + this.source( action.expr );
 
-};PHP.Compiler.prototype.Node_Scalar_String = function( action ) {
+};
+PHP.Compiler.prototype.Node_Scalar_String = function( action ) {
 
     return this.CREATE_VARIABLE + '(' + this.fixString(action.value) + ')';
        
@@ -2111,7 +2112,8 @@ PHP.Compiler.prototype.Node_Scalar_LineConst = function( action ) {
 PHP.Compiler.prototype.Node_Scalar_DirConst = function( action ) {
     return this.VARIABLE + '("$__DIR__")';  
   
-};/*
+};
+/*
  * @author Niklas von Hertzen <niklas at hertzen.com>
  * @created 29.6.2012
  * @website http://hertzen.com
@@ -2128,7 +2130,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
     staticVars = {}; // static variable storage
 
     ENV.FUNCTION_REFS[ functionName ] = funcByRef;
-    
+
     // initializer
     args.push( function( args, values ) {
 
@@ -2139,20 +2141,20 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
 
         args.forEach(function( argObject, index ){
             var arg = handler( argObject[ COMPILER.PARAM_NAME ] );
-            
+
             PHP.Utils.ArgumentHandler( ENV, arg, argObject, vals[index], index, functionName );
-            
+
             // redefine item in arguments object, to be used by func_get_arg(s)
-            
+
             if ( argObject[ COMPILER.PARAM_BYREF ] === true ) {
                 values[ index + 2 ] = arg;
             } else {
                 values[ index + 2 ] = new PHP.VM.Variable( arg[ COMPILER.VARIABLE_VALUE ] );
             }
         });
- 
+
         handler("GLOBALS", $GLOBAL( "GLOBALS") );
-        
+
         // magic constants
         handler( "$__FILE__" )[ COMPILER.VARIABLE_VALUE ] = $GLOBAL(__FILE__)[ COMPILER.VARIABLE_VALUE ];
 
@@ -2163,7 +2165,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION_HANDLER ] = function( ENV
         // static handler, the messed up ordering of things is needed due to js execution order
         PHP.Utils.StaticHandler( staticHandler, staticVars,  handler, ENV[ COMPILER.GLOBAL ] );
 
-        
+
 
 
         return handler;
@@ -2209,12 +2211,12 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
         if ( !this[ COMPILER.SIGNATURE ]( Array.prototype.slice.call(arguments,2 ), func_get_arg, 1, [ VARIABLE.INT ] ) ) {
             return new PHP.VM.Variable( false );
         }
-        
+
         if ( arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] < 0 ) {
             this[ PHP.Compiler.prototype.ERROR ]( func_get_arg + "():  The argument number should be >= 0", PHP.Constants.E_WARNING, true );
-            return new PHP.VM.Variable( false ); 
+            return new PHP.VM.Variable( false );
         }
-   
+
 
         if ( args[ arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] + 2 ] === undefined ) {
             this[ PHP.Compiler.prototype.ERROR ]( func_get_arg + "():  Argument " + arguments[ 2 ][ COMPILER.VARIABLE_VALUE ] + " not passed to function", PHP.Constants.E_CORE_WARNING, true );
@@ -2239,11 +2241,11 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.FUNCTION ] = function( functionNam
     } else if ( this[ functionName ] === undefined ) {
         this[ PHP.Compiler.prototype.ERROR ]( "Call to undefined function " + functionName + "()", PHP.Constants.E_ERROR, true );
     } else {
-        ret = this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) ); 
+        ret = this[ functionName ].apply( this, Array.prototype.slice.call( arguments, 2 ) );
     }
 
     PHP.Utils.CheckRef.call( this, ret, this.FUNCTION_REFS[ functionName ] );
-                
+
 
     return ret;
 };
@@ -2417,18 +2419,15 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     };
 
     MODULES.register_shutdown_function = function( func ) {
-        console.log("registering shutdown");
         shutdownFunc = func;
         shutdownParams = Array.prototype.slice.call( arguments, 1 );
     };
-    
+
     MODULES.$shutdown = function( ) {
-        
+
         this.$Class.Shutdown();
-        
-        console.log("shutting down");
+
         if ( shutdownFunc !== undefined ) {
-            console.log("yes");
             this.call_user_func.apply( this, [ shutdownFunc ].concat( arguments ) );
         }
     };
@@ -2458,18 +2457,18 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         methods[ COMPILER.CATCH ] = function( name, type, $, func ) {
             if ( caught ) return methods;
             if ( variable[ VARIABLE.TYPE ] === VARIABLE.OBJECT  ) {
-                
+
                 var classObj = variable[ COMPILER.VARIABLE_VALUE ];
-         
+
                 if ( this.$Class.Inherits( classObj, type ) || classObj[ PHP.VM.Class.INTERFACES ].indexOf( type ) !== -1   ) {
                     $( name, variable );
                     caught = true;
                     func();
                 }
             } else if ( variable instanceof PHP.Halt && /^Exception$/i.test( type )) {
-                
+
                 if ( variable.catchable !== true ) {
-                
+
                     $( name, new (this.$Class.Get( "Exception"  ))( this, new PHP.VM.Variable( variable.msg )  ) );
                     caught = true;
                     func();
@@ -2495,7 +2494,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
             ]);
 
     };
-    
+
     MODULES.error_reporting = function( level ) {
         reportingLevel = level[ COMPILER.VARIABLE_VALUE ];
     };
@@ -2517,7 +2516,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         };
 
         function checkType( type ) {
-            
+
             return ((reportingLevel & C[ type ]) === C[ type ]);
         }
 
@@ -2532,17 +2531,17 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
         } else {
             lineAppend = "";
         }
-        
+
         if ( this.$ini.track_errors == 1 ||  this.$ini.track_errors == "On") {
             $GLOBAL("php_errormsg")[ COMPILER.VARIABLE_VALUE ] = msg;
         }
 
-     
+
         if (reportingLevel !== 0) {
             if ( suppress === false ) {
                 if ( errorHandler !== undefined ) {
-                   
-                        
+
+
                     this.call_user_func(
                         errorHandler,
                         new PHP.VM.Variable( level ),
@@ -2551,18 +2550,18 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                         new PHP.VM.Variable( 1 ),
                         this.array([])
                         );
-                    
+
                 } else {
                     switch ( level ) {
                         case C.E_ERROR:
-                            this[ COMPILER.DISPLAY_HANDLER ] = false; 
+                            this[ COMPILER.DISPLAY_HANDLER ] = false;
                             throw new PHP.Halt( msg, level, lineAppend, catchable );
                             return;
                             break;
                         case C.E_RECOVERABLE_ERROR:
                             this[ COMPILER.DISPLAY_HANDLER ] = false;
                             //    this.$ob( "\nCatchable fatal error: " + msg + lineAppend + "\n");
-                     
+
                             throw new PHP.Halt( msg, level, lineAppend, catchable );
                             //   throw new PHP.Halt( level );
                             return;
@@ -2605,7 +2604,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
                             }
 
                             break;
-                            
+
                         default:
                             this.echo( new PHP.VM.Variable("\nDefault Warning: " + msg + lineAppend + "\n"));
                             return;
@@ -2619,6 +2618,7 @@ PHP.Modules.prototype[ PHP.Compiler.prototype.SIGNATURE ] = function( args, name
     };
 
 })( PHP.Modules.prototype )
+
 
 
 
@@ -2644,6 +2644,7 @@ PHP.Modules.prototype.array = function( ) {
     return new PHP.VM.Variable( arr );
     
 };
+
 PHP.Modules.prototype.array_key_exists = function( key, search ) {
     
     var COMPILER = PHP.Compiler.prototype,
@@ -2678,7 +2679,8 @@ PHP.Modules.prototype.array_key_exists = function( key, search ) {
         return new PHP.VM.Variable( ( index !== -1) );
     }
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 19.7.2012 
 * @website http://hertzen.com
@@ -2702,6 +2704,7 @@ PHP.Modules.prototype.$array_merge = function() {
     return array;
 
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 14.7.2012 
@@ -2724,6 +2727,7 @@ PHP.Modules.prototype.array_pop = function( array ) {
     return value;
 
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 14.7.2012 
@@ -2736,6 +2740,7 @@ PHP.Modules.prototype.array_push = function( array ) {
     
     array[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, "append", arguments[ 1 ] )
 };
+
 
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -2783,7 +2788,8 @@ PHP.Modules.prototype.array_search = function( needle, haystack, strict ) {
         return new PHP.VM.Variable( false );
     }
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 16.7.2012 
 * @website http://hertzen.com
@@ -2816,6 +2822,7 @@ PHP.Modules.prototype.array_shift = function( array ) {
     return value;
 
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 16.7.2012 
@@ -2858,7 +2865,8 @@ PHP.Modules.prototype.array_unshift = function( array ) {
         
     return new PHP.VM.Variable( value.length );
 
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 29.6.2012 
 * @website http://hertzen.com
@@ -2876,7 +2884,8 @@ PHP.Modules.prototype.count = function( variable ) {
         return new PHP.VM.Variable( values.length );
     }
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
@@ -2904,7 +2913,8 @@ PHP.Modules.prototype.current = function( array ) {
     } 
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
@@ -2938,7 +2948,8 @@ PHP.Modules.prototype.each = function( array ) {
     } 
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 2.7.2012 
 * @website http://hertzen.com
@@ -2954,7 +2965,8 @@ PHP.Modules.prototype.is_array = function( variable ) {
     return new PHP.VM.Variable( ( variable[ VAR.TYPE ] === VAR.ARRAY ) );
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 12.7.2012 
 * @website http://hertzen.com
@@ -2983,7 +2995,8 @@ PHP.Modules.prototype.key = function( array ) {
     } 
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
@@ -3032,7 +3045,8 @@ PHP.Modules.prototype.list = function() {
     return new PHP.VM.Variable(false);
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 12.7.2012 
 * @website http://hertzen.com
@@ -3062,6 +3076,7 @@ PHP.Modules.prototype.next = function( array ) {
     
     
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
@@ -3090,7 +3105,8 @@ PHP.Modules.prototype.reset = function( array ) {
     } 
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 11.7.2012 
 * @website http://hertzen.com
@@ -3107,6 +3123,7 @@ PHP.Modules.prototype.class_exists = function( class_name, autoload ) {
     return new PHP.VM.Variable( this.$Class.Exists( class_name[ COMPILER.VARIABLE_VALUE ] )  );
     
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 9.7.2012 
@@ -3124,7 +3141,8 @@ PHP.Modules.prototype.get_class = function( object ) {
     }
  
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 17.7.2012 
 * @website http://hertzen.com
@@ -3143,7 +3161,8 @@ PHP.Modules.prototype.get_declared_classes = function( ) {
     
     return this.array( items );
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 12.7.2012 
 * @website http://hertzen.com
@@ -3182,7 +3201,8 @@ PHP.Modules.prototype.get_class_methods = function( object ) {
     return this.array( items );
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 13.7.2012 
 * @website http://hertzen.com
@@ -3207,7 +3227,8 @@ PHP.Modules.prototype.get_parent_class = function( object ) {
         return new PHP.VM.Variable( parent );
     }
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 11.7.2012 
 * @website http://hertzen.com
@@ -3224,6 +3245,7 @@ PHP.Modules.prototype.interface_exists = function( class_name, autoload ) {
     return new PHP.VM.Variable( this.$Class.Exists( class_name[ COMPILER.VARIABLE_VALUE ] )  );
     
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 13.7.2012 
@@ -3257,7 +3279,8 @@ PHP.Modules.prototype.is_subclass_of = function( object, classNameObj ) {
         return new PHP.VM.Variable( true );
     }
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 11.7.2012 
 * @website http://hertzen.com
@@ -3282,7 +3305,8 @@ PHP.Modules.prototype.method_exists = function( object, method ) {
         return new PHP.VM.Variable( (object[ PHP.VM.Class.METHOD + method[ COMPILER.VARIABLE_VALUE ].toLowerCase()] ) !== undefined ); 
     }
     
-};/*
+};
+/*
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 30.6.2012
 * @website http://hertzen.com
@@ -3588,21 +3612,16 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
 
 
 
-};/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 3.7.2012 
-* @website http://hertzen.com
- */
-
+};
 PHP.Modules.prototype.$include = function( $, $Static, file ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     filename = file[ COMPILER.VARIABLE_VALUE ];
-    
-    
+
+
     var path = this[ COMPILER.FILE_PATH ];
-    
-    
+
+
     var loaded_file = (/^(.:|\/)/.test( filename ) ) ? filename : path + "/" + filename;
     var $this = this;
     this.$Included.Include( loaded_file );
@@ -3610,43 +3629,38 @@ PHP.Modules.prototype.$include = function( $, $Static, file ) {
     var source = this[ COMPILER.FILESYSTEM ].readFileSync( loaded_file );
     }
     catch( e ) {
-  
+
          $this.ENV[ COMPILER.ERROR ]("include(" + filename + "): failed to open stream: No such file or directory", PHP.Constants.E_CORE_WARNING, true );
-         $this.ENV[ COMPILER.ERROR ]("include(): Failed opening '" +  filename + "' for inclusion (include_path='" + path + "')", PHP.Constants.E_CORE_WARNING, true ); 
+         $this.ENV[ COMPILER.ERROR ]("include(): Failed opening '" +  filename + "' for inclusion (include_path='" + path + "')", PHP.Constants.E_CORE_WARNING, true );
     }
-        
+
     var COMPILER = PHP.Compiler.prototype;
-   
+
     // tokenizer
     var tokens = new PHP.Lexer( source );
-   
+
     // build ast tree
-    
+
     var AST = new PHP.Parser( tokens );
-  
+
     // compile tree into JS
     var compiler = new PHP.Compiler( AST );
-   
-    console.log( compiler.src );
+
     // execture code in current context ($)
     var exec = new Function( "$$", "$", "ENV", "$Static", compiler.src  );
-    
+
     this[ COMPILER.FILE_PATH ] = PHP.Utils.Path( loaded_file );
     
     exec.call(this, function( arg ) {
         return new PHP.VM.Variable( arg );
     }, $, this, $Static);
-    /*
-     this needs to be fixed
-    console.log("changing back");
-    this[ COMPILER.FILE_PATH ] = path;
-    */
 };
 
 
 PHP.Modules.prototype.include = function() {
     this.$include.apply(this, arguments);
-};PHP.Modules.prototype.include_once = function( $, $Static, file ) {
+};
+PHP.Modules.prototype.include_once = function( $, $Static, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
     filename = file[ COMPILER.VARIABLE_VALUE ];
@@ -3661,9 +3675,11 @@ PHP.Modules.prototype.include = function() {
         this.$include.apply(this, arguments);
     }
     
-};PHP.Modules.prototype.require = function() {
+};
+PHP.Modules.prototype.require = function() {
     this.$include.apply(this, arguments);
-};PHP.Modules.prototype.require_once = function( $, $Static, file ) {
+};
+PHP.Modules.prototype.require_once = function( $, $Static, file ) {
     
     var COMPILER = PHP.Compiler.prototype,
     filename = file[ COMPILER.VARIABLE_VALUE ];
@@ -3678,7 +3694,8 @@ PHP.Modules.prototype.include = function() {
         this.$include.apply(this, arguments);
     }
     
-};/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
+};
+/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
 PHP.Constants.DATE_ATOM = "Y-m-d\\TH:i:sP";
 PHP.Constants.DATE_COOKIE = "l, d-M-y H:i:s T";
 PHP.Constants.DATE_ISO8601 = "Y-m-d\\TH:i:sO";
@@ -3693,6 +3710,7 @@ PHP.Constants.DATE_W3C = "Y-m-d\\TH:i:sP";
 PHP.Constants.SUNFUNCS_RET_TIMESTAMP = 0;
 PHP.Constants.SUNFUNCS_RET_STRING = 1;
 PHP.Constants.SUNFUNCS_RET_DOUBLE = 2;
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 20.7.2012 
@@ -3703,6 +3721,7 @@ PHP.Modules.prototype.date_default_timezone_set = function() {
     // todo add functionality
     return new PHP.VM.Variable( true );
 };
+
 
 
 /* 
@@ -3729,7 +3748,8 @@ PHP.Modules.prototype.mktime = function( hour, minute, second, month, day, year,
     
     
     return new PHP.VM.Variable( Math.round( createDate.getTime() / 1000 ) );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 3.7.2012 
 * @website http://hertzen.com
@@ -3740,6 +3760,7 @@ PHP.Modules.prototype.time = function() {
     
     return new PHP.VM.Variable( Math.round( Date.now() / 1000 ) );
 };
+
 
 /* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
 PHP.Constants.E_ERROR = 1;
@@ -3758,6 +3779,7 @@ PHP.Constants.E_USER_WARNING = 512;
 PHP.Constants.E_USER_NOTICE = 1024;
 PHP.Constants.E_USER_DEPRECATED = 16384;
 PHP.Constants.E_ALL = 32767;
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 26.6.2012 
@@ -3768,7 +3790,8 @@ PHP.Modules.prototype.trigger_error = function( msg, level ) {
           this[ PHP.Compiler.prototype.ERROR ]( msg.$, ( level !== undefined ) ? level.$ : PHP.Constants.E_USER_NOTICE  , true );    
  //   throw new Error( "Fatal error: " + msg.$ );
     
-};/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
+};
+/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
 PHP.Constants.UPLOAD_ERR_OK = 0;
 PHP.Constants.UPLOAD_ERR_INI_SIZE = 1;
 PHP.Constants.UPLOAD_ERR_FORM_SIZE = 2;
@@ -3777,20 +3800,13 @@ PHP.Constants.UPLOAD_ERR_NO_FILE = 4;
 PHP.Constants.UPLOAD_ERR_NO_TMP_DIR = 6;
 PHP.Constants.UPLOAD_ERR_CANT_WRITE = 7;
 PHP.Constants.UPLOAD_ERR_EXTENSION = 8;
-/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 12.7.2012 
-* @website http://hertzen.com
- */
-
-
 
 PHP.Modules.prototype.dirname = function( path ) {
     var COMPILER = PHP.Compiler.prototype,
     dir = PHP.Utils.Path( path[ COMPILER.VARIABLE_VALUE ] )
-    console.log( dir, path );
     return new PHP.VM.Variable( dir );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 30.6.2012 
 * @website http://hertzen.com
@@ -3800,7 +3816,8 @@ PHP.Modules.prototype.dirname = function( path ) {
 PHP.Modules.prototype.fclose = function( fp ) {
 
     return new PHP.VM.Variable( true );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 18.7.2012 
 * @website http://hertzen.com
@@ -3828,7 +3845,8 @@ PHP.Modules.prototype.file_get_contents = function( filenameObj ) {
         }
     }            
 
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 29.6.2012 
 * @website http://hertzen.com
@@ -3842,7 +3860,8 @@ PHP.Modules.prototype.fopen = function( filenameObj ) {
     this.ENV[ COMPILER.ERROR ]("fopen(" + filename + "): failed to open stream: No such file or directory", PHP.Constants.E_WARNING, true );    
                         
     return new PHP.VM.Variable( new PHP.VM.Resource() );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 18.7.2012 
 * @website http://hertzen.com
@@ -3863,7 +3882,8 @@ PHP.Modules.prototype.is_uploaded_file = function( filenameObj ) {
   
                         
     return new PHP.VM.Variable( true );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 18.7.2012 
 * @website http://hertzen.com
@@ -3877,7 +3897,8 @@ PHP.Modules.prototype.realpath = function( filenameObj ) {
     // todo implement properly
                         
     return new PHP.VM.Variable( filename );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 17.7.2012 
 * @website http://hertzen.com
@@ -3892,6 +3913,7 @@ PHP.Modules.prototype.rename = function( from, to ) {
                         
     return new PHP.VM.Variable( false );
 };
+
 
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -3961,6 +3983,7 @@ PHP.Modules.prototype.call_user_func = function( callback ) {
   
     
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 4.7.2012 
@@ -4036,6 +4059,7 @@ PHP.Modules.prototype.call_user_func_array = function( callback ) {
   
     
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 16.7.2012 
@@ -4084,6 +4108,7 @@ PHP.Modules.prototype.create_function = function( args, source ) {
     return lambda;
     
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 11.7.2012 
@@ -4103,6 +4128,7 @@ PHP.Modules.prototype.function_exists = function( function_name ) {
   
     
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 15.7.2012 
@@ -4117,28 +4143,19 @@ PHP.Modules.prototype.dechex = function( variable ) {
     var num = variable[ COMPILER.VARIABLE_VALUE ];
     
     return new PHP.VM.Variable( parseInt( num, 10 ).toString( 16 ) );
-};/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 16.7.2012 
-* @website http://hertzen.com
- */
-
-
-
+};
 PHP.Modules.prototype.constant = function( name ) {
-    
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     variableValue = name[ COMPILER.VARIABLE_VALUE ];
-    
+
     var constant = this[ COMPILER.CONSTANTS ][ COMPILER.CONSTANT_GET ]( variableValue );
     if ( constant[ VARIABLE.DEFINED ] !== true ) {
-        this.ENV[ COMPILER.ERROR ]("constant(): Couldn't find constant " + variableValue, PHP.Constants.E_CORE_WARNING, true );    
+        this.ENV[ COMPILER.ERROR ]("constant(): Couldn't find constant " + variableValue, PHP.Constants.E_CORE_WARNING, true );
         return new PHP.VM.Variable();
     }
-    console.log( constant );
-  
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 7.7.2012 
 * @website http://hertzen.com
@@ -4162,7 +4179,8 @@ PHP.Modules.prototype.define = function( name, value, case_insensitive ) {
     
      return new PHP.VM.Variable( true );
   
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 7.7.2012 
 * @website http://hertzen.com
@@ -4179,42 +4197,26 @@ PHP.Modules.prototype.defined = function( name ) {
   
 };
 
-/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 2.7.2012 
-* @website http://hertzen.com
- */
-
 
 PHP.Modules.prototype.eval = function( $, $Static, $this, ctx, ENV, code) {
-    
-
-    
     var COMPILER = PHP.Compiler.prototype;
-   
+
     var source = code[ COMPILER.VARIABLE_VALUE ];
-        
+
 
     // tokenizer
     var tokens = new PHP.Lexer( "<?php " + source );
-   
-    // build ast tree
-    
-    var AST = new PHP.Parser( tokens, true );
-  
-    if ( Array.isArray(AST) ) {
-        
-    
 
+    // build ast tree
+
+    var AST = new PHP.Parser( tokens, true );
+
+    if ( Array.isArray(AST) ) {
         // compile tree into JS
         var compiler = new PHP.Compiler( AST, undefined, {
             INSIDE_METHOD: ( ctx !== undefined) ? true : false
         } );
-   
-    
 
-    
-     console.log( compiler.src );
 
         // execture code in current context ($)
         var exec = new Function( "$$", "$", "ENV", "$Static", "ctx",  compiler.src  );
@@ -4222,18 +4224,19 @@ PHP.Modules.prototype.eval = function( $, $Static, $this, ctx, ENV, code) {
         var ret = exec.call($this, function( arg ) {
             return new PHP.VM.Variable( arg );
         }, $, ENV, $Static, ctx);
-       
+
         this.EVALING = undefined;
         return ret;
     } else {
-        
-                this[ COMPILER.ERROR ]( "syntax error, unexpected $end in " + 
-            this[ COMPILER.GLOBAL ]("$__FILE__")[ COMPILER.VARIABLE_VALUE ] + 
-            "(1) : eval()'d code on line " + 1, PHP.Constants.E_PARSE );    
-        
+
+                this[ COMPILER.ERROR ]( "syntax error, unexpected $end in " +
+            this[ COMPILER.GLOBAL ]("$__FILE__")[ COMPILER.VARIABLE_VALUE ] +
+            "(1) : eval()'d code on line " + 1, PHP.Constants.E_PARSE );
+
     }
-    
-};/* 
+
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 17.7.2012 
 * @website http://hertzen.com
@@ -4243,7 +4246,8 @@ PHP.Modules.prototype.eval = function( $, $Static, $this, ctx, ENV, code) {
 PHP.Modules.prototype.exit = function( message ) {
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 9.7.2012 
 * @website http://hertzen.com
@@ -4253,7 +4257,8 @@ PHP.Modules.prototype.exit = function( message ) {
 PHP.Modules.prototype.php_egg_logo_guid = function(  ) {
     
     return new PHP.VM.Variable("PHPE9568F36-D428-11d2-A769-00AA001ACF42");
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 9.7.2012 
 * @website http://hertzen.com
@@ -4263,7 +4268,8 @@ PHP.Modules.prototype.php_egg_logo_guid = function(  ) {
 PHP.Modules.prototype.php_logo_guid = function(  ) {
     
     return new PHP.VM.Variable("PHPE9568F34-D428-11d2-A769-00AA001ACF42");
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 9.7.2012 
 * @website http://hertzen.com
@@ -4273,7 +4279,8 @@ PHP.Modules.prototype.php_logo_guid = function(  ) {
 PHP.Modules.prototype.php_real_logo_guid = function(  ) {
     
     return new PHP.VM.Variable("PHPE9568F34-D428-11d2-A769-00AA001ACF42");
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 9.7.2012 
 * @website http://hertzen.com
@@ -4283,7 +4290,8 @@ PHP.Modules.prototype.php_real_logo_guid = function(  ) {
 PHP.Modules.prototype.zend_logo_guid = function(  ) {
     
     return new PHP.VM.Variable("PHPE9568F35-D428-11d2-A769-00AA001ACF42");
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 18.7.2012 
 * @website http://hertzen.com
@@ -4299,7 +4307,8 @@ PHP.Modules.prototype.header= function( string ) {
     
     // todo add to output
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 14.7.2012 
 * @website http://hertzen.com
@@ -4312,6 +4321,7 @@ PHP.Modules.prototype.assert = function( assertion ) {
     return (new PHP.VM.Variable( assertion[ COMPILER.VARIABLE_VALUE] ));
     
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 15.7.2012 
@@ -4336,6 +4346,7 @@ PHP.Modules.prototype.ini_get = function( varname ) {
     
   
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 15.7.2012 
@@ -4354,6 +4365,7 @@ PHP.Modules.prototype.ini_restore = function( varname ) {
     
   
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 5.7.2012 
@@ -4370,32 +4382,23 @@ PHP.Modules.prototype.ini_set = PHP.Modules.prototype.ini_alter = function( varn
     return new PHP.VM.Variable( old );
 };
 
-/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 18.7.2012 
-* @website http://hertzen.com
- */
-
-
 
 PHP.Modules.prototype.getenv = function( name ) {
-    
     var COMPILER = PHP.Compiler.prototype,
-    VARIABLE = PHP.VM.Variable.prototype,
     variableValue = name[ COMPILER.VARIABLE_VALUE ];
- 
- 
+
+
     switch( variableValue ) {
         case "TEST_PHP_EXECUTABLE":
-            console.log(PHP.Constants.PHP_BINARY);
             return new PHP.VM.Variable( PHP.Constants.PHP_BINARY )
             break;
         default:
             return new PHP.VM.Variable( false );
-        
+
     }
 };
-    /* 
+
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 11.7.2012 
 * @website http://hertzen.com
@@ -4411,6 +4414,7 @@ PHP.Modules.prototype.getenv = function( name ) {
      
     };
 })( PHP.Modules.prototype );
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 20.7.2012 
@@ -4422,7 +4426,8 @@ PHP.Modules.prototype.getenv = function( name ) {
 PHP.Modules.prototype.zend_version = function(  ) {
     
     return new PHP.VM.Variable("1.0.0");
-};/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
+};
+/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
 PHP.Constants.PHP_OUTPUT_HANDLER_START = 1;
 PHP.Constants.PHP_OUTPUT_HANDLER_WRITE = 0;
 PHP.Constants.PHP_OUTPUT_HANDLER_FLUSH = 4;
@@ -4436,6 +4441,7 @@ PHP.Constants.PHP_OUTPUT_HANDLER_REMOVABLE = 64;
 PHP.Constants.PHP_OUTPUT_HANDLER_STDFLAGS = 112;
 PHP.Constants.PHP_OUTPUT_HANDLER_STARTED = 4096;
 PHP.Constants.PHP_OUTPUT_HANDLER_DISABLED = 8192;
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
@@ -4446,6 +4452,7 @@ PHP.Constants.PHP_OUTPUT_HANDLER_DISABLED = 8192;
 PHP.Modules.prototype.flush = function() {
     return new PHP.VM.Variable();
 };
+
 /* 
  * @author Niklas von Hertzen <niklas at hertzen.com>
  * @created 10.7.2012 
@@ -4809,6 +4816,7 @@ PHP.Modules.prototype.flush = function() {
     };
     
 })( PHP.Modules.prototype );
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
@@ -4837,6 +4845,7 @@ PHP.Modules.prototype.ob_flush = function() {
     }
     
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
@@ -4860,6 +4869,7 @@ PHP.Modules.prototype.ob_get_contents = function() {
     }
 
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
@@ -4882,7 +4892,8 @@ PHP.Modules.prototype.ob_get_length = function() {
         return new PHP.VM.Variable( false );
     }
 
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
@@ -4901,6 +4912,7 @@ PHP.Modules.prototype.ob_get_level = function() {
     return new PHP.VM.Variable( this[ COMPILER.OUTPUT_BUFFERS ].length - 1 );
 
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 16.7.2012 
@@ -4915,7 +4927,8 @@ PHP.Modules.prototype.preg_match = function( pattern, subject, matches ) {
     var result = subject[ COMPILER.VARIABLE_VALUE ].toString().match( re );
         
     return new PHP.VM.Variable( ( result === null ) ? 0 : result.length );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 24.6.2012 
 * @website http://hertzen.com
@@ -4948,7 +4961,8 @@ PHP.Modules.prototype.echo = function() {
         
     }, this);
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 27.6.2012 
 * @website http://hertzen.com
@@ -4973,7 +4987,8 @@ PHP.Modules.prototype.explode = function( delim, string ) {
         return this.array( arr );
     }
 
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 27.6.2012 
 * @website http://hertzen.com
@@ -4999,7 +5014,8 @@ PHP.Modules.prototype.implode = function( glue, pieces ) {
     return new PHP.VM.Variable( values.map(function( val ){
         return val[ COMPILER.VARIABLE_VALUE ];
     }).join( glue ) );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 20.7.2012 
 * @website http://hertzen.com
@@ -5020,7 +5036,8 @@ PHP.Modules.prototype.localeconv = function(  ) {
         item( "thousands_sep", locale.thousands_sep ) ] 
 );
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 27.6.2012 
 * @website http://hertzen.com
@@ -5034,7 +5051,8 @@ PHP.Modules.prototype.parse_str = function( str, arr ) {
     
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 4.7.2012 
 * @website http://hertzen.com
@@ -5044,7 +5062,8 @@ PHP.Modules.prototype.parse_str = function( str, arr ) {
 PHP.Modules.prototype.print = function( variable ) {
     this.echo( variable );
     return new PHP.VM.Variable(1);
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 15.7.2012 
 * @website http://hertzen.com
@@ -5085,7 +5104,8 @@ PHP.Modules.prototype.printf = function( format ) {
         
 
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 17.7.2012 
 * @website http://hertzen.com
@@ -5133,9 +5153,10 @@ PHP.Modules.prototype.setlocale = function( category ) {
     
     return new PHP.VM.Variable( localeName );
     
-};/* 
+};
+/*
 * @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 23.7.2012 
+* @created 23.7.2012
 * @website http://hertzen.com
  */
 
@@ -5144,29 +5165,21 @@ PHP.Modules.prototype.setlocale = function( category ) {
 PHP.Modules.prototype.sprintf = function( format ) {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
- 
-        
+
     if (format instanceof PHP.VM.VariableProto) {
-        
         var value = format[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ];
         if ( format[ VARIABLE.TYPE ] !== VARIABLE.NULL ) {
-            
-            console.log( value );
+
             // todo fix to make more specific
             Array.prototype.slice.call( arguments, 1 ).forEach( function( item ) {
                value = value.replace(/%./, item[ VARIABLE.CAST_STRING ][ COMPILER.VARIABLE_VALUE ] );
             });
-            
-            return new PHP.VM.Variable( value );
-          
-                
-        }
-            
-    } 
-        
 
-    
-};/* 
+            return new PHP.VM.Variable( value );
+        }
+    }
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 18.7.2012 
 * @website http://hertzen.com
@@ -5187,21 +5200,14 @@ PHP.Modules.prototype.str_repeat = function( input, multiplier ) {
     
     return new PHP.VM.Variable( str );
     
-};/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 22.7.2012 
-* @website http://hertzen.com
- */
-
-
+};
 PHP.Modules.prototype.str_replace = function( search, replace, subject ) {
-    var VARIABLE = PHP.VM.Variable.prototype,
-    COMPILER = PHP.Compiler.prototype;
-    
+    var COMPILER = PHP.Compiler.prototype;
+
     var re = new RegExp( search[ COMPILER.VARIABLE_VALUE ], "g");
-    console.log( re );
     return new PHP.VM.Variable( subject[ COMPILER.VARIABLE_VALUE ].replace( re, replace[ COMPILER.VARIABLE_VALUE ] ) );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
@@ -5219,7 +5225,8 @@ PHP.Modules.prototype.str_rot13 = function( str, arr ) {
     
     
 };
-  /* 
+  
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 3.7.2012 
 * @website http://hertzen.com
@@ -5232,30 +5239,19 @@ PHP.Modules.prototype.strlen = function( string ) {
     
     return new PHP.VM.Variable( string[ COMPILER.VARIABLE_VALUE ].length );
     
-};/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 2.7.2012 
-* @website http://hertzen.com
- */
-
-
+};
 PHP.Modules.prototype.strncmp = function( str1, str2, len ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype;
-    
-  //  console.log(( str1[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) === str2[ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) ), str1[ COMPILER.VARIABLE_VALUE ], str2[ COMPILER.VARIABLE_VALUE ]);
-    // TODO add real
-    
+
     if ( ( str1[ VAR.CAST_STRING ][ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) === str2[ VAR.CAST_STRING ][ COMPILER.VARIABLE_VALUE ].substring(0, len[ COMPILER.VARIABLE_VALUE ] ) ) ) {
          return new PHP.VM.Variable( 0 );
     } else {
          return new PHP.VM.Variable( 1 );
     }
-   
-    
-    
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
@@ -5268,7 +5264,8 @@ PHP.Modules.prototype.strtolower = function( str ) {
     COMPILER = PHP.Compiler.prototype;
     
     return new PHP.VM.Variable( str[ COMPILER.VARIABLE_VALUE ].toLowerCase() );
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 10.7.2012 
 * @website http://hertzen.com
@@ -5281,26 +5278,18 @@ PHP.Modules.prototype.strtoupper = function( str ) {
     COMPILER = PHP.Compiler.prototype;
     
     return new PHP.VM.Variable( str[ COMPILER.VARIABLE_VALUE ].toUpperCase() );
-};/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 23.7.2012 
-* @website http://hertzen.com
- */
-
-
-
+};
 PHP.Modules.prototype.trim = function( variable ) {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
-    
+
     if ( variable[ VARIABLE.TYPE ] !== VARIABLE.STRING ) {
         variable = variable[ VARIABLE.CAST_STRING ];
     }
-    console.log( variable );
+
     return new PHP.VM.Variable( variable[ COMPILER.VARIABLE_VALUE ].toString().trim() );
-    
-    
 };
+
 
 
 
@@ -5431,7 +5420,8 @@ PHP.Constants.T_DOUBLE_COLON = 376;
 PHP.Constants.T_NAMESPACE = 377;
 PHP.Constants.T_NS_C = 378;
 PHP.Constants.T_DIR = 379;
-PHP.Constants.T_NS_SEPARATOR = 380;/* 
+PHP.Constants.T_NS_SEPARATOR = 380;
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 28.6.2012 
 * @website http://hertzen.com
@@ -5468,7 +5458,8 @@ PHP.Modules.prototype.token_get_all = function( code ) {
     
     
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 15.6.2012 
 * @website http://hertzen.com
@@ -5629,7 +5620,8 @@ PHP.Modules.prototype.token_name = function( token ) {
     
     
 
-};/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
+};
+/* Automatically built from PHP version: 5.4.0-ZS5.6.0 */
 PHP.Constants.CONNECTION_ABORTED = 1;
 PHP.Constants.CONNECTION_NORMAL = 0;
 PHP.Constants.CONNECTION_TIMEOUT = 2;
@@ -5911,6 +5903,7 @@ PHP.Constants.DNS_AAAA = 134217728;
 PHP.Constants.DNS_A6 = 16777216;
 PHP.Constants.DNS_ANY = 268435456;
 PHP.Constants.DNS_ALL = 251713587;
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 6.7.2012 
@@ -5937,6 +5930,7 @@ PHP.Modules.prototype.$empty = function( arg) {
 
 
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 20.7.2012 
@@ -5989,31 +5983,28 @@ PHP.Modules.prototype.gettype = function( arg ) {
 
 
 };
-/* 
+
+/*
 * @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 4.7.2012 
+* @created 4.7.2012
 * @website http://hertzen.com
  */
 
 
 PHP.Modules.prototype.is_callable = function( callback ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
-    
+
     if ( callback[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
         var Class = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 0 )[ COMPILER.VARIABLE_VALUE ],
         methodName = callback[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( this, COMPILER.ARRAY_GET, 1 )[ COMPILER.VARIABLE_VALUE ];
-        
+
         return new PHP.VM.Variable( typeof Class[ PHP.VM.Class.METHOD + methodName.toLowerCase()] === "function" );
-             
-    } else {
-           console.log( callback );
-    }
-    
- 
-    
-};/* 
+
+    } 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 13.7.2012 
 * @website http://hertzen.com
@@ -6029,7 +6020,8 @@ PHP.Modules.prototype.is_float = function( variable ) {
     
  
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 15.7.2012 
 * @website http://hertzen.com
@@ -6047,7 +6039,8 @@ PHP.Modules.prototype.is_null = function( variable ) {
     
  
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 13.7.2012 
 * @website http://hertzen.com
@@ -6063,7 +6056,8 @@ PHP.Modules.prototype.is_string = function( variable ) {
     
  
     
-};PHP.Modules.prototype.$isset = function() {
+};
+PHP.Modules.prototype.$isset = function() {
 
     var len = arguments.length, i = -1, arg,
     VARIABLE = PHP.VM.Variable.prototype;
@@ -6089,15 +6083,16 @@ PHP.Modules.prototype.is_string = function( variable ) {
 
 };
 
-/* 
+
+/*
 * @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 26.6.2012 
+* @created 26.6.2012
 * @website http://hertzen.com
  */
 
 
 PHP.Modules.prototype.print_r = function() {
-    
+
     var str = "",
     indent = 0,
     COMPILER = PHP.Compiler.prototype,
@@ -6105,26 +6100,24 @@ PHP.Modules.prototype.print_r = function() {
     PROTECTED = PHP.VM.Class.PROTECTED,
     PROPERTY = PHP.VM.Class.PROPERTY,
     VAR = PHP.VM.Variable.prototype;
-   
+
     if (this[ COMPILER.DISPLAY_HANDLER ] === true) {
-        this[ COMPILER.ERROR ]( "print_r(): Cannot use output buffering in output buffering display handlers", PHP.Constants.E_ERROR, true );  
+        this[ COMPILER.ERROR ]( "print_r(): Cannot use output buffering in output buffering display handlers", PHP.Constants.E_ERROR, true );
     }
-    
+
     var $dump = function( argument, indent ) {
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ],
         ARG_TYPE = argument[ VAR.TYPE ]; // trigger get for undefined
-        
+
         if ( ARG_TYPE === VAR.ARRAY ) {
             str += "Array\n";
             str += $INDENT( indent ) + "(";
             var values = value[ PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
             var keys = value[ PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
-            
-           
-       console.log( values );
+
             str += "\n";
-            
+
             keys.forEach(function( key, index ){
                 str += $INDENT( indent + 4 ) + "[";
                 if ( key instanceof PHP.VM.Variable) {
@@ -6135,13 +6128,13 @@ PHP.Modules.prototype.print_r = function() {
                 str += "] => ";
 
                 str += $dump( values[ index ], indent + 8 ) + "\n";
-                
 
-                
+
+
             }, this);
-            
+
             str += $INDENT( indent ) + ")\n";
-        } else if( ARG_TYPE === VAR.OBJECT || argument instanceof PHP.VM.ClassPrototype) { 
+        } else if( ARG_TYPE === VAR.OBJECT || argument instanceof PHP.VM.ClassPrototype) {
             var classObj;
             if (argument instanceof PHP.VM.Variable ){
                 classObj = value;
@@ -6150,20 +6143,17 @@ PHP.Modules.prototype.print_r = function() {
             }
             str += classObj[ COMPILER.CLASS_NAME ] + " Object\n";
             str += $INDENT( indent ) + "(\n";
-      
-      
+
+
             var added = false,
             definedItems = [],
             tmp = "";
-          
-            console.log( classObj );
+
             // search whole prototype chain
             for ( var item in classObj ) {
-                
-            
                 if (item.substring(0, PROPERTY.length) === PROPERTY) {
-                    
-                   
+
+
                     if ( classObj.hasOwnProperty( item )) {
                         definedItems.push( item );
                         str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length );
@@ -6172,13 +6162,13 @@ PHP.Modules.prototype.print_r = function() {
                         str += "\n";
                     }
                     //  props.push( item );
-                  
+
                     var parent = classObj;
                     // search for overwritten private members
                     do {
-                       
+
                         if ( parent.hasOwnProperty(item) ) {
-                      
+
                             if ((Object.getPrototypeOf( parent )[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PROPERTY.length ) ] & PRIVATE) === PRIVATE) {
                                 str += $INDENT( indent + 4 ) + '[' + item.substring( PROPERTY.length ) + ':' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +':private] => ';
                                 str += $dump( parent[ item ], indent + 8 );
@@ -6197,36 +6187,33 @@ PHP.Modules.prototype.print_r = function() {
                         }
                         parent = Object.getPrototypeOf( parent );
                     } while( parent instanceof PHP.VM.ClassPrototype);
-                    
-                 
-              
-                    
+
+
+
+
                 }
             }
             str += tmp;
-            
 
-          
- 
+
+
+
             str += $INDENT( indent ) + ")\n";
-            
+
         } else if( ARG_TYPE === VAR.NULL ) {
-            str += $INDENT( indent ) + "NULL";  
+            str += $INDENT( indent ) + "NULL";
         } else if( ARG_TYPE === VAR.STRING ) {
-            
-   
-            str += value;  
+
+
+            str += value;
         } else if( ARG_TYPE === VAR.INT ) {
-            
-         
-            str += value;  
-            
-        } else {
-            console.log( argument );
+
+
+            str += value;
+
         }
-    
         return str;
-    }, 
+    },
     $INDENT = function( num ) {
         var str = "", i ;
         for (i = 0; i < num; i++) {
@@ -6234,24 +6221,16 @@ PHP.Modules.prototype.print_r = function() {
         }
         return str;
     };
-    
+
     PHP.Utils.$A( arguments ).forEach( function( argument ) {
-        str += $dump( argument, 0 );    
+        str += $dump( argument, 0 );
     }, this );
-    
+
     this.echo( str );
-    
-    
-  
-// console.log(arguments);
+};
 /*
-    console.log( arguments[0].type);
-    console.log( arguments[0] instanceof PHP.VM.VariableProto);
-    console.log( arguments );
-    */
-};/* 
  * @author Niklas von Hertzen <niklas at hertzen.com>
- * @created 22.7.2012 
+ * @created 22.7.2012
  * @website http://hertzen.com
  */
 PHP.Modules.prototype.serialize = function( valueObj ) {
@@ -6268,97 +6247,91 @@ PHP.Modules.prototype.serialize = function( valueObj ) {
         str = "";
 
         switch( item[ VARIABLE.TYPE ] ) {
-            
+
             case VARIABLE.NULL:
                 str += "N;";
                 break;
-            
+
             case VARIABLE.STRING:
-                
+
                 str += val.length + ":{" + val + "}";
-                
-                
+
+
                 break;
             default:
-                console.log( val );
+
         }
-        
+
         return str;
-        
+
     }.bind( this ),
     value = valueObj[ COMPILER.VARIABLE_VALUE ];
 
     // serializable interface
     if( (value[ PHP.VM.Class.METHOD + serialize] ) !== undefined ) {
         item = value[ COMPILER.METHOD_CALL ]( this, serialize );
-        
+
         if ( item[ VARIABLE.TYPE] !== VARIABLE.NULL && item[ VARIABLE.TYPE] !== VARIABLE.STRING  ) {
-            this.ENV[ COMPILER.ERROR ](value[ COMPILER.CLASS_NAME ] + "::" + serialize + "() must return a string or NULL", PHP.Constants.E_ERROR, true );   
+            this.ENV[ COMPILER.ERROR ](value[ COMPILER.CLASS_NAME ] + "::" + serialize + "() must return a string or NULL", PHP.Constants.E_ERROR, true );
             return new PHP.VM.Variable();
         }
-        
+
     } else {
-       
+
         item = value;
-        
+
         if( (value[ PHP.VM.Class.METHOD + __sleep] ) !== undefined ) {
             item = value[ COMPILER.METHOD_CALL ]( this, __sleep );
-        
+
             if ( item[ VARIABLE.TYPE] !== VARIABLE.ARRAY  ) {
-                this.ENV[ COMPILER.ERROR ](value[ COMPILER.CLASS_NAME ] + "::" + serialize + "() must return a string or NULL", PHP.Constants.E_ERROR, true );   
+                this.ENV[ COMPILER.ERROR ](value[ COMPILER.CLASS_NAME ] + "::" + serialize + "() must return a string or NULL", PHP.Constants.E_ERROR, true );
                 return new PHP.VM.Variable();
             }
-             
-            item[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ].forEach( function( member ){
-                
-                if ( value[ PHP.VM.Class.PROPERTY + member[ COMPILER.VARIABLE_VALUE ]] === undefined ) {
-                    this.ENV[ COMPILER.ERROR ](serialize + '(): "' + member[ COMPILER.VARIABLE_VALUE ] + '" returned as member variable from ' + __sleep + "() but does not exist", PHP.Constants.E_NOTICE, true );   
-                } 
-                
-               
-            }, this);
-            
-            str += "O:" + value[ COMPILER.CLASS_NAME ].length + ':"' + value[ COMPILER.CLASS_NAME ] + '":';
-        
-        
-   
-        }
-        
-        console.log( item );
-        
-    }
-    
 
-  
+            item[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ].forEach( function( member ){
+
+                if ( value[ PHP.VM.Class.PROPERTY + member[ COMPILER.VARIABLE_VALUE ]] === undefined ) {
+                    this.ENV[ COMPILER.ERROR ](serialize + '(): "' + member[ COMPILER.VARIABLE_VALUE ] + '" returned as member variable from ' + __sleep + "() but does not exist", PHP.Constants.E_NOTICE, true );
+                }
+
+
+            }, this);
+
+            str += "O:" + value[ COMPILER.CLASS_NAME ].length + ':"' + value[ COMPILER.CLASS_NAME ] + '":';
+
+
+
+        }
+
+    }
 
     if ( item instanceof PHP.VM.Variable ) {
-    
         if( item[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
             var arr = item[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
             str += arr.length + ":{";
             arr.forEach(function( arrItem ){
-                
+
                 if(( value[ PHP.VM.Class.PROPERTY_TYPE + arrItem[ COMPILER.VARIABLE_VALUE ]] & PHP.VM.Class.PRIVATE) === PHP.VM.Class.PRIVATE) {
                     str += "s:" + (2 + value[ COMPILER.CLASS_NAME ].length + arrItem[ COMPILER.VARIABLE_VALUE ].length) + ":";
                     str += '"\\0' + value[ COMPILER.CLASS_NAME ] + "\\0" + arrItem[ COMPILER.VARIABLE_VALUE ] +'";';
                 } else if (( value[ PHP.VM.Class.PROPERTY_TYPE + arrItem[ COMPILER.VARIABLE_VALUE ]] & PHP.VM.Class.PROTECTED) === PHP.VM.Class.PROTECTED) {
                     str += "s:" + (3 + arrItem[ COMPILER.VARIABLE_VALUE ].length) + ":";
-                    str += '"\\0*\\0'  + arrItem[ COMPILER.VARIABLE_VALUE ] +'";';       
+                    str += '"\\0*\\0'  + arrItem[ COMPILER.VARIABLE_VALUE ] +'";';
                 } else {
                     str += "s:" + (arrItem[ COMPILER.VARIABLE_VALUE ].length) + ":";
-                    str += '"'  + arrItem[ COMPILER.VARIABLE_VALUE ] +'";'; 
+                    str += '"'  + arrItem[ COMPILER.VARIABLE_VALUE ] +'";';
                 }
-               
+
                 var tmp = value[ PHP.VM.Class.PROPERTY + arrItem[ COMPILER.VARIABLE_VALUE ]];
-               
+
                 if ( tmp !== undefined ) {
                     tmp = tmp[ COMPILER.VARIABLE_VALUE ];
                     str += "s:" + tmp.length + ':"' + tmp + '";';
                 }else {
                     str += "N;";
                 }
-               
-                
+
+
             });
             str += "}"
         } else if ( item[ VARIABLE.TYPE] !== VARIABLE.NULL ) {
@@ -6366,17 +6339,16 @@ PHP.Modules.prototype.serialize = function( valueObj ) {
         } else {
             str += "N;"
         }
-    
-    } else {
-        console.log( item );
+
     }
 
-   
+
     return new PHP.VM.Variable( str );
-        
+
 
 
 };
+
 
 
 /* 
@@ -6475,6 +6447,7 @@ PHP.Modules.prototype.unserialize = function( valueObj ) {
 };
 
 
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 1.7.2012 
@@ -6490,69 +6463,59 @@ PHP.Modules.prototype.unset = function() {
         }
     }, this );  
     
-};/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 26.6.2012 
-* @website http://hertzen.com
- */
-
-
+};
 PHP.Modules.prototype.var_dump = function() {
-    
+
     var str = "",
     indent = 0,
     COMPILER = PHP.Compiler.prototype,
     VAR = PHP.VM.Variable.prototype;
-    
+
     var $dump = function( argument, indent ) {
-     
+
         var str = "",
         value = argument[ COMPILER.VARIABLE_VALUE ],
         ARG_TYPE = argument[ VAR.TYPE ]; // trigger get for undefined
         str += $INDENT( indent );
-        
-        /*
-        if (argument[ VAR.IS_REF] !== undefined ) {
-            str += "&";
-        }*/
+
         if( ARG_TYPE === VAR.NULL || (argument[ VAR.DEFINED ] !== true && !(argument instanceof PHP.VM.ClassPrototype)) ) {
-            
-            str += "NULL\n";  
+
+            str += "NULL\n";
         } else if ( ARG_TYPE === VAR.ARRAY ) {
             str += "array(";
 
             var values = value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.VALUES ][ COMPILER.VARIABLE_VALUE ];
             var keys = value[ PHP.VM.Class.PROPERTY + PHP.VM.Array.prototype.KEYS ][ COMPILER.VARIABLE_VALUE ];
-            
+
             str += values.length;
-       
+
             str += ") {\n";
-            
+
             keys.forEach(function( key, index ){
-                
+
                 if (key instanceof PHP.VM.Variable) {
                     key = key[ COMPILER.VARIABLE_VALUE ];
                 }
-                
+
                 str += $INDENT( indent + 2 ) + "[";
                 if ( typeof key === "string" ) {
                     str += '"' + key + '"';
                 } else {
                     str += key;
-                } 
+                }
                 str += "]=>\n";
                 str += $dump( values[ index ], indent + 2 );
-                
+
             }, this);
-            
+
             str += $INDENT( indent ) + "}\n";
-        } else if( ARG_TYPE === VAR.BOOL ) {    
-            str += "bool(" + value + ")\n";  
+        } else if( ARG_TYPE === VAR.BOOL ) {
+            str += "bool(" + value + ")\n";
         } else if( ARG_TYPE === VAR.STRING ) {
-            
-            str += "string(" + value.length + ') "' + value + '"\n';  
+
+            str += "string(" + value.length + ') "' + value + '"\n';
         } else if( ARG_TYPE === VAR.INT ) {
-            str += "int(" + value + ')\n';  
+            str += "int(" + value + ')\n';
         } else if( argument instanceof PHP.VM.ClassPrototype || ARG_TYPE === VAR.OBJECT ) {
             // todo, complete
             if( ARG_TYPE === VAR.OBJECT ) {
@@ -6560,19 +6523,19 @@ PHP.Modules.prototype.var_dump = function() {
             }
 
             str += "object(" + argument[ COMPILER.CLASS_NAME ] + ')#1 ';
-            
-           
-            
+
+
+
             // search whole prototype chain
-            
+
             var tmp = "",
             count = 0;
-            
+
             for ( var item in argument ) {
                 var ignore = false,
                 parent;
                 if (item.substring(0, PHP.VM.Class.PROPERTY.length) === PHP.VM.Class.PROPERTY) {
-                   
+
                     if (!((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PRIVATE) === PHP.VM.Class.PRIVATE) && !((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PROTECTED) === PHP.VM.Class.PROTECTED)) {
 
                         tmp += $INDENT( indent + 2 ) + '["' + item.substring( PHP.VM.Class.PROPERTY.length );
@@ -6582,47 +6545,45 @@ PHP.Modules.prototype.var_dump = function() {
                     } else {
                         ignore = true;
                     }
-                    
+
                 }
-                
+
                 parent = argument;
                 // search for overwritten private members
                 do {
                     if ( ( argument[ item ] !== parent[ item ] || ignore ) && parent[ item ] instanceof PHP.VM.Variable && parent.hasOwnProperty( item )) {
-                        
-                            
+
+
                         tmp += $INDENT( indent + 2 ) + '["' + item.substring( PHP.VM.Class.PROPERTY.length ) + '":';
                         if ((argument[ PHP.VM.Class.PROPERTY_TYPE + item.substring( PHP.VM.Class.PROPERTY.length ) ] & PHP.VM.Class.PRIVATE) === PHP.VM.Class.PRIVATE) {
                             tmp +=  '"' + Object.getPrototypeOf(parent)[ COMPILER.CLASS_NAME ] +'":' + "private";
                         } else {
                             tmp +=  "protected";
                         }
-                        
+
                         tmp += ']=>\n';
                         tmp += $dump( parent[ item ], indent + 2 );
                         count++;
                     }
                     parent = Object.getPrototypeOf( parent );
                 } while( parent instanceof PHP.VM.ClassPrototype);
-                
+
             }
-         
-            
+
+
             str += '(' + count + ') {\n' + tmp;
-            
 
-      
 
-            
-            str += $INDENT( indent ) + '}\n';  
+
+
+
+            str += $INDENT( indent ) + '}\n';
         } else if( ARG_TYPE === VAR.FLOAT ) {
-            str += "float(" + value + ')\n';      
-        } else {
-            console.log( argument );
+            str += "float(" + value + ')\n';
         }
 
         return str;
-    }.bind(this), 
+    }.bind(this),
     $INDENT = function( num ) {
         var str = "", i ;
         for (i = 0; i < num; i++) {
@@ -6630,22 +6591,15 @@ PHP.Modules.prototype.var_dump = function() {
         }
         return str;
     };
-    
+
     PHP.Utils.$A( arguments ).forEach( function( argument ) {
-        str += $dump( argument, 0 );    
+        str += $dump( argument, 0 );
     }, this );
-    
+
     this.echo( str );
-    
-    
-  
-// console.log(arguments);
-/*
-    console.log( arguments[0].type);
-    console.log( arguments[0] instanceof PHP.VM.VariableProto);
-    console.log( arguments );
-    */
-};/* 
+
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 15.7.2012 
 * @website http://hertzen.com
@@ -6676,7 +6630,8 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
     
     return new PHP.VM.Variable();
 
-};PHP.Lexer = function( src, ini ) {
+};
+PHP.Lexer = function( src, ini ) {
 
 
     var heredoc,
@@ -6690,7 +6645,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
         return result;
     },
     prev,
-    
+
     openTag = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag) ) ? /(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
         openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /^(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
             tokens = [
@@ -7169,18 +7124,18 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                             match = result.match( /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\@\^\%\"\'\{\}]/ );
 
                             if ( match !== null ) {
-                       
+
                                 results.push( match[ 0 ] );
                                 result = result.substring( 1 );
 
                                 if ( curlyOpen > 0 && match[ 0 ] === "}") {
                                     curlyOpen--;
                                 }
-                        
+
                                 if ( match[ 0 ] === "[" ) {
                                     bracketOpen++;
                                 }
-                        
+
                                 if ( match[ 0 ] === "]" ) {
                                     bracketOpen--;
                                 }
@@ -7200,11 +7155,11 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                                     ]);
 
                                 result = result.substring( match[ 0 ].length );
-                    
+
                                 match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
-                        
+
                                 if ( match !== null ) {
-                            
+
                                     results.push([
                                         parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10),
                                         match[ 1 ],
@@ -7216,14 +7171,14 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                                         line
                                         ]);
                                     result = result.substring( match[ 0 ].length );
-                                } 
-                        
-                        
+                                }
+
+
                                 if ( result.match( /^\[/g ) !== null ) {
                                     continue;
                                 }
                             }
-                    
+
                             var re;
                             if ( curlyOpen > 0) {
                                 re = /^([^\\\$"{}\]]|\\.)+/g;
@@ -7253,7 +7208,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                             }
 
                             if( result.match(/^{\$/) !== null ) {
-                       
+
                                 results.push([
                                     parseInt(PHP.Constants.T_CURLY_OPEN, 10),
                                     "{",
@@ -7262,19 +7217,18 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                                 result = result.substring( 1 );
                                 curlyOpen++;
                             }
-                    
+
                             if (len === result.length) {
                                 //  nothing has been found yet
                                 if ((match =  result.match( /^(([^\\]|\\.)*?[^\\]\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)/g )) !== null) {
-                                    console.log( result, match, match[0], match[1] );
                                     return;
                                 }
                             }
-                    
+
                         }
 
                         return undefined;
-            
+
                     } else {
                         result = result.replace(/\n/g,"\\n").replace(/\r/g,"");
                     }
@@ -7299,8 +7253,8 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
                 re: /^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\"\'\$\~]/
             }];
 
-   
-    
+
+
 
 
             var results = [],
@@ -7450,6 +7404,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
 
         };
 
+
 /*
  * @author Niklas von Hertzen <niklas at hertzen.com>
  * @created 15.6.2012
@@ -7461,7 +7416,7 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
  * the work by Masato Bito and is in the PUBLIC DOMAIN.
  * Ported to JavaScript by Niklas von Hertzen
  */
-  
+
 
 PHP.Parser = function ( preprocessedTokens, eval ) {
 
@@ -7478,7 +7433,7 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
     terminals = this.terminals,
     translate = this.translate,
     yygdefault = this.yygdefault;
-    
+
 
     this.pos = -1;
     this.line = 1;
@@ -7489,20 +7444,20 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
     this.dropTokens[ T_WHITESPACE ] = 1;
     this.dropTokens[ T_OPEN_TAG ] = 1;
     var tokens = [];
-    
+
     // pre-process
     preprocessedTokens.forEach( function( token, index ) {
         if ( typeof token === "object" && token[ 0 ] === PHP.Constants.T_OPEN_TAG_WITH_ECHO) {
             tokens.push([
-                PHP.Constants.T_OPEN_TAG, 
+                PHP.Constants.T_OPEN_TAG,
                 token[ 1 ],
                 token[ 2 ]
                 ]);
             tokens.push([
-                PHP.Constants.T_ECHO, 
+                PHP.Constants.T_ECHO,
                 token[ 1 ],
                 token[ 2 ]
-                ]);    
+                ]);
         } else {
             tokens.push( token );
         }
@@ -7546,23 +7501,11 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
             yyn = yydefault[ state ];
         } else {
             if (tokenId === this.TOKEN_NONE ) {
-
                 // fetch the next token id from the lexer and fetch additional info by-ref
-
                 origTokenId = this.getNextToken( );
 
                 // map the lexer token id to the internally used token id's
                 tokenId = (origTokenId >= 0 && origTokenId < this.TOKEN_MAP_SIZE) ? translate[ origTokenId ] : this.TOKEN_INVALID;
-                //    console.log(origTokenId,tokenId);
-                if (tokenId === this.TOKEN_INVALID) {
-                    console.log('The lexer returned an invalid token',
-                        origTokenId, this.tokenValue);
-                /*
-                    throw new RangeException(sprintf(
-                    'The lexer returned an invalid token (id=%d, value=%s)',
-                    origTokenId, tokenValue
-                ));*/
-                }
 
                 attributeStack[ this.stackPos ] = this.startAttributes;
             }
@@ -7608,16 +7551,11 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
 
             if ( yyn === 0 ) {
                 /* accept */
-                //  console.log(this.yyastk);
                 return this.yyval;
             } else if (yyn !== this.YYUNEXPECTED ) {
                 /* reduce */
                 try {
-                    //      console.log('yyn' + yyn);
-                    this['yyn' + yyn](
-                        PHP.Utils.Merge(attributeStack[this.stackPos - yylen[ yyn ] ], this.endAttributes)
-                        //      + endAttributes
-                        );
+                    this['yyn' + yyn](PHP.Utils.Merge(attributeStack[this.stackPos - yylen[ yyn ] ], this.endAttributes));
                 } catch (e) {
                     /*
                         if (-1 === $e->getRawLine()) {
@@ -7645,7 +7583,6 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
                 attributeStack[ this.stackPos ] = this.startAttributes;
             } else {
                 /* error */
-                console.log( tokens );
                 if (eval !== true) {
                     throw new PHP.ParseError("syntax error, unexpected " + terminals[ tokenId ] + ", expecting identifier", this.startAttributes['startLine']);
                     throw new Error('Unexpected token ' + terminals[ tokenId ] + ", tokenId " + tokenId + " line " + this.startAttributes['startLine']);
@@ -7869,8 +7806,6 @@ PHP.Parser.prototype.getNextToken = function( ) {
             } else if (T_DOC_COMMENT === token[0]) {
                 this.startAttributes['comments'].push( new PHPParser_Comment_Doc(token[1], token[2]) );
             } else if (this.dropTokens[token[0]] === undefined) {
-                //      console.log(this.pos, token);
-                //     console.log(this.tokenMap);
                 this.tokenValue = token[1];
                 this.startAttributes['startLine'] = token[2];
                 this.endAttributes['endLine'] = this.line;
@@ -7943,18 +7878,18 @@ PHP.Parser.prototype.parseString = function( str ) {
             ['\\\\', '\\\''],
             [  '\\',   '\'']);
     } else {
-     
+
         str = this.parseEscapeSequences( str, '"');
 
     }
 
     return str;
-  
+
 };
 
 PHP.Parser.prototype.parseEscapeSequences = function( str, quote ) {
-    
-  
+
+
 
     if (undefined !== quote) {
         str = str.replace(new RegExp('\\' + quote, "g"), quote);
@@ -7985,9 +7920,10 @@ PHP.Parser.prototype.parseEscapeSequences = function( str, quote ) {
             }
         }
         );
-    
+
     return str;
 };
+
 
 /* This is an automatically GENERATED file, which should not be manually edited.
  * Instead edit one of the following:
@@ -10420,6 +10356,7 @@ var T_NS_SEPARATOR = 380;
          this.yyval = this.Node_Expr_Variable(this.yyastk[ this.stackPos-(1-1) ].substring( 1 ), attributes); 
     };
 
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 20.7.2012 
@@ -10732,9 +10669,10 @@ PHP.Parser.prototype.Node_Stmt_Unset = function() {
         attributes: arguments[ 1 ]
     };  
 
-};/* 
+};
+/*
 * @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 20.7.2012 
+* @created 20.7.2012
 * @website http://hertzen.com
  */
 
@@ -10744,463 +10682,461 @@ PHP.Parser.prototype.Node_Expr_Variable = function( a ) {
         type: "Node_Expr_Variable",
         name: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    }; 
+    };
 };
 
 PHP.Parser.prototype.Node_Expr_FuncCall = function() {
-   
+
     return {
         type: "Node_Expr_FuncCall",
         func: arguments[ 0 ],
         args: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_MethodCall = function() {
-   
+
     return {
         type: "Node_Expr_MethodCall",
         variable: arguments[ 0 ],
         name: arguments[ 1 ],
         args: arguments[ 2 ],
         attributes: arguments[ 3 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_StaticCall = function() {
-   
+
     return {
         type: "Node_Expr_StaticCall",
         Class: arguments[ 0 ],
         func: arguments[ 1 ],
         args: arguments[ 2 ],
         attributes: arguments[ 3 ]
-    };  
-  
+    };
+
 };
 
 
 PHP.Parser.prototype.Node_Expr_Ternary = function() {
-   
+
     return {
         type: "Node_Expr_Ternary",
         cond: arguments[ 0 ],
         If: arguments[ 1 ],
         Else: arguments[ 2 ],
         attributes: arguments[ 3 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_AssignList = function() {
-   
+
     return {
         type: "Node_Expr_AssignList",
         assignList: arguments[ 0 ],
         expr: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 
 PHP.Parser.prototype.Node_Expr_Assign = function() {
-   
+
     return {
         type: "Node_Expr_Assign",
         variable: arguments[ 0 ],
         expr: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_AssignConcat = function() {
-   
+
     return {
         type: "Node_Expr_AssignConcat",
         variable: arguments[ 0 ],
         expr: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_AssignMinus = function() {
-   
+
     return {
         type: "Node_Expr_AssignMinus",
         variable: arguments[ 0 ],
         expr: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_AssignPlus = function() {
-   
+
     return {
         type: "Node_Expr_AssignPlus",
         variable: arguments[ 0 ],
         expr: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_AssignDiv = function() {
-   
+
     return {
         type: "Node_Expr_AssignDiv",
         variable: arguments[ 0 ],
         expr: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_AssignRef = function() {
-   
+
     return {
         type: "Node_Expr_AssignRef",
         variable: arguments[ 0 ],
         refVar: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_AssignMul = function() {
-   
+
     return {
         type: "Node_Expr_AssignMul",
         variable: arguments[ 0 ],
         expr: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_AssignMod = function() {
-   
+
     return {
         type: "Node_Expr_AssignMod",
         variable: arguments[ 0 ],
         expr: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_Plus = function() {
-   
+
     return {
         type: "Node_Expr_Plus",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_Minus = function() {
-   
+
     return {
         type: "Node_Expr_Minus",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 
 PHP.Parser.prototype.Node_Expr_Mul = function() {
-   
+
     return {
         type: "Node_Expr_Mul",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 
 PHP.Parser.prototype.Node_Expr_Div = function() {
-   
+
     return {
         type: "Node_Expr_Div",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 
 PHP.Parser.prototype.Node_Expr_Mod = function() {
-   
+
     return {
         type: "Node_Expr_Mod",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_Greater = function() {
-   
+
     return {
         type: "Node_Expr_Greater",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_Equal = function() {
-   
+
     return {
         type: "Node_Expr_Equal",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_NotEqual = function() {
-   
+
     return {
         type: "Node_Expr_NotEqual",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 
 PHP.Parser.prototype.Node_Expr_Identical = function() {
-   
+
     return {
         type: "Node_Expr_Identical",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 
 PHP.Parser.prototype.Node_Expr_NotIdentical = function() {
-   
+
     return {
         type: "Node_Expr_NotIdentical",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_GreaterOrEqual = function() {
-   
+
     return {
         type: "Node_Expr_GreaterOrEqual",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_SmallerOrEqual = function() {
-   
+
     return {
         type: "Node_Expr_SmallerOrEqual",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_Concat = function() {
-   
+
     return {
         type: "Node_Expr_Concat",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_Smaller = function() {
-   
+
     return {
         type: "Node_Expr_Smaller",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_PostInc = function() {
-   
+
     return {
         type: "Node_Expr_PostInc",
         variable: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_PostDec = function() {
-   
+
     return {
         type: "Node_Expr_PostDec",
         variable: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_PreInc = function() {
-   
+
     return {
         type: "Node_Expr_PreInc",
         variable: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_PreDec = function() {
-   
+
     return {
         type: "Node_Expr_PreDec",
         variable: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_Include = function() {
-   console.log( arguments );
     return {
         expr: arguments[ 0 ],
         type: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
 };
 
 PHP.Parser.prototype.Node_Expr_ArrayDimFetch = function() {
-   
+
     return {
         type: "Node_Expr_ArrayDimFetch",
         variable: arguments[ 0 ],
         dim: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_StaticPropertyFetch = function() {
-   
+
     return {
         type: "Node_Expr_StaticPropertyFetch",
         Class: arguments[ 0 ],
         name: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_ClassConstFetch = function() {
-   
+
     return {
         type: "Node_Expr_ClassConstFetch",
         Class: arguments[ 0 ],
         name: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 
 PHP.Parser.prototype.Node_Expr_StaticPropertyFetch = function() {
-   
+
     return {
         type: "Node_Expr_StaticPropertyFetch",
         Class: arguments[ 0 ],
         name: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_ConstFetch = function() {
-   
+
     return {
         type: "Node_Expr_ConstFetch",
         name: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_ArrayItem = function() {
-   
+
     return {
         type: "Node_Expr_ArrayItem",
         value: arguments[ 0 ],
         key: arguments[ 1 ],
         byRef: arguments[ 2 ],
         attributes: arguments[ 3 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_Array = function() {
-   
+
     return {
         type: "Node_Expr_Array",
         items: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_PropertyFetch = function() {
-   
+
     return {
         type: "Node_Expr_PropertyFetch",
         variable: arguments[ 0 ],
         name: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_New = function() {
-   
+
     return {
         type: "Node_Expr_New",
         Class: arguments[ 0 ],
         args: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 
@@ -11209,7 +11145,7 @@ PHP.Parser.prototype.Node_Expr_Print = function() {
         type: "Node_Expr_Print",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11219,7 +11155,7 @@ PHP.Parser.prototype.Node_Expr_Exit = function() {
         type: "Node_Expr_Exit",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11229,7 +11165,7 @@ PHP.Parser.prototype.Node_Expr_Cast_Bool = function() {
         type: "Node_Expr_Cast_Bool",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11238,7 +11174,7 @@ PHP.Parser.prototype.Node_Expr_Cast_Int = function() {
         type: "Node_Expr_Cast_Int",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11247,7 +11183,7 @@ PHP.Parser.prototype.Node_Expr_Cast_String = function() {
         type: "Node_Expr_Cast_String",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11256,7 +11192,7 @@ PHP.Parser.prototype.Node_Expr_Cast_Double = function() {
         type: "Node_Expr_Cast_Double",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11266,7 +11202,7 @@ PHP.Parser.prototype.Node_Expr_ErrorSuppress = function() {
         type: "Node_Expr_ErrorSuppress",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11276,7 +11212,7 @@ PHP.Parser.prototype.Node_Expr_Isset = function() {
         type: "Node_Expr_Isset",
         variables: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11288,7 +11224,7 @@ PHP.Parser.prototype.Node_Expr_UnaryMinus = function() {
         type: "Node_Expr_UnaryMinus",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11298,7 +11234,7 @@ PHP.Parser.prototype.Node_Expr_UnaryPlus = function() {
         type: "Node_Expr_UnaryPlus",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11307,7 +11243,7 @@ PHP.Parser.prototype.Node_Expr_Empty = function() {
         type: "Node_Expr_Empty",
         variable: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11317,7 +11253,7 @@ PHP.Parser.prototype.Node_Expr_BooleanOr = function() {
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
+    };
 
 };
 
@@ -11327,7 +11263,7 @@ PHP.Parser.prototype.Node_Expr_LogicalOr = function() {
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
+    };
 
 };
 
@@ -11337,7 +11273,7 @@ PHP.Parser.prototype.Node_Expr_LogicalAnd = function() {
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
+    };
 
 };
 
@@ -11348,7 +11284,7 @@ PHP.Parser.prototype.Node_Expr_LogicalXor = function() {
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
+    };
 
 };
 
@@ -11358,7 +11294,7 @@ PHP.Parser.prototype.Node_Expr_BitwiseAnd = function() {
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
+    };
 
 };
 
@@ -11368,7 +11304,7 @@ PHP.Parser.prototype.Node_Expr_BitwiseOr = function() {
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
+    };
 
 };
 
@@ -11377,7 +11313,7 @@ PHP.Parser.prototype.Node_Expr_BitwiseNot = function() {
         type: "Node_Expr_BitwiseNot",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11386,7 +11322,7 @@ PHP.Parser.prototype.Node_Expr_BooleanNot = function() {
         type: "Node_Expr_BooleanNot",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
+    };
 
 };
 
@@ -11396,30 +11332,31 @@ PHP.Parser.prototype.Node_Expr_BooleanAnd = function() {
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
+    };
 
 };
 
 PHP.Parser.prototype.Node_Expr_Instanceof = function() {
-   
+
     return {
         type: "Node_Expr_Instanceof",
         left: arguments[ 0 ],
         right: arguments[ 1 ],
         attributes: arguments[ 2 ]
-    };  
-  
+    };
+
 };
 
 PHP.Parser.prototype.Node_Expr_Clone = function() {
-   
+
     return {
         type: "Node_Expr_Clone",
         expr: arguments[ 0 ],
         attributes: arguments[ 1 ]
-    };  
-  
-};/* 
+    };
+
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 20.7.2012 
 * @website http://hertzen.com
@@ -11540,6 +11477,7 @@ PHP.Parser.prototype.Node_Const = function() {
   
 };
 
+
 /* 
  * based on node-iniparser Copyright (c) 2009-2010 Jordy van Gelder <jordyvangelder@gmail.com>
  * The MIT License
@@ -11585,7 +11523,8 @@ PHP.ini = function( contents ) {
     
     return value;
     
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 17.7.2012 
 * @website http://hertzen.com
@@ -11866,54 +11805,54 @@ PHP.RAWPost = function( content ) {
 };
 
 
+
 PHP.VM = function( src, opts ) {
-    
+
     var $ = PHP.VM.VariableHandler( this );
-    // console.log($('_POST'));
-  
+
     var $$ = function( arg ) {
-        
+
         var item = new PHP.VM.Variable( arg );
         item[ PHP.Compiler.prototype.NAV ] = true;
-        
+
         return item;
     },
     COMPILER = PHP.Compiler.prototype,
     ENV = this;
-    
+
     this.ENV = ENV;
-    
+
     PHP.VM.Variable.prototype.ENV = ENV;
-    
+
     ENV [ PHP.Compiler.prototype.FILESYSTEM ] = (opts.filesystem === undefined ) ? {} : opts.filesystem;
-    
+
     // bind global variablehandler to ENV
     ENV[ PHP.Compiler.prototype.GLOBAL ] = $;
- 
+
     ENV[ PHP.Compiler.prototype.CONSTANTS ] = PHP.VM.Constants( PHP.Constants, ENV );
-    
+
     ENV.$ini = Object.create(opts.ini);
-    
+
     ENV.$locale = {
         decimal_point: ".",
         thousands_sep: ","
     };
-    
+
     ENV.$Included = (function(){
-        
+
         var files = [];
-        
+
         return {
             Include: function( file ) {
                 files.push( file.toLowerCase() );
             },
             Included: function( file ) {
-                return (files.indexOf( file.toLowerCase() ) !== -1) 
-            } 
+                return (files.indexOf( file.toLowerCase() ) !== -1)
+            }
         }
-        
+
     })();
-    
+
     ENV.$Class = (function( declaredClasses ) {
         var classRegistry = {},
         COMPILER = PHP.Compiler.prototype,
@@ -11924,29 +11863,29 @@ PHP.VM = function( src, opts ) {
         declaredClasses = [],
         autoloadedClasses = [],
         classHandler = new PHP.VM.Class( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants, declaredClasses );
-        
+
         ENV[ COMPILER.MAGIC_CONSTANTS ] = function( constantName ) {
             return new PHP.VM.Variable( magicConstants[ constantName ] );
         };
-        
+
         var methods =  {
             Shutdown: function() {
-                
+
                 initiatedClasses.forEach( function( classObj ) {
                     classObj[  COMPILER.CLASS_DESTRUCT ]( ENV, true );
                 });
-                
+
             },
             __autoload: function( name ) {
-                
+
                 if ( typeof ENV.__autoload === "function" && autoloadedClasses.indexOf( name.toLowerCase() ) === -1) {
                     autoloadedClasses.push( name.toLowerCase() )
                     ENV.__autoload( new PHP.VM.Variable( name ) );
                 }
-                
+
                 return methods.Exists( name );
             },
-            Inherits: function(  obj, name ) {       
+            Inherits: function(  obj, name ) {
                 do {
                     if ( obj[ COMPILER.CLASS_NAME ] === name) {
                         return true;
@@ -11954,9 +11893,9 @@ PHP.VM = function( src, opts ) {
 
                     obj = Object.getPrototypeOf( obj );
                 }
-        
+
                 while( obj !== undefined && obj instanceof PHP.VM.ClassPrototype );
-                return false; 
+                return false;
             },
             INew: function( name, exts, func ) {
                 return classHandler( name, PHP.VM.Class.INTERFACE, exts, func );
@@ -11964,14 +11903,14 @@ PHP.VM = function( src, opts ) {
             DeclaredClasses: function() {
                 return declaredClasses;
             },
-            New: function() {       
+            New: function() {
                 return classHandler.apply( null, arguments );
             },
             Exists: function( name ) {
-                return (classRegistry[ name.toLowerCase() ] !== undefined);  
+                return (classRegistry[ name.toLowerCase() ] !== undefined);
             },
             ConstantGet: function( className, state, constantName ) {
-                
+
                 if ( !/^(self|parent)$/i.test( className ) && classRegistry[ className.toLowerCase() ] === undefined ) {
                     if ( undefinedConstants[ className + "::" + constantName] === undefined ) {
                         var variable = new PHP.VM.Variable();
@@ -11979,41 +11918,41 @@ PHP.VM = function( src, opts ) {
                         variable[ VARIABLE.REGISTER_GETTER ] = function() {
                             if (classRegistry[ className.toLowerCase() ] === undefined ) {
                                 ENV[ COMPILER.ERROR ]( "Class '" + className + "' not found", PHP.Constants.E_ERROR, true );
-                            } 
+                            }
                         }
                         variable[ VARIABLE.DEFINED ] = className + "::$" + constantName;
                         undefinedConstants[ className + "::" + constantName] = variable;
-                    
+
                     }
-                
+
                     return undefinedConstants[ className + "::" + constantName];
-                    
+
                 } else if ( /^(self|parent)$/i.test( className )) {
-                    
+
                     if (/^(self)$/i.test( className)) {
-                        
+
                         return (( typeof state === "function") ? state.prototype : state)[ COMPILER.CLASS_CONSTANT_FETCH ]( state, constantName );
-                       
+
                     } else {
                         return Object.getPrototypeOf( ( typeof state === "function") ? state.prototype : state )[ COMPILER.CLASS_CONSTANT_FETCH ]( state, constantName );
                     }
 
-                    
+
                 } else {
-                    
+
                     return methods.Get(  className, state )[ COMPILER.CLASS_CONSTANT_FETCH ]( state, constantName );
                 }
-                
+
             },
             Get: function( className, state, isInterface ) {
-               
+
                 if ( !/^(self|parent)$/i.test( className ) ) {
-                    
+
                     if (classRegistry[ className.toLowerCase() ] === undefined && methods.__autoload( className ) === false ) {
-                        
+
                         ENV[ COMPILER.ERROR ]( (( isInterface === true) ? "Interface" :  "Class") + " '" + className + "' not found", PHP.Constants.E_ERROR, true );
                     }
-                    
+
                     if (state !== undefined) {
                         return classRegistry[ className.toLowerCase() ].prototype;
                     } else {
@@ -12021,40 +11960,40 @@ PHP.VM = function( src, opts ) {
                     }
                 } else if ( /^self$/i.test( className ) ) {
                     return state.prototype;
-                //      return Object.getPrototypeOf( state );  
+                //      return Object.getPrototypeOf( state );
                 } else if ( /parent/i.test( className ) ) {
-                    return Object.getPrototypeOf( state.prototype  ); 
-                //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );  
+                    return Object.getPrototypeOf( state.prototype  );
+                //   return Object.getPrototypeOf( Object.getPrototypeOf( state ) );
                 } else {
-                   
+
             }
-                
-                
-                
+
+
+
             }
         };
-        
+
         return methods;
     })();
-    
-    ENV[ PHP.Compiler.prototype.RESOURCES ] = PHP.VM.ResourceManager( ENV ); 
-    
+
+    ENV[ PHP.Compiler.prototype.RESOURCES ] = PHP.VM.ResourceManager( ENV );
+
     ENV.$Array = new PHP.VM.Array( ENV );
     var variables_order = this.$ini.variables_order;
-    
-    this.FUNCTION_REFS = {};   
+
+    this.FUNCTION_REFS = {};
     $('php_errormsg').$ = new PHP.VM.Variable();
-        
+
     ENV[ PHP.Compiler.prototype.FILE_PATH ] = PHP.Utils.Path( opts.SERVER.SCRIPT_FILENAME );
-     
+
     this.OUTPUT_BUFFERS = [""];
     this.$obreset();
     this.$ErrorReset();
     this.$strict = "";
     this.INPUT_BUFFER = opts.RAW_POST;
-    
+
     // todo add error reporting level parser
-    
+
     if (isNaN( this.$ini.error_reporting - 0)) {
         var lvl = this.$ini.error_reporting;
         ["E_ERROR",
@@ -12076,82 +12015,81 @@ PHP.VM = function( src, opts ) {
             lvl = lvl.replace(err, PHP.Constants[ err ]);
         });
         this.$ini.error_reporting = eval(lvl);
-        
-       
+
+
     }
     this.error_reporting(new PHP.VM.Variable( this.$ini.error_reporting ));
-    
-    
-   
-    
+
+
+
+
     $('$__FILE__').$ = opts.SERVER.SCRIPT_FILENAME;
     $('$__DIR__').$ = ENV[ PHP.Compiler.prototype.FILE_PATH ];
-    
+
     var post_max_size;
-    
+
     if (  (post_max_size = PHP.Utils.Filesize(this.$ini.post_max_size)) > opts.RAW_POST.length || post_max_size == 0 ) {
         if (this.$ini.enable_post_data_reading != 0) {
             $('_POST').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 ) ? opts.POST : {} ).$;
-            $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST; 
+            $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST;
         } else {
             $('_POST').$ = PHP.VM.Array.fromObject.call( this, {} ).$;
         }
     } else {
         $('_POST').$ = PHP.VM.Array.fromObject.call( this, {} ).$;
         if (this.$ini.always_populate_raw_post_data == 1 ) {
-            ENV[ PHP.Compiler.prototype.ERROR ]( "Unknown: POST Content-Length of " + opts.RAW_POST.length + " bytes exceeds the limit of " + post_max_size + " bytes in Unknown on line 0", PHP.Constants.E_WARNING ); 
-            ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot modify header information - headers already sent in Unknown on line 0", PHP.Constants.E_WARNING ); 
+            ENV[ PHP.Compiler.prototype.ERROR ]( "Unknown: POST Content-Length of " + opts.RAW_POST.length + " bytes exceeds the limit of " + post_max_size + " bytes in Unknown on line 0", PHP.Constants.E_WARNING );
+            ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot modify header information - headers already sent in Unknown on line 0", PHP.Constants.E_WARNING );
         } else {
-            ENV[ PHP.Compiler.prototype.ERROR ]( "POST Content-Length of " + opts.RAW_POST.length + " bytes exceeds the limit of " + post_max_size + " bytes in Unknown on line 0", PHP.Constants.E_WARNING ); 
+            ENV[ PHP.Compiler.prototype.ERROR ]( "POST Content-Length of " + opts.RAW_POST.length + " bytes exceeds the limit of " + post_max_size + " bytes in Unknown on line 0", PHP.Constants.E_WARNING );
         }
     }
-    
+
     $('_GET').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("G") !== -1 ) ? opts.GET : {} ).$;
 
 
     $('_SERVER').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("S") !== -1 ) ? opts.SERVER : {} ).$;
     $('_FILES').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 && this.$ini.enable_post_data_reading != 0 && this.$ini.file_uploads == 1 ) ? opts.FILES : {} ).$;
-    
+
     $('_ENV').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("E") !== -1 ) ? {} : {} ).$;
-    
+
 
     var staticHandler = {}, staticVars = {};
-    
+
     PHP.Utils.StaticHandler( staticHandler, staticVars, $, $ );
- 
+
     this.$Static = staticHandler;
-    
+
     Object.keys( PHP.VM.Class.Predefined ).forEach(function( className ){
         PHP.VM.Class.Predefined[ className ]( ENV, $$ );
     });
-    
+
     //$('GLOBALS').$ = new (ENV.$Class.Get("__Globals"))( this );
-    
+
     var obj = {};
-    
+
     obj[ COMPILER.DIM_FETCH ] = function( ctx, variable ) {
-        console.log(variable[ COMPILER.VARIABLE_VALUE ]);
         return $( variable[ COMPILER.VARIABLE_VALUE ] );
     };
-    
 
-    
+
+
     $('GLOBALS', obj);
-    
+
     var shutdown = false;
     ENV[ COMPILER.TIMER ] = function(){
         if ( Date.now() > this.start + (this.$ini.max_execution_time - 0)*1000) {
-            
+
             if (this.$ini.display_errors != 0) {
                 this.$ob( "\nFatal error: Maximum execution time of " + this.$ini.max_execution_time + " second exceeded in " + $('$__FILE__').$ + " on line 1\n");
-              
+
             }
-            if (shutdown === false ){ 
+            if (shutdown === false ){
                 shutdown = true;
-                this.$obflush.call( ENV );  
+                this.$obflush.call( ENV );
                 this.$shutdown.call( ENV );
             }
-            
+
             // we aint killing it always with a single throw?? todo examine why
             throw Error;
             throw Error;
@@ -12159,29 +12097,29 @@ PHP.VM = function( src, opts ) {
             throw Error;
         }
     }.bind(this);
-    
+
     this.Run = function() {
         this.start = Date.now();
-        
+
         if ( false ) {
-    
-  
+
+
             var exec = new Function( "$$", "$", "ENV", "$Static", src  );
             exec.call(this, $$, $, ENV, staticHandler);
-    
-     
+
+
         } else {
             try {
 
-                
+
                 var exec = new Function( "$$", "$", "ENV", "$Static", src  );
                 exec.call(this, $$, $, ENV, staticHandler);
-                if (shutdown === false ){ 
+                if (shutdown === false ){
                     shutdown = true;
-                    this.$obflush.call( ENV );  
+                    this.$obflush.call( ENV );
                     this.$shutdown.call( ENV );
                 }
-          
+
             } catch( e ) {
                 var C = PHP.Constants;
                 if ( e instanceof PHP.Halt) {
@@ -12193,31 +12131,28 @@ PHP.VM = function( src, opts ) {
                             this.$ob( "\nCatchable fatal error: " + e.msg + e.lineAppend + "\n");
                             break;
                     }
-                
                 }
-                console.log("Caught: ", e.message, e);
-                console.log("Buffer: ", this.$strict + this.OUTPUT_BUFFERS.join(""));
-        
             }
         }
 
         this.OUTPUT_BUFFER = this.$strict + this.OUTPUT_BUFFERS.join("");
     }.bind( this );
-    
+
 
 };
 
 PHP.VM.prototype = new PHP.Modules();
 
-/* 
+
+/*
  * @author Niklas von Hertzen <niklas at hertzen.com>
- * @created 26.6.2012 
+ * @created 26.6.2012
  * @website http://hertzen.com
  */
 
 
 PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, undefinedConstants, declaredClasses ) {
-    
+
     var methodPrefix = PHP.VM.Class.METHOD,
     methodArgumentPrefix = "_$_",
     propertyPrefix = PHP.VM.Class.PROPERTY,
@@ -12238,8 +12173,8 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
     PROTECTED = "PROTECTED",
     __destruct = "__destruct",
     __construct = "__construct";
-    
-    
+
+
     // helper function for checking whether variable/method is of type
     function checkType( value, type) {
         if ( type === PUBLIC) {
@@ -12247,32 +12182,32 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
         } else {
             return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]);
         }
-        
+
     }
-        
+
     // check if obj inherits className
     function inherits( obj, name ) {
         return ENV.$Class.Inherits( obj, name );
     }
-    
+
     var buildVariableContext = function( methodName, args, className, realName, ctx ) {
-        
+
         var $ = PHP.VM.VariableHandler( ENV ),
         argumentObj = this[ methodArgumentPrefix + methodName ];
 
         if ( Array.isArray(argumentObj) ) {
             argumentObj.forEach( function( argObject, index  ) {
-                
-                
+
+
                 var arg = $( argObject.name );
-            
+
                 PHP.Utils.ArgumentHandler( ENV, arg, argObject, args[ index ], index, className + "::" + realName );
             /*
-                
+
                 // assign arguments to correct variable names
                 if ( args[ index ] !== undefined ) {
 
-                 
+
                     if ( args[ index ] instanceof PHP.VM.VariableProto) {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = args[ index ][ COMPILER.VARIABLE_VALUE ];
                     } else {
@@ -12280,116 +12215,79 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 } else {
                     // no argument passed for the specified index
-                    
+
                     if ( arg[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = arg[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
                     } else {
                         $( arg.name )[ COMPILER.VARIABLE_VALUE ] = (new PHP.VM.Variable())[ COMPILER.VARIABLE_VALUE ];
                     }
                 }
-                
+
 
                 // perform type hint check
-            
+
                 if ( arg[ COMPILER.PROPERTY_TYPE ] !== undefined ) {
                     ENV[ COMPILER.TYPE_CHECK ]( $( arg.name ), arg[ COMPILER.PROPERTY_TYPE ], arg[ COMPILER.PROPERTY_DEFAULT ], index, className + "::" + realName );
-                }   
-                
+                }
+
                  */
-                
+
 
             });
         }
-        
+
         $("GLOBALS", ENV[ COMPILER.GLOBAL ]( "GLOBALS" ));
-        
+
         $("$__CLASS__")[ COMPILER.VARIABLE_VALUE ] = className;
         $("$__FUNCTION__")[ COMPILER.VARIABLE_VALUE ] = realName;
         $("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className + "::" + realName;
-        
+
         if ( ctx !== false ) {
             $("this")[ COMPILER.VARIABLE_VALUE ] = ( ctx !== undefined ) ? ctx : this;
         }
-        
+
         return $;
     }
-    
-    
-    
+
+
+
     return function() {
-       
-        var className = arguments[ 0 ], 
-        classType = arguments[ 1 ], 
+
+        var className = arguments[ 0 ],
+        classType = arguments[ 1 ],
         opts = arguments[ 2 ],
         classDefinition = arguments[ 3 ],
         DECLARED = false,
         staticVars = {},
         props = {},
-        
-        callMethod = function( methodName, args, variablesCallback ) {
-            
-            //   console.log('calling ', methodName, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], args);
-            
 
-            
+        callMethod = function( methodName, args, variablesCallback ) {
             var $ = buildVariableContext.call( this, methodName, args, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ], this[ PHP.VM.Class.METHOD_REALNAME + methodName ], (checkType( this[ methodTypePrefix + methodName ], STATIC )) ? false : this );
-           
+
             if (staticVars[ methodName ] === undefined) {
                 staticVars[ methodName ] = {};
-            } 
-           
+            }
+
             Object.keys( staticVars[ methodName ] ).forEach(function( key ){
-                
+
                 $( key, staticVars[ methodName ][ key ] );
             });
-            
-            // static handler
-            
+
             var staticHandler = {};
             PHP.Utils.StaticHandler.call( this, staticHandler, staticVars, $, ENV[ COMPILER.GLOBAL ] );
-            /*
-            staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
-                
-                if ( staticVars[ methodName ][ name ] !== undefined ) {
-                    // already defined
-                    return staticHandler;
-                }
-                // store it to storage for this method
-                staticVars[ methodName ][ name ] = def;
 
-                // assign it to current running context as well
-                $( name, def );
-                
-                // chain
-                return staticHandler;
-            };
-
-            // global handler
-            staticHandler[ COMPILER.FUNCTION_GLOBAL ] = function( vars ) {
-                vars.forEach(function( varName ){
-      
-                    $( varName, ENV[ COMPILER.GLOBAL ]( varName ) )
-                });
-            };
-            */
             if (variablesCallback !== undefined ) {
                 variablesCallback();
             }
-            
+
             return this[ methodPrefix + methodName ].call( this, $, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ], staticHandler );
         };
 
         var Class = function( ctx ) {
-         
-     
-         
             Object.keys( props ).forEach(function( propertyName ){
-                
+
                 if ( checkType(this[propertyTypePrefix + propertyName], STATIC)) {
                 // static, so refer to the one and only same value defined in actual prototype
-
-                //  this[ propertyPrefix + propertyName ] = this[ propertyPrefix + propertyName ];
-                    
                 } else {
                     if ( Array.isArray( props[ propertyName ] ) ) {
                         this[ propertyPrefix + propertyName ] = new PHP.VM.Variable( [] );
@@ -12397,32 +12295,29 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         this[ propertyPrefix + propertyName ] = new PHP.VM.Variable( props[ propertyName ] );
                     }
                 }
-                
+
                 this [ PHP.VM.Class.CLASS_PROPERTY + className + "_" + propertyPrefix + propertyName] = this[ propertyPrefix + propertyName ];
             }, this);
-            
-            
+
+
             var callConstruct = function( $this, name, args, ctx ) {
-                /*
-           console.log( this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ], name, checkType( this[ methodTypePrefix + name ], PRIVATE ));
-                 */
-                
+
                 if ( checkType( $this[ methodTypePrefix + name ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + $this[ PHP.VM.Class.METHOD_PROTOTYPE + name ][ COMPILER.CLASS_NAME ] + "::" + name + "() from invalid context", PHP.Constants.E_ERROR, true );
                 }
-                
+
                 if ( checkType( this[ methodTypePrefix + name ], PROTECTED) && (!( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ))) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + name + "() from invalid context", PHP.Constants.E_ERROR, true );
-                } 
-                
+                }
+
                 this[ PHP.VM.Class.KILLED ] = true;
-                var ret = callMethod.call( $this, name, Array.prototype.slice.call( args, 1 ) ); 
+                var ret = callMethod.call( $this, name, Array.prototype.slice.call( args, 1 ) );
                 this[ PHP.VM.Class.KILLED ] = undefined;
                 return ret;
             }.bind( this );
-            
+
             // call constructor
-          
+
             if ( ctx !== true ) {
                 // check if we are extending class, i.e. don't call constructors
                 if ( !/^(ArrayObject|__Globals)$/i.test( className ) ) {
@@ -12434,91 +12329,91 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }, ENV);
                     undefinedConstants = [];
                 }
-                 
-                this[ COMPILER.CLASS_STORED ] = []; // variables that store an instance of this class, needed for destructors 
-                 
-                 
-                // make sure we aren't initiating an abstract class 
+
+                this[ COMPILER.CLASS_STORED ] = []; // variables that store an instance of this class, needed for destructors
+
+
+                // make sure we aren't initiating an abstract class
                 if (checkType( this[ COMPILER.CLASS_TYPE ], ABSTRACT ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot instantiate abstract class " + className, PHP.Constants.E_ERROR, true ); 
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot instantiate abstract class " + className, PHP.Constants.E_ERROR, true );
                 }
 
-                // make sure we aren't initiating an interface 
+                // make sure we aren't initiating an interface
                 if (checkType( this[ COMPILER.CLASS_TYPE ], INTERFACE ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot instantiate interface " + className, PHP.Constants.E_ERROR, true ); 
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot instantiate interface " + className, PHP.Constants.E_ERROR, true );
                 }
-                 
-                // register new class initiated into registry (for destructors at shutdown) 
+
+                // register new class initiated into registry (for destructors at shutdown)
                 if ( className !== "ArrayObject") {
-                    initiatedClasses.push ( this ); 
-                   
+                    initiatedClasses.push ( this );
+
                     this[ PHP.VM.Class.CLASS_INDEX ] = initiatedClasses.length;
                 }
-                
+
                 // PHP 5 style constructor in current class
                 if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + __construct  ) ) {
                     return callConstruct( this, __construct, arguments, ctx );
                 }
-                
+
                 // PHP 4 style constructor in current class
-                
+
                 else if ( Object.getPrototypeOf( this ).hasOwnProperty(  methodPrefix + className.toLowerCase()  ) ) {
                     return callConstruct( this, className.toLowerCase(), arguments, ctx  );
                 }
-                
+
                 // PHP 5 style constructor in any inherited class
-                
+
                 else if ( typeof this[ methodPrefix + __construct ] === "function" ) {
                     return callConstruct( this, __construct, arguments, ctx  );
                 }
-                
+
                 // PHP 4 style constructor in any inherited class
-                
+
                 else {
                     var proto = this;
-                    
+
                     while ( ( proto = Object.getPrototypeOf( proto ) ) instanceof PHP.VM.ClassPrototype ) {
-                        
+
                         if ( proto.hasOwnProperty( methodPrefix + proto[ COMPILER.CLASS_NAME  ].toLowerCase() ) ) {
                             return callConstruct( proto, proto[ COMPILER.CLASS_NAME  ].toLowerCase(), arguments, ctx  );
                         }
-                            
-                            
+
+
                     }
-                        
+
                 }
             }
-           
-     
 
-        }, 
+
+
+        },
         methods = {};
-        
+
         /*
          * Declare class constant
-         */ 
+         */
         methods [ COMPILER.CLASS_CONSTANT ] = function( constantName, constantValue ) {
-            
+
             if ( classType === PHP.VM.Class.INTERFACE ) {
-                Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){            
+                Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
                     if (ENV.$Class.Get( interfaceName ).prototype[ PHP.VM.Class.CONSTANT + constantName ] !== undefined ) {
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot inherit previously-inherited or override constant " + constantName + " from interface " + interfaceName, PHP.Constants.E_ERROR, true );    
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot inherit previously-inherited or override constant " + constantName + " from interface " + interfaceName, PHP.Constants.E_ERROR, true );
                     }
-                  
+
                 }, this);
 
             }
-        
+
             if (  Class.prototype[ PHP.VM.Class.CONSTANT + className  + "$" + constantName] !== undefined ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redefine class constant " + className + "::" + constantName, PHP.Constants.E_ERROR, true );    
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redefine class constant " + className + "::" + constantName, PHP.Constants.E_ERROR, true );
             }
-            
-     
-            
+
+
+
             if ( undefinedConstants[ className + "::" + constantName] !== undefined ) {
-                
+
                 Class.prototype[ PHP.VM.Class.CONSTANT + constantName ] = undefinedConstants[ className + "::" + constantName];
-                
+
                 if ( constantValue[ VARIABLE.CLASS_CONSTANT ] ) {
                     // class constant referring another class constant, use reference
                     undefinedConstants[ className + "::" + constantName][ VARIABLE.REFERRING ] = constantValue;
@@ -12526,68 +12421,68 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 } else {
                     Class.prototype[ PHP.VM.Class.CONSTANT + constantName ][ COMPILER.VARIABLE_VALUE ] = constantValue[ COMPILER.VARIABLE_VALUE ];
                 }
-                
-                
+
+
             } else {
                 constantValue[ VARIABLE.CLASS_CONSTANT ] = true;
                 Class.prototype[ PHP.VM.Class.CONSTANT + constantName ] = constantValue;
             }
-            
+
             Class.prototype[ PHP.VM.Class.CONSTANT + className  + "$" + constantName] = Class.prototype[ PHP.VM.Class.CONSTANT + constantName ];
-            
+
             if (Class.prototype[ PHP.VM.Class.CONSTANT + constantName ][ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Arrays are not allowed in class constants", PHP.Constants.E_ERROR, true );  
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Arrays are not allowed in class constants", PHP.Constants.E_ERROR, true );
             }
-            
+
             return methods;
         };
-        
+
         /*
          * Declare class property
-         */       
-        
+         */
+
         methods [ COMPILER.CLASS_PROPERTY ] = function( propertyName, propertyType, propertyDefault ) {
             props[ propertyName ] = propertyDefault;
-            
+
             // can't define members for interface
             if ( classType === PHP.VM.Class.INTERFACE ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Interfaces may not include member variables", PHP.Constants.E_ERROR, true ); 
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Interfaces may not include member variables", PHP.Constants.E_ERROR, true );
             }
-            
+
             if ( Class.prototype[ propertyTypePrefix + propertyName ] !== undefined &&  Class.prototype[ propertyTypePrefix + propertyName ] !== propertyType ) {
-                // property has been defined in an inherited class and isn't of same type as newly defined one, 
+                // property has been defined in an inherited class and isn't of same type as newly defined one,
                 // so let's make sure it is weaker or throw an error
-                
+
                 var type = Class.prototype[ propertyTypePrefix + propertyName ],
                 inheritClass = Object.getPrototypeOf( Class.prototype )[ COMPILER.CLASS_NAME ];
-                
+
                 // redeclaring a (non-private) static as non-static
                 if (!checkType( propertyType, STATIC ) && checkType( type, STATIC ) && !checkType( type, PRIVATE ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redeclare static " + inheritClass + "::$" + propertyName + " as non static " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redeclare static " + inheritClass + "::$" + propertyName + " as non static " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );
                 }
-                
+
                 // redeclaring a (non-private) non-static as static
                 if (checkType( propertyType, STATIC ) && !checkType( type, STATIC ) && !checkType( type, PRIVATE ) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redeclare non static " + inheritClass + "::$" + propertyName + " as static " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot redeclare non static " + inheritClass + "::$" + propertyName + " as static " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );
                 }
-                
+
                 if (!checkType( propertyType, PUBLIC ) ) {
-                    
+
                     if ( ( checkType( propertyType, PRIVATE ) || checkType( propertyType, PROTECTED ) ) && checkType( type, PUBLIC )  ) {
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::$" + propertyName + " must be public (as in class " + inheritClass + ")", PHP.Constants.E_ERROR, true );
                     }
-                    
+
                     if ( ( checkType( propertyType, PRIVATE )  ) && checkType( type, PROTECTED )  ) {
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::$" + propertyName + " must be protected (as in class " + inheritClass + ") or weaker", PHP.Constants.E_ERROR, true );
                     }
-                    
+
                 }
 
-                
-            }
-            
 
-                    
+            }
+
+
+
             if ( checkType( propertyType, STATIC )) {
                 /*
                 Object.defineProperty( Class.prototype,  propertyPrefix + propertyName, {
@@ -12597,17 +12492,17 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 Object.defineProperty( Class.prototype,  PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName, {
                     value: propertyDefault || new PHP.VM.Variable(null)
                 });
-                
-                
-            } 
-            
-            
-            
-            
+
+
+            }
+
+
+
+
             Object.defineProperty( Class.prototype, propertyTypePrefix + propertyName, {
                 value: propertyType
             });
-             
+
             return methods;
         };
 
@@ -12616,74 +12511,74 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
          */
 
         methods [ COMPILER.CLASS_METHOD ] = function( realName, methodType, methodProps, byRef, methodFunc ) {
-            
+
             /*
              * signature checks
              */
             var methodName = realName.toLowerCase();
-                        
-            // can't override final 
+
+            // can't override final
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], FINAL ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true );
             }
-            
+
             // can't override final php4 ctor extending php5 ctor
             if ( methodName === className.toLowerCase() && Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + __construct ] !== undefined && checkType( Class.prototype[ methodTypePrefix + __construct ], FINAL ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + __construct ][ COMPILER.CLASS_NAME ] + "::" + __construct + "() with " + className + "::" + realName + "()", PHP.Constants.E_ERROR, true );
             }
-            
+
             var ctorProto = ( function( proto ){
-                 
-                   
+
+
                 while ( ( proto = Object.getPrototypeOf( proto ) ) instanceof PHP.VM.ClassPrototype ) {
-                       
+
                     if ( proto.hasOwnProperty( methodPrefix + proto[ COMPILER.CLASS_NAME  ].toLowerCase() ) ) {
                         return proto;
                     }
-                                    
+
                 }
-                
+
             })( Class.prototype );
-         
+
             // can't override final php5 ctor extending php4 ctor
             if ( methodName === __construct && ctorProto !== undefined && checkType( ctorProto[ methodTypePrefix + ctorProto[ COMPILER.CLASS_NAME ].toLowerCase() ], FINAL ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot override final " + ctorProto[ COMPILER.CLASS_NAME ] + "::" + ctorProto[ COMPILER.CLASS_NAME ] + "() with " + className + "::" + realName + "()", PHP.Constants.E_ERROR, true );
             }
-            
+
             // can't make static non-static
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], STATIC ) && !checkType( methodType, STATIC ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() non static in class " + className, PHP.Constants.E_ERROR, true );
             }
-            
+
             // can't make non-static  static
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && !checkType( Class.prototype[ methodTypePrefix + methodName ], STATIC ) && checkType( methodType, STATIC ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot make non static method " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() static in class " + className, PHP.Constants.E_ERROR, true );
             }
- 
+
             // A final method cannot be abstract
             if ( checkType( methodType, ABSTRACT ) && checkType( methodType, FINAL ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot use the final modifier on an abstract class member", PHP.Constants.E_ERROR, true );
             }
-           
+
             // abstract static warning
             if ( !checkType( classType, INTERFACE ) && checkType( methodType, STATIC ) && checkType( methodType, ABSTRACT ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Static function " + className + "::" + methodName + "() should not be abstract", PHP.Constants.E_STRICT, true );
             }
-            
+
             // visibility from public
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PUBLIC ) && (checkType( methodType, PROTECTED ) || checkType( methodType, PRIVATE ) ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + realName + "() must be public (as in class same)", PHP.Constants.E_ERROR, true );
-            } 
+            }
             // visibility from protected
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined && checkType( Class.prototype[ methodTypePrefix + methodName ], PROTECTED ) && checkType( methodType, PRIVATE ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access level to " + className + "::" + realName + "() must be protected (as in class same) or weaker", PHP.Constants.E_ERROR, true );
             }
-            
-            // interface methods can't be private 
+
+            // interface methods can't be private
             if ( classType === PHP.VM.Class.INTERFACE && checkType( methodType, PRIVATE ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Access type for interface method " + className + "::" + realName + "() must be omitted", PHP.Constants.E_ERROR, true );
             }
-           
+
             // Default value for parameters with a class type hint can only be NULL
             methodProps.forEach(function( prop ){
                 if ( prop[ COMPILER.PROPERTY_TYPE ] !== undefined && prop[ COMPILER.PROPERTY_DEFAULT ] instanceof PHP.VM.Variable && !/^(string|array)$/i.test(prop[ COMPILER.PROPERTY_TYPE ]) && prop[ COMPILER.PROPERTY_DEFAULT ][ VARIABLE.TYPE] !== VARIABLE.NULL ) {
@@ -12691,41 +12586,41 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
             }, this);
 
-            
+
             // __call
-            if ( methodName === __call  ) { 
-                
+            if ( methodName === __call  ) {
+
                 if ( methodProps.length !== 2 ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + realName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
                 }
-                
+
                 if ( !checkType( methodType, PUBLIC ) || checkType( methodType, STATIC ) ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "The magic method " + realName + "() must have public visibility and cannot be static", PHP.Constants.E_CORE_WARNING, true );
                 }
-                
+
             }
-            
+
             // __get
-            
-            else if ( methodName === __get  ) { 
+
+            else if ( methodName === __get  ) {
                 if ( methodProps.length !== 1 ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + realName + "() must take exactly 1 argument", PHP.Constants.E_ERROR, true );
                 }
             }
-            
+
             // __set
-            
-            else if ( methodName === __set  ) { 
+
+            else if ( methodName === __set  ) {
                 if ( methodProps.length !== 2 ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Method " + className + "::" + realName + "() must take exactly 2 arguments", PHP.Constants.E_ERROR, true );
                 }
             }
-            
-            
+
+
             // strict standards checks
-           
+
             if ( Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined ) {
-                
+
                 // method has been defined in an inherited class
                 var propName,
                 propDef,
@@ -12733,13 +12628,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 if ( methodName !== __construct && (!Class.prototype[ methodArgumentPrefix + methodName ].every(function( item, index ){
                     propName = item;
                     lastIndex = index;
-                    
+
                     if ( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) ) {
-                
+
                         if (methodProps[ index ] !== undefined) {
-                        
+
                             if ( item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]  ) {
-                             
+
                                 return true;
                             }
                         }
@@ -12747,241 +12642,240 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     // or
                     if (item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) {
                         propDef = item[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
-                        console.log( propDef );
                     }
                     return false;
-                    
+
                 // return (( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) && methodProps[ index ] !== undefined && item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]) || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined);
                 //                                                                                                ^^ ^^^^^^ rechecking it on purpose
                 }) || ( methodProps[ ++lastIndex ] !== undefined && methodProps[ lastIndex][ COMPILER.PROPERTY_DEFAULT ] === undefined) ) ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + realName + "() should be compatible with " + Class.prototype[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + (( propDef !== undefined) ? " = " + propDef : "") + ")", PHP.Constants.E_STRICT, true, true );
                 }
-                
-      
+
+
             }
-            
-            
+
+
             // end signature checks
-            
+
             Object.defineProperty( Class.prototype, PHP.VM.Class.METHOD_PROTOTYPE + methodName, {
                 value: Class.prototype
             });
-            
+
             Object.defineProperty( Class.prototype, PHP.VM.Class.METHOD_REALNAME + methodName, {
                 value: realName
             });
-            
+
             Object.defineProperty( Class.prototype, methodTypePrefix + methodName, {
-                value: methodType 
+                value: methodType
             });
-            
+
             Object.defineProperty( Class.prototype, methodByRef  + methodName, {
-                value: byRef 
+                value: byRef
             });
-            
+
             Object.defineProperty( Class.prototype, methodPrefix + methodName, {
                 value: methodFunc,
                 enumerable: true
             });
-            
+
             Object.defineProperty( Class.prototype, methodArgumentPrefix + methodName, {
-                value: methodProps 
+                value: methodProps
             });
-            
+
             return methods;
         };
-            
+
         methods [ COMPILER.CLASS_DECLARE ] = function() {
-            
+
             if ( !checkType( classType, ABSTRACT ) ) {
                 // make sure there are no abstract methods left undeclared
-                
+
                 if ( classType !== PHP.VM.Class.INTERFACE) {
                     Object.keys( Class.prototype ).forEach(function( item ){
                         if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
-                        
+
                             var methodName = item.substring( methodPrefix.length );
                             if ( checkType( Class.prototype[ methodTypePrefix + methodName ], ABSTRACT ) ) {
                                 ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + className + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
                             }
-                     
+
                         }
                     });
-                
+
                     // interfaces
-                
+
                     Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ){
-                  
+
                         var interfaceProto = classRegistry[ interfaceName.toLowerCase() ].prototype;
                         Object.keys( interfaceProto ).forEach(function( item ){
-                            
 
-                            
-                            
+
+
+
                             if ( item.substring( 0, PHP.VM.Class.CONSTANT.length ) === PHP.VM.Class.CONSTANT ) {
-                                
+
                                 if ( Class.prototype[ item ] !== undefined ) {
-                                    Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName2 ){    
+                                    Class.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName2 ){
                                         if ( interfaceName2 === interfaceName ) {
                                             if (ENV.$Class.Get( interfaceName2 ).prototype[ item ] !== undefined ) {
-                                                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot inherit previously-inherited or override constant " + item.substring( PHP.VM.Class.CONSTANT.length ) + " from interface " + interfaceName2, PHP.Constants.E_ERROR, true );    
+                                                ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot inherit previously-inherited or override constant " + item.substring( PHP.VM.Class.CONSTANT.length ) + " from interface " + interfaceName2, PHP.Constants.E_ERROR, true );
                                             }
                                         }
                                     }, this);
                                 }
-                                
+
                                 methods [ COMPILER.CLASS_CONSTANT ]( item.substring( PHP.VM.Class.CONSTANT.length ), interfaceProto[ item ] );
                             }
-                            
+
 
 
 
                             // method checks
                             if ( item.substring( 0, methodPrefix.length ) === methodPrefix ) {
-                        
+
                                 var methodName = item.substring( methodPrefix.length ),
                                 propName,
                                 propDef,
                                 lastIndex = -1;
-                                
+
                                 if (Class.prototype[ methodTypePrefix + methodName ] === undefined ) {
                                     ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (" + interfaceName + "::" + methodName + ")", PHP.Constants.E_ERROR, true );
-                                } 
-                                
+                                }
+
                                 if ( methodName === __construct && interfaceProto[ methodTypePrefix + methodName ] !== undefined ||  interfaceProto[ methodTypePrefix + interfaceName.toLowerCase() ] !== undefined) {
-                                  
+
                                     var methodProps = Class.prototype[ methodArgumentPrefix + __construct ];
-                                    
+
                                     if ((!interfaceProto[ methodArgumentPrefix + __construct ].every(function( item, index ){
-                                       
+
                                         propName = item;
                                         lastIndex = index;
-        
+
                                         if ( (methodProps[ index ] !== undefined || item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) ) {
-                
+
                                             if (methodProps[ index ] !== undefined) {
-                        
+
                                                 if ( item[ COMPILER.PROPERTY_TYPE ] === methodProps[ index ][ COMPILER.PROPERTY_TYPE ]  ) {
-                             
+
                                                     return true;
                                                 }
                                             }
                                         }
                                         if (item[ COMPILER.PROPERTY_DEFAULT ] !== undefined) {
                                             propDef = item[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
-                      
+
                                         }
-                                      
+
                                         return false;
 
                                     }) || ( methodProps[ ++lastIndex ] !== undefined && methodProps[ lastIndex][ COMPILER.PROPERTY_DEFAULT ] === undefined) ) ) {
                                         ENV[ PHP.Compiler.prototype.ERROR ]( "Declaration of " + className + "::" + __construct + "() must be compatible with " + interfaceName + "::" + __construct + "(" + ((  propName !== undefined ) ? ((propName[ COMPILER.PROPERTY_TYPE ] === undefined ) ? "" : propName[ COMPILER.PROPERTY_TYPE ] + " ") + "$" + propName.name : "" ) + (( propDef !== undefined) ? " = " + propDef : "") + ")", PHP.Constants.E_ERROR, true );
                                     }
-                                    
-                                    
+
+
                                 }
                             }
                         });
-                    
+
                     });
                 }
 
-                
+
             }
-            
-            
+
+
             DECLARED = true;
-            
+
             if ( classType !== PHP.VM.Class.INTERFACE ) {
                 declaredClasses.push( className );
             }
-            
+
             return Class;
         };
-        
-        
+
+
         /*
          * Extends and implements
          */
-        
+
         if (opts.Extends  !== undefined) {
-            
+
             var Extends = ENV.$Class.Get( opts.Extends );
-            
+
             if ( Extends.prototype[ COMPILER.CLASS_TYPE ] === PHP.VM.Class.INTERFACE ) {
                 // can't extend interface
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " cannot extend from interface " + opts.Extends, PHP.Constants.E_ERROR, true );
-              
+
             } else if ( checkType(Extends.prototype[ COMPILER.CLASS_TYPE ], FINAL ) ) {
                 // can't extend final class
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " may not inherit from final class (" + opts.Extends + ")", PHP.Constants.E_ERROR, true );
-              
+
             }
-            
+
             Class.prototype = new Extends( true );
-        } else {      
+        } else {
             Class.prototype = new PHP.VM.ClassPrototype();
 
         }
-      
-        
+
+
         Class.prototype[ PHP.VM.Class.INTERFACES ] = (Class.prototype[ PHP.VM.Class.INTERFACES ] === undefined ) ? [] : Array.prototype.slice.call(Class.prototype[ PHP.VM.Class.INTERFACES ], 0);
-        
+
         var pushInterface = function( interfaceName, interfaces, ignore ) {
-            
+
             if ( interfaceName.toLowerCase() === "traversable" && ignore !== true && !/^iterato(r|raggregate)$/i.test( className ) ) {
                 ENV[ PHP.Compiler.prototype.ERROR ]( "Class " + className + " must implement interface Traversable as part of either Iterator or IteratorAggregate", PHP.Constants.E_ERROR, true );
-            } 
-            
+            }
 
-            
+
+
             if ( interfaces.indexOf( interfaceName ) === -1 ) {
                 // only add interface if it isn't present already
                 interfaces.push( interfaceName );
             }
-            
-            
+
+
         }
-        
+
         if (opts.Implements !== undefined || classType === PHP.VM.Class.INTERFACE) {
 
             (( classType === PHP.VM.Class.INTERFACE) ? opts : opts.Implements).forEach(function( interfaceName ){
-                
-                var Implements = ENV.$Class.Get( interfaceName, undefined, true ); 
-                
+
+                var Implements = ENV.$Class.Get( interfaceName, undefined, true );
+
                 if ( Implements.prototype[ COMPILER.CLASS_TYPE ] !== PHP.VM.Class.INTERFACE ) {
                     // can't implement non-interface
                     ENV[ PHP.Compiler.prototype.ERROR ]( className + " cannot implement " + interfaceName + " - it is not an interface", PHP.Constants.E_ERROR, true );
                 }
-                
-                pushInterface( interfaceName, Class.prototype[ PHP.VM.Class.INTERFACES ] ); 
-          
+
+                pushInterface( interfaceName, Class.prototype[ PHP.VM.Class.INTERFACES ] );
+
                 // add interfaces from interface
-                
+
                 Implements.prototype[ PHP.VM.Class.INTERFACES ].forEach( function( interfaceName ) {
-                    pushInterface( interfaceName, Class.prototype[ PHP.VM.Class.INTERFACES ], true );               
+                    pushInterface( interfaceName, Class.prototype[ PHP.VM.Class.INTERFACES ], true );
                 });
-                
+
             });
         }
 
-        
+
         Class.prototype[ COMPILER.CLASS_TYPE ] = classType;
-        
+
         Class.prototype[ COMPILER.CLASS_NAME ] = className;
-        
+
         Class.prototype[ COMPILER.METHOD_CALL ] = function( ctx, methodName ) {
-            methodName = methodName.toLowerCase(); 
+            methodName = methodName.toLowerCase();
             var args = Array.prototype.slice.call( arguments, 2 ),
             value;
 
             if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
                 // no method with that name found
-                  
+
                 if ( typeof this[ methodPrefix + __call ] === "function" ) {
                     // __call method defined, let's call that instead then
-                    
-                    
+
+
                     // determine which __call to use in case there are several defined
                     if ( ctx instanceof PHP.VM ) {
                         // normal call, use current context
@@ -12990,60 +12884,60 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         // static call, ensure current scope's __call() is favoured over the specified class's  __call()
                         value = ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
                     }
-                    
+
                     return (( value === undefined ) ? new PHP.VM.Variable() : value);
-               
+
                 }
-                  
+
             } else {
-               
+
                 if ( checkType( this[ methodTypePrefix + methodName ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
-                   
-                    // targeted function is private and inaccessible from current context, 
+
+                    // targeted function is private and inaccessible from current context,
                     // but let's make sure current context doesn't have it's own private method that has been overwritten
-                    if ( !ctx instanceof PHP.VM.ClassPrototype || 
+                    if ( !ctx instanceof PHP.VM.ClassPrototype ||
                         ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] === undefined ||
                         ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                     }
-                    
+
                 } else if ( checkType( this[ methodTypePrefix + methodName ], PROTECTED ) ) {
-                    // we are calling a protected method, let's see if we are inside it 
-                    if ( !( ctx instanceof PHP.VM.ClassPrototype) ) { // todo check actually parents as well 
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                    // we are calling a protected method, let's see if we are inside it
+                    if ( !( ctx instanceof PHP.VM.ClassPrototype) ) { // todo check actually parents as well
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + methodName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                     }
                 }
-                
-              
+
+
             }
 
-           
+
 
             // favor current context's private method
-            if ( ctx instanceof PHP.VM.ClassPrototype && 
+            if ( ctx instanceof PHP.VM.ClassPrototype &&
                 ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ] !== undefined &&
                 checkType( ctx[ methodTypePrefix + methodName ], PRIVATE ) &&
                 ctx[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] === ctx[ COMPILER.CLASS_NAME ] ) {
-                
+
                 value = this.callMethod.call( ctx, methodName, args );
-                
+
             } else {
                 value = this.callMethod.call( this, methodName, args );
-            
+
             }
-            
+
             value = (( value === undefined ) ? new PHP.VM.Variable() : value);
             if (className !== "ArrayObject") {
                 PHP.Utils.CheckRef.call( ENV, value, this[ methodByRef  + methodName ] );
             }
             return value;
-           
-              
+
+
         };
-        
+
         Class.prototype.callMethod = callMethod;
-        
-        
+
+
         Class.prototype[  COMPILER.STATIC_CALL  ] = function( ctx, methodClass, realName ) {
             var methodName = realName.toLowerCase();
             var ret;
@@ -13051,11 +12945,11 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
             if ( typeof this[ methodPrefix + methodName ] !== "function" ) {
                 // no method with that name found
-                  
+
                 if ( typeof this[ methodPrefix + __call ] === "function" ) {
                     // __call method defined, let's call that instead then
-                    
-                    
+
+
                     // determine which __call to use in case there are several defined
                     if ( ctx instanceof PHP.VM ) {
                         // normal call, use current context
@@ -13064,41 +12958,41 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         // static call, ensure current scope's __call() is favoured over the specified class's  __call()
                         return ctx.callMethod.call( ctx, __call, [ new PHP.VM.Variable( methodName ), new PHP.VM.Variable( PHP.VM.Array.fromObject.call( ENV, args ) ) ] );
                     }
-               
-                }
-                  
-            } else {
-               
-                if ( checkType( this[ methodTypePrefix + methodName ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
-                } else if ( checkType( this[ methodTypePrefix + methodName ], PROTECTED ) ) {
-                    // we are calling a protected method, let's see if we are inside it 
-                    if ( !( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ) ) { 
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
-                    } 
-                    
-                }
-                
 
-              
+                }
+
+            } else {
+
+                if ( checkType( this[ methodTypePrefix + methodName ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
+                } else if ( checkType( this[ methodTypePrefix + methodName ], PROTECTED ) ) {
+                    // we are calling a protected method, let's see if we are inside it
+                    if ( !( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ) ) {
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
+                    }
+
+                }
+
+
+
             }
-           
-           
+
+
             var methodToCall,
             methodCTX,
             $;
             var proto;
-            
-            
-            
+
+
+
             if ( /^parent$/i.test( methodClass ) ) {
                 proto = Object.getPrototypeOf( Object.getPrototypeOf( this ) );
-                
+
             } else if ( /^self$/i.test( methodClass ) ) {
                 proto = Object.getPrototypeOf( this );
-                
+
             } else if ( methodClass !== className ){
-              
+
 
                 proto = Object.getPrototypeOf( this );
                 while ( proto !== null && proto[ COMPILER.CLASS_NAME ] !== methodClass ) {
@@ -13106,61 +13000,60 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                 }
 
             }
-            
+
             if ( proto !== undefined ) {
                 methodToCall = proto[ methodPrefix + methodName ];
                 methodCTX = proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ];
-                
-                $ = buildVariableContext.call( proto, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName, (checkType( proto[ methodTypePrefix + methodName ], STATIC )) ? false : this );
-           
 
-   
+                $ = buildVariableContext.call( proto, methodName, args, methodCTX[ COMPILER.CLASS_NAME ], realName, (checkType( proto[ methodTypePrefix + methodName ], STATIC )) ? false : this );
+
+
+
                 if ( checkType( proto[ methodTypePrefix + methodName ], PRIVATE ) && methodCTX[ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
                     if ( methodName === __construct ) {
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call private " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true ); 
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call private " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true );
                     }
-                    
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
-                
+
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
+
                 }
-               
+
                 if ( checkType( proto[ methodTypePrefix + methodName ], ABSTRACT ) ) {
-                    
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call abstract method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true ); 
+
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot call abstract method " + methodCTX[ COMPILER.CLASS_NAME ] + "::" + realName + "()", PHP.Constants.E_ERROR, true );
                 }
-                console.log('static call ', methodName, proto);
-                
+
                 if ( !checkType( proto[ methodTypePrefix + methodName ], STATIC ) && !/^(parent|self)$/i.test( methodClass ) && !inherits(ctx, proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ]) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
-                } 
-                
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + proto[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true );
+                }
+
                 ret = methodToCall.call( this, $, methodCTX );
-                
-                
+
+
                 PHP.Utils.CheckRef.call( ENV, ret, methodCTX[ methodByRef  + methodName ] );
-                
+
                 return ret;
             }
-            
-            
-          
+
+
+
             ret = this.callMethod.call( this, methodName, args, function(){
                 if ( !checkType( this[ methodTypePrefix + methodName ], STATIC ) && !/^(parent|self)$/i.test( methodClass ) && !inherits(ctx, this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ]) ) {
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true ); 
-                } 
-           
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Non-static method " + this[ PHP.VM.Class.METHOD_PROTOTYPE + methodName ][ COMPILER.CLASS_NAME ] + "::" + realName + "() should not be called statically", PHP.Constants.E_STRICT, true );
+                }
+
             }.bind(this));
-            
-           
+
+
             PHP.Utils.CheckRef.call( ENV, ret, this[ methodByRef  + methodName ] );
-                
-           
+
+
             return ret;
- 
+
         };
-        
+
         Class.prototype[ COMPILER.STATIC_PROPERTY_GET ] = function( ctx, propertyClass, propertyName, ref ) {
-       
+
             var methodCTX;
             if ( /^self$/i.test( propertyClass ) ) {
                 methodCTX = ctx;
@@ -13169,23 +13062,23 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             } else {
                 methodCTX = this;
             }
-    
+
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] === undefined ) {
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Access to undeclared static property: " + methodCTX[ COMPILER.CLASS_NAME ] + "::$" + propertyName, PHP.Constants.E_ERROR, true ); 
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Access to undeclared static property: " + methodCTX[ COMPILER.CLASS_NAME ] + "::$" + propertyName, PHP.Constants.E_ERROR, true );
             }
- 
- 
+
+
             if ( ref === true && !methodCTX.hasOwnProperty( PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName )) {
                 methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ] = new PHP.VM.Variable();
                 return methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ];
             }
-            
 
-            
+
+
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ] !== undefined ) {
                 return methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ];
             }
-            
+
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] !== undefined ) {
 
                 return methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ];
@@ -13193,13 +13086,13 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
 
         //      return methodCTX[ propertyPrefix + propertyName ];
         }
-            
-            
+
+
         };
-        
-        
+
+
         Class.prototype[ COMPILER.CLASS_STATIC_PROPERTY_ISSET ] = function( ctx, propertyClass, propertyName ) {
-            
+
             var methodCTX;
             if ( /^self$/i.test( propertyClass ) ) {
                 methodCTX = ctx;
@@ -13208,31 +13101,31 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
             } else {
                 methodCTX = this;
             }
- 
+
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] === undefined ) {
                 return false;
             }
- 
 
 
-            
+
+
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY_REF + propertyClass + "$" + propertyName ] !== undefined ) {
                 return true;
             }
-            
+
             if (methodCTX[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName ] !== undefined ) {
 
                 return true;
             }
-            
+
             return false;
-            
-            
+
+
         };
-        
+
         Class.prototype[ COMPILER.CLASS_CONSTANT_FETCH ] = function( ctx, constantName ) {
-            if ( this[ PHP.VM.Class.CONSTANT + constantName ] === undefined && DECLARED === true ) {  
-                ENV[ PHP.Compiler.prototype.ERROR ]( "Undefined class constant '" + constantName + "'", PHP.Constants.E_ERROR, true ); 
+            if ( this[ PHP.VM.Class.CONSTANT + constantName ] === undefined && DECLARED === true ) {
+                ENV[ PHP.Compiler.prototype.ERROR ]( "Undefined class constant '" + constantName + "'", PHP.Constants.E_ERROR, true );
             } else if ( this[ PHP.VM.Class.CONSTANT + constantName ] === undefined ) {
                 //  undefinedConstants
                 if ( undefinedConstants[ className + "::" + constantName] === undefined ) {
@@ -13240,164 +13133,164 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     variable[ VARIABLE.CLASS_CONSTANT ] = true;
                     variable[ VARIABLE.DEFINED ] = className + "::$" + constantName;
                     undefinedConstants[ className + "::" + constantName] = variable;
-                    
+
                 }
-                
+
                 return undefinedConstants[ className + "::" + constantName];
             }
-            
-            
-            
+
+
+
             return this[ PHP.VM.Class.CONSTANT + constantName ];
 
         };
-        
+
         Class.prototype[ COMPILER.CLASS_PROPERTY_ISSET ] = function( ctx, propertyName ) {
             if ( this[ propertyPrefix + propertyName ] === undefined || checkType( this[ propertyTypePrefix + propertyName ], STATIC )) {
                 return false;
             } else {
                 return true;
             }
-             
+
         };
-        
+
         Class.prototype[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName ) {
-         
+
             if ( this[ propertyPrefix + propertyName ] === undefined && this[ PHP.VM.Class.CLASS_STATIC_PROPERTY + propertyName] === undefined ) {
 
 
                 var obj = {}, props = {};
-                
+
                 // property set
                 if ( this[ methodPrefix + __set ] !== undefined ) {
                     obj [ COMPILER.ASSIGN ] = function( value ) {
-                        
-                        callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), value ] );       
+
+                        callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), value ] );
                         return value;
                     }.bind( this );
                 }
-                
+
                 // Post inc ++
                 // getting value
-                
+
                 obj [ VARIABLE.DEFINED ] = true;
-                
+
                 obj [ COMPILER.POST_INC ] = function() {
-                 
+
                     if ( this[ methodPrefix + __get ] !== undefined ) {
-                     
-                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
-                        
-                        
+
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );
+
+
                         // setting ++
                         if ( this[ methodPrefix + __set ] !== undefined ) {
-                            
-                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? ++value[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? ++value[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );
                         }
                         if ( value === undefined ) {
                             return new PHP.VM.Variable();
                         }
                         return value;
-                
+
                     }
                 }.bind( this );
-                
-                
+
+
                 obj [ COMPILER.PRE_INC ] = function() {
-                   
+
                     if ( this[ methodPrefix + __get ] !== undefined ) {
-                     
-                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
-                        
-                        
+
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );
+
+
                         // setting ++
                         if ( this[ methodPrefix + __set ] !== undefined ) {
-                            
-                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? ++value[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? ++value[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );
                         }
-                        
+
                         return value;
-                
+
                     }
                 }.bind( this );
-                
+
                 obj [ COMPILER.ASSIGN_PLUS ] = function( combined ) {
-                 
+
                     if ( this[ methodPrefix + __get ] !== undefined ) {
-                     
-                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
-                        
-                        
+
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );
+
+
                         // setting ++
                         if ( this[ methodPrefix + __set ] !== undefined ) {
-                            
-                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? value[ COMPILER.VARIABLE_VALUE ] + combined[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? value[ COMPILER.VARIABLE_VALUE ] + combined[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );
                         }
-                     
+
                         return value;
-                
+
                     }
                 }.bind( this );
-                
+
                 obj [ COMPILER.CLASS_PROPERTY_GET ] = function() {
-                       
+
                     if ( this[ methodPrefix + __get ] !== undefined ) {
-                       
-                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
-               
+
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );
+
                         return value[ COMPILER.CLASS_PROPERTY_GET ].apply( value, arguments );
                     }
-                    
+
                 }.bind( this );
-                 
+
                 obj [ COMPILER.ASSIGN_MINUS ] = function( combined ) {
-                 
+
                     if ( this[ methodPrefix + __get ] !== undefined ) {
-                     
-                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );  
-                        
-                        
+
+                        var value = callMethod.call( this, __get, [ new PHP.VM.Variable( propertyName ) ] );
+
+
                         // setting ++
                         if ( this[ methodPrefix + __set ] !== undefined ) {
-                            
-                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? value[ COMPILER.VARIABLE_VALUE ] - combined[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );    
+
+                            callMethod.call( this, __set,  [ new PHP.VM.Variable( propertyName ), ( value instanceof PHP.VM.Variable ) ? value[ COMPILER.VARIABLE_VALUE ] - combined[ COMPILER.VARIABLE_VALUE ] : new PHP.VM.Variable( 1 ) ] );
                         }
-                     
+
                         return value;
-                
+
                     }
                 }.bind( this );
-                
-                
+
+
                 var $this = this;
                 // property get
                 if ( this[ methodPrefix + __get ] !== undefined ) {
-                  
+
                     props[ COMPILER.VARIABLE_VALUE ] = {
                         get : function(){
-                            
+
                             if (obj.__get === undefined ) {
                                 obj.__get = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] );
                             }
-                            return obj.__get[ COMPILER.VARIABLE_VALUE ];   
-                             
-                            
+                            return obj.__get[ COMPILER.VARIABLE_VALUE ];
+
+
                         }
                     };
-                    
+
                     props[ VARIABLE.TYPE ] = {
                         get: function() {
-                            
+
                             if (obj.__get === undefined ) {
-                                obj.__get = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] ); 
+                                obj.__get = callMethod.call( $this, __get, [ new PHP.VM.Variable( propertyName ) ] );
                             }
                             return obj.__get[ VARIABLE.TYPE ];
                         }
-                      
+
                     };
-                    
+
                     Object.defineProperties( obj, props );
-                          
+
                 } else {
 
 
@@ -13406,91 +13299,91 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         var variable = new PHP.VM.Variable();
                         variable[ VARIABLE.PROPERTY ] = true;
                         variable[ VARIABLE.DEFINED ] = className + "::$" + propertyName;
-                    
+
                         this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] = variable;
-                    
+
                         variable[ VARIABLE.REGISTER_SETTER ] = function() {
                             this[ propertyPrefix + propertyName ] = variable;
                         }.bind(this);
-                    
-                    
-                    
+
+
+
                         return variable;
                     } else {
                         return this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ];
                     }
-                    
+
                 }
                 return obj;
-              
-                
+
+
             } else {
-               
+
                 var checkPermissions = function( propertyPrefix ) {
                     if ( checkType( this[ propertyTypePrefix + propertyName ], PROTECTED ) && !(ctx instanceof PHP.VM.ClassPrototype) ) {
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access protected property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access protected property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );
                     }
 
                     if ( checkType( this[ propertyTypePrefix + propertyName ], PRIVATE ) && !(ctx instanceof PHP.VM.ClassPrototype) ) {
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access private property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access private property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );
                     }
 
                     if (this[ propertyPrefix + propertyName ][ VARIABLE.DEFINED ] !== true && (!(ctx instanceof PHP.VM.ClassPrototype) || this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] === undefined  )) {
                         if (!(ctx instanceof PHP.VM.ClassPrototype) && checkType( this[ propertyTypePrefix + propertyName ], PRIVATE )) {
-                            ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access private property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );   
-                        } 
-                        
+                            ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot access private property " + className + "::$" + propertyName, PHP.Constants.E_ERROR, true );
+                        }
+
                         if (checkType( this[ propertyTypePrefix + propertyName ], PROTECTED ) && ctx instanceof PHP.VM.ClassPrototype) {
                         // no change?
                         } else {
                             Object.getPrototypeOf(this)[ propertyTypePrefix + propertyName ] = 1;
                         }
-                    
-                       
+
+
                     }
-                
+
                     if ( ctx instanceof PHP.VM.ClassPrototype && this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ] !== undefined ) {
                         // favor current context over object only if current context property is private
                         if ( checkType( ctx[ propertyTypePrefix + propertyName ], PRIVATE ) ) {
                             return this[ PHP.VM.Class.CLASS_PROPERTY + ctx[ COMPILER.CLASS_NAME ] + "_" + propertyPrefix + propertyName ];
                         }
                     }
-                    
+
                 }.bind(this),
                 ret;
-                
+
                 if ( this[ propertyPrefix + propertyName ] !== undefined ) {
                     ret = checkPermissions( propertyPrefix );
-                
+
                     if (ret !== undefined ) {
                         return ret;
                     }
-             
+
                 }
-                
+
                 if ( checkType( this[ propertyTypePrefix + propertyName ], STATIC ) ) {
-                    
-                
-                    
+
+
+
                     ret = checkPermissions( PHP.VM.Class.CLASS_STATIC_PROPERTY );
                     if (ret !== undefined ) {
                         return ret;
                     }
-                    
-                    ENV[ PHP.Compiler.prototype.ERROR ]( "Accessing static property " + className + "::$" + propertyName + " as non static", PHP.Constants.E_STRICT, true );      
+
+                    ENV[ PHP.Compiler.prototype.ERROR ]( "Accessing static property " + className + "::$" + propertyName + " as non static", PHP.Constants.E_STRICT, true );
                     if ( this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] === undefined ) {
                         var variable = new PHP.VM.Variable();
                         variable[ VARIABLE.PROPERTY ] = true;
                         variable[ VARIABLE.DEFINED ] = className + "::$" + propertyName;
-                    
+
                         this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ] = variable;
-                    
+
                         variable[ VARIABLE.REGISTER_SETTER ] = function() {
                             this[ propertyPrefix + propertyName ] = variable;
                         }.bind(this);
-                    
-                    
-                    
+
+
+
                         return variable;
                     } else {
                         if ( this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ][ VARIABLE.DEFINED ] !== true ) {
@@ -13498,26 +13391,25 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         }
                         return this[ PHP.VM.Class.CLASS_UNDEFINED_PROPERTY + propertyName ];
                     }
-                } 
-                
-                
+                }
+
+
                 return this[ propertyPrefix + propertyName ];
             }
-            
-            
+
+
         };
-        
+
         Class.prototype[  COMPILER.CLASS_CLONE  ] = function( ctx ) {
-            
+
             var cloned = new (ENV.$Class.Get( this[ COMPILER.CLASS_NAME ] ))( true ),
             __clone = "__clone";
-            cloned[ COMPILER.CLASS_STORED ] = []; // variables that store an instance of this class, needed for destructors 
-            console.log( "cloning", cloned );
-            
+            cloned[ COMPILER.CLASS_STORED ] = []; // variables that store an instance of this class, needed for destructors
+
             // for...in, since we wanna go through the whole proto chain
             for (var prop in this) {
                 if ( prop.substring(0, propertyPrefix.length) === propertyPrefix) {
-                                         
+
                     if ( cloned[ prop ] === undefined ) {
                         cloned[ prop ] = new PHP.VM.Variable( this[ prop ][ COMPILER.VARIABLE_VALUE ] );
                     } else {
@@ -13525,60 +13417,60 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     }
                 }
             }
-            
+
             if ( this[ methodPrefix + __clone ] !== undefined ) {
-              
-                             
+
+
                 if ( checkType( this[ methodTypePrefix + __clone ], PRIVATE ) && this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
-                   
-                    // targeted function is private and inaccessible from current context, 
+
+                    // targeted function is private and inaccessible from current context,
                     // but let's make sure current context doesn't have it's own private method that has been overwritten
-                    if ( !ctx instanceof PHP.VM.ClassPrototype || 
+                    if ( !ctx instanceof PHP.VM.ClassPrototype ||
                         ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ] === undefined ||
                         ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] + "::" + __clone + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                     }
-                    
+
                 } else if ( checkType( this[ methodTypePrefix + __clone ], PROTECTED ) ) {
-                    // we are calling a protected method, let's see if we are inside it 
-                    if ( !( ctx instanceof PHP.VM.ClassPrototype) ) { // todo check actually parents as well 
-                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] + "::" + __clone + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true ); 
+                    // we are calling a protected method, let's see if we are inside it
+                    if ( !( ctx instanceof PHP.VM.ClassPrototype) ) { // todo check actually parents as well
+                        ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + this[ PHP.VM.Class.METHOD_PROTOTYPE + __clone ][ COMPILER.CLASS_NAME ] + "::" + __clone + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                     }
                 }
-              
-              
-          
-              
-                var $ = buildVariableContext.call( this, __clone, [], className, __clone, cloned );
-           
 
-                
+
+
+
+                var $ = buildVariableContext.call( this, __clone, [], className, __clone, cloned );
+
+
+
                 this[ methodPrefix + __clone ].call( this, $, Object.getPrototypeOf(this) );
-              
-              
+
+
             // cloned.callMethod.call( cloned, __clone );
             }
-            
-            
-            
-                
-                
-   
-                
-            
+
+
+
+
+
+
+
+
             return new PHP.VM.Variable( cloned );
         };
-        
-        
+
+
         Class.prototype[ COMPILER.CLASS_DESTRUCT ] = function( ctx, shutdown ) {
             // check if this class has been destructed already
-            
-        
-            
-            if ( this[ PHP.VM.Class.KILLED ] === true ) { 
+
+
+
+            if ( this[ PHP.VM.Class.KILLED ] === true ) {
                 return;
             }
-            
+
             // go through all assigned class props to see if we have closure classes to be killed
             // for...in, since we wanna go through the whole proto chain
             for (var prop in this) {
@@ -13586,16 +13478,16 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                     this[ prop ][ PHP.VM.Class.KILLED ] = true;
                 }
             }
-            
-            
+
+
             if ( checkType( this[ methodTypePrefix + __destruct ], PRIVATE ) && ( !(ctx instanceof PHP.VM.ClassPrototype) || this[ PHP.VM.Class.METHOD_PROTOTYPE + __destruct ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ]  )) {
-                   
-                // targeted function is private and inaccessible from current context, 
+
+                // targeted function is private and inaccessible from current context,
                 // but let's make sure current context doesn't have it's own private method that has been overwritten
-                if ( !(ctx instanceof PHP.VM.ClassPrototype) || 
+                if ( !(ctx instanceof PHP.VM.ClassPrototype) ||
                     ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __destruct ] === undefined ||
                     ctx[ PHP.VM.Class.METHOD_PROTOTYPE + __destruct ][ COMPILER.CLASS_NAME ] !== ctx[ COMPILER.CLASS_NAME ] ) {
-                    
+
                     if ( shutdown === true ) {
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 0", PHP.Constants.E_WARNING );
                         return;
@@ -13603,63 +13495,63 @@ PHP.VM.Class = function( ENV, classRegistry, magicConstants, initiatedClasses, u
                         ENV[ PHP.Compiler.prototype.ERROR ]( "Call to private " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                     }
                 }
-                    
-            } 
-            
-           
+
+            }
+
+
             if ( checkType( this[ methodTypePrefix + __destruct ], PROTECTED) && (!( ctx instanceof PHP.VM.ClassPrototype) || !inherits( ctx, this[ COMPILER.CLASS_NAME ] ))) {
-                
+
                 if ( shutdown === true ) {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "' during shutdown ignored in Unknown on line 0", PHP.Constants.E_WARNING );
                     return;
                 } else {
                     ENV[ PHP.Compiler.prototype.ERROR ]( "Call to protected " + className + "::" + __destruct + "() from context '" + ((ctx instanceof PHP.VM.ClassPrototype) ? ctx[ COMPILER.CLASS_NAME ] : '') + "'", PHP.Constants.E_ERROR, true );
                 }
-                
+
             }
-            
-            
+
+
             this[ PHP.VM.Class.KILLED ] = true;
-            
+
             if ( this[  methodPrefix + __destruct  ] !== undefined ) {
-                return callMethod.call( this, __destruct, [] );         
+                return callMethod.call( this, __destruct, [] );
             }
-     
-            
+
+
         };
-        
+
         // register class
         classRegistry[ className.toLowerCase() ] = Class;
-        
-        
+
+
         var constant$ = PHP.VM.VariableHandler();
-        
-   
+
+
         constant$("$__FILE__")[ COMPILER.VARIABLE_VALUE ] = "__FILE__";
-         
+
         //   constant$("$__FILE__")[ COMPILER.VARIABLE_VALUE ] = ENV[ COMPILER.GLOBAL ]('_SERVER')[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( ENV, COMPILER.ARRAY_GET, 'SCRIPT_FILENAME' )[ COMPILER.VARIABLE_VALUE ];
-        
+
         constant$("$__METHOD__")[ COMPILER.VARIABLE_VALUE ] = className;
-        
+
         constant$("$__CLASS__")[ COMPILER.VARIABLE_VALUE ] = className;
-        
+
         constant$("$__FUNCTION__")[ COMPILER.VARIABLE_VALUE ] = "";
-        
+
         constant$("$__LINE__")[ COMPILER.VARIABLE_VALUE ] = 1;
-        
+
         classDefinition.call( Class, methods, constant$, function( arg ) {
             var item = new PHP.VM.Variable( arg );
             item[ PHP.Compiler.prototype.NAV ] = true;
             item[ VARIABLE.INSTANCE ] = Class.prototype;
-        
+
             return item;
         } );
-        
+
         return methods;
     };
-    
 
-    
+
+
 };
 PHP.VM.Class.KILLED = "$Killed";
 
@@ -13699,64 +13591,33 @@ PHP.VM.Class.ABSTRACT = 16;
 PHP.VM.Class.FINAL = 32;
 PHP.VM.Class.INTERFACE = 64;
 
-/* 
+
+/*
  * @author Niklas von Hertzen <niklas at hertzen.com>
- * @created 24.6.2012 
+ * @created 24.6.2012
  * @website http://hertzen.com
  */
 
 PHP.VM.VariableHandler = function( ENV ) {
-    
+
     var variables = {},
     methods = function( variableName, setTo ) {
-        
+
         if ( setTo !== undefined ) {
             variables[ variableName ] = setTo;
             return methods;
         }
-        
-        if ( variables[ variableName ] === undefined ) { 
-            
-          
+
+        if ( variables[ variableName ] === undefined ) {
             variables[ variableName ] = new PHP.VM.Variable();
             variables[ variableName ][ PHP.VM.Variable.prototype.DEFINED ] = variableName;
             variables[ variableName ].ENV = ENV;
             variables[ variableName ][ PHP.VM.Variable.prototype.NAME ] = variableName;
-           
-        /*
-            Object.defineProperty( variables, variableName, {
-                value: new PHP.VM.Variable()
-            });
-            
-           
-           
-           
-            Object.defineProperty( variables, variableName, {
-                value: Object.defineProperty( {}, PHP.Compiler.prototype.VARIABLE_VALUE, {
-                        set: function( val ) {
-                            // we are setting a val to a newly created variable
-                           variables[ variableName ] = new PHP.VM.Variable( val );
-                        },
-                        get: function() {
-                            // attempting to retrieve a value of undefined property
-                            console.log( variables );
-                            console.log( variableName + " not defined");
-                        }
-                    }
-                
-                )
-            });
-             */
-            
         }
-
-        
-        
         return variables[ variableName ];
     };
-    
+
     return methods;
-    
 };
 
 PHP.VM.VariableProto = function() {
@@ -13764,12 +13625,12 @@ PHP.VM.VariableProto = function() {
     }
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( combinedVariable ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
 
     this[ VARIABLE.VARIABLE_TYPE ] = undefined;
-    
+
     if ( arguments.length > 1 ) {
         // chaining, todo make it work for unlimited vars
         this[ COMPILER.VARIABLE_VALUE ] = arguments[ 0 ][ COMPILER.VARIABLE_VALUE ] = arguments[ 1 ][ COMPILER.VARIABLE_VALUE ];
@@ -13778,57 +13639,53 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN ] = function( comb
         if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
             // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
             this[ COMPILER.VARIABLE_VALUE ] = val[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
-              
+
         } else {
             if (combinedVariable[ VARIABLE.TYPE ] === VARIABLE.NULL && this[ VARIABLE.TYPE ] === VARIABLE.OBJECT) {
                 this.TMPCTX =   combinedVariable[ VARIABLE.INSTANCE ];
             }
-            
-            this[ COMPILER.VARIABLE_VALUE ] = val;          
+
+            this[ COMPILER.VARIABLE_VALUE ] = val;
         }
-        
+
         if ( combinedVariable[ VARIABLE.TYPE ] === VARIABLE.ARRAY || combinedVariable[ VARIABLE.TYPE ] === VARIABLE.OBJECT ) {
-            this[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_STORED ].push( this );           
+            this[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_STORED ].push( this );
         }
-                
-    
+
+
     }
-    
+
     return this;
-    
+
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.INSTANCEOF ] = function( instanceName ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
-    console.log(this[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ], this[ COMPILER.VARIABLE_VALUE ], instanceName);
-    
+
     var className,
     classObj = this[ COMPILER.VARIABLE_VALUE ];
-    
+
     // search interfaces
     if ( classObj[ PHP.VM.Class.INTERFACES ].indexOf( instanceName ) !== -1 ) {
-     
+
         return new PHP.VM.Variable( true );
     }
-  
+
     // search parents
     do {
-        
         className = classObj[ COMPILER.CLASS_NAME ];
         if (className === instanceName) {
             return new PHP.VM.Variable( true );
         }
-        
         classObj = Object.getPrototypeOf( classObj );
-    }
-    while( className !== undefined );
+    } while( className !== undefined );
     return new PHP.VM.Variable( false );
-    
+
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( combinedVariable ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
 
@@ -13836,13 +13693,13 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.CONCAT ] = function( comb
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_CONCAT ] = function( combinedVariable ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
     this.NO_ERROR = true;
-    
+
     var val = this[ COMPILER.VARIABLE_VALUE ]; // trigger get
-    
+
     if ( this[ this.TYPE ] === this.NULL ) {
         this[ COMPILER.VARIABLE_VALUE ] = "" + combinedVariable[ COMPILER.VARIABLE_VALUE ];
     } else {
@@ -13853,7 +13710,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_CONCAT ] = functio
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_PLUS ] = function( combinedVariable ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
     this[ COMPILER.VARIABLE_VALUE ] = (this[ COMPILER.VARIABLE_VALUE ] - 0) + (combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0);
@@ -13861,7 +13718,7 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_PLUS ] = function(
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_MINUS ] = function( combinedVariable ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
     this[ COMPILER.VARIABLE_VALUE ] = this[ COMPILER.VARIABLE_VALUE ] - combinedVariable[ COMPILER.VARIABLE_VALUE ];
@@ -13869,32 +13726,32 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ASSIGN_MINUS ] = function
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.ADD ] = function( combinedVariable ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     val1 = this[ COMPILER.VARIABLE_VALUE ],
     val2 = combinedVariable[ COMPILER.VARIABLE_VALUE ];
-    
+
     if ( isNaN(val1 - 0) ) {
         val1 = 0;
     }
-    
+
     if ( isNaN(val2 - 0) ) {
         val2 = 0;
     }
-    
+
     return new PHP.VM.Variable( (val1 - 0) + (val2 - 0) );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MUL ] = function( combinedVariable ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) * ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.DIV ] = function( combinedVariable ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
-    
+
     var val = (this[ COMPILER.VARIABLE_VALUE ] - 0) / ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 );
     if ( val === Number.POSITIVE_INFINITY ) {
         this.ENV[ COMPILER.ERROR ]("Division by zero", PHP.Constants.E_WARNING, true );
@@ -13904,58 +13761,58 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.DIV ] = function( combine
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MOD ] = function( combinedVariable ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) % ( combinedVariable[ COMPILER.VARIABLE_VALUE ]) );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.MINUS ] = function( combinedVariable, post ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
-    
-    if ( post === true ) { 
+
+    if ( post === true ) {
         var after = combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0,
         before = this[ COMPILER.VARIABLE_VALUE ] - 0;
         return new PHP.VM.Variable( before - after );
-        
+
     } else {
         return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ] - 0) - ( combinedVariable[ COMPILER.VARIABLE_VALUE ] - 0 ) );
     }
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.METHOD_CALL ] = function() {
-    
+
     var COMPILER = PHP.Compiler.prototype;
-    
+
     return this[ COMPILER.VARIABLE_VALUE ][ PHP.Compiler.prototype.METHOD_CALL ].apply( this[ COMPILER.VARIABLE_VALUE ], arguments );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_NOT ] = function() {
-    
+
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( !(this[ COMPILER.VARIABLE_VALUE ]) );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.IDENTICAL ] = function( compareTo ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) === ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.NOT_IDENTICAL ] = function( compareTo ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) !== ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
 };
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compareTo ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
     ARRAY = PHP.VM.Array.prototype,
     first = this,
     second = compareTo,
     cast;
-    
+
     if ( first[ this.TYPE ] === this.OBJECT && second[ this.TYPE ] === this.OBJECT ) {
         cast = (first[ COMPILER.VARIABLE_VALUE ].Native === true || second[ COMPILER.VARIABLE_VALUE ].Native === true);
         if ( cast ) {
@@ -13965,51 +13822,51 @@ PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.EQUAL ] = function( compa
     } else if ( first[ this.TYPE ] === this.ARRAY && second[ this.TYPE ] === this.ARRAY ) {
         var firstVals = first[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
         secondVals = second[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ];
-       
+
         if (firstVals.length !== secondVals.length) {
-            return new PHP.VM.Variable( false ); 
+            return new PHP.VM.Variable( false );
         }
-       
+
         var result = firstVals.every(function( val,index ){
             return (val[ COMPILER.VARIABLE_VALUE ] == secondVals[ index ][ COMPILER.VARIABLE_VALUE ]);
         });
-       
-        return new PHP.VM.Variable( result ); 
-       
-    }
-    
 
-    
+        return new PHP.VM.Variable( result );
+
+    }
+
+
+
     return new PHP.VM.Variable( (first[ COMPILER.VARIABLE_VALUE ]) == ( second[ COMPILER.VARIABLE_VALUE ]) );
 };
- 
+
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.SMALLER_OR_EQUAL ] = function( compareTo ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) <= ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
-}; 
+};
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.GREATER_OR_EQUAL ] = function( compareTo ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) >= ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
-}; 
+};
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.SMALLER ] = function( compareTo ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ COMPILER.VARIABLE_VALUE ]) < ( compareTo[ COMPILER.VARIABLE_VALUE ]) );
-}; 
+};
 
 PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.GREATER ] = function( compareTo ) {
-    
+
     var COMPILER = PHP.Compiler.prototype;
     return new PHP.VM.Variable( (this[ this.CAST_DOUBLE ][ COMPILER.VARIABLE_VALUE ]) > ( compareTo[ this.CAST_DOUBLE ][ COMPILER.VARIABLE_VALUE ]) );
-}; 
- 
-PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_OR ] = function( compareTo ) { 
+};
+
+PHP.VM.VariableProto.prototype[ PHP.Compiler.prototype.BOOLEAN_OR ] = function( compareTo ) {
     var COMPILER = PHP.Compiler.prototype;
-    return new PHP.VM.Variable( (this[ this.CAST_STRING ][ COMPILER.VARIABLE_VALUE ]) | ( compareTo[ this.CAST_STRING ][ COMPILER.VARIABLE_VALUE ]) ); 
+    return new PHP.VM.Variable( (this[ this.CAST_STRING ][ COMPILER.VARIABLE_VALUE ]) | ( compareTo[ this.CAST_STRING ][ COMPILER.VARIABLE_VALUE ]) );
 };
 
 PHP.VM.Variable = function( arg ) {
@@ -14018,26 +13875,26 @@ PHP.VM.Variable = function( arg ) {
     POST_MOD = 0,
     __toString = "__toString",
     COMPILER = PHP.Compiler.prototype,
-    
+
     setValue = function( newValue ) {
-        
+
         var prev = value;
         var setType = function( newValue ) {
             if (this[ this.OVERLOADED ] === undefined) {
-           
-        
-        
+
+
+
                 if ( newValue === undefined ) {
                     newValue = null;
                 }
-       
+
                 if ( newValue instanceof PHP.VM.Variable ) {
                     newValue = newValue[ COMPILER.VARIABLE_VALUE ];
                 }
-     
+
                 if ( typeof newValue === "string" ) {
                     this[ this.TYPE ] = this.STRING;
-                } else if ( typeof newValue === "function" ) { 
+                } else if ( typeof newValue === "function" ) {
                     this[ this.TYPE ] = this.LAMBDA;
                 } else if ( typeof newValue === "number" ) {
                     if ( newValue % 1 === 0 ) {
@@ -14045,21 +13902,21 @@ PHP.VM.Variable = function( arg ) {
                     } else {
                         this[ this.TYPE ] = this.FLOAT;
                     }
-                } else if ( newValue === null ) {   
+                } else if ( newValue === null ) {
                     if ( this[ this.TYPE ] === this.OBJECT && value instanceof PHP.VM.ClassPrototype ) {
-                      
+
                         this[ PHP.VM.Class.KILLED ] = true;
                         if (value[ COMPILER.CLASS_STORED ].every(function( variable ){
-  
+
                             return ( variable[ PHP.VM.Class.KILLED ] === true );
                         })) {
                             // all variable instances have been killed, can safely destruct
-                       
+
                             value[ COMPILER.CLASS_DESTRUCT ]( this.TMPCTX );
                         }
-                        
+
                     }
-            
+
                     this[ this.TYPE ] = this.NULL;
 
                 } else if ( typeof newValue === "boolean" ) {
@@ -14067,32 +13924,32 @@ PHP.VM.Variable = function( arg ) {
                 } else if ( newValue instanceof PHP.VM.ClassPrototype ) {
                     if ( newValue[ COMPILER.CLASS_NAME ] === PHP.VM.Array.prototype.CLASS_NAME ) {
                         this[ this.TYPE ] = this.ARRAY;
-                
+
                     } else {
 
                         this[ this.TYPE ] = this.OBJECT;
                     }
-                } else if ( newValue instanceof PHP.VM.Resource ) {    
+                } else if ( newValue instanceof PHP.VM.Resource ) {
                     this[ this.TYPE ] = this.RESOURCE;
                 } else {
-         
+
                 }
                 this[ this.DEFINED ] = true;
 
                 // is variable a reference
                 if ( this[ this.REFERRING ] !== undefined ) {
-                           
+
                     this[ this.REFERRING ][ COMPILER.VARIABLE_VALUE ] = newValue;
                 } else {
-       
+
                     value = newValue;
-            
+
                     // remove this later, debugging only
                     this.val = newValue;
-            
+
                 }
-            } 
-   
+            }
+
         }.bind(this);
         setType( newValue );
         if ( typeof this[this.REGISTER_SETTER ] === "function" ) {
@@ -14102,32 +13959,32 @@ PHP.VM.Variable = function( arg ) {
                 value = prev;
             }
         }
-        
+
     }.bind( this ); // something strange going on with context in node.js?? iterators_2.phpt
-    
+
     this.rand = Math.random();
     this.NO_ERROR = false;
     setValue.call( this, arg );
-    
-    
+
+
     if (this[ this.TYPE ] === this.INT) {
         this[ this.VARIABLE_TYPE ] = this.NEW_VARIABLE;
     }
-    
+
     this[ COMPILER.VARIABLE_CLONE ] = function() {
         var variable;
-        
+
         if ( this[ this.IS_REF ]) {
             return this;
         }
-        
+
         switch( this[ this.TYPE ] ) {
             case this.NULL:
             case this.BOOL:
             case this.INT:
             case this.FLOAT:
             case this.STRING:
-                variable = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );               
+                variable = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );
                 break;
             case this.OBJECT:
             case this.RESOURCE:
@@ -14136,21 +13993,20 @@ PHP.VM.Variable = function( arg ) {
                 variable = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  ) )
                 break;
             default:
-                console.log("Unknown variable type cloned");
                 return this;
         }
-       
+
         variable[ this.REFERRING ] = this[ this.REFERRING ];
-         
-        
-        
-        
+
+
+
+
         return variable;
-        
+
     };
-    
+
     this [ this.REF ] = function( variable ) {
-       
+
         if (this === variable) {
             /// hehehehehe referring yourself... results in thread lock
             return this;
@@ -14160,31 +14016,31 @@ PHP.VM.Variable = function( arg ) {
             this[ COMPILER.ASSIGN ]( variable );
             return this;
         }
-        
+
         var tmp = variable[ COMPILER.VARIABLE_VALUE ]; // trigger get
-        
+
         // call setter incase we need to complete array push transaction
-        if ( typeof this[this.REGISTER_SETTER ] === "function" ) {  
+        if ( typeof this[this.REGISTER_SETTER ] === "function" ) {
             this[this.REGISTER_SETTER ]();
         }
-        
+
         this[ this.REFERRING ] = variable;
         this[ this.DEFINED ] = true;
-        
+
         variable[ this.IS_REF ] = true;
-        
+
         return this;
     };
-    
+
     this[ COMPILER.NEG ] = function() {
         return new PHP.VM.Variable(-this[ COMPILER.VARIABLE_VALUE ]);
     };
-    
+
     this[ COMPILER.PRE_INC ] = function() {
         this[ COMPILER.VARIABLE_VALUE ]++;
         return this;
     };
-    
+
     this[ COMPILER.PRE_DEC ] = function() {
         this[ COMPILER.VARIABLE_VALUE ]--;
         return this;
@@ -14193,16 +14049,16 @@ PHP.VM.Variable = function( arg ) {
     this[ COMPILER.POST_INC ] = function() {
         this.NO_ERROR = true;
         var tmp = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
-        
+
         if (this[ this.DEFINED ] !== true) {
             this[ COMPILER.VARIABLE_VALUE ] = 0;
         }
-        
+
         this.NO_ERROR = false;
         POST_MOD++;
         this.POST_MOD = POST_MOD;
         return this;
-        
+
     };
 
 
@@ -14213,14 +14069,14 @@ PHP.VM.Variable = function( arg ) {
         return this;
     };
 
-    
 
-   
+
+
     this[ PHP.Compiler.prototype.UNSET ] = function() {
-        
+
         setValue( null );
         this[ this.DEFINED ] = this[ this.NAME ];
-   
+
         if ( this[ this.REFERRING ] !== undefined ) {
             this [ this.REFERRING ][ PHP.Compiler.prototype.UNSET ]();
         }
@@ -14228,17 +14084,17 @@ PHP.VM.Variable = function( arg ) {
     // property get proxy
     this[ COMPILER.CLASS_PROPERTY_GET ] = function( ctx, propertyName, funcCall ) {
         var val, $this = this;
-     
+
         if ( this[ this.REFERRING ] !== undefined ) {
             $this = this [ this.REFERRING ];
         }
-        
+
         if ($this[ this.TYPE ] !== this.OBJECT){
-            
+
             val = new (this.ENV.$Class.Get("stdClass"))( this );
-               
-            if ($this[ this.TYPE ] === this.NULL || 
-                ($this[ this.TYPE ] === this.BOOL && $this[ COMPILER.VARIABLE_VALUE ] === false) || 
+
+            if ($this[ this.TYPE ] === this.NULL ||
+                ($this[ this.TYPE ] === this.BOOL && $this[ COMPILER.VARIABLE_VALUE ] === false) ||
                 ($this[ this.TYPE ] === this.STRING && $this[ COMPILER.VARIABLE_VALUE ].length === 0)
                 ) {
                 if ( funcCall !== true ) {
@@ -14249,16 +14105,16 @@ PHP.VM.Variable = function( arg ) {
                 $this[ COMPILER.VARIABLE_VALUE ] = val;
             } else {
                 this.ENV[ COMPILER.ERROR ]("Attempt to assign property of non-object", PHP.Constants.E_WARNING, true );
-                
-                
+
+
             }
-           
+
         } else {
             val =  $this[ COMPILER.VARIABLE_VALUE ];
         }
         return val[ COMPILER.CLASS_PROPERTY_GET ].apply( val, arguments );
     };
-    
+
     Object.defineProperty( this, COMPILER.VARIABLE_VALUE,
     {
         get : function(){
@@ -14267,7 +14123,7 @@ PHP.VM.Variable = function( arg ) {
             if ( this[ this.REFERRING ] !== undefined ) {
                 $this = this[this.REFERRING];
             }
-            
+
             if ( typeof this[this.REGISTER_GETTER ] === "function" ) {
                 var returned = this[ this.REGISTER_GETTER ]();
                 if ( returned instanceof PHP.VM.Variable ) {
@@ -14275,63 +14131,63 @@ PHP.VM.Variable = function( arg ) {
                     this[ this.DEFINED ] = returned[ this.DEFINED ];
                     return returned[ COMPILER.VARIABLE_VALUE ];
                 }
-                    
+
             }
-            
+
             if ( $this[ this.DEFINED ] !== true && $this[ COMPILER.SUPPRESS ] !== true ) {
-                
+
                 if ( $this[ this.CONSTANT ] === true ) {
                     this.ENV[ COMPILER.ERROR ]("Use of undefined constant " + $this[ this.DEFINED ] + " - assumed '" + $this[ this.DEFINED ] + "'", PHP.Constants.E_CORE_NOTICE, true );
                     $this[ this.TYPE ] = this.STRING;
-                    
+
                     returning = $this[ this.DEFINED ];
                     $this[ COMPILER.VARIABLE_VALUE ] = $this[ this.DEFINED ];
                     $this[ this.DEFINED ] = true;
-                    
+
                     return returning;
                 } else {
                     if (this.NO_ERROR !==  true ) {
-                        this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_NOTICE, true );    
-                    }    
+                        this.ENV[ COMPILER.ERROR ]("Undefined " + ($this[ this.PROPERTY ] === true ? "property" : "variable") + ": " + $this[ this.DEFINED ], PHP.Constants.E_NOTICE, true );
+                    }
                 }
             }
             if ( this[ this.REFERRING ] === undefined ) {
                 returning = value;
-            } else { 
+            } else {
                 var referLoop = $this;
-                
+
                 while( referLoop[ this.REFERRING ] !== undefined ) {
                     referLoop = referLoop[ this.REFERRING ];
                 }
-                
+
                 this[ this.TYPE ] = referLoop[ this.TYPE ];
                 returning = $this[ COMPILER.VARIABLE_VALUE ];
             }
-            
+
             // perform POST_MOD change
-           
+
             if ( POST_MOD !== 0 ) {
                 var setPOST_MOD = POST_MOD;
                 POST_MOD = 0; // reset counter
                 $this[ COMPILER.VARIABLE_VALUE ] += setPOST_MOD - 0;
             //     value = POST_MOD + (value - 0);
-               
+
             }
-            
+
 
             return returning;
-        },  
+        },
         set : setValue
     }
     );
-    
+
     Object.defineProperty( this, this.CAST_BOOL,
     {
         get : function(){
             // http://www.php.net/manual/en/language.types.boolean.php#language.types.boolean.casting
-            
+
             var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
-            
+
             switch( this[ this.TYPE ]) {
                 case this.INT:
                 case this.FLOAT:
@@ -14341,7 +14197,7 @@ PHP.VM.Variable = function( arg ) {
                         return new PHP.VM.Variable( true );
                     }
                     break;
-                    
+
                 case this.STRING:
                     if ( value.length === 0 || value === "0" ) {
                         return new PHP.VM.Variable( false );
@@ -14367,41 +14223,41 @@ PHP.VM.Variable = function( arg ) {
                     break;
             }
 
-            
+
             return this;
         }
     }
     );
-    
+
     Object.defineProperty( this, this.CAST_INT,
     {
         get : function(){
             // http://www.php.net/manual/en/language.types.integer.php
-            
+
             var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
-            
-            
+
+
             switch ( this[ this.TYPE ] ) {
-                
+
                 case this.BOOL:
                     return new PHP.VM.Variable( ( value === true ) ? 1 : 0 );
                     break;
-                    
+
                 case this.FLOAT:
-                    return new PHP.VM.Variable( Math.floor( value ) ); 
+                    return new PHP.VM.Variable( Math.floor( value ) );
                     break;
                 case this.STRING:
                     if (isNaN( parseInt(value, 10))) {
-                        return new PHP.VM.Variable( 0 ); 
+                        return new PHP.VM.Variable( 0 );
                     } else {
                         return new PHP.VM.Variable( parseInt(value, 10) );
                     }
                     break;
                 case this.OBJECT:
-                    this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to int", PHP.Constants.E_NOTICE, true ); 
+                    this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to int", PHP.Constants.E_NOTICE, true );
                     return new PHP.VM.Variable();
                     break;
-                    
+
                 default:
                     return this;
             }
@@ -14415,34 +14271,34 @@ PHP.VM.Variable = function( arg ) {
     {
         get : function(){
             // http://www.php.net/manual/en/language.types.integer.php
-            
+
             var value = this[ COMPILER.VARIABLE_VALUE ], // trigger get, incase there is POST_MOD
             ret;
-            
-            
+
+
             switch ( this[ this.TYPE ] ) {
-                
+
                 case this.BOOL:
                     return new PHP.VM.Variable( ( value === true ) ? 1.0 : 0.0 );
                     break;
-                    
+
                 case this.INT:
-                    
+
                     ret =  new PHP.VM.Variable( parseFloat(value) );
                     ret[ this.TYPE ] = this.FLOAT;
                     return ret;
                     break;
                 case this.STRING:
                     if (isNaN( parseFloat(value) ) ) {
-                        ret = new PHP.VM.Variable( 0.0 ); 
-                       
+                        ret = new PHP.VM.Variable( 0.0 );
+
                     } else {
                         ret =  new PHP.VM.Variable( parseFloat(value) );
                     }
                     ret[ this.TYPE ] = this.FLOAT;
                     return ret;
                     break;
-                    
+
                 default:
                     return this;
             }
@@ -14455,37 +14311,37 @@ PHP.VM.Variable = function( arg ) {
     {
         get : function() {
             //   http://www.php.net/manual/en/language.types.string.php#language.types.string.casting
-            
+
             var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get, incase there is POST_MOD
-            
+
             if ( value instanceof PHP.VM.ClassPrototype && value[ COMPILER.CLASS_NAME ] !== PHP.VM.Array.prototype.CLASS_NAME  ) {
                 // class
                 // check for __toString();
-           
-           
-           
+
+
+
                 if ( typeof value[PHP.VM.Class.METHOD + __toString.toLowerCase() ] === "function" ) {
                     try {
                         var val = value[ COMPILER.METHOD_CALL ]( this, __toString );
                     } catch( e ) {
-                        this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must not throw an exception", PHP.Constants.E_ERROR, true, false, true );    
+                        this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must not throw an exception", PHP.Constants.E_ERROR, true, false, true );
                         return new PHP.VM.Variable("");
                     }
                     if (val[ this.TYPE ] !==  this.STRING) {
-                        this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );    
+                        this.ENV[ COMPILER.ERROR ]("Method " + value[ COMPILER.CLASS_NAME ] + "::" + __toString + "() must return a string value", PHP.Constants.E_RECOVERABLE_ERROR, true );
                         return new PHP.VM.Variable("");
                     }
                     val[ this.VARIABLE_TYPE ] = this.FUNCTION;
                     return val;
                 //  return new PHP.VM.Variable( value[PHP.VM.Class.METHOD + __toString ]() );
                 } else {
-                    this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to string", PHP.Constants.E_RECOVERABLE_ERROR, true );    
-                    
+                    this.ENV[ COMPILER.ERROR ]("Object of class " + value[ COMPILER.CLASS_NAME ] + " could not be converted to string", PHP.Constants.E_RECOVERABLE_ERROR, true );
 
-                    
+
+
                     return new PHP.VM.Variable("");
                 }
-                     
+
             }
             else if (this[ this.TYPE ] === this.BOOL) {
                 return new PHP.VM.Variable( ( value ) ? "1" : "" );
@@ -14498,107 +14354,107 @@ PHP.VM.Variable = function( arg ) {
         }
     }
     );
-    
+
     this[ COMPILER.DIM_UNSET ] = function( ctx, variable  ) {
-         
-        var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get 
-         
+
+        var value = this[ COMPILER.VARIABLE_VALUE ]; // trigger get
+
         if ( this[ this.TYPE ] !== this.ARRAY ) {
             if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
-                       
-                value[ COMPILER.METHOD_CALL ]( ctx, "offsetUnset", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetUnset          
-            } 
+
+                value[ COMPILER.METHOD_CALL ]( ctx, "offsetUnset", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetUnset
+            }
         } else {
-       
+
             value[ COMPILER.METHOD_CALL ]( ctx, "offsetUnset", variable );
         }
-                
-    
+
+
 
     };
 
     this[ COMPILER.DIM_ISSET ] = function( ctx, variable  ) {
-        
+
         var $this = this;
-        
+
         if ( this[ this.REFERRING ] !== undefined ) {
-       
+
             var referLoop = $this;
-                
+
             while( referLoop[ this.REFERRING ] !== undefined ) {
                 referLoop = referLoop[ this.REFERRING ];
             }
-            
+
             $this = referLoop;
-            
+
         }
-        
+
         if ( $this[ this.TYPE ] !== this.ARRAY ) {
             if ( $this[ this.TYPE ] === this.OBJECT && $this.val[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
-                       
+
                 var exists = $this.val[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
                 return exists;
-      
-                        
+
+
             } else {
-                        
+
                 return false;
             }
-        } 
-        
+        }
+
         var returning = $this.val[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
-                
+
         return (returning[ this.DEFINED ] === true );
 
     };
-    
+
     this[ COMPILER.DIM_EMPTY ] = function( ctx, variable  ) {
-        
+
         if ( this[ this.TYPE ] !== this.ARRAY ) {
-           
+
             if ( this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
-                       
+
                 var exists = value[ COMPILER.METHOD_CALL ]( ctx, "offsetExists", variable )[ COMPILER.VARIABLE_VALUE ]; // trigger offsetExists
-                
-             
+
+
                 if ( exists === true ) {
                     var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ); // trigger offsetGet
                     return val;
-   
+
                 } else {
                     return true;
                 }
 
-                                        
+
             } else {
-                // looking in a non-existant array, so obviously its empty        
+                // looking in a non-existant array, so obviously its empty
                 return true;
             }
         } else {
             return this[ COMPILER.DIM_FETCH ]( ctx, variable);
         }
-        
+
 
 
     };
-    
+
     Object.defineProperty( this, COMPILER.DIM_FETCH,
     {
         get : function(){
-         
+
             return function( ctx, variable ) {
-                
+
                 var $this = this;
-                
+
                 if ( variable instanceof PHP.VM.Variable && variable[ this.TYPE ] === this.OBJECT ) {
-                    this.ENV[ COMPILER.ERROR ]("Illegal offset type", PHP.Constants.E_WARNING, true );    
+                    this.ENV[ COMPILER.ERROR ]("Illegal offset type", PHP.Constants.E_WARNING, true );
                     return new PHP.VM.Variable();
                 }
-                
+
                 if ( typeof this[this.REGISTER_GETTER ] === "function" ) {
                     var returned = this[ this.REGISTER_GETTER ]();
                     if ( returned instanceof PHP.VM.Variable ) {
-                        
+
                         this[ this.TYPE ] = returned[ this.TYPE ];
                         this[ this.DEFINED ] = returned[ this.DEFINED ];
                         var item = returned[ COMPILER.DIM_FETCH ]( ctx, variable );
@@ -14607,11 +14463,11 @@ PHP.VM.Variable = function( arg ) {
                             item[ this.OVERLOADED ] = returned[ this.OVERLOADING ];
 
                         }
-                       
+
                         item[ this.REGISTER_SETTER ] = function() {
-                            
+
                             if (item[ this.OVERLOADING ] !== undefined) {
-                                this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + item[ this.OVERLOADING ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
+                                this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + item[ this.OVERLOADING ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true );
                                 item[ this.OVERLOADED ] = item[ this.OVERLOADING ];
                             //   item[ this.OVERLOADED ] = returned[ this.OVERLOADING ];
                             }
@@ -14619,165 +14475,138 @@ PHP.VM.Variable = function( arg ) {
                      */
                         return item;
                     }
-                    
+
                 }
-                
+
                 if ( this[ this.TYPE ] === this.INT ) {
-                    this.ENV[ COMPILER.ERROR ]("Cannot use a scalar value as an array", PHP.Constants.E_WARNING, true );    
+                    this.ENV[ COMPILER.ERROR ]("Cannot use a scalar value as an array", PHP.Constants.E_WARNING, true );
                     return new PHP.VM.Variable();
                 } else if (this[ this.TYPE ] === this.STRING) {
                     if ( variable[ this.TYPE ] !== this.INT ) {
-                        this.ENV[ COMPILER.ERROR ]("Illegal string offset '" + variable[ COMPILER.VARIABLE_VALUE ] + "'", PHP.Constants.E_WARNING, true );    
+                        this.ENV[ COMPILER.ERROR ]("Illegal string offset '" + variable[ COMPILER.VARIABLE_VALUE ] + "'", PHP.Constants.E_WARNING, true );
                         return new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ] );
                     } else {
                         var ret = new PHP.VM.Variable( this[ COMPILER.VARIABLE_VALUE ].substr( variable[ COMPILER.VARIABLE_VALUE ], 1 ));
-                        
+
                         ret[ this.REGISTER_SETTER ] = function( value ) {
                             this[ COMPILER.VARIABLE_VALUE ] = this[ COMPILER.VARIABLE_VALUE ].substr( 0, variable[ COMPILER.VARIABLE_VALUE ] ) + value + this[ COMPILER.VARIABLE_VALUE ].substr( 1 + variable[ COMPILER.VARIABLE_VALUE ]);
                         }.bind( this );
-                        
+
                         return ret;
                     }
                 }
-              
-                
+
+
                 if ( this[ this.REFERRING ] !== undefined ) {
                     $this = this[this.REFERRING];
                 }
-                
 
-          
+
+
                 if ( $this[ this.TYPE ] !== this.ARRAY ) {
                     if ( $this[ this.TYPE ] === this.OBJECT && value[ PHP.VM.Class.INTERFACES ].indexOf("ArrayAccess") !== -1) {
-                       
+
                         var dimHandler = new PHP.VM.Variable();
                         dimHandler[ this.REGISTER_GETTER ] = function() {
                             var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
                             val [ $this.OVERLOADING ] = value[ COMPILER.CLASS_NAME ];
                             if ( val[ this.DEFINED ] !== true ) {
-                                this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );    
+                                this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );
                                 return new PHP.VM.Variable();
                             }
-                            
+
                             if ( val[ this.TYPE ] === this.ARRAY ) {
-                                
+
                                 val[ COMPILER.VARIABLE_VALUE ][ this.REGISTER_ARRAY_SETTER ] = function() {
-                                   
-                                    this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + value[ COMPILER.CLASS_NAME ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
+
+                                    this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + value[ COMPILER.CLASS_NAME ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true );
                                     return false;
                                 }.bind( val );
                             }
-   
+
                             return val;
                         };
-                        
+
                         dimHandler[ this.REGISTER_SETTER ] = function( val ) {
-                            
+
                             if ( val === null ) {
-                                this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + value[ COMPILER.CLASS_NAME ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
+                                this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + value[ COMPILER.CLASS_NAME ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true );
                             }
-                           
-                            
+
+
                             var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_SET, variable, val );
-                            
+
                             if ( val[ this.DEFINED ] !== true ) {
-                                this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );    
+                                this.ENV[ COMPILER.ERROR ]("Undefined " + (variable[ this.TYPE ] === this.INT ? "offset" : "index") + ": " + variable[ COMPILER.VARIABLE_VALUE ], PHP.Constants.E_CORE_NOTICE, true );
                                 return new PHP.VM.Variable();
                             }
                             return val;
                         };
-                        
+
                         dimHandler[ COMPILER.POST_INC ] = function() {
                             var val = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ); // trigger get
-                            this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + value[ COMPILER.CLASS_NAME ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true ); 
+                            this.ENV[ COMPILER.ERROR ]("Indirect modification of overloaded element of " + value[ COMPILER.CLASS_NAME ] + " has no effect", PHP.Constants.E_CORE_NOTICE, true );
                             return val;
                         };
-                        
+
                         dimHandler[ this.REF ] = function() {
-                            this.ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot assign by reference to overloaded object", PHP.Constants.E_ERROR, true ); 
+                            this.ENV[ PHP.Compiler.prototype.ERROR ]( "Cannot assign by reference to overloaded object", PHP.Constants.E_ERROR, true );
                         };
-                        /*                  
-                        delete dimHandler.$Dim;
-                        
-                        Object.defineProperty( dimHandler, COMPILER.DIM_FETCH,
-                        {
-                            get : function(){
-                                return function( ctx, variable ) {
-                                    console.log("sup", variable);
-                                }
-                            }
-                        });
-                        
-                       dimHandler[ COMPILER.DIM_FETCH ] = function() {
-                           console.log("yo");
-                       }
-                        
-                        
-                        console.log("sending!", dimHandler);
-                     */
+
                         return dimHandler;
-                       
-                        
-                      
-                        
                     } else {
-                        
+
                         var notdefined = false;
-                        
+
                         // cache DEFINED value
                         if ( $this[ this.DEFINED ] !== true && $this[ COMPILER.SUPPRESS ] !== true ) {
                             notdefined = $this[ this.DEFINED ];
                         }
-                        
+
                         $this[ COMPILER.VARIABLE_VALUE ] = this.ENV.array([]);
                         if ( notdefined !== false ) {
                             $this[ this.DEFINED ] = notdefined;
                         }
                     }
-                } 
-  
-                //  console.log(value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable ));
+                }
+
                 var returning;
                 if ( value === null ) {
                     returning = this[ COMPILER.VARIABLE_VALUE ][ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
                 } else {
                     returning = value[ COMPILER.METHOD_CALL ]( ctx, COMPILER.ARRAY_GET, variable );
                 }
-                
-                
 
-                
                 if (returning[ this.DEFINED ] !== true ) {
-                    
                     var saveFunc = returning[ this.REGISTER_SETTER ],
                     arrThis = this;
-                    
-                    
+
+
                     returning[ this.REGISTER_SETTER ] = function( val ) {
                         arrThis[ this.DEFINED ] = true;
                         if (saveFunc !== undefined ) {
                             saveFunc( val );
                         }
                     };
-                    
+
                     if ( this[ this.DEFINED ] !== true ) {
                         returning[ this.DEFINED ] = this[ this.DEFINED ];
                     }
-                    
-                //  
+
+                //
                 }
-                            
+
                 return  returning
-                
+
             };
-        },  
+        },
         set : setValue
     }
     );
-    
-    
+
+
     return this;
-    
+
 };
 
 PHP.VM.Variable.prototype = new PHP.VM.VariableProto();
@@ -14835,7 +14664,8 @@ PHP.VM.Variable.prototype.REGISTER_ARRAY_SETTER = "$ASetter";
 
 PHP.VM.Variable.prototype.REGISTER_GETTER = "$Getter";
 
-PHP.VM.Variable.prototype.INSTANCE = "$Instance";/* 
+PHP.VM.Variable.prototype.INSTANCE = "$Instance";
+/* 
  * @author Niklas von Hertzen <niklas at hertzen.com>
  * @created 27.6.2012 
  * @website http://hertzen.com
@@ -15161,34 +14991,20 @@ PHP.VM.Array.prototype.INTKEY = "intkey";
 
 PHP.VM.Array.prototype.POINTER = "pointer";
 
-PHP.VM.Array.prototype.CLASS_NAME = "array";/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 1.7.2012 
-* @website http://hertzen.com
- */
-
+PHP.VM.Array.prototype.CLASS_NAME = "array";
 PHP.VM.ResourceManager = function() {
-    
-    
     var resources = [],
     RESOURCE = PHP.VM.ResourceManager.prototype,
     id = 0,
     methods = {};
-    
-    methods[ RESOURCE.REGISTER ] = function() {
 
+    methods[ RESOURCE.REGISTER ] = function() {
         var resource = new PHP.VM.Resource( id++ );
         resources.push( resource );
-        
-
         return resource;
-        
     };
-    
-    
+
     return methods;
-       
-    
 };
 
 PHP.VM.ResourceManager.prototype.ID = "$Id";
@@ -15197,68 +15013,57 @@ PHP.VM.ResourceManager.prototype.REGISTER = "$Register";
 
 PHP.VM.Resource = function( id ) {
     this[ PHP.VM.ResourceManager.prototype.ID ] = id;
-    
-};/* 
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 29.6.2012 
-* @website http://hertzen.com
- */
-
+};
 PHP.VM.Constants = function(  predefined, ENV ) {
-    
+
     var constants = {},
     constantVariables = {},
     COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype,
     methods = {};
-    
+
     Object.keys( predefined ).forEach(function( key ){
-       
+
         constants[ key ] = predefined[ key ];
-    }, this); 
-    
+    }, this);
+
     methods[ COMPILER.CONSTANT_GET ] = function( constantName ) {
-        
-        var variable = new PHP.VM.Variable( constants[ constantName ] ); 
+
+        var variable = new PHP.VM.Variable( constants[ constantName ] );
 
         if ( constants[ constantName ] === undefined  ) {
-            
+
             if ( constantVariables[ constantName ] === undefined ) {
                 constantVariables[ constantName ] = variable;
             } else {
                 return constantVariables[ constantName ];
-            }  
-            
+            }
             variable[ VARIABLE.DEFINED ] = constantName;
             variable[ VARIABLE.CONSTANT ] = true;
-            
-            
-            
-            
         }
-
-        return variable;    
+        return variable;
     };
-    
+
     methods[ COMPILER.CONSTANT_DEFINED ] = function( constantName ) {
         return ( constants[ constantName ] === undefined  );
     };
-    
+
     methods[ COMPILER.CONSTANT_SET ] = function( constantName, constantValue ) {
-              
+
         if ( constantVariables[ constantName ] !== undefined ) {
             constantVariables[ constantName ][ COMPILER.VARIABLE_VALUE ] = constantValue;
         }
         constants[ constantName ] = constantValue;
     };
-    
+
     return methods;
-    
+
 };
 
 // manually defined constants
 
-PHP.Constants.PHP_BINARY = "/bin/php";/* automatically built from DateTime.php*/
+PHP.Constants.PHP_BINARY = "/bin/php";
+/* automatically built from DateTime.php*/
 PHP.VM.Class.Predefined.DateTime = function( ENV, $$ ) {
 ENV.$Class.New( "DateTime", 0, {}, function( M, $, $$ ){
  M.Constant("ATOM", $$("Y-m-d\\TH:i:sP"))
@@ -15311,7 +15116,8 @@ ENV.$Class.New( "DateTime", 0, {}, function( M, $, $$ ){
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from Exception.php*/
+};
+/* automatically built from Exception.php*/
 PHP.VM.Class.Predefined.Exception = function( ENV, $$ ) {
 ENV.$Class.New( "Exception", 0, {}, function( M, $, $$ ){
  M.Variable( "message", 2 )
@@ -15346,7 +15152,8 @@ return ENV.array([{v:ENV.array([{v:$$("Error2Exception"), k:$$("function")}]), k
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from ReflectionClass.php*/
+};
+/* automatically built from ReflectionClass.php*/
 PHP.VM.Class.Predefined.ReflectionClass = function( ENV, $$ ) {
 ENV.$Class.New( "ReflectionClass", 0, {}, function( M, $, $$ ){
  M.Constant("IS_IMPLICIT_ABSTRACT", $$(16))
@@ -15395,13 +15202,15 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Interface ").$Co
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from ReflectionException.php*/
+};
+/* automatically built from ReflectionException.php*/
 PHP.VM.Class.Predefined.ReflectionException = function( ENV, $$ ) {
 ENV.$Class.New( "ReflectionException", 0, {Extends: "Exception"}, function( M, $, $$ ){
  M.Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from ReflectionMethod.php*/
+};
+/* automatically built from ReflectionMethod.php*/
 PHP.VM.Class.Predefined.ReflectionMethod = function( ENV, $$ ) {
 ENV.$Class.New( "ReflectionMethod", 0, {}, function( M, $, $$ ){
  M.Constant("IS_IMPLICIT_ABSTRACT", $$(16))
@@ -15428,7 +15237,8 @@ $("this").$Prop( ctx, "class" )._($("class"));
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from ReflectionProperty.php*/
+};
+/* automatically built from ReflectionProperty.php*/
 PHP.VM.Class.Predefined.ReflectionProperty = function( ENV, $$ ) {
 ENV.$Class.New( "ReflectionProperty", 0, {}, function( M, $, $$ ){
  M.Constant("IS_STATIC", $$(1))
@@ -15449,7 +15259,8 @@ throw $$(new (ENV.$Class.Get("ReflectionException"))( this, $$("Class ").$Concat
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from __PHP_Incomplete_Class.php*/
+};
+/* automatically built from __PHP_Incomplete_Class.php*/
 PHP.VM.Class.Predefined.__PHP_Incomplete_Class = function( ENV, $$ ) {
 ENV.$Class.New( "__PHP_Incomplete_Class", 0, {}, function( M, $, $$ ){
  M.Variable( "__PHP_Incomplete_Class_Name", 1 )
@@ -15459,19 +15270,22 @@ $("this").$Prop( ctx, "__PHP_Incomplete_Class_Name" )._($("name"));
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from stdClass.php*/
+};
+/* automatically built from stdClass.php*/
 PHP.VM.Class.Predefined.stdClass = function( ENV, $$ ) {
 ENV.$Class.New( "stdClass", 0, {}, function( M, $, $$ ){
  M.Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from Traversable.php*/
+};
+/* automatically built from Traversable.php*/
 PHP.VM.Class.Predefined.Traversable = function( ENV, $$ ) {
 ENV.$Class.INew( "Traversable", [], function( M, $, $$ ){
  M.Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from ArrayAccess.php*/
+};
+/* automatically built from ArrayAccess.php*/
 PHP.VM.Class.Predefined.ArrayAccess = function( ENV, $$ ) {
 ENV.$Class.INew( "ArrayAccess", [], function( M, $, $$ ){
  M.Method( "offsetExists", 1, [{name:"offset"}], false, function( $, ctx, $Static ) {
@@ -15485,7 +15299,8 @@ ENV.$Class.INew( "ArrayAccess", [], function( M, $, $$ ){
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from Iterator.php*/
+};
+/* automatically built from Iterator.php*/
 PHP.VM.Class.Predefined.Iterator = function( ENV, $$ ) {
 ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $, $$ ){
  M.Method( "current", 1, [], false, function( $, ctx, $Static ) {
@@ -15501,7 +15316,8 @@ ENV.$Class.INew( "Iterator", ["Traversable"], function( M, $, $$ ){
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from IteratorAggregate.php*/
+};
+/* automatically built from IteratorAggregate.php*/
 PHP.VM.Class.Predefined.IteratorAggregate = function( ENV, $$ ) {
 ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $, $$ ){
  M.Method( "getIterator", 17, [], false, function( $, ctx, $Static ) {
@@ -15509,7 +15325,8 @@ ENV.$Class.INew( "IteratorAggregate", ["Traversable"], function( M, $, $$ ){
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from Reflector.php*/
+};
+/* automatically built from Reflector.php*/
 PHP.VM.Class.Predefined.Reflector = function( ENV, $$ ) {
 ENV.$Class.INew( "Reflector", [], function( M, $, $$ ){
  M.Method( "export", 25, [], false, function( $, ctx, $Static ) {
@@ -15519,7 +15336,8 @@ ENV.$Class.INew( "Reflector", [], function( M, $, $$ ){
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* automatically built from Serializable.php*/
+};
+/* automatically built from Serializable.php*/
 PHP.VM.Class.Predefined.Serializable = function( ENV, $$ ) {
 ENV.$Class.INew( "Serializable", [], function( M, $, $$ ){
  M.Method( "serialize", 17, [], false, function( $, ctx, $Static ) {
@@ -15529,7 +15347,8 @@ ENV.$Class.INew( "Serializable", [], function( M, $, $$ ){
 .Create()});
 
 ENV.$Class.Get( "DateTime").prototype.Native = true;
-};/* 
+};
+/* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 17.7.2012 
 * @website http://hertzen.com

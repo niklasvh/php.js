@@ -1,12 +1,12 @@
-/* 
+/*
  * @author Niklas von Hertzen <niklas at hertzen.com>
- * @created 15.6.2012 
+ * @created 15.6.2012
  * @website http://hertzen.com
  */
 
 
 var PHP = function( code, opts ) {
-    
+
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" ),
     iniSet = opts.ini || {};
     opts.ini = PHP.ini( iniContent );
@@ -14,7 +14,7 @@ var PHP = function( code, opts ) {
     Object.keys( iniSet ).forEach(function(key){
         this[ key ] = iniSet[ key ];
     }, opts.ini);
-    
+
     this.tokens = PHP.Lexer( code, opts.ini );
     try {
         this.AST = new PHP.Parser( this.tokens );
@@ -28,11 +28,11 @@ var PHP = function( code, opts ) {
     var POST = opts.POST,
     RAW_POST = opts.RAW_POST,
     RAW = (RAW_POST !== undefined ) ? PHP.RAWPost( RAW_POST ) : {};
-    
+
     opts.POST = ( POST !== undefined ) ? PHP.Utils.QueryString( POST ) : (RAW_POST !== undefined ) ? RAW.Post() : {};
     opts.RAW_POST = ( RAW_POST !== undefined ) ? RAW.Raw() : (POST !== undefined ) ? POST.trim() :  "";
     opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
-    
+
     opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.max_file_uploads, opts.ini.upload_tmp_dir ) : {};
     /*
     if (RAW_POST !== undefined ) {
@@ -43,31 +43,31 @@ var PHP = function( code, opts ) {
     if (RAW_POST !== undefined ) {
         RAW.WriteFiles( opts.filesystem.writeFileSync );
     }
-    
 
-    
+
+
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
 
 /*    if ( false ) {
         var thread = new Worker("thread.js");
-    
+
         thread.postMessage({
-            type: "import", 
+            type: "import",
             content: opts.files
         });
-        
+
         thread.postMessage({
             type: "run",
             content: [this.compiler.src, opts]
         })
-        
+
         setTimeout(function(){
             thread.postMessage({
                 type: "stop"
             })
         }, opts.ini.max_execution_time);
-        
-        
+
+
         thread.addEventListener('message', function(e) {
             switch( e.data.type ) {
                 case "complete":
@@ -77,7 +77,7 @@ var PHP = function( code, opts ) {
                 default:
                     console.log(e.data);
             }
-            
+
         }, false);
         return;
     }*/
@@ -90,7 +90,7 @@ var PHP = function( code, opts ) {
 
     /*
     if (rawError !== undefined ) {
-        this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING ); 
+        this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING );
     }
    */
 
@@ -109,7 +109,7 @@ PHP.Utils = {};
 
 
 PHP.Utils.$A = function( arr) {
-    return Array.prototype.slice.call( arr ); 
+    return Array.prototype.slice.call( arr );
 };
 
 PHP.Utils.ClassName = function( classVar ) {
@@ -120,79 +120,79 @@ PHP.Utils.ClassName = function( classVar ) {
             return classVar[ COMPILER.VARIABLE_VALUE ]
         } else {
             return classVar[ COMPILER.VARIABLE_VALUE ][ COMPILER.CLASS_NAME ];
-        } 
+        }
     }
-    
+
 };
 
 PHP.Utils.Merge = function(obj1, obj2) {
-    
+
     Object.keys( obj2 ).forEach(function( key ){
-        obj1[ key ] = obj2 [ key ]; 
+        obj1[ key ] = obj2 [ key ];
     });
-    
+
     return obj1;
 };
 
 PHP.Utils.Path = function( path ) {
-    
+
     path = path.substring(0, path.lastIndexOf("/"));
-    
+
     return path;
 };
 
 PHP.Utils.Visible = function( name, objectValue, ctx ) {
-    
+
     // helper function for checking whether variable/method is of type
     function checkType( name, type) {
         var value = objectValue[ PROPERTY_TYPE + name ];
         if (value === undefined) {
             return true;
         }
-        
+
         if ( type === "PUBLIC") {
             return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]) || (value  === PHP.VM.Class.STATIC);
         } else {
             return ((value & PHP.VM.Class[ type ]) === PHP.VM.Class[ type ]);
         }
-        
+
     }
-    
+
     function hasProperty( proto, prop ) {
         while( proto !== undefined &&  proto[ PHP.VM.Class.PROPERTY + prop ] !== undefined ) {
             proto = Object.getPrototypeOf( proto );
         }
-        
+
         return proto;
-     
+
     }
-    
+
     var COMPILER = PHP.Compiler.prototype,
     PROPERTY_TYPE = PHP.VM.Class.PROPERTY_TYPE,
     VARIABLE = PHP.VM.Variable.prototype;
-    
+
     if ( (ctx instanceof PHP.VM.ClassPrototype) && objectValue[ COMPILER.CLASS_NAME ] === ctx[ COMPILER.CLASS_NAME ] ) {
-        return true;                       
+        return true;
     } else {
-                        
+
         if ( (ctx instanceof PHP.VM.ClassPrototype) && this.$Class.Inherits( objectValue, ctx[ COMPILER.CLASS_NAME ] ) && checkType( name, "PROTECTED")) {
-                                   
+
             return true;
         } else  if ( (ctx instanceof PHP.VM.ClassPrototype) && this.$Class.Inherits( objectValue, ctx[ COMPILER.CLASS_NAME ] ) && checkType( name, "PRIVATE")) {
-            
+
             if (hasProperty( ctx, name ) ===  ctx) {
                 return true;
             }
-        
-            
+
+
         } else if (checkType(name, "PUBLIC")) {
 
             return true;
         }
     }
-    
+
     return false;
-    
+
 };
 
 PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functionName ) {
@@ -212,7 +212,7 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
             ENV[ PHP.Compiler.prototype.ERROR ]( "Only variables should be passed by reference", PHP.Constants.E_STRICT, true );
             value[ VARIABLE.VARIABLE_TYPE ] = undefined;
             value = new PHP.VM.Variable( value[ COMPILER.VARIABLE_VALUE ] );
-            
+
         }
 
         if (value[ VARIABLE.DEFINED ] !== true ) {
@@ -222,23 +222,23 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
 
         arg[ VARIABLE.REF ]( value );
     } else {
-        
+
         if ( value !== undefined ) {
-            
+
             if ( value instanceof PHP.VM.VariableProto) {
-              
+
                 if ( value[ VARIABLE.TYPE ] === VARIABLE.ARRAY ) {
                     // Array assignment always involves value copying. Use the reference operator to copy an array by reference.
                     arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.METHOD_CALL ]( {}, COMPILER.ARRAY_CLONE  );
-              
+
                 } else {
                     arg[ COMPILER.VARIABLE_VALUE ] = value[ COMPILER.VARIABLE_VALUE ];
                 }
             } else {
                 arg[ COMPILER.VARIABLE_VALUE ] = value;
             }
-            
-   
+
+
         } else {
             if ( argObject[ COMPILER.PROPERTY_DEFAULT ] !== undefined ) {
                 arg[ COMPILER.VARIABLE_VALUE ] = argObject[ COMPILER.PROPERTY_DEFAULT ][ COMPILER.VARIABLE_VALUE ];
@@ -256,10 +256,10 @@ PHP.Utils.ArgumentHandler = function( ENV, arg, argObject, value, index, functio
 };
 
 PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global ) {
-    
+
     var COMPILER = PHP.Compiler.prototype,
      VARIABLE = PHP.VM.Variable.prototype;
-   
+
     staticHandler[ COMPILER.FUNCTION_STATIC_SET ] = function( name, def ) {
 
         if ( staticVars[ name ] === undefined ) {
@@ -268,10 +268,10 @@ PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global 
                 def: def[ COMPILER.VARIABLE_VALUE ],
                 val: def
             };
-            
+
             // assign it to current running context as well
             handler( name, def );
-        
+
         } else {
             if ( def [ COMPILER.VARIABLE_VALUE ] === staticVars[ name ].def ) {
                 handler( name, staticVars[ name ].val );
@@ -281,14 +281,14 @@ PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global 
                     val: def
                 };
                 handler( name, def );
-            }   
+            }
         }
 
 
         return staticHandler;
 
 
-    };  
+    };
 
 
     // global handler
@@ -299,29 +299,29 @@ PHP.Utils.StaticHandler = function( staticHandler, staticVars, handler, $Global 
             handler( varName, val )
         });
     };
-    
+
     return staticHandler;
-    
+
 };
 
 PHP.Utils.CheckRef = function( ret, byRef ) {
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
-    
+
     if ( ret instanceof PHP.VM.Variable) {
         if ( byRef !== true) {
-            
+
             ret[ VARIABLE.VARIABLE_TYPE ] = VARIABLE.FUNCTION;
         } else if (byRef === true){
-       
+
             if (ret[ VARIABLE.REFERRING] === undefined && (ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.NEW_VARIABLE || ret[ VARIABLE.VARIABLE_TYPE ] === VARIABLE.FUNCTION )) {
-                 
+
                this[ PHP.Compiler.prototype.ERROR ]( "Only variable references should be returned by reference", PHP.Constants.E_NOTICE, true );
             }
             ret[ VARIABLE.VARIABLE_TYPE ] = undefined;
         }
     }
-    
+
 };
 
 
@@ -336,38 +336,38 @@ PHP.Utils.TokenName = function( token ) {
             return false;
         }
     });
-    
+
     return current;
 };
 
 PHP.Utils.Filesize = function( size ) {
-  
+
     if ( /^\d+M$/i.test( size )) {
         return (size.replace(/M/g,"") - 0) * 1024 * 1024;
     } else if ( /^\d+K$/i.test( size )) {
-        return (size.replace(/K/g,"") - 0) * 1024;    
+        return (size.replace(/K/g,"") - 0) * 1024;
     }
-    
+
     return size;
-    
+
 };
 
 PHP.Utils.QueryString = function( str ) {
     str = str.trim();
     var variables = str.split(/&/);
-    
+
     var items = {};
-    
+
     // going through each variable which have been split by &
     variables.forEach( function( variable ) {
-        
+
         var parts = variable.split(/=/),
             key = decodeURIComponent( parts[ 0 ] ),
             value = (parts.length > 1 ) ? decodeURIComponent( parts[ 1 ] ) : null,
-           
+
             arrayManager = function( item, parse, value ) {
-               
-                
+
+
                 var arraySearch = parse.match(/^\[([a-z0-9+_\-\[]*)\]/i);
                 //  console.log(item, parse, value, arraySearch);
                 if ( arraySearch !== null ) {
@@ -375,27 +375,27 @@ PHP.Utils.QueryString = function( str ) {
 
                     if ( key.length === 0 ) {
                         key = Object.keys(item).length;
-                       
-                    } 
+
+                    }
                     parse = parse.substring( arraySearch[ 0 ].length );
-                  
+
                     if ( parse.length > 0  ) {
                         if ( typeof item[ key ] !== "object" && item[ key ] !== null ) {
                             item[ key ] = {};
                         }
-                        
+
                         var ret = arrayManager( item[ key ], parse, value );
-                       
+
                         if ( ret !== undefined ) {
                             item[ key ] = ret;
                         }
-                       
+
                     } else {
- 
+
                         item[ key ] = ( value !== null) ? value.replace(/\+/g," ") : null;
                     }
-                    
-                    
+
+
                 } else {
                     if ( parse === "]") {
                         item = value;
@@ -403,8 +403,8 @@ PHP.Utils.QueryString = function( str ) {
                     }
 
                 }
-                
-                
+
+
             };
 
 
@@ -412,24 +412,24 @@ PHP.Utils.QueryString = function( str ) {
 
             if ( arraySearch !== null ) {
                 key =  arraySearch[ 1 ];
-                
-                
-                
+
+
+
                 if ( typeof items[ key ] !== "object" ) {
                     items[ key ] = {};
 
                 }
-                
+
                 arrayManager( items[ key ], arraySearch[ 2 ], value );
-                
+
 
             }
             else  {
                 items[ key ] = ( value !== null) ? value.replace(/\+/g," ") : null;
             }
-        
+
         }, this);
-   
+
     return items;
-    
+
 };

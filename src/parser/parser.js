@@ -9,7 +9,7 @@
  * the work by Masato Bito and is in the PUBLIC DOMAIN.
  * Ported to JavaScript by Niklas von Hertzen
  */
-  
+
 
 PHP.Parser = function ( preprocessedTokens, eval ) {
 
@@ -26,7 +26,7 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
     terminals = this.terminals,
     translate = this.translate,
     yygdefault = this.yygdefault;
-    
+
 
     this.pos = -1;
     this.line = 1;
@@ -37,20 +37,20 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
     this.dropTokens[ T_WHITESPACE ] = 1;
     this.dropTokens[ T_OPEN_TAG ] = 1;
     var tokens = [];
-    
+
     // pre-process
     preprocessedTokens.forEach( function( token, index ) {
         if ( typeof token === "object" && token[ 0 ] === PHP.Constants.T_OPEN_TAG_WITH_ECHO) {
             tokens.push([
-                PHP.Constants.T_OPEN_TAG, 
+                PHP.Constants.T_OPEN_TAG,
                 token[ 1 ],
                 token[ 2 ]
                 ]);
             tokens.push([
-                PHP.Constants.T_ECHO, 
+                PHP.Constants.T_ECHO,
                 token[ 1 ],
                 token[ 2 ]
-                ]);    
+                ]);
         } else {
             tokens.push( token );
         }
@@ -94,23 +94,11 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
             yyn = yydefault[ state ];
         } else {
             if (tokenId === this.TOKEN_NONE ) {
-
                 // fetch the next token id from the lexer and fetch additional info by-ref
-
                 origTokenId = this.getNextToken( );
 
                 // map the lexer token id to the internally used token id's
                 tokenId = (origTokenId >= 0 && origTokenId < this.TOKEN_MAP_SIZE) ? translate[ origTokenId ] : this.TOKEN_INVALID;
-                //    console.log(origTokenId,tokenId);
-                if (tokenId === this.TOKEN_INVALID) {
-                    console.log('The lexer returned an invalid token',
-                        origTokenId, this.tokenValue);
-                /*
-                    throw new RangeException(sprintf(
-                    'The lexer returned an invalid token (id=%d, value=%s)',
-                    origTokenId, tokenValue
-                ));*/
-                }
 
                 attributeStack[ this.stackPos ] = this.startAttributes;
             }
@@ -156,16 +144,11 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
 
             if ( yyn === 0 ) {
                 /* accept */
-                //  console.log(this.yyastk);
                 return this.yyval;
             } else if (yyn !== this.YYUNEXPECTED ) {
                 /* reduce */
                 try {
-                    //      console.log('yyn' + yyn);
-                    this['yyn' + yyn](
-                        PHP.Utils.Merge(attributeStack[this.stackPos - yylen[ yyn ] ], this.endAttributes)
-                        //      + endAttributes
-                        );
+                    this['yyn' + yyn](PHP.Utils.Merge(attributeStack[this.stackPos - yylen[ yyn ] ], this.endAttributes));
                 } catch (e) {
                     /*
                         if (-1 === $e->getRawLine()) {
@@ -193,7 +176,6 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
                 attributeStack[ this.stackPos ] = this.startAttributes;
             } else {
                 /* error */
-                console.log( tokens );
                 if (eval !== true) {
                     throw new PHP.ParseError("syntax error, unexpected " + terminals[ tokenId ] + ", expecting identifier", this.startAttributes['startLine']);
                     throw new Error('Unexpected token ' + terminals[ tokenId ] + ", tokenId " + tokenId + " line " + this.startAttributes['startLine']);
@@ -417,8 +399,6 @@ PHP.Parser.prototype.getNextToken = function( ) {
             } else if (T_DOC_COMMENT === token[0]) {
                 this.startAttributes['comments'].push( new PHPParser_Comment_Doc(token[1], token[2]) );
             } else if (this.dropTokens[token[0]] === undefined) {
-                //      console.log(this.pos, token);
-                //     console.log(this.tokenMap);
                 this.tokenValue = token[1];
                 this.startAttributes['startLine'] = token[2];
                 this.endAttributes['endLine'] = this.line;
@@ -491,18 +471,18 @@ PHP.Parser.prototype.parseString = function( str ) {
             ['\\\\', '\\\''],
             [  '\\',   '\'']);
     } else {
-     
+
         str = this.parseEscapeSequences( str, '"');
 
     }
 
     return str;
-  
+
 };
 
 PHP.Parser.prototype.parseEscapeSequences = function( str, quote ) {
-    
-  
+
+
 
     if (undefined !== quote) {
         str = str.replace(new RegExp('\\' + quote, "g"), quote);
@@ -533,6 +513,6 @@ PHP.Parser.prototype.parseEscapeSequences = function( str, quote ) {
             }
         }
         );
-    
+
     return str;
 };
