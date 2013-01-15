@@ -1,10 +1,3 @@
-/*
- * @author Niklas von Hertzen <niklas at hertzen.com>
- * @created 15.6.2012
- * @website http://hertzen.com
- */
-
-
 var PHP = function( code, opts ) {
 
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" ),
@@ -34,11 +27,7 @@ var PHP = function( code, opts ) {
     opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
 
     opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.max_file_uploads, opts.ini.upload_tmp_dir ) : {};
-    /*
-    if (RAW_POST !== undefined ) {
-        var rawError = RAW.Error();
-    }
-    */
+
     // needs to be called after RAW.Files
     if (RAW_POST !== undefined ) {
         RAW.WriteFiles( opts.filesystem.writeFileSync );
@@ -48,51 +37,11 @@ var PHP = function( code, opts ) {
 
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
 
-/*    if ( false ) {
-        var thread = new Worker("thread.js");
-
-        thread.postMessage({
-            type: "import",
-            content: opts.files
-        });
-
-        thread.postMessage({
-            type: "run",
-            content: [this.compiler.src, opts]
-        })
-
-        setTimeout(function(){
-            thread.postMessage({
-                type: "stop"
-            })
-        }, opts.ini.max_execution_time);
-
-
-        thread.addEventListener('message', function(e) {
-            switch( e.data.type ) {
-                case "complete":
-                    this.vm = e.data.content;
-                    complete(this);
-                    break;
-                default:
-                    console.log(e.data);
-            }
-
-        }, false);
-        return;
-    }*/
-
     this.vm = new PHP.VM( this.compiler.src, opts );
 
     if (RAW_POST !== undefined ) {
         RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
     }
-
-    /*
-    if (rawError !== undefined ) {
-        this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING );
-    }
-   */
 
     this.vm.Run();
 };
@@ -366,10 +315,7 @@ PHP.Utils.QueryString = function( str ) {
             value = (parts.length > 1 ) ? decodeURIComponent( parts[ 1 ] ) : null,
 
             arrayManager = function( item, parse, value ) {
-
-
                 var arraySearch = parse.match(/^\[([a-z0-9+_\-\[]*)\]/i);
-                //  console.log(item, parse, value, arraySearch);
                 if ( arraySearch !== null ) {
                     var key = ( arraySearch[ 1 ] === undefined ) ? Object.keys( item ).length : arraySearch[ 1 ];
 
@@ -431,5 +377,4 @@ PHP.Utils.QueryString = function( str ) {
         }, this);
 
     return items;
-
 };

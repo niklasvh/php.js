@@ -5,13 +5,6 @@
   Released under MIT License
 */
 
-/*
- * @author Niklas von Hertzen <niklas at hertzen.com>
- * @created 15.6.2012
- * @website http://hertzen.com
- */
-
-
 var PHP = function( code, opts ) {
 
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" ),
@@ -41,11 +34,7 @@ var PHP = function( code, opts ) {
     opts.GET = ( opts.GET !== undefined ) ? PHP.Utils.QueryString( opts.GET ) : {};
 
     opts.FILES = (RAW_POST !== undefined ) ? RAW.Files( opts.ini.upload_max_filesize, opts.ini.max_file_uploads, opts.ini.upload_tmp_dir ) : {};
-    /*
-    if (RAW_POST !== undefined ) {
-        var rawError = RAW.Error();
-    }
-    */
+
     // needs to be called after RAW.Files
     if (RAW_POST !== undefined ) {
         RAW.WriteFiles( opts.filesystem.writeFileSync );
@@ -55,51 +44,11 @@ var PHP = function( code, opts ) {
 
     this.compiler = new PHP.Compiler( this.AST, opts.SERVER.SCRIPT_FILENAME );
 
-/*    if ( false ) {
-        var thread = new Worker("thread.js");
-
-        thread.postMessage({
-            type: "import",
-            content: opts.files
-        });
-
-        thread.postMessage({
-            type: "run",
-            content: [this.compiler.src, opts]
-        })
-
-        setTimeout(function(){
-            thread.postMessage({
-                type: "stop"
-            })
-        }, opts.ini.max_execution_time);
-
-
-        thread.addEventListener('message', function(e) {
-            switch( e.data.type ) {
-                case "complete":
-                    this.vm = e.data.content;
-                    complete(this);
-                    break;
-                default:
-                    console.log(e.data);
-            }
-
-        }, false);
-        return;
-    }*/
-
     this.vm = new PHP.VM( this.compiler.src, opts );
 
     if (RAW_POST !== undefined ) {
         RAW.Error(this.vm[ PHP.Compiler.prototype.ERROR ].bind( this.vm ), opts.SERVER.SCRIPT_FILENAME);
     }
-
-    /*
-    if (rawError !== undefined ) {
-        this.vm[ PHP.Compiler.prototype.ERROR ]( rawError + " in " + opts.SERVER.SCRIPT_FILENAME, PHP.Constants.E_WARNING );
-    }
-   */
 
     this.vm.Run();
 };
@@ -373,10 +322,7 @@ PHP.Utils.QueryString = function( str ) {
             value = (parts.length > 1 ) ? decodeURIComponent( parts[ 1 ] ) : null,
 
             arrayManager = function( item, parse, value ) {
-
-
                 var arraySearch = parse.match(/^\[([a-z0-9+_\-\[]*)\]/i);
-                //  console.log(item, parse, value, arraySearch);
                 if ( arraySearch !== null ) {
                     var key = ( arraySearch[ 1 ] === undefined ) ? Object.keys( item ).length : arraySearch[ 1 ];
 
@@ -438,7 +384,6 @@ PHP.Utils.QueryString = function( str ) {
         }, this);
 
     return items;
-
 };
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
@@ -3306,11 +3251,6 @@ PHP.Modules.prototype.method_exists = function( object, method ) {
     }
     
 };
-/*
-* @author Niklas von Hertzen <niklas at hertzen.com>
-* @created 30.6.2012
-* @website http://hertzen.com
- */
 PHP.Modules.prototype.$foreachInit = function( expr, ctx ) {
 
     var COMPILER = PHP.Compiler.prototype,
@@ -3338,14 +3278,14 @@ PHP.Modules.prototype.$foreachInit = function( expr, ctx ) {
         if ( objectValue[ PHP.VM.Class.INTERFACES ].indexOf("Traversable") !== -1 ) {
 
             var iterator = objectValue;
-          
+
             try {
                 while( (iterator instanceof PHP.VM.ClassPrototype) && iterator[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1  ) {
-                    iterator = iterator[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];  
+                    iterator = iterator[ COMPILER.METHOD_CALL ]( this, "getIterator" )[ COMPILER.VARIABLE_VALUE ];
                 }
             }catch(e) {
-           
-            }  
+
+            }
             if ( !(iterator instanceof PHP.VM.ClassPrototype) || iterator[ PHP.VM.Class.INTERFACES ].indexOf("Iterator") === -1) {
                 this[ COMPILER.ERROR ]( "Objects returned by " + objectValue[ COMPILER.CLASS_NAME ] + "::getIterator() must be traversable or implement interface Iterator", PHP.Constants.E_ERROR, true );
                 return;
@@ -3370,28 +3310,28 @@ PHP.Modules.prototype.$foreachInit = function( expr, ctx ) {
 
                     needReorder = false;
                     for (var key in objectValue) {
-                    
+
                         if ( key.substring(0, classProperty.length ) === classProperty) {
-                                
+
                             var name = key.substring( classProperty.length );
-                            
+
                             if (PHP.Utils.Visible.call( this, name, objectValue, ctx )) {
                                 items.push( name );
                             }
 
                         }
-                        
+
                         if (((objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] & PHP.VM.Class.PUBLIC) === PHP.VM.Class.PUBLIC) || objectValue[ PHP.VM.Class.PROPERTY_TYPE + name ] === undefined) {
 
-                           
+
                         } else {
                             needReorder = true;
                         }
                     }
                     if ( needReorder ) {
-                        items.sort(); 
+                        items.sort();
                     }
-                    
+
                     return items;
                 }.bind(this))( objectValue )
 
@@ -3433,16 +3373,6 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
     }
 
     if ( expr[ VAR.TYPE ] === VAR.ARRAY ) {
-
-
-
-        /*
-        if ( iterator.expr[ VAR.IS_REF ] !== true ) {
-            expr = iterator.clone;
-        } else {
-            expr = expr[ COMPILER.VARIABLE_VALUE ];
-        }
-        */
         var clonedValues = iterator.clone[ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
         clonedKeys =  iterator.clone[ PHP.VM.Class.PROPERTY + ARRAY.KEYS ][ COMPILER.VARIABLE_VALUE ],
         origValues = expr[ COMPILER.VARIABLE_VALUE ][ PHP.VM.Class.PROPERTY + ARRAY.VALUES ][ COMPILER.VARIABLE_VALUE ],
@@ -3450,34 +3380,17 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
         len = ( byRef === true || iterator.expr[ VAR.IS_REF ] === true ) ? origValues.length : iterator.len,
         pointer = (( byRef === true || iterator.expr[ VAR.IS_REF ] === true) ? expr[ COMPILER.VARIABLE_VALUE ] : iterator.clone )[ PHP.VM.Class.PROPERTY + ARRAY.POINTER];
 
-
-        // clean unset elements off array
-        /*
-        if ( byRef === true ) {
-            origValues.forEach(function( variable, index ) {
-                if ( variable[ VAR.DEFINED ] !== true ) {
-                    origValues.splice( index, 1 );
-                    origKeys.splice( index, 1 );
-                    console.log(origValues);
-                }
-            });
-        }*/
-
         var compareTo = (byRef === true || iterator.expr[ VAR.IS_REF ] === true)  ? origValues : clonedValues,
         result;
-
 
         var index, lowerLoop = function( index ) {
             while( compareTo [ --index ] === undefined && index > 0 ) {}
             return index;
         }
 
-
         if (  iterator.breakNext ===  true) {
-
             return false;
         }
-
 
         if ( pointer[ COMPILER.VARIABLE_VALUE ] !== iterator.count ) {
             if ( iterator.last !== undefined && iterator.last !== compareTo [ pointer[ COMPILER.VARIABLE_VALUE ] ] ) {
@@ -3601,17 +3514,11 @@ PHP.Modules.prototype.foreach = function( iterator, byRef, value, key ) {
                 return true;
             }
             return false;
-
         }
-
-
     } else {
         this[ COMPILER.ERROR ]( "Invalid argument supplied for foreach()", PHP.Constants.E_CORE_WARNING, true );
         return false;
     }
-
-
-
 };
 PHP.Modules.prototype.$include = function( $, $Static, file ) {
 
