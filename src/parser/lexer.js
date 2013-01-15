@@ -363,7 +363,7 @@ PHP.Lexer = function( src, ini ) {
             },
             {
                 value: PHP.Constants.T_COMMENT,
-                re: /^\/\*(.|\s)*?\*\//
+                re: /^\/\*([\S\s]*?)(?:\*\/|$)/
             },
             {
                 value: PHP.Constants.T_COMMENT,
