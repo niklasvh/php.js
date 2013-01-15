@@ -95,7 +95,7 @@ PHP.Adapters.XHRFileSystem.prototype.readFileSync = function( filename, xhr ) {
     
         var response; 
         xhr.onload = function() {
-            response = this.response; 
+            response = this.responseText;
    
         };
 
