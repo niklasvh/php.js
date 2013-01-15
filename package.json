@@ -1,0 +1,35 @@
+{
+  "name": "php.js",
+  "description": "PHP to JavaScript converter and VM written in JavaScript",
+  "version": "0.1.0",
+  "homepage": "http://phpjs.hertzen.com/",
+  "author": {
+    "name": "Niklas von Hertzen",
+    "email": "niklasvh@gmail.com",
+    "url": "http://hertzen.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/niklasvh/php.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/niklasvh/php.js/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://phpjs.hertzen.com//blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "lib/php",
+  "engines": {
+    "node": ">= 0.6.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "~0.3.17"
+  },
+  "keywords": []
+}

@@ -28,6 +28,10 @@ I took a test driven approach to developing this library, which means that I hav
 
 The current status of the passing tests can be seen here. I'll be the first admit that there are still a lot of bugs, but considering the complexity of the language, it is well on its way.
 
+## License ##
+JavaScript code licensed under MIT license
+PHP Files and tests under The PHP License, version 3.01
+
 ## Credits ##
  - Test cases from <a href="https://github.com/php/php-src/">php-src</a> -  The PHP License, version 3.01
  - Grammar parser adapted from <a href="https://github.com/nikic/PHP-Parser">PHP-Parser</a> - by Nikita Popov
