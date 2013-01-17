@@ -7,8 +7,8 @@ $meta #
 
 /* This is an automatically GENERATED file, which should not be manually edited.
  * Instead edit one of the following:
- *  * the grammar file grammar/zend_language_parser.phpy
- *  * the parser skeleton grammar/kymacc.php.parser
+ *  * the grammar file grammar/zend_language_parser.jsy
+ *  * the parser skeleton grammar/kymacc.js.parser
  *  * the preprocessing script grammar/rebuildParser.php
  *
  * The skeleton for this parser was written by Moriyoshi Koizumi and is based on
