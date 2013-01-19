@@ -177,8 +177,32 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
             } else {
                 /* error */
                 if (eval !== true) {
-                    throw new PHP.ParseError("syntax error, unexpected " + terminals[ tokenId ] + ", expecting identifier", this.startAttributes['startLine']);
-                    throw new Error('Unexpected token ' + terminals[ tokenId ] + ", tokenId " + tokenId + " line " + this.startAttributes['startLine']);
+
+                    var expected = [];
+
+                    for (var i = 0; i < this.TOKEN_MAP_SIZE; ++i) {
+                        if ((yyn = yybase[ state ] + i) >= 0 && yyn < this.YYLAST && yycheck[ yyn ] == i
+                         || state < this.YY2TBLSTATE
+                            && (yyn = yybase[ state + this.YYNLSTATES] + i)
+                            && yyn < this.YYLAST && yycheck[ yyn ] == i
+                        ) {
+                            if (yyaction[ yyn ] != this.YYUNEXPECTED) {
+                                if (expected.length == 4) {
+                                    /* Too many expected tokens */
+                                    expected = [];
+                                    break;
+                                }
+
+                                expected.push( this.terminals[ i ] );
+                            }
+                        }
+                    }
+
+                    var expectedString = '';
+                    if (expected.length) {
+                        expectedString = ', expecting ' + expected.join(' or ');
+                    }
+                    throw new PHP.ParseError('syntax error, unexpected ' + terminals[ tokenId ] + expectedString, this.startAttributes['startLine']);
                 } else {
                     return this.startAttributes['startLine'];
                 }
