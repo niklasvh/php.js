@@ -524,6 +524,24 @@ PHP.Parser.prototype.Node_Expr_Cast_Double = function() {
 
 };
 
+PHP.Parser.prototype.Node_Expr_Cast_Array = function() {
+    return {
+        type: "Node_Expr_Cast_Array",
+        expr: arguments[ 0 ],
+        attributes: arguments[ 1 ]
+    };
+
+};
+
+PHP.Parser.prototype.Node_Expr_Cast_Object = function() {
+    return {
+        type: "Node_Expr_Cast_Object",
+        expr: arguments[ 0 ],
+        attributes: arguments[ 1 ]
+    };
+
+};
+
 
 PHP.Parser.prototype.Node_Expr_ErrorSuppress = function() {
     return {
