@@ -1,0 +1,108 @@
+$meta #
+#semval($) this.yyval
+#semval($,%t) this.yyval
+#semval(%n) this.yyastk[ this.stackPos-(%l-%n) ]
+#semval(%n,%t) this.yyastk[ this.stackPos-(%l-%n) ]
+#include;
+
+/* This is an automatically GENERATED file, which should not be manually edited.
+ * Instead edit one of the following:
+ *  * the grammar file grammar/zend_language_parser.jsy
+ *  * the parser skeleton grammar/kymacc.js.parser
+ *  * the preprocessing script grammar/rebuildParser.php
+ *
+ * The skeleton for this parser was written by Moriyoshi Koizumi and is based on
+ * the work by Masato Bito and is in the PUBLIC DOMAIN.
+ * Ported to JavaScript by Niklas von Hertzen
+ */
+
+PHP.Parser.prototype.TOKEN_NONE    = -1;
+PHP.Parser.prototype.TOKEN_INVALID = #(YYBADCH);
+
+PHP.Parser.prototype.TOKEN_MAP_SIZE = #(YYMAXLEX);
+
+PHP.Parser.prototype.YYLAST       = #(YYLAST);
+PHP.Parser.prototype.YY2TBLSTATE  = #(YY2TBLSTATE);
+PHP.Parser.prototype.YYGLAST      = #(YYGLAST);
+PHP.Parser.prototype.YYNLSTATES   = #(YYNLSTATES);
+PHP.Parser.prototype.YYUNEXPECTED = #(YYUNEXPECTED);
+PHP.Parser.prototype.YYDEFAULT    = #(YYDEFAULT);
+
+// {{{ Tokens
+#tokenval
+PHP.Parser.prototype.%s = %n;
+#endtokenval
+// }}}
+
+/* @var array Map of token ids to their respective names */
+PHP.Parser.prototype.terminals = [
+    #listvar terminals
+    , "???"
+];
+
+/* @var Map which translates lexer tokens to internal tokens */
+PHP.Parser.prototype.translate = [
+    #listvar yytranslate
+];
+
+PHP.Parser.prototype.yyaction = [
+    #listvar yyaction
+];
+
+PHP.Parser.prototype.yycheck = [
+    #listvar yycheck
+];
+
+PHP.Parser.prototype.yybase = [
+    #listvar yybase
+];
+
+PHP.Parser.prototype.yydefault = [
+    #listvar yydefault
+];
+
+PHP.Parser.prototype.yygoto = [
+    #listvar yygoto
+];
+
+PHP.Parser.prototype.yygcheck = [
+    #listvar yygcheck
+];
+
+PHP.Parser.prototype.yygbase = [
+    #listvar yygbase
+];
+
+PHP.Parser.prototype.yygdefault = [
+    #listvar yygdefault
+];
+
+PHP.Parser.prototype.yylhs = [
+    #listvar yylhs
+];
+
+PHP.Parser.prototype.yylen = [
+    #listvar yylen
+];
+
+
+
+#endif
+
+
+
+#ifnot -t
+#reduce
+
+PHP.Parser.prototype.yyn%n = function ( attributes ) {
+    %b
+};
+#noact
+
+PHP.Parser.prototype.yyn%n = function () {
+    this.yyval = this.yyastk[ this.stackPos ];
+};
+#endreduce
+#endif
+
+#tailcode;

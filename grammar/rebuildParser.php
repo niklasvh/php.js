@@ -1,8 +1,8 @@
 <?php
 
-const GRAMMAR_FILE = './zend_language_parser.phpy';
-const TMP_FILE     = './tmp_parser.phpy';
-const RESULT_FILE  = './tmp_parser.php';
+const GRAMMAR_FILE = './zend_language_parser.jsy';
+const TMP_FILE     = './tmp_parser.jsy';
+const RESULT_FILE  = './tmp_parser.js';
 
 ///////////////////////////////
 /// Utility regex constants ///
@@ -37,7 +37,7 @@ $grammarCode = resolveArrays($grammarCode);
 file_put_contents(TMP_FILE, $grammarCode);
 
 echo 'Building parser. Output: "',
-     trim(shell_exec('kmyacc -l -m kmyacc.php.parser ' . TMP_FILE . ' 2>&1')),
+     trim(shell_exec('kmyacc -l -m kmyacc.js.parser ' . TMP_FILE . ' 2>&1')),
      '"', "\n";
 
 rename(RESULT_FILE, '../src/parser/yyn.js');

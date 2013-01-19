@@ -34,8 +34,8 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
     this.tokenMap = this.createTokenMap( );
 
     this.dropTokens = {};
-    this.dropTokens[ T_WHITESPACE ] = 1;
-    this.dropTokens[ T_OPEN_TAG ] = 1;
+    this.dropTokens[ PHP.Constants.T_WHITESPACE ] = 1;
+    this.dropTokens[ PHP.Constants.T_OPEN_TAG ] = 1;
     var tokens = [];
 
     // pre-process
@@ -109,7 +109,7 @@ PHP.Parser = function ( preprocessedTokens, eval ) {
                     && (yyn = yybase[state + this.YYNLSTATES] + tokenId) >= 0
                     && yyn < this.YYLAST
                     && yycheck[ yyn ] === tokenId))
-            && (yyn = yyaction[ yyn ]) !== YYDEFAULT ) {
+            && (yyn = yyaction[ yyn ]) !== this.YYDEFAULT ) {
                 /*
                  * >= YYNLSTATE: shift and reduce
                  * > 0: shift
@@ -205,156 +205,6 @@ PHP.Parser.prototype.MODIFIER_STATIC    =  8;
 PHP.Parser.prototype.MODIFIER_ABSTRACT  = 16;
 PHP.Parser.prototype.MODIFIER_FINAL     = 32;
 
-PHP.Parser.prototype.TOKEN_NONE    = -1;
-PHP.Parser.prototype.TOKEN_INVALID = 149;
-
-PHP.Parser.prototype.TOKEN_MAP_SIZE = 384;
-
-PHP.Parser.prototype.YYLAST       = 913;
-PHP.Parser.prototype.YY2TBLSTATE  = 328;
-PHP.Parser.prototype.YYGLAST      = 415;
-PHP.Parser.prototype.YYNLSTATES   = 544;
-PHP.Parser.prototype.YYUNEXPECTED = 32767;
-PHP.Parser.prototype.YYDEFAULT    = -32766;
-
-PHP.Parser.prototype.YYERRTOK = 256;
-PHP.Parser.prototype.T_INCLUDE = 257;
-PHP.Parser.prototype.T_INCLUDE_ONCE = 258;
-PHP.Parser.prototype.T_EVAL = 259;
-PHP.Parser.prototype.T_REQUIRE = 260;
-PHP.Parser.prototype.T_REQUIRE_ONCE = 261;
-PHP.Parser.prototype.T_LOGICAL_OR = 262;
-PHP.Parser.prototype.T_LOGICAL_XOR = 263;
-PHP.Parser.prototype.T_LOGICAL_AND = 264;
-PHP.Parser.prototype.T_PRINT = 265;
-PHP.Parser.prototype.T_PLUS_EQUAL = 266;
-PHP.Parser.prototype.T_MINUS_EQUAL = 267;
-PHP.Parser.prototype.T_MUL_EQUAL = 268;
-PHP.Parser.prototype.T_DIV_EQUAL = 269;
-PHP.Parser.prototype.T_CONCAT_EQUAL = 270;
-PHP.Parser.prototype.T_MOD_EQUAL = 271;
-PHP.Parser.prototype.T_AND_EQUAL = 272;
-PHP.Parser.prototype.T_OR_EQUAL = 273;
-PHP.Parser.prototype.T_XOR_EQUAL = 274;
-PHP.Parser.prototype.T_SL_EQUAL = 275;
-PHP.Parser.prototype.T_SR_EQUAL = 276;
-PHP.Parser.prototype.T_BOOLEAN_OR = 277;
-PHP.Parser.prototype.T_BOOLEAN_AND = 278;
-PHP.Parser.prototype.T_IS_EQUAL = 279;
-PHP.Parser.prototype.T_IS_NOT_EQUAL = 280;
-PHP.Parser.prototype.T_IS_IDENTICAL = 281;
-PHP.Parser.prototype.T_IS_NOT_IDENTICAL = 282;
-PHP.Parser.prototype.T_IS_SMALLER_OR_EQUAL = 283;
-PHP.Parser.prototype.T_IS_GREATER_OR_EQUAL = 284;
-PHP.Parser.prototype.T_SL = 285;
-PHP.Parser.prototype.T_SR = 286;
-PHP.Parser.prototype.T_INSTANCEOF = 287;
-PHP.Parser.prototype.T_INC = 288;
-PHP.Parser.prototype.T_DEC = 289;
-PHP.Parser.prototype.T_INT_CAST = 290;
-PHP.Parser.prototype.T_DOUBLE_CAST = 291;
-PHP.Parser.prototype.T_STRING_CAST = 292;
-PHP.Parser.prototype.T_ARRAY_CAST = 293;
-PHP.Parser.prototype.T_OBJECT_CAST = 294;
-PHP.Parser.prototype.T_BOOL_CAST = 295;
-PHP.Parser.prototype.T_UNSET_CAST = 296;
-PHP.Parser.prototype.T_NEW = 297;
-PHP.Parser.prototype.T_CLONE = 298;
-PHP.Parser.prototype.T_EXIT = 299;
-PHP.Parser.prototype.T_IF = 300;
-PHP.Parser.prototype.T_ELSEIF = 301;
-PHP.Parser.prototype.T_ELSE = 302;
-PHP.Parser.prototype.T_ENDIF = 303;
-PHP.Parser.prototype.T_LNUMBER = 304;
-PHP.Parser.prototype.T_DNUMBER = 305;
-PHP.Parser.prototype.T_STRING = 306;
-PHP.Parser.prototype.T_STRING_VARNAME = 307;
-PHP.Parser.prototype.T_VARIABLE = 308;
-PHP.Parser.prototype.T_NUM_STRING = 309;
-PHP.Parser.prototype.T_INLINE_HTML = 310;
-PHP.Parser.prototype.T_CHARACTER = 311;
-PHP.Parser.prototype.T_BAD_CHARACTER = 312;
-PHP.Parser.prototype.T_ENCAPSED_AND_WHITESPACE = 313;
-PHP.Parser.prototype.T_CONSTANT_ENCAPSED_STRING = 314;
-PHP.Parser.prototype.T_ECHO = 315;
-PHP.Parser.prototype.T_DO = 316;
-PHP.Parser.prototype.T_WHILE = 317;
-PHP.Parser.prototype.T_ENDWHILE = 318;
-PHP.Parser.prototype.T_FOR = 319;
-PHP.Parser.prototype.T_ENDFOR = 320;
-PHP.Parser.prototype.T_FOREACH = 321;
-PHP.Parser.prototype.T_ENDFOREACH = 322;
-PHP.Parser.prototype.T_DECLARE = 323;
-PHP.Parser.prototype.T_ENDDECLARE = 324;
-PHP.Parser.prototype.T_AS = 325;
-PHP.Parser.prototype.T_SWITCH = 326;
-PHP.Parser.prototype.T_ENDSWITCH = 327;
-PHP.Parser.prototype.T_CASE = 328;
-PHP.Parser.prototype.T_DEFAULT = 329;
-PHP.Parser.prototype.T_BREAK = 330;
-PHP.Parser.prototype.T_CONTINUE = 331;
-PHP.Parser.prototype.T_GOTO = 332;
-PHP.Parser.prototype.T_FUNCTION = 333;
-PHP.Parser.prototype.T_CONST = 334;
-PHP.Parser.prototype.T_RETURN = 335;
-PHP.Parser.prototype.T_TRY = 336;
-PHP.Parser.prototype.T_CATCH = 337;
-PHP.Parser.prototype.T_THROW = 338;
-PHP.Parser.prototype.T_USE = 339;
-PHP.Parser.prototype.T_INSTEADOF = 340;
-PHP.Parser.prototype.T_GLOBAL = 341;
-PHP.Parser.prototype.T_STATIC = 342;
-PHP.Parser.prototype.T_ABSTRACT = 343;
-PHP.Parser.prototype.T_FINAL = 344;
-PHP.Parser.prototype.T_PRIVATE = 345;
-PHP.Parser.prototype.T_PROTECTED = 346;
-PHP.Parser.prototype.T_PUBLIC = 347;
-PHP.Parser.prototype.T_VAR = 348;
-PHP.Parser.prototype.T_UNSET = 349;
-PHP.Parser.prototype.T_ISSET = 350;
-PHP.Parser.prototype.T_EMPTY = 351;
-PHP.Parser.prototype.T_HALT_COMPILER = 352;
-PHP.Parser.prototype.T_CLASS = 353;
-PHP.Parser.prototype.T_TRAIT = 354;
-PHP.Parser.prototype.T_INTERFACE = 355;
-PHP.Parser.prototype.T_EXTENDS = 356;
-PHP.Parser.prototype.T_IMPLEMENTS = 357;
-PHP.Parser.prototype.T_OBJECT_OPERATOR = 358;
-PHP.Parser.prototype.T_DOUBLE_ARROW = 359;
-PHP.Parser.prototype.T_LIST = 360;
-PHP.Parser.prototype.T_ARRAY = 361;
-PHP.Parser.prototype.T_CALLABLE = 362;
-PHP.Parser.prototype.T_CLASS_C = 363;
-PHP.Parser.prototype.T_TRAIT_C = 364;
-PHP.Parser.prototype.T_METHOD_C = 365;
-PHP.Parser.prototype.T_FUNC_C = 366;
-PHP.Parser.prototype.T_LINE = 367;
-PHP.Parser.prototype.T_FILE = 368;
-PHP.Parser.prototype.T_COMMENT = 369;
-PHP.Parser.prototype.T_DOC_COMMENT = 370;
-PHP.Parser.prototype.T_OPEN_TAG = 371;
-PHP.Parser.prototype.T_OPEN_TAG_WITH_ECHO = 372;
-PHP.Parser.prototype.T_CLOSE_TAG = 373;
-PHP.Parser.prototype.T_WHITESPACE = 374;
-PHP.Parser.prototype.T_START_HEREDOC = 375;
-PHP.Parser.prototype.T_END_HEREDOC = 376;
-PHP.Parser.prototype.T_DOLLAR_OPEN_CURLY_BRACES = 377;
-PHP.Parser.prototype.T_CURLY_OPEN = 378;
-PHP.Parser.prototype.T_PAAMAYIM_NEKUDOTAYIM = 379;
-PHP.Parser.prototype.T_NAMESPACE = 380;
-PHP.Parser.prototype.T_NS_C = 381;
-PHP.Parser.prototype.T_DIR = 382;
-PHP.Parser.prototype.T_NS_SEPARATOR = 383;
-
-
-
-
-
-
-
-
-
-
 PHP.Parser.prototype.getNextToken = function( ) {
 
     this.startAttributes = {};
@@ -384,7 +234,7 @@ PHP.Parser.prototype.getNextToken = function( ) {
 
             this.line += ((tmp = token[ 1 ].match(/\n/g)) === null) ? 0 : tmp.length;
 
-            if (T_COMMENT === token[0]) {
+            if (PHP.Constants.T_COMMENT === token[0]) {
 
                 if (!Array.isArray(this.startAttributes['comments'])) {
                     this.startAttributes['comments'] = [];
@@ -396,7 +246,7 @@ PHP.Parser.prototype.getNextToken = function( ) {
                     line: token[2]
                 });
 
-            } else if (T_DOC_COMMENT === token[0]) {
+            } else if (PHP.Constants.T_DOC_COMMENT === token[0]) {
                 this.startAttributes['comments'].push( new PHPParser_Comment_Doc(token[1], token[2]) );
             } else if (this.dropTokens[token[0]] === undefined) {
                 this.tokenValue = token[1];
@@ -429,7 +279,7 @@ PHP.Parser.prototype.createTokenMap = function() {
     var tokenMap = {},
     name,
     i;
-    var T_DOUBLE_COLON = T_PAAMAYIM_NEKUDOTAYIM;
+    var T_DOUBLE_COLON = PHP.Constants.T_PAAMAYIM_NEKUDOTAYIM;
     // 256 is the minimum possible token number, as everything below
     // it is an ASCII value
     for ( i = 256; i < 1000; ++i ) {
@@ -437,10 +287,10 @@ PHP.Parser.prototype.createTokenMap = function() {
         if ( T_DOUBLE_COLON === i ) {
             tokenMap[ i ] = this.T_PAAMAYIM_NEKUDOTAYIM;
         // T_OPEN_TAG_WITH_ECHO with dropped T_OPEN_TAG results in T_ECHO
-        } else if( T_OPEN_TAG_WITH_ECHO === i ) {
-            tokenMap[ i ] = T_ECHO;
+        } else if( PHP.Constants.T_OPEN_TAG_WITH_ECHO === i ) {
+            tokenMap[ i ] = PHP.Constants.T_ECHO;
         // T_CLOSE_TAG is equivalent to ';'
-        } else if( T_CLOSE_TAG === i ) {
+        } else if( PHP.Constants.T_CLOSE_TAG === i ) {
             tokenMap[ i ] = 59;
         // and the others can be mapped directly
         } else if ( 'UNKNOWN' !== (name = PHP.Utils.TokenName( i ) ) ) {
