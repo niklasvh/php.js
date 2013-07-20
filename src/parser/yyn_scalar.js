@@ -83,6 +83,26 @@ PHP.Parser.prototype.Node_Name = function() {
   
 };
 
+PHP.Parser.prototype.Node_Name_FullyQualified = function() {
+   
+    return {
+        type: "Node_Name_FullyQualified",
+        parts: arguments[ 0 ],
+        attributes: arguments[ 1 ]
+    };  
+  
+};
+
+PHP.Parser.prototype.Node_Name_Relative = function() {
+   
+    return {
+        type: "Node_Name_Relative",
+        parts: arguments[ 0 ],
+        attributes: arguments[ 1 ]
+    };  
+  
+};
+
 PHP.Parser.prototype.Node_Param = function() {
    
     return {
@@ -107,7 +127,6 @@ PHP.Parser.prototype.Node_Arg = function() {
   
 };
 
-
 PHP.Parser.prototype.Node_Const = function() {
    
     return {
@@ -118,4 +137,3 @@ PHP.Parser.prototype.Node_Const = function() {
     };  
   
 };
-

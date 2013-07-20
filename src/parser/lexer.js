@@ -17,6 +17,10 @@ PHP.Lexer = function( src, ini ) {
         openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /^(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
             tokens = [
             {
+                value: PHP.Constants.T_NAMESPACE,
+                re: /^namespace(?=\s)/i
+            },
+            {
                 value: PHP.Constants.T_USE,
                 re: /^use(?=\s)/i
             },
@@ -308,6 +312,10 @@ PHP.Lexer = function( src, ini ) {
                 value: PHP.Constants.T_CLASS,
                 re: /^class(?=[\s\{])/i,
                 afterWhitespace: true
+            },
+            {
+                value: PHP.Constants.T_TRAIT,
+                re: /^trait(?=[\s]+[A-Za-z])/i,
             },
             {
                 value: PHP.Constants.T_PUBLIC,
@@ -614,6 +622,10 @@ PHP.Lexer = function( src, ini ) {
              */
                     return result;
                 }
+            },
+            {
+                value: PHP.Constants.T_NS_SEPARATOR,
+                re: /^\\(?=[a-zA-Z_])/
             },
             {
                 value: PHP.Constants.T_STRING,
