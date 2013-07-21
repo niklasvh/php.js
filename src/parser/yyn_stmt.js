@@ -63,6 +63,63 @@ PHP.Parser.prototype.Stmt_Class_verifyModifier = function() {
 
 };
 
+PHP.Parser.prototype.Node_Stmt_Namespace = function() {
+    return {
+        type: "Node_Stmt_Namespace",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_Use = function() {
+    return {
+        type: "Node_Stmt_Use",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_UseUse = function() {
+    return {
+        type: "Node_Stmt_UseUse",
+        name: arguments[ 0 ],
+        as: arguments[1],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_TraitUseAdaptation_Precedence = function() {
+    return {
+        type: "Node_Stmt_TraitUseAdaptation_Precedence",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_TraitUseAdaptation_Alias = function() {
+    return {
+        type: "Node_Stmt_TraitUseAdaptation_Alias",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_Trait = function() {
+    return {
+        type: "Node_Stmt_Trait",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_TraitUse = function() {
+    return {
+        type: "Node_Stmt_TraitUse",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
 PHP.Parser.prototype.Node_Stmt_Class = function() {
     return {
         type: "Node_Stmt_Class",
