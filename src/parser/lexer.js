@@ -562,7 +562,7 @@ PHP.Lexer = function( src, ini ) {
                             if ( curlyOpen > 0) {
                                 re = /^([^\\\$"{}\]]|\\.)+/g;
                             } else {
-                                re = /^([^\\\$"{]|\\.|{[^\$])+/g;
+                                re = /^([^\\\$"{]|\\.|{[^\$]|\$(?=[^a-zA-Z_\x7f-\xff]))+/g;;
                             }
 
                             while(( match = result.match( re )) !== null ) {
