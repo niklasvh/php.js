@@ -1,6 +1,5 @@
-.bug37276.txt
 /tmp/
 /bin/
 /nbproject/
-/node_modules/minify/node_modules/.bin/
-/node_modules/node-minify/node_modules/.bin/
+/node_modules
+*.idea

@@ -1,10 +1,3 @@
-/*
-  php.js 0.1.0 <http://phpjs.hertzen.com/>
-  Copyright (c) 2013 Niklas von Hertzen
-
-  Released under MIT License
-*/
-
 var PHP = function( code, opts ) {
 
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" ),
@@ -5297,7 +5290,7 @@ PHP.Constants.T_ISSET = 350;
 PHP.Constants.T_EMPTY = 351;
 PHP.Constants.T_HALT_COMPILER = 352;
 PHP.Constants.T_CLASS = 353;
-//PHP.Constants.T_TRAIT = ;
+PHP.Constants.T_TRAIT = 382;
 PHP.Constants.T_INTERFACE = 354;
 PHP.Constants.T_EXTENDS = 355;
 PHP.Constants.T_IMPLEMENTS = 356;
@@ -5328,6 +5321,7 @@ PHP.Constants.T_NAMESPACE = 377;
 PHP.Constants.T_NS_C = 378;
 PHP.Constants.T_DIR = 379;
 PHP.Constants.T_NS_SEPARATOR = 380;
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 28.6.2012 
@@ -6557,6 +6551,14 @@ PHP.Lexer = function( src, ini ) {
         openTagStart = (ini === undefined || (/^(on|true|1)$/i.test(ini.short_open_tag)) ? /^(\<\?php\s|\<\?|\<\%|\<script language\=('|")?php('|")?\>)/i : /^(\<\?php\s|<\?=|\<script language\=('|")?php('|")?\>)/i),
             tokens = [
             {
+                value: PHP.Constants.T_NAMESPACE,
+                re: /^namespace(?=\s)/i
+            },
+            {
+                value: PHP.Constants.T_USE,
+                re: /^use(?=\s)/i
+            },
+            {
                 value: PHP.Constants.T_ABSTRACT,
                 re: /^abstract(?=\s)/i
             },
@@ -6846,6 +6848,10 @@ PHP.Lexer = function( src, ini ) {
                 afterWhitespace: true
             },
             {
+                value: PHP.Constants.T_TRAIT,
+                re: /^trait(?=[\s]+[A-Za-z])/i,
+            },
+            {
                 value: PHP.Constants.T_PUBLIC,
                 re: /^public(?=[\s])/i
             },
@@ -7063,7 +7069,7 @@ PHP.Lexer = function( src, ini ) {
 
                                 result = result.substring( match[ 0 ].length );
 
-                                match = result.match(/^(\-\>)([a-zA-Z0-9_\x7f-\xff]*)/);
+                                match = result.match(/^(\-\>)\s*([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)\s*(\()/);
 
                                 if ( match !== null ) {
 
@@ -7077,6 +7083,8 @@ PHP.Lexer = function( src, ini ) {
                                         match[ 2 ],
                                         line
                                         ]);
+                                    if (match[3])
+                                        results.push(match[3]);
                                     result = result.substring( match[ 0 ].length );
                                 }
 
@@ -7088,43 +7096,52 @@ PHP.Lexer = function( src, ini ) {
 
                             var re;
                             if ( curlyOpen > 0) {
-                                re = /^([^\\\$"{}\]\)\->]|\\.)+/g;
+                                re = /^([^\\\$"{}\]\(\)\->]|\\.)+/g;
                             } else {
                                 re = /^([^\\\$"{]|\\.|{[^\$]|\$(?=[^a-zA-Z_\x7f-\uffff]))+/g;
                             }
 
+                            var type, match2;
                             while(( match = result.match( re )) !== null ) {
-
-
                                 if (result.length === 1) {
                                     throw new Error(match);
                                 }
+                                
+                                type = 0;
 
-
-
-                                results.push([
-                                    parseInt(( curlyOpen > 0 ) ? PHP.Constants.T_STRING : PHP.Constants.T_ENCAPSED_AND_WHITESPACE, 10),
-                                    match[ 0 ].replace(/\n/g,"\\n").replace(/\r/g,""),
-                                    line
-                                    ]);
+                                if( curlyOpen > 0 ){
+                                    if( match2 = match[0].match(/^[\[\]\;\:\?\(\)\!\.\,\>\<\=\+\-\/\*\|\&\{\}\@\^\%\$\~]/) ){
+                                        results.push(match2[0]);
+                                    }else{
+                                        type = PHP.Constants.T_STRING;
+                                    }
+                                }else{
+                                    type = PHP.Constants.T_ENCAPSED_AND_WHITESPACE;
+                                }
+                                
+                                if( type ){
+                                    results.push([
+                                        parseInt(type, 10),
+                                        match[ 0 ].replace(/\n/g,"\\n").replace(/\r/g,""),
+                                        line
+                                        ]);
+                                }
 
                                 line += match[ 0 ].split('\n').length - 1;
 
                                 result = result.substring( match[ 0 ].length );
-
                             }
 
                             if( curlyOpen > 0 && result.match(/^\->/) !== null ) {
-                                results.push([
-                                    parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10),
-                                    '->',
-                                    line
-                                    ]);
+								results.push([
+									parseInt(PHP.Constants.T_OBJECT_OPERATOR, 10),
+									'->',
+									line
+								    ]);
                                 result = result.substring( 2 );
                             }
 
                             if( result.match(/^{\$/) !== null ) {
-
                                 results.push([
                                     parseInt(PHP.Constants.T_CURLY_OPEN, 10),
                                     "{",
@@ -7146,7 +7163,7 @@ PHP.Lexer = function( src, ini ) {
                         return undefined;
 
                     } else {
-                        result = result.replace(/\r/g,"");
+                        result = result.replace(/\n/g,"\\n").replace(/\r/g,"");
                     }
 
                     /*
@@ -7159,6 +7176,10 @@ PHP.Lexer = function( src, ini ) {
              */
                     return result;
                 }
+            },
+            {
+                value: PHP.Constants.T_NS_SEPARATOR,
+                re: /^\\(?=[a-zA-Z_])/
             },
             {
                 value: PHP.Constants.T_STRING,
@@ -10211,6 +10232,63 @@ PHP.Parser.prototype.Stmt_Class_verifyModifier = function() {
 
 };
 
+PHP.Parser.prototype.Node_Stmt_Namespace = function() {
+    return {
+        type: "Node_Stmt_Namespace",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_Use = function() {
+    return {
+        type: "Node_Stmt_Use",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_UseUse = function() {
+    return {
+        type: "Node_Stmt_UseUse",
+        name: arguments[ 0 ],
+        as: arguments[1],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_TraitUseAdaptation_Precedence = function() {
+    return {
+        type: "Node_Stmt_TraitUseAdaptation_Precedence",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_TraitUseAdaptation_Alias = function() {
+    return {
+        type: "Node_Stmt_TraitUseAdaptation_Alias",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_Trait = function() {
+    return {
+        type: "Node_Stmt_Trait",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
+PHP.Parser.prototype.Node_Stmt_TraitUse = function() {
+    return {
+        type: "Node_Stmt_TraitUse",
+        name: arguments[ 0 ],
+        attributes: arguments[ 2 ]
+    };  
+};
+
 PHP.Parser.prototype.Node_Stmt_Class = function() {
     return {
         type: "Node_Stmt_Class",
@@ -10459,6 +10537,7 @@ PHP.Parser.prototype.Node_Stmt_Unset = function() {
     };  
 
 };
+
 /*
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 20.7.2012
@@ -11173,6 +11252,7 @@ PHP.Parser.prototype.Node_Expr_Clone = function() {
     };
 
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 20.7.2012 
@@ -11258,6 +11338,26 @@ PHP.Parser.prototype.Node_Name = function() {
   
 };
 
+PHP.Parser.prototype.Node_Name_FullyQualified = function() {
+   
+    return {
+        type: "Node_Name_FullyQualified",
+        parts: arguments[ 0 ],
+        attributes: arguments[ 1 ]
+    };  
+  
+};
+
+PHP.Parser.prototype.Node_Name_Relative = function() {
+   
+    return {
+        type: "Node_Name_Relative",
+        parts: arguments[ 0 ],
+        attributes: arguments[ 1 ]
+    };  
+  
+};
+
 PHP.Parser.prototype.Node_Param = function() {
    
     return {
@@ -11282,7 +11382,6 @@ PHP.Parser.prototype.Node_Arg = function() {
   
 };
 
-
 PHP.Parser.prototype.Node_Const = function() {
    
     return {
@@ -11293,7 +11392,6 @@ PHP.Parser.prototype.Node_Const = function() {
     };  
   
 };
-
 
 /* 
  * based on node-iniparser Copyright (c) 2009-2010 Jordy van Gelder <jordyvangelder@gmail.com>

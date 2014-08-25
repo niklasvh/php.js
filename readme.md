@@ -18,15 +18,19 @@ The code can be directly run in your browser, meaning you can execute php code s
 
 ## Usage ##
     var engine = new PHP ('<?php echo "Hello world!"; ?>');
-    console.log( engine.vm.OUTPUT_BUFFER); // the outputted buffer from the script
+    console.log(engine.vm.OUTPUT_BUFFER); // the outputted buffer from the script
 
 The code is by default run synchronously so the output will be immidiately readable upon the engine finishing execution. Alternatively, the VM can be set to run under a web worker as well, in which case a callback function will need to be provided.
 
 ## Status ##
 
-I took a test driven approach to developing this library, which means that I have been mostly focusing on getting the php unit tests (which PHP uses itself) to work correctly. If a certain functionality hasn't been a part of the base unit tests (around 670 in total), it most likely won't work or only works partially. Additionally, only a fraction of module functions have been implemented, and even for the ones that have been, many of them are only partially implemented (i.e. signature checks haven't really been implemented to any functions, although user created functions support them). However, additional functions can easily be added, as they can be written in PHP and have them compiled into JavaScript.
+This project was purely for my personal learning. If it isn't obvious, this shouldn't be incorporated in any type of application, and the only reason it is open source is that if someone would find useful information or parts from it. I took a test driven approach to developing this library, which means that I have been mostly focusing on getting the php unit tests (which PHP uses itself) to work correctly. If a certain functionality hasn't been a part of the base unit tests (around 670 in total), it most likely won't work or only works partially. Additionally, only a fraction of module functions have been implemented, and even for the ones that have been, many of them are only partially implemented (i.e. signature checks haven't really been implemented to any functions, although user created functions support them). However, additional functions can easily be added, as they can be written in PHP and have them compiled into JavaScript.
 
 The current status of the passing tests can be seen here. I'll be the first admit that there are still a lot of bugs, but considering the complexity of the language, it is well on its way.
+
+## Building ##
+    npm install
+    grunt 
 
 ## License ##
 JavaScript code licensed under MIT license
