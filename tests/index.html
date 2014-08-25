@@ -3,73 +3,113 @@
     <head>
         <title>php.js test suite</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script>
-            var exports = {};
-        </script>
-
-        <script src="src/include.js"></script>
-
+        <link rel="stylesheet" href="/mocha/mocha.css" />
+        <script src="/expect/index.js"></script>
+        <script src="/mocha/mocha.js"></script>
+        <script>mocha.setup('bdd')</script>
+        <script src="/dist/php.js"></script>
         <script src="adapters/filesystem/xhr.js"></script>
-
-        <script src="src/lib/diff_match_patch.js"></script>
-
-        <script src="tests/tests.js"></script>
-
-        <style>
-            body {
-                font-family: Arial, Sans-Serif;
-                font-size:11px;
-            }
-
-            ins {
-
-                background:#E6FFE6;
-            }
-            del {
-                background:#FFE6E6;
-            }
-
-            li {
-                white-space: pre;
-            }
-
-        </style>
-
         <script>
-           
-   
+            // phantomjs is using old version of jsc, doesn't have bind
+            if (!Function.prototype.bind) {
+                Function.prototype.bind = function (oThis) {
+                    if (typeof this !== "function") {
+                        // closest thing possible to the ECMAScript 5
+                        // internal IsCallable function
+                        throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+                    }
 
-            
+                    var aArgs = Array.prototype.slice.call(arguments, 1),
+                            fToBind = this,
+                            fNOP = function () {},
+                            fBound = function () {
+                                return fToBind.apply(this instanceof fNOP && oThis
+                                                ? this
+                                                : oThis,
+                                        aArgs.concat(Array.prototype.slice.call(arguments)));
+                            };
+
+                    fNOP.prototype = this.prototype;
+                    fBound.prototype = new fNOP();
+
+                    return fBound;
+                };
+            }
+
+            function initOptions(test) {
+                var opts = {
+                    POST: test.POST,
+                    RAW_POST: test.POST_RAW,
+                    GET: test.GET,
+                    ini: (test.INI !== undefined ) ? PHP.ini(test.INI) : {},
+                    SERVER: {
+                        SCRIPT_FILENAME: test.path.substring(0, test.path.length - 1)
+                    }
+                };
+
+                if (test.ARGS !== undefined ) {
+                    var args = test.ARGS.trim().split(/\s/);
+                    args.unshift( path );
+                    opts.SERVER.argc = args.length;
+                    opts.SERVER.argv = args;
+                } else if (test.GET !== undefined) {
+                    var args = test.GET.replace(/\+/g," ").trim().split(/\s/);
+                    opts.SERVER.argc = args.length;
+                    opts.SERVER.argv = args;
+                }
+
+                opts.filesystem = new PHP.Adapters.XHRFileSystem();
+
+                return opts;
+            }
+
+            function buildTests(suite, tests) {
+                describe(suite, function() {
+                    tests.forEach(function(test) {
+                        it(test.TEST, function() {
+                            var engine = new PHP(test.FILE || test.FILEEOF, initOptions(test));
+                            var expected = ((test.EXPECT === undefined) ? ((test.EXPECTF ===  undefined ) ? test.EXPECTREGEX  : test.EXPECTF) : test.EXPECT)
+                                    .trim()
+                                    .replace(/\%unicode\|string\%/g, "string")
+                                    .replace(/\%string\|unicode\%/g, "string")
+                                    .replace(/\%u\|b\%/g, "");
+                            var output = engine.vm.OUTPUT_BUFFER.replace(/\n/g, "\r\n").trim();
+
+                            if (test.EXPECTREGEX !== undefined) {
+                                expect(output).to.match(new RegExp("^" + expected + "$", "i"));
+                            } else if (test.EXPECT === undefined ) {
+                                var shouldBef = expected.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
+                                        .replace(/\%d/g,"\\d+")
+                                        .replace(/\%i/g,"(\\+|\\-)?\\d+")
+                                        .replace(/\%s/g,".+")
+                                        .replace(/\%c/g,".")
+                                        .replace(/\%S/g,".*?")
+                                        .replace(/\%x/g,"[0-9a-fA-F]+")
+                                        .replace(/\%f/g,"[-+]?[0-9]*\\.?[0-9]*");
+                                expect(output).to.match(new RegExp("^" + shouldBef + "$", "i"));
+                            } else {
+                                expect(output).to.be(expected);
+                            }
+                        });
+                    })
+                });
+            }
         </script>
     </head>
     <body>
-        <div id="tests"></div>
+        <div id="mocha"></div>
+
+        <script src="/tests/ext/tokenizer"></script>
+        <script src="/tests/basic"></script>
+        <script src="/tests/func"></script>
+        <script src="/tests/lang"></script>
+        <script src="/tests/classes"></script>
+        <script src="/tests/strings"></script>
+        <script src="/tests/run-test"></script>
+        <script src="/tests/output"></script>
+        <script src="/phantomjs/bridge.js" type="text/javascript" charset="utf-8"></script>
         <script>
-            
-            var tests = ["ext/tokenizer","basic","func","lang","classes","strings","run-test","output"];
-            
-          
-            var el = document.getElementById("tests");
-            tests.forEach(function( file ){
-                var a = document.createElement("a");
-                a.href = "?pack=" + file;
-                a.innerHTML = file;
-                el.appendChild( a );
-                el.appendChild( document.createElement("br") );
-            });
-            
-            if (window.location.search.indexOf("?pack=") !== -1 ) {     
-                 new PHP_Tests( window.location.search.split("?pack=")[1], document.getElementById("tests") );
-            }
-          
-            //   new PHP_Tests( "ext/tokenizer", document.getElementById("tests") );
-            //   new PHP_Tests( "basic", document.getElementById("tests") );
-            //      new PHP_Tests( "func", document.getElementById("tests") );
-         //   new PHP_Tests( "lang", document.getElementById("tests") );
-            // new PHP_Tests( "classes", document.getElementById("tests") );
-            //   new PHP_Tests( "strings", document.getElementById("tests") );
-            //  new PHP_Tests( "output", document.getElementById("tests") );
-         
+            mocha.run();
         </script>
     </body>
 </html>

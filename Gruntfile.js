@@ -167,11 +167,28 @@ module.exports = function(grunt) {
                 src: '<%= concat.dist.dest %>',
                 dest: 'dist/php.min.js'
             }
+        },
+        express: {
+            test: {
+                options: {
+                    script: __dirname + "/tests/test_server.js"
+                }
+            }
+        },
+        mocha: {
+            desc: [__dirname + '/tests/results'],
+            options: {
+                run: false,
+                urls: ['http://localhost:3000/index.html'],
+                timeout: 10000
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-express-server');
+    grunt.loadNpmTasks('grunt-mocha');
 
-    grunt.registerTask('default', ['concat', 'uglify']);
+    grunt.registerTask('default', ['concat', 'uglify', 'express', 'mocha']);
 };
