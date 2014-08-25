@@ -17,7 +17,7 @@ The code can be directly run in your browser, meaning you can execute php code s
  - <a href="http://phpjs.hertzen.com/console.html?gist=3171462">tokenizer</a>
 
 ## Usage ##
-    var engine = new PHP ('<?php echo "Hello world!"; ?>');
+    var engine = new PHP ('<?php echo "Hello world!"; ?>', options);
     console.log(engine.vm.OUTPUT_BUFFER); // the outputted buffer from the script
 
 The code is by default run synchronously so the output will be immidiately readable upon the engine finishing execution. Alternatively, the VM can be set to run under a web worker as well, in which case a callback function will need to be provided.

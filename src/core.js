@@ -1,4 +1,8 @@
 var PHP = function( code, opts ) {
+    var opts = opts || {};
+    opts.filesystem = opts.filesystem || typeof(window) !== "undefined" ? new PHP.Adapters.XHRFileSystem() : require('fs');
+    opts.SERVER = opts.SERVER || {};
+    opts.SERVER.SCRIPT_FILENAME = opts.SERVER.SCRIPT_FILENAME || "";
 
     var iniContent = opts.filesystem.readFileSync( "cfg/php.ini" ),
     iniSet = opts.ini || {};

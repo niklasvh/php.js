@@ -154,6 +154,7 @@ module.exports = function(grunt) {
                     "src/predefined/interfaces/IteratorAggregate.js",
                     "src/predefined/interfaces/Reflector.js",
                     "src/predefined/interfaces/Serializable.js",
+                    "adapters/filesystem/xhr.js",
                     "cfg/locales.js"
                 ],
                 dest: 'dist/<%= pkg.name %>'
@@ -190,5 +191,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-express-server');
     grunt.loadNpmTasks('grunt-mocha');
 
-    grunt.registerTask('default', ['concat', 'uglify', 'express', 'mocha']);
+    grunt.registerTask('build', ['concat', 'uglify']);
+    grunt.registerTask('test', ['express', 'mocha']);
+
+    grunt.registerTask('default', ['build', 'test']);
+
 };
