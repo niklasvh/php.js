@@ -161,6 +161,28 @@ PHP.Parser.prototype.Node_Expr_AssignMod = function() {
 
 };
 
+PHP.Parser.prototype.Node_Expr_AssignBitwiseAnd = function() {
+
+    return {
+        type: "Node_Expr_AssignBitwiseAnd",
+        variable: arguments[ 0 ],
+        expr: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };
+
+};
+
+PHP.Parser.prototype.Node_Expr_AssignBitwiseOr = function() {
+
+    return {
+        type: "Node_Expr_AssignBitwiseOr",
+        variable: arguments[ 0 ],
+        expr: arguments[ 1 ],
+        attributes: arguments[ 2 ]
+    };
+
+};
+
 PHP.Parser.prototype.Node_Expr_Plus = function() {
 
     return {
