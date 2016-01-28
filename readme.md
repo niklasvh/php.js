@@ -5,7 +5,7 @@ php.js
 
 This library reads PHP code and transforms it into JavaScript code which can be run in the PHP VM in this library, resulting in same results as with PHP. It starts by tokenizing the PHP code into tokens, which it then uses to build an AST tree. Once the tree has been constructed, the script compiles it into JavaScript that can be interpreted by the VM and then executes it. Any additional unconverted code that gets executed within the VM, such as eval or lambda functions will go through the same process before being executed.
 
-The code can be directly run in your browser, meaning you can execute php code straight out of your browser! It can also be run on node.js, but strongly recommend not to, due to potential security issues.
+The code can be directly run in your browser, meaning you can execute PHP code straight out of your browser! It can also be run on node.js, but strongly recommend not to, due to potential security issues.
 
 ## Some examples ##
 
@@ -20,7 +20,7 @@ The code can be directly run in your browser, meaning you can execute php code s
     var engine = new PHP ('<?php echo "Hello world!"; ?>', options);
     console.log(engine.vm.OUTPUT_BUFFER); // the outputted buffer from the script
 
-The code is by default run synchronously so the output will be immidiately readable upon the engine finishing execution. Alternatively, the VM can be set to run under a web worker as well, in which case a callback function will need to be provided.
+The code is by default run synchronously so the output will be immediately readable upon the engine finishing execution. Alternatively, the VM can be set to run under a web worker as well, in which case a callback function will need to be provided.
 
 ## Status ##
 
