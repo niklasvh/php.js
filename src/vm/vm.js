@@ -172,7 +172,7 @@ PHP.VM = function( src, opts ) {
     ENV[ PHP.Compiler.prototype.RESOURCES ] = PHP.VM.ResourceManager( ENV );
 
     ENV.$Array = new PHP.VM.Array( ENV );
-    var variables_order = this.$ini.variables_order;
+    var variables_order = this.$ini.PHP.variables_order;
 
     this.FUNCTION_REFS = {};
     $('php_errormsg').$ = new PHP.VM.Variable();
@@ -187,8 +187,8 @@ PHP.VM = function( src, opts ) {
 
     // todo add error reporting level parser
 
-    if (isNaN( this.$ini.error_reporting - 0)) {
-        var lvl = this.$ini.error_reporting;
+    if (isNaN( this.$ini.PHP.error_reporting - 0)) {
+        var lvl = this.$ini.PHP.error_reporting;                // ISSUE #72
         ["E_ERROR",
         "E_RECOVERABLE_ERROR",
         "E_WARNING",
@@ -207,11 +207,11 @@ PHP.VM = function( src, opts ) {
         "E_ALL"].forEach(function( err ){
             lvl = lvl.replace(err, PHP.Constants[ err ]);
         });
-        this.$ini.error_reporting = eval(lvl);
+        this.$ini.PHP.error_reporting = eval(lvl);
 
 
     }
-    this.error_reporting(new PHP.VM.Variable( this.$ini.error_reporting ));
+    this.error_reporting(new PHP.VM.Variable( this.$ini.PHP.error_reporting ));
 
 
 
@@ -221,7 +221,9 @@ PHP.VM = function( src, opts ) {
 
     var post_max_size;
 
-    if (  (post_max_size = PHP.Utils.Filesize(this.$ini.post_max_size)) > opts.RAW_POST.length || post_max_size == 0 ) {
+    // Section PHP
+    //  |------> post_max_size
+    if (  (post_max_size = PHP.Utils.Filesize(this.$ini.PHP.post_max_size)) > opts.RAW_POST.length || post_max_size == 0 ) {
         if (this.$ini.enable_post_data_reading != 0) {
             $('_POST').$ = PHP.VM.Array.fromObject.call( this, ( variables_order.indexOf("P") !== -1 ) ? opts.POST : {} ).$;
             $('HTTP_RAW_POST_DATA').$ = opts.RAW_POST;
