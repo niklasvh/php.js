@@ -4875,6 +4875,9 @@ PHP.Modules.prototype.echo = function() {
 
 
 PHP.Modules.prototype.explode = function( delim, string ) {
+	
+	
+	
     var VARIABLE = PHP.VM.Variable.prototype,
     COMPILER = PHP.Compiler.prototype,
     item = PHP.VM.Array.arrayItem;
@@ -5145,6 +5148,289 @@ PHP.Modules.prototype.strlen = function( string ) {
     return new PHP.VM.Variable( string[ COMPILER.VARIABLE_VALUE ].length );
     
 };
+
+
+
+//################### MODIFIED BY Merbin Joe START #####################
+
+
+PHP.Modules.prototype.str_word_count= function( string ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+
+	s = string[ COMPILER.VARIABLE_VALUE ];
+	s = s.replace(/(^\s*)|(\s*$)/gi,"");
+	s = s.replace(/[ ]{2,}/gi," ");
+	s = s.replace(/\n /,"\n");
+
+    return new PHP.VM.Variable(s.split(' ').length);
+    
+};
+
+
+
+
+PHP.Modules.prototype.strval= function( string ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+	
+    return new PHP.VM.Variable(s.toString());
+
+};
+
+
+
+PHP.Modules.prototype.substr = function( string, len1, len2 ) {
+
+
+    var COMPILER = PHP.Compiler.prototype,
+    VAR = PHP.VM.Variable.prototype;
+
+	var str=string[VAR.CAST_STRING][COMPILER.VARIABLE_VALUE];
+	var len1=len1[VAR.CAST_STRING][COMPILER.VARIABLE_VALUE];
+	var ans;
+	if(len2)
+	{
+		var len2=len2[VAR.CAST_STRING][COMPILER.VARIABLE_VALUE];
+		ans = str.substr(len1, len2);
+	}
+	else
+	{
+		ans = str.substr(len1);
+	}
+		
+	return new PHP.VM.Variable(ans);
+};
+
+
+
+
+PHP.Modules.prototype.str_shuffle = function( string) {
+
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+	s=s.toString();
+	
+    var a = s.split(""),n = a.length;
+
+    for(var i = n - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
+    }
+    
+	
+	
+    return new PHP.VM.Variable(a.join(""));
+};
+
+
+
+
+PHP.Modules.prototype.strrev= function( string ) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+    return new PHP.VM.Variable(s.split("").reverse().join(""));
+
+};
+
+
+PHP.Modules.prototype.is_scalar= function( string ) {
+	
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+
+	var ans=true;
+	if(typeof(s)=="object" || typeof(s)=="array")
+		ans=false;
+
+	return new PHP.VM.Variable(ans);
+
+};
+
+
+PHP.Modules.prototype.is_double= function( string ) {
+
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+
+    return new PHP.VM.Variable(Number(s) === s && s % 1 !== 0);
+};
+
+
+
+PHP.Modules.prototype.is_real = function( variable ) {
+    
+    var COMPILER = PHP.Compiler.prototype,
+    VARIABLE = PHP.VM.Variable.prototype;
+    
+    return new PHP.VM.Variable( variable[ VARIABLE.TYPE ] === VARIABLE.FLOAT );
+};
+
+
+
+
+PHP.Modules.prototype.is_int= function( string ) {
+
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+
+    return new PHP.VM.Variable(Number.isInteger(s));
+};
+
+
+
+PHP.Modules.prototype.is_integer= function( string ) {
+
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+
+    return new PHP.VM.Variable(Number.isInteger(s));
+};
+
+
+
+
+PHP.Modules.prototype.is_long= function( string ) {
+
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+
+    return new PHP.VM.Variable(Number.isInteger(s));
+};
+
+
+
+
+
+PHP.Modules.prototype.is_numeric= function( string ) {
+
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+
+    return new PHP.VM.Variable((isNaN(s)?false:true));
+};
+
+
+
+
+
+
+
+PHP.Modules.prototype.is_object= function( string ) {
+
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+	
+	var ans=false;
+	if(typeof(s)=="object")
+		ans=true;
+	
+    return new PHP.VM.Variable(ans);
+};
+
+
+
+
+
+
+PHP.Modules.prototype.floatval=function( string ) {
+
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+    return new PHP.VM.Variable(parseFloat(s));
+
+};
+
+
+
+PHP.Modules.prototype.intval=function(string) {
+    
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+    return new PHP.VM.Variable(parseInt(s));
+
+};
+
+
+
+
+
+
+
+
+
+PHP.Modules.prototype.strpos= function( str1, str2) {
+
+    var COMPILER = PHP.Compiler.prototype,
+    VAR = PHP.VM.Variable.prototype;
+	
+	var v1=str1[VAR.CAST_STRING][COMPILER.VARIABLE_VALUE];
+	var v2=str2[VAR.CAST_STRING][COMPILER.VARIABLE_VALUE];
+	
+
+	var n = v1.indexOf(v2);
+	
+	return new PHP.VM.Variable(n);
+};
+
+
+PHP.Modules.prototype.strcmp= function( str1, str2) {
+
+    var COMPILER = PHP.Compiler.prototype,
+    VAR = PHP.VM.Variable.prototype;
+	
+	var v1=str1[VAR.CAST_STRING][COMPILER.VARIABLE_VALUE];
+	var v2=str2[VAR.CAST_STRING][COMPILER.VARIABLE_VALUE];
+	
+
+	var string1 = v1;
+	var string2 = v2;
+    var result = string1.localeCompare(string2);
+
+            
+	
+	return new PHP.VM.Variable(result);
+};
+
+
+
+
+PHP.Modules.prototype.sort= function(string) {
+
+    
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+    return new PHP.VM.Variable(s.split("").reverse().join(""));
+};
+
+
+
+
+PHP.Modules.prototype.is_bool= function(string) {
+
+    var COMPILER = PHP.Compiler.prototype;
+	s = string[ COMPILER.VARIABLE_VALUE ];
+
+	var ans=0;
+	if (typeof s === "boolean"){
+		ans=1;
+	}
+
+
+    return new PHP.VM.Variable(ans);
+};
+
+
+
+
+//################### MODIFIED BY Merbin Joe END #####################
+
+
+
 PHP.Modules.prototype.strncmp = function( str1, str2, len ) {
 
     var COMPILER = PHP.Compiler.prototype,
@@ -5899,6 +6185,7 @@ PHP.Modules.prototype.gettype = function( arg ) {
 
 PHP.Modules.prototype.is_callable = function( callback ) {
 
+
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
 
@@ -5923,10 +6210,8 @@ PHP.Modules.prototype.is_float = function( variable ) {
     VARIABLE = PHP.VM.Variable.prototype;
     
     return new PHP.VM.Variable( variable[ VARIABLE.TYPE ] === VARIABLE.FLOAT );
-    
- 
-    
 };
+
 /* 
 * @author Niklas von Hertzen <niklas at hertzen.com>
 * @created 15.7.2012 
@@ -6515,6 +6800,7 @@ PHP.Modules.prototype.var_dump = function() {
 
 
 PHP.Modules.prototype.var_export = function( variable, ret ) {
+
     var COMPILER = PHP.Compiler.prototype,
     VARIABLE = PHP.VM.Variable.prototype;
     
@@ -6524,6 +6810,12 @@ PHP.Modules.prototype.var_export = function( variable, ret ) {
         case VARIABLE.STRING:
             val += "'" + variable[ COMPILER.VARIABLE_VALUE ] + "'";
             break;
+		case VARIABLE.INT:
+			val=variable[ COMPILER.VARIABLE_VALUE ];
+			break;
+		case VARIABLE.FLOAT:
+			val=variable[ COMPILER.VARIABLE_VALUE ];
+			break;		
     }
     
     val = new PHP.VM.Variable( val );
